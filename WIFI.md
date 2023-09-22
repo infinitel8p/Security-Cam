@@ -156,7 +156,14 @@ use_profile static_ap
 ```
 
 ## Step 6: Restart the Services
-#### 6.1. Restart `hostapd` and `dnsmasq`:
+#### 6.1. Enable `hostapd` and `dnsmasq` services:
+```bash
+sudo systemctl enable dnsmasq
+sudo systemctl enable hostapd
+```
+These commands ensure that both services start automatically every time the Raspberry Pi is powered on or rebooted.
+
+#### 6.2. Restart `hostapd` and `dnsmasq`:
 ```bash
 sudo systemctl restart dnsmasq
 sudo systemctl restart hostapd
@@ -179,7 +186,7 @@ sudo systemctl restart hostapd
       sudo systemctl status dnsmasq
       ```
 
-#### 6.2. Check the logs:
+#### 6.3. Check the logs:
 ```bash
 cat /tmp/wifi_switcher.log
 ```
