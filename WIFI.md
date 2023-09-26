@@ -195,7 +195,7 @@
             valid_lft forever preferred_lft forever
         ```
         You should see both `wlan0` and `ap0` interfaces with their respective IP addresses.
-        If you scan for WiFi networks with your phone you should also see the `DevAccessPoint` (or whatever you've called) network.
+        If you scan for WiFi networks with your phone you should also see the `DevAccessPoint` (or whatever you've called it) network.
 
 10. ### Bridge traffic between AP and Client side
     1.  #### Enbale ip-forwarding:
@@ -210,7 +210,7 @@
         ```bash
         sudo systemctl restart dnsmasq
         ```
-    Now you should be able to connect to the AP and access the internet through it.
+    Now you should be able to connect to the AP and use its internet connection to access the internet. (If you have a working internet connection on its client side)
 
 11. ### Automate the workaround:
     1. #### Create a new file:
