@@ -1,235 +1,245 @@
-## Step 1: Install Required Packages
-```bash
-sudo apt-get update
-sudo apt-get install hostapd dnsmasq
-```
-
-## Step 2: Create the Switching Script  
-This script will:  
-- Try to connect to known networks.  
-- If it can't connect, it will switch to AP mode.
-
-#### 1. Create the Script
-```bash
-sudo nano /usr/local/bin/wifi_switcher.sh
-```
-
-Add the following content and replace `'YOUR_HOME_WIFI_SSID1'` with your actual home SSID:  
-(You could also add multiple SSIDs to the array, e.g., `('SSID1' 'SSID2' 'SSID3')`)
-
-```bash
-#!/bin/bash
-echo "--- $(date) - Script started with PID $$  ---" >> /tmp/wifi_switcher.log
-
-# Define an array of SSIDs
-HOME_SSIDS=('YOUR_HOME_WIFI_SSID1')
-
-# Initialize a flag to indicate if a home network is found
-home_network_found=0
-
-# Delay for 180 seconds
-echo "$(date) - Initialization done. Sleeping for 2 min before running." >> /tmp/wifi_switcher.log
-sleep 180
-
-# Check for home networks
-echo "$(date) - Checking for home networks" >> /tmp/wifi_switcher.log
-
-# Scan for available networks and save the results to a variable
-scan_results=$(sudo iwlist wlan0 scan | grep ESSID)
-
-# Log the scan results and iwconfig output
-echo "$scan_results" >> /tmp/wifi_switcher.log
-
-# Check the scan results for each SSID in the HOME_SSIDS array
-for ssid in "${HOME_SSIDS[@]}"; do
-    echo "$scan_results" | grep -q "$ssid"
-    if [ $? -eq 0 ]; then
-        home_network_found=1
-        break
-    fi
-done
-
-if [ $home_network_found -eq 1 ]; then
-    # Home network found
-    echo "$(date) - Home network found. Stopping services." >> /tmp/wifi_switcher.log
-    sudo systemctl stop hostapd
-    sudo systemctl stop dnsmasq
-else
-    # Home network not found, start AP mode
-    echo "$(date) - Home network not found. Starting services." >> /tmp/wifi_switcher.log
-    sudo systemctl start hostapd
-    sudo systemctl start dnsmasq
-fi
-
-echo "--- $(date) - Script finished ---" >> /tmp/wifi_switcher.log
-```
-
-Make the script executable:
-
-```bash
-sudo chmod +x /usr/local/bin/wifi_switcher.sh
-```
-
-#### 2. Schedule the Script
-We'll use `cron` to run our script periodically:
-```bash
-sudo crontab -e
-```
-
-Add the following line to the end of the file to run the script every 4 minutes:
-
-```bash
-*/4 * * * * sudo /usr/local/bin/wifi_switcher.sh
-```
-
-## Step 3: Configure Hostapd for AP Mode
-#### 1. Edit the `hostapd` configuration file:
-```bash
-sudo nano /etc/hostapd/hostapd.conf
-```
-
-Add the following content and replace `DevAccessPoint` and `YOUR_AP_PASSWORD` with your desired values:
-
-```conf
-interface=wlan0
-driver=nl80211
-ssid=DevAccessPoint
-hw_mode=g
-channel=7
-wmm_enabled=0
-macaddr_acl=0
-auth_algs=1
-ignore_broadcast_ssid=0
-wpa=2
-wpa_passphrase=YOUR_AP_PASSWORD
-wpa_key_mgmt=WPA-PSK
-wpa_pairwise=TKIP
-rsn_pairwise=CCMP
-```
-
-#### 2. Specify where `hostapd` should find its configuration:
-```bash
-sudo nano /etc/default/hostapd
-```
-
-Find the line with `#DAEMON_CONF=""` and replace _(uncomment it or add it if it doesn't exist)_ it with: 
-
-```bash
-DAEMON_CONF="/etc/hostapd/hostapd.conf"
-```
-
-## Step 4: Configure Dnsmasq for DHCP in AP Mode
-#### 4.1. Backup the original `dnsmasq` configuration:
-```bash
-sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
-```
-
-#### 4.2. Create a new dnsmasq configuration:
-```bash
-sudo nano /etc/dnsmasq.conf
-```
-
-Add the following content:
-
-```conf
-interface=wlan0
-dhcp-range=192.168.4.2,192.168.4.20,255.255.255.0,24h
-```
-
-## Step 5: Configure a Static IP for the `wlan0` Interface
-#### 5.1. Edit the `dhcpcd` configuration file:
-```bash
-sudo nano /etc/dhcpcd.conf
-```
-
-#### 5.2. Add the following content to the end of the file, save, and exit:
-**_If you have previously changed the SSID in the [hostapd](#step-3-configure-hostapd-for-ap-mode) configuration file, you'll need to change the SSID in the `ssid` line below as well._**
-```conf
-# Use a static IP for AP mode
-profile static_ap
-static ip_address=192.168.4.1/24
-
-# Set the profile based on the SSID
-interface wlan0
-ssid DevAccessPoint
-use_profile static_ap
-```
-
-## Step 6: Restart the Services
-#### 6.1. Enable `hostapd` and `dnsmasq` services:
-```bash
-sudo systemctl enable dnsmasq
-sudo systemctl enable hostapd
-```
-These commands ensure that both services start automatically every time the Raspberry Pi is powered on or rebooted.
-
-#### 6.2. Restart `hostapd` and `dnsmasq`:
-```bash
-sudo systemctl restart dnsmasq
-sudo systemctl restart hostapd
-```
-
-##### Note: If you get an error when restarting `hostapd` (_Failed to restart hostapd.service: Unit hostapd.service is masked._), try running the following commands:
-- Unmask the `hostapd` service:
+1. ### Find your Raspberry's MAC address with `iw dev`:  
     ```bash
-    sudo systemctl unmask hostapd
+    pi@raspberrypizero2:~ $ iw dev
+    phy#0
+        Unnamed/non-netdev interface
+                wdev 0x2
+                addr ba:27:xx:xx:xx:xx
+                type P2P-device
+                txpower 31.00 dBm
+        Interface wlan0
+                ifindex 2
+                wdev 0x1
+                addr b8:27:xx:xx:xx:xx
+                ssid FRITZ!Box 0420
+                type managed
+                channel 1 (2412 MHz), width: 20 MHz, center1: 2412 MHz
+                txpower 31.00 dBm
     ```
-- Enable the `hostapd` service to start on boot:
+    The MAC address of the `wlan0` interface is `b8:27:xx:xx:xx:xx` in this case.  
+    *Note: Remember the channel number (1 in this case) for later.*
+
+1. ### Allocate a device for the AP:  
+    This will create a new interface called `ap0` with the same MAC address as `wlan0`. `ap0` will then be the interface used for the AP.
     ```bash
-    sudo systemctl enable hostapd
+    sudo nano /etc/udev/rules.d/70-persistent-net.rules
     ```
-- This is where the ssh connection can be lost. After manually restarting the Pi, you should then see a network named `DevAccessPoint` (or whatever SSID name you've set) in the list of available Wi-Fi networks and connect to it using the password you've set.
-  - SSH into the Pi using the static IP address you've set (e.g., `192.168.4.1`).
-  - Once connected, check the status of both services to ensure they're running correctly:
-      ```bash
-      sudo systemctl status hostapd
-      sudo systemctl status dnsmasq
-      ```
 
-#### 6.3. Check the logs:
-```bash
-cat /tmp/wifi_switcher.log
-```
+    Add the following lines and **replace your MAC address** accordingly:
+    ```bash
+    SUBSYSTEM=="ieee80211", ACTION=="add|change", ATTR{macaddress}=="b8:27:xx:xx:xx:xx", KERNEL=="phy0", \
+    RUN+="/sbin/iw phy phy0 interface add ap0 type __ap", \
+    RUN+="/bin/ip link set ap0 address b8:27:xx:xx:xx:xx"
+    ```
 
-You should see something like this:
-```log
---- Thu 21 Sep 17:28:01 CEST 2023 - Script started with PID [PID1]  ---
-Thu 21 Sep 17:28:01 CEST 2023 - Initialization done. Sleeping for 2 min before running.
-Thu 21 Sep 17:31:01 CEST 2023 - Checking for home networks
-                    ESSID:"NETWORK_SSID_1"
-                    ESSID:"NETWORK_SSID_2"
-                    ...
-                    ESSID:"NETWORK_SSID_N"
-Thu 21 Sep 17:31:03 CEST 2023 - Home network found. Stopping services.
---- Thu 21 Sep 17:31:04 CEST 2023 - Script finished ---
---- Thu 21 Sep 17:32:01 CEST 2023 - Script started with PID [PID2]  ---
-Thu 21 Sep 17:32:01 CEST 2023 - Initialization done. Sleeping for 2 min before running.
-Thu 21 Sep 17:35:01 CEST 2023 - Checking for home networks
-                    ESSID:"NETWORK_SSID_1"
-                    ESSID:"NETWORK_SSID_2"
-                    ...
-                    ESSID:"NETWORK_SSID_N"
-Thu 21 Sep 17:35:02 CEST 2023 - Home network found. Stopping services.
---- Thu 21 Sep 17:35:02 CEST 2023 - Script finished ---
---- Thu 21 Sep 17:36:02 CEST 2023 - Script started with PID [PID3]  ---
-Thu 21 Sep 17:36:02 CEST 2023 - Initialization done. Sleeping for 2 min before running.
-```
+3. ### Install `Dnsmasq` and `Hostapd`:
+    ```bash
+    sudo apt-get update
+    sudo apt-get upgrade #Optional
+    sudo apt-get install dnsmasq hostapd
+    ```
 
-When in your home network, you should see it continuously logging `Home network found. Stopping services.` every 4 minutes.  
-When not in your home network, you should see it logging `Home network not found. Starting services.` every 4 minutes.
+4. ### Configure `Dnsmasq`:
+    1. #### Backup the original `dnsmasq` configuration:
+        ```bash
+        sudo cp /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
+        ```
 
-You can ssh into the Pi in AP mode with the static IP address you've set (e.g., `192.168.4.1`) and if in your home network (Client mode) you can ssh into the Pi using its IP address in your home network.
+    2. #### Create a new `dnsmasq` configuration:
+        ```bash
+        sudo nano /etc/dnsmasq.conf
+        ```
 
-### Script Modification for Wi-Fi Detection:
+    3. #### Add the following content:
+        ```conf
+        interface=lo,ap0
+        no-dhcp-interface=lo,wlan0
+        bind-interfaces
+        server=8.8.8.8
+        domain-needed
+        bogus-priv
+        dhcp-range=192.168.10.50,192.168.10.150,12h
+        ```
 
-To detect if a device is connected to the Raspberry Pi's Wi-Fi network, you can check the DHCP leases of dnsmasq:
+5. ### Configure `Hostapd`:
+    1. #### Open the configuration file:
+        ```bash
+        sudo nano /etc/hostapd/hostapd.conf
+        ```
 
-```python
-def is_device_connected_wifi():
-    with open('/var/lib/misc/dnsmasq.leases', 'r') as f:
-        if 'your_phone_mac_address' in f.read():
-            return True
-    return False
-```
+    2. #### Add the following content:
+        ```conf
+        ctrl_interface=/var/run/hostapd
+        ctrl_interface_group=0
+        interface=ap0
+        driver=nl80211
+        ssid=DevAccessPoint
+        hw_mode=g
+        channel=1
+        wmm_enabled=0
+        macaddr_acl=0
+        auth_algs=1
+        wpa=2
+        wpa_passphrase=YourPassPhraseHere
+        wpa_key_mgmt=WPA-PSK
+        wpa_pairwise=TKIP CCMP
+        rsn_pairwise=CCMP
+        ```
+        Before you save, make sure to do these changes to the configuration:
+        1. Replace `DevAccessPoint` and `YourPassPhraseHere` with your desired values
+        2. Replace the `channel` with the channel your `wlan0` was running on (as reported by `iw dev` in step 1)
 
-Replace 'your_phone_mac_address' with the MAC address of your phone.
+    3. #### Specify where `hostapd` should find its configuration:
+        ```bash
+        sudo nano /etc/default/hostapd
+        ```
+
+        Find the line with `#DAEMON_CONF=""` and replace _(uncomment it or add it if it doesn't exist)_ it with: 
+        ```bash
+        DAEMON_CONF="/etc/hostapd/hostapd.conf"
+        ```
+
+6. ### Modify `wpa_supplicant`:
+    1. #### Open the configuration file:
+        ```bash
+        sudo nano /etc/wpa_supplicant/wpa_supplicant.conf
+        ```
+    
+    2. #### Add the following content (if it doesn't exist already):
+        ```conf
+        country=US
+        ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+        update_config=1
+
+        network={
+            ssid="YourSSID1"
+            psk="YourPassphrase1"
+            id_str="AP1"
+        }
+
+        network={
+            ssid="YourSSID2"
+            psk="YourPassphrase2"
+            id_str="AP2"
+        }
+        ```
+        Replace `YourSSID1` and `YourPassphrase1` with your WiFi's SSID and passphrase.
+        You can add as many networks as you want, just make sure to increment the `id_str` value for each network. You are are not required to keep `YourSSID2` in the configuration if you only have one WiFi network you want to connect to.  
+        Change your country code accordingly.
+
+7. ### Modify `/etc/network/interfaces` to support the new AP
+    1. #### Open the configuration file:
+        ```bash
+        sudo nano /etc/network/interfaces
+        ```
+    
+    2. #### Add the following content:
+        ```conf
+        auto lo
+        auto ap0
+        auto wlan0
+        iface lo inet loopback
+
+        allow-hotplug ap0
+        iface ap0 inet static
+            address 192.168.10.1
+            netmask 255.255.255.0
+            hostapd /etc/hostapd/hostapd.conf
+
+        allow-hotplug wlan0
+        iface wlan0 inet manual
+            wpa-roam /etc/wpa_supplicant/wpa_supplicant.conf
+        iface AP1 inet dhcp
+        iface AP2 inet dhcp
+        ```
+
+8. ### Start both interfaces:
+    ```bash
+    sudo ifdown --force wlan0
+    sudo ifdown --force ap0
+    sudo ifup ap0
+    sudo ifup wlan0
+    ```
+
+    *Note: It's crucial to copy and paste the entire block of commands above all at once. Executing them one by one will disconnect you from the Pi after disabling the interfaces, preventing you from re-enabling them immediately.
+    If your Raspberry Pi Zero W does not reconnect to your WiFi network at this point, unplug the power and plug it back in.  
+    On my setup it wouldn't connect even after a restart. I inserted the microSD card into my PC and recreated the `wpa_supplier.conf` in the boot drive.*
+
+9. ### Check the interfaces:
+    1. SSH into the Pi again and check the interfaces:
+        ```bash
+        pi@raspberrypi:~$ ip addr
+        1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+            link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+            inet 127.0.0.1/8 scope host lo
+            valid_lft forever preferred_lft forever
+            inet6 ::1/128 scope host
+            valid_lft forever preferred_lft forever
+        2: wlan0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+            link/ether b8:27:xx:xx:xx:xx brd ff:ff:ff:ff:ff:ff
+            inet 192.168.178.102/24 brd 192.168.178.255 scope global dynamic noprefixroute wlan0
+            valid_lft 863907sec preferred_lft 755907sec
+            inet6 2a02:4500:4507:8d04:e2455:6452:6e45:2f66/64 scope global dynamic mngtmpaddr noprefixroute
+            valid_lft 7102sec preferred_lft 2496sec
+            inet6 fe45::4455:a1e3:45c9:5451/64 scope link
+            valid_lft forever preferred_lft forever
+        3: ap0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+            link/ether b8:27:xx:xx:xx:xx brd ff:ff:ff:ff:ff:ff
+            inet 192.168.10.1/24 brd 192.168.10.255 scope global ap0
+            valid_lft forever preferred_lft forever
+            inet 169.254.165.183/16 brd 169.254.255.255 scope global noprefixroute ap0
+            valid_lft forever preferred_lft forever
+            inet6 fe45::7d45:45b8:b45:2f45/64 scope link
+            valid_lft forever preferred_lft forever
+            inet6 fe45::ba27:eb45:fe7c:3cea/64 scope link
+            valid_lft forever preferred_lft forever
+        ```
+        You should see both `wlan0` and `ap0` interfaces with their respective IP addresses.
+        If you scan for WiFi networks with your phone you should also see the `DevAccessPoint` (or whatever you've called) network.
+
+10. ### Bridge traffic between AP and Client side
+    1.  #### Enbale ip-forwarding:
+        ```bash
+        sudo sysctl -w net.ipv4.ip_forward=1
+        ```
+    2.  #### Add iptables rules:
+        ```bash
+        sudo iptables -t nat -A POSTROUTING -s 192.168.10.0/24 ! -d 192.168.10.0/24 -j MASQUERADE
+        ```
+    3. #### Restart `dnsmasq`:
+        ```bash
+        sudo systemctl restart dnsmasq
+        ```
+    Now you should be able to connect to the AP and access the internet through it.
+
+11. ### Automate the workaround:
+    1. #### Create a new file:
+        ```bash
+        sudo nano start-ap-managed-wifi.sh
+        ```
+    2. #### Add the following content:
+        ```bash
+        #!/bin/bash
+        sleep 45
+        sudo ifdown --force wlan0 && sudo ifdown --force ap0 && sudo ifup ap0 && sudo ifup wlan0
+        sudo sysctl -w net.ipv4.ip_forward=1
+        sudo iptables -t nat -A POSTROUTING -s 192.168.10.0/24 ! -d 192.168.10.0/24 -j MASQUERADE
+        sudo systemctl restart dnsmasq
+        ```
+    3. #### Add a cronjob to run the script on boot:
+        ```bash
+        sudo crontab -e
+        ```
+        Add the following line to the end of the file:
+        ```bash
+        @reboot /home/pi/start-ap-managed-wifi.sh
+        ```
+
+**Note:** These instructions are tested on Raspbian Buster.  
+Shoutout to [TheWalrus](https://blog.thewalr.us/2017/09/26/raspberry-pi-zero-w-simultaneous-ap-and-managed-mode-wifi/) for the original instructions. A comment under the post pointed out that the instructions depend upon if-up and if-down system which is no longer used in Raspian Buster. You might want to visit the original post for more information.
+
+>These instructions depend upon if-up and if-down system used by Raspbian Stretch version.  
+>
+>But as of 2020, you would be using Raspbian Buster, which uses a different system, based on dhcpcd daemon. While it is technically possible to still get it working (because the ifup/ifdown system are still there), it is recommended to use systemd-networkd approach, which doesn't depend upon having to introduce udev hook.  
+>
+>The instructions are here: [https://raspberrypi.stackex...](https://disq.us/url?url=https%3A%2F%2Fraspberrypi.stackexchange.com%2Fquestions%2F89803%2Faccess-point-as-wifi-router-repeater-optional-with-bridge%2F89804%2389804%3AtorAhAl318HVmaNbHEe6ej2YO6s&cuid=4278722)
