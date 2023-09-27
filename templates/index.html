@@ -1,21 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Camera Feed</title>
-</head>
-<body>
-    <h1>Camera Live Feed</h1>
-    <img src="/video_feed" alt="Camera Feed">
-    <div id="status"></div>
-
+    <link rel="stylesheet" media="screen" type="text/css" href="/static/css/main.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
-    <script>
-        const socket = io.connect(window.location.origin);
-        socket.on('status_update', function(status) {
-            document.getElementById('status').textContent = status;
-        });
-    </script>
+    <script src="/static/js/main.js"></script>
+    <title>Security-Cam Webinterface</title>
+</head>
+
+<body>
+    <header>
+        <h1>Security-Cam Webinterface</h1>
+    </header>
+    <div class="container">
+        <nav>
+            <ul>
+                <li id="nav-live-feed">Live Feed</li>
+                <li id="nav-settings">Settings</li>
+                <li id="nav-info">Info</li>
+            </ul>
+        </nav>
+
+        <section id="content">
+            <img src="/video_feed" width="80%" alt="If you can see this text, the feed is down :P Check server status">
+            <div id="status"></div>
+        </section>
+    </div>
+
 </body>
+
 </html>
