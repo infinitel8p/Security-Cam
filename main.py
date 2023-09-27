@@ -3,11 +3,11 @@ import logging
 import os
 import time
 from datetime import datetime
-
 import picamera
 import RPi.GPIO as GPIO
 from dotenv import load_dotenv
-
+from threading import Thread
+from web_server import app, socketio, send_status_update
 from functions import *
 
 # Set up logging with custom timestamp format
@@ -40,7 +40,15 @@ if isinstance(TARGET_AP_MAC_ADDRESSES, str):
 
 # Initialize the camera
 camera = picamera.PiCamera()
+app.camera = camera
 recording = False
+
+# Start Flask app in a separate thread
+def start_flask_app():
+    socketio.run(app, host='0.0.0.0', port=5000)
+
+flask_thread = Thread(target=start_flask_app)
+flask_thread.start()
 
 # Set up GPIO
 GPIO.setmode(GPIO.BCM)
@@ -56,15 +64,12 @@ try:
         update_annotation(camera)
         if GPIO.input(Digital_Pin):
             logging.info("Door is closed.")
-
             if recording:
                 logging.info("Recording was in progress. Pausing recording.")
                 camera.stop_recording()
                 recording = False
-
         else:
             logging.warning("Door is open.")
-
             # Check if any of the smartphones' Bluetooth addresses are visible or if they're connected to the AP
             if is_device_connected_to_bt(TARGET_BT_ADDRESSES) or is_device_connected_to_ap(TARGET_AP_MAC_ADDRESSES):
                 if recording:
@@ -78,13 +83,16 @@ try:
                     camera.start_recording(
                         f"./recordings/video_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.h264")
                     recording = True
+        # Emit status to the client
+        if GPIO.input(Digital_Pin):
+            send_status_update('Door is closed.')
+        else:
+            send_status_update('Door is open.')
         time.sleep(1)
-
 except KeyboardInterrupt:
     if recording:
         camera.stop_recording()
     camera.close()
     logging.info("Script manually interrupted! Recording stopped.")
-
 finally:
     GPIO.cleanup()
