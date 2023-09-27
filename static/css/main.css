@@ -47,6 +47,18 @@ nav ul li:hover {
     background-color: #f6f6f6;
 }
 
+nav ul li.active-tab {
+    background-color: #eee;
+}
+
+a:active,
+a:focus,
+a:hover,
+a:visited {
+    color: #333;
+    text-decoration: none;
+}
+
 section {
     display: flex;
     flex-direction: column;
@@ -54,4 +66,43 @@ section {
     align-items: center;
     width: 80%;
     padding: 2em;
+}
+
+/* Form Styling */
+form {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 3em;
+}
+
+form label {
+    display: block;
+    margin-bottom: 0.5em;
+    font-weight: 500;
+}
+
+form input[type="text"] {
+    width: 100%;
+    padding: 0.5em;
+    margin-bottom: 1em;
+    border: 1px solid #eaeaea;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+}
+
+form input[type="submit"] {
+    background-color: #333;
+    color: #f9f9f9;
+    padding: 0.5em 1em;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+form input[type="submit"]:hover {
+    background-color: #555;
 }

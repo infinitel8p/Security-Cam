@@ -8,7 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script src="/static/js/main.js"></script>
     <script src="/static/js/nav.js"></script>
-    <title>Security-Cam Live Feed</title>
+    <title>Security-Cam Settings</title>
 </head>
 
 <body>
@@ -24,11 +24,17 @@
             </ul>
         </nav>
 
-
-
         <section id="content">
-            <img src="/video_feed" width="80%" alt="If you can see this text, the feed is down :P Check server status">
-            <div id="status"></div>
+            <!-- This should then be handled by a new route in web_server.py to update config.json mac addresses -->
+            <form action="/update_mac_addresses" method="post">
+                <label for="bt_addresses">Bluetooth MAC Addresses (comma-separated):</label>
+                <input type="text" id="bt_addresses" name="bt_addresses" required>
+
+                <label for="ap_addresses">AP MAC Addresses (comma-separated):</label>
+                <input type="text" id="ap_addresses" name="ap_addresses" required>
+
+                <input type="submit" value="Update">
+            </form>
         </section>
     </div>
 
