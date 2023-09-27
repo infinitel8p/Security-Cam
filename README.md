@@ -29,7 +29,7 @@ Integrations:
 - [KY-025 module](https://amzn.eu/d/grjoopD) (Magnetic reed switch)
 - a bunch of [Dupont Jumper Wires](https://amzn.eu/d/6ZgE4N6)
 - Breadboard (optional)
-- _[DS3231 Real Time Clock Module](https://amzn.eu/d/ikNTko8) - will be added in the future_
+- [DS3231 Real Time Clock Module](https://amzn.eu/d/ikNTko8)
 
 ## Setup
 The following sections will explain how to set up the Raspberry Pi Zero W. It is assumed that the Raspberry Pi Zero W is already set up and running (Optional - set up VNC if you have a hard time working in a headless setup). If you need help setting up the Raspberry Pi Zero W, please refer to the [Raspberry Pi Documentation](https://www.raspberrypi.org/documentation/).
@@ -50,7 +50,6 @@ Once the script is running, the Raspberry Pi will start recording a video when t
 
 ## Future Enhancements
 - **Web Interface**: A user-friendly interface to view recorded videos.
-- **Hardware Clock**: Integration with a hardware clock to keep track of the date and time even when the Raspberry Pi has been powered off.
 
 ## Troubleshooting
 _This section will be populated with common issues and their solutions as they are identified._
