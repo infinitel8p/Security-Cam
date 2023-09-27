@@ -1,0 +1,10 @@
+{
+    "TARGET_BT_ADDRESSES": [
+        "XX:XX:XX:XX:XX:XX",
+        "XX:XX:XX:XX:XX:XX"
+    ],
+    "TARGET_AP_MAC_ADDRESSES": [
+        "XX:XX:XX:XX:XX:XX",
+        "XX:XX:XX:XX:XX:XX"
+    ]
+}
