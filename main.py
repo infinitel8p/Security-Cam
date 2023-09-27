@@ -10,12 +10,12 @@ from dotenv import load_dotenv
 
 from functions import *
 
-logging.info("Initializing...")
-
 # Set up logging with custom timestamp format
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s',
                     datefmt='%d-%m-%Y %H:%M:%S')
+
+logging.info("Initializing...")
 
 # Try to load config from .env file
 logging.info("Loading config from .env file...")
@@ -82,7 +82,8 @@ try:
 
 
 except KeyboardInterrupt:
-    camera.stop_recording()
+    if recording:
+        camera.stop_recording()
     camera.close()
     logging.info("\nScript manually interrupted! Recording stopped.")
 
