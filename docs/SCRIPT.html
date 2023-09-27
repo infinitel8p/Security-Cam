@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Install</title>
+  <title>Bluetooth &amp; Script Setup</title>
   <link rel="stylesheet"
     href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
   <link rel="stylesheet"
@@ -30,38 +30,62 @@
 </head>
 
 <body class="vscode-body vscode-light">
+  <h1 id="bluetooth--script-setup">Bluetooth &amp; Script Setup</h1>
   <h2 id="install">Install</h2>
   <p>To set up the necessary libraries and tools, run the following commands:</p>
   <pre><code class="language-bash">sudo apt-get update
 sudo apt-get install python3-picamera
 sudo apt-get install python3-pip
-sudo pip3 install pybluez
 </code></pre>
+  <p>Now clone the repository and install the required Python libraries:</p>
+  <pre><code class="language-bash">git <span class="hljs-built_in">clone</span> https://github.com/infinitel8p/Security-Cam/
+<span class="hljs-built_in">cd</span> Security-Cam
+sudo pip3 install -r requirements.txt
+</code></pre>
+  <h2 id="pairing">Pairing</h2>
+  <ul>
+    <li>Ensure your Bluetooth device's visibility is turned on.</li>
+    <li>On the Raspberry Pi, run <code>bluetoothctl</code>.</li>
+    <li>In the bluetoothctl prompt, enter the following commands:
+      <pre><code class="language-bash">agent on
+default-agent
+scan on
+</code></pre>
+    </li>
+    <li>Once you see the MAC address of your device, pair with it using: <code>pair XX:XX:XX:XX:XX:XX</code>.</li>
+    <li>Trust the device using: <code>trust XX:XX:XX:XX:XX:XX</code>.</li>
+    <li><code>exit</code> from <code>bluetoothctl</code>.</li>
+  </ul>
   <h2 id="setup">Setup</h2>
   <ol>
     <li>
       <h4 id="modify-the-script">Modify the Script</h4>
       <ul>
-        <li>Open the <a href="http://main.py">main.py</a> file in an editor.</li>
-        <li>Locate the line TARGET_BT_ADDRESS = &quot;XX:XX:XX:XX:XX:XX&quot;.</li>
+        <li>Open the <code>config.json</code> file.</li>
         <li>Replace XX:XX:XX:XX:XX:XX with the Bluetooth MAC address of your device (e.g., your smartphone).</li>
+        <li>Replace XX:XX:XX:XX:XX:XX with the WiFi MAC address of your device (e.g., your smartphone).</li>
       </ul>
-    </li>
-    <li>
-      <h4 id="pairing">Pairing</h4>
-      <ul>
-        <li>Ensure your Bluetooth device's visibility is turned on.</li>
-        <li>On the Raspberry Pi, run <code>bluetoothctl</code>.</li>
-        <li>In the bluetoothctl prompt, enter the following commands:
-          <pre><code class="language-bash">agent on
-default-agent
-scan on
-</code></pre>
-        </li>
-        <li>Once you see the MAC address of your device, pair with it using: <code>pair XX:XX:XX:XX:XX:XX</code>.</li>
-        <li>Trust the device using: <code>trust XX:XX:XX:XX:XX:XX</code>.</li>
-        <li>Exit <code>bluetoothctl</code>.</li>
-      </ul>
+      <p>Your <code>config.json</code> could look like this:</p>
+      <table>
+        <thead>
+          <tr>
+            <th>example 1</th>
+            <th>example 2</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <pre
+                lang="json">{<br>    &quot;TARGET_BT_ADDRESSES&quot;: [<br>    &quot;12:34:56:78:9A:BC&quot;,<br>    ],<br>    &quot;TARGET_AP_MAC_ADDRESSES&quot;: [<br>    &quot;A1:B2:C3:D4:E5:F6&quot;,<br>    ]<br>}</pre>
+            </td>
+            <td>
+              <pre
+                lang="json">{<br>    &quot;TARGET_BT_ADDRESSES&quot;: [<br>    &quot;12:34:56:78:9A:BC&quot;,<br>    &quot;DE:F1:23:45:67:89&quot;<br>    ],<br>    &quot;TARGET_AP_MAC_ADDRESSES&quot;: [<br>    &quot;A1:B2:C3:D4:E5:F6&quot;,<br>    &quot;F6:E5:D4:C3:B2:A1&quot;<br>    ]<br>}</pre>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </li>
     <li>
       <h4 id="run-the-script">Run the Script</h4>
