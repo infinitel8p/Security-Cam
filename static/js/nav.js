@@ -7,8 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
     navbarItems.forEach(item => {
         const link = item.querySelector('a');
 
-        if (link.href === currentUrl || (link.href === baseUrl + 'templates/index.html' && currentUrl === baseUrl + 'templates/index.html')) {
-            console.log(link.href);
+        if (link.href === currentUrl || (link.href === baseUrl + 'index.html' && currentUrl === baseUrl + 'index.html')) {
             item.classList.add('active-tab');
         }
     });
