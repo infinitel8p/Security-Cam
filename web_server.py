@@ -7,8 +7,22 @@ socketio = SocketIO(app)
 
 
 @app.route('/')
+@app.route('/index')
+@app.route('/index.html')
 def index():
     return render_template('index.html')
+
+
+@app.route('/settings')
+@app.route('/settings.html')
+def settings():
+    return render_template('settings.html')
+
+
+@app.route('/info')
+@app.route('/info.html')
+def info():
+    return render_template('info.html')
 
 
 @app.route('/video_feed')
