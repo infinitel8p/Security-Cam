@@ -35,13 +35,13 @@ Integrations:
 The following sections will explain how to set up the Raspberry Pi Zero W. It is assumed that the Raspberry Pi Zero W is already set up and running (Optional - set up VNC if you have a hard time working in a headless setup). If you need help setting up the Raspberry Pi Zero W, please refer to the [Raspberry Pi Documentation](https://www.raspberrypi.org/documentation/).
 
 1. ### Hardware setup
-    The Instructions to the hardware setup can be found [here](HARDWARE.md).  
+    The Instructions to the hardware setup can be found [here](./docs/HARDWARE.md).  
     They explain how to connect the camera module and the magnetic reed switch to the Raspberry Pi.
 2. ### WiFi setup
-    The Instructions to the WiFi setup can be found [here](WIFI.md).  
+    The Instructions to the WiFi setup can be found [here](./docs/WIFI.md).  
     They explain how to set up the Raspberry Pi as an access point and how to connect to it. This will be necessary to connect to the Raspberry Pi when outside of the home network and to access the web interface.
 3. ### Bluetooth and Script setup
-    The Instructions to the Bluetooth setup and the script setup can be found [here](SCRIPT.md).
+    The Instructions to the Bluetooth setup and the script setup can be found [here](./docs/SCRIPT.md).
     They explain how to pair the Raspberry Pi with a Bluetooth device and how to set up the script.
 
 
