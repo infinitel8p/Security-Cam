@@ -4,7 +4,6 @@
 <head>
   <meta charset="UTF-8">
   <title>Security Camera</title>
-
   <link rel="stylesheet"
     href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
   <link rel="stylesheet"
@@ -63,22 +62,23 @@
   </ul>
   <h2 id="prerequisites">Prerequisites</h2>
   <ul>
-    <li>Raspberry Pi Zero W (or Raspberry Pi Zero WH)</li>
-    <li>Headers for the Raspberry Pi Zero W if you did not choose a Raspberry Pi Zero WH (if you do not feel comfortable
-      soldering the headers you can use solderless headers such as these <a
+    <li><a href="https://www.raspberrypi.com/products/raspberry-pi-zero-w/">Raspberry Pi Zero W</a> (or Raspberry Pi
+      Zero WH)</li>
+    <li><a href="https://amzn.eu/d/hULoAo6">Headers</a> for the Raspberry Pi Zero W if you did not choose a Raspberry Pi
+      Zero WH (if you do not feel comfortable soldering the headers you can use solderless headers such as these <a
         href="https://www.berrybase.de/en/solderless-stiftleiste-2x-20-polig-rm-2-54-gerade">here</a>)</li>
     <li><a
         href="https://www.berrybase.de/en/noir-kamera-fuer-raspberry-pi-mit-einstellbarem-fokus-und-infrarot-leds">Waveshare
         RPi Camera (F)</a> or another compatible camera module</li>
-    <li>Flexcable adapter for the camera module (such as this one <a
-        href="https://www.berrybase.de/en/flexkabel-fuer-raspberry-pi-zero-und-kameramodul?number=RPIZ-FLEX-15">here</a>)
-    </li>
+    <li><a
+        href="https://www.berrybase.de/en/flexkabel-fuer-raspberry-pi-zero-und-kameramodul?number=RPIZ-FLEX-15">Flexcable
+        adapter</a> for the camera module</li>
     <li>Bluetooth-enabled device (e.g., a smartphone) to pair with the Raspberry Pi</li>
-    <li>Magnetic reed switch (i chose the following <a
-        href="https://www.amazon.de/dp/B089QJVBL7?psc=1&amp;ref=ppx_yo2ov_dt_b_product_details">KY-025 module</a>)</li>
-    <li>a bunch of Dupont Jumper Wires</li>
+    <li><a href="https://amzn.eu/d/grjoopD">KY-025 module</a> (Magnetic reed switch)</li>
+    <li>a bunch of <a href="https://amzn.eu/d/6ZgE4N6">Dupont Jumper Wires</a></li>
     <li>Breadboard (optional)</li>
-    <li><em>Hardwareclock (optional)</em> - will be added in the future</li>
+    <li><em><a href="https://amzn.eu/d/ikNTko8">DS3231 Real Time Clock Module</a> - will be added in the future</em>
+    </li>
   </ul>
   <h2 id="setup">Setup</h2>
   <p>The following sections will explain how to set up the Raspberry Pi Zero W. It is assumed that the Raspberry Pi Zero
@@ -88,18 +88,20 @@
   <ol>
     <li>
       <h3 id="hardware-setup">Hardware setup</h3>
-      The Instructions to the hardware setup can be found <a href="HARDWARE.html">here</a>.<br>
-      They explain how to connect the camera module and the magnetic reed switch to the Raspberry Pi.
+      The Instructions to the hardware setup can be found <a href="./docs/HARDWARE.html">here</a>. If you are new to the
+      project, please start here.<br>
+      They explain how to connect the camera module and the magnetic reed switch to the Raspberry Pi and serve as entry
+      point to the project.
     </li>
     <li>
       <h3 id="wifi-setup">WiFi setup</h3>
-      The Instructions to the WiFi setup can be found <a href="WIFI.html">here</a>.<br>
+      The Instructions to the WiFi setup can be found <a href="./docs/WIFI.html">here</a>.<br>
       They explain how to set up the Raspberry Pi as an access point and how to connect to it. This will be necessary to
       connect to the Raspberry Pi when outside of the home network and to access the web interface.
     </li>
     <li>
       <h3 id="bluetooth-and-script-setup">Bluetooth and Script setup</h3>
-      The Instructions to the Bluetooth setup and the script setup can be found <a href="SCRIPT.html">here</a>.
+      The Instructions to the Bluetooth setup and the script setup can be found <a href="./docs/SCRIPT.html">here</a>.
       They explain how to pair the Raspberry Pi with a Bluetooth device and how to set up the script.
     </li>
   </ol>

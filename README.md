@@ -21,22 +21,22 @@ Integrations:
 
 ## Prerequisites
 
-- Raspberry Pi Zero W (or Raspberry Pi Zero WH)
-- Headers for the Raspberry Pi Zero W if you did not choose a Raspberry Pi Zero WH (if you do not feel comfortable soldering the headers you can use solderless headers such as these [here](https://www.berrybase.de/en/solderless-stiftleiste-2x-20-polig-rm-2-54-gerade))
+- [Raspberry Pi Zero W](https://www.raspberrypi.com/products/raspberry-pi-zero-w/) (or Raspberry Pi Zero WH)
+- [Headers](https://amzn.eu/d/hULoAo6) for the Raspberry Pi Zero W if you did not choose a Raspberry Pi Zero WH (if you do not feel comfortable soldering the headers you can use solderless headers such as these [here](https://www.berrybase.de/en/solderless-stiftleiste-2x-20-polig-rm-2-54-gerade))
 - [Waveshare RPi Camera (F)](https://www.berrybase.de/en/noir-kamera-fuer-raspberry-pi-mit-einstellbarem-fokus-und-infrarot-leds) or another compatible camera module
-- Flexcable adapter for the camera module (such as this one [here](https://www.berrybase.de/en/flexkabel-fuer-raspberry-pi-zero-und-kameramodul?number=RPIZ-FLEX-15))
+- [Flexcable adapter](https://www.berrybase.de/en/flexkabel-fuer-raspberry-pi-zero-und-kameramodul?number=RPIZ-FLEX-15) for the camera module
 - Bluetooth-enabled device (e.g., a smartphone) to pair with the Raspberry Pi
-- Magnetic reed switch (i chose the following [KY-025 module](https://www.amazon.de/dp/B089QJVBL7?psc=1&ref=ppx_yo2ov_dt_b_product_details))
-- a bunch of Dupont Jumper Wires
+- [KY-025 module](https://amzn.eu/d/grjoopD) (Magnetic reed switch)
+- a bunch of [Dupont Jumper Wires](https://amzn.eu/d/6ZgE4N6)
 - Breadboard (optional)
-- _Hardwareclock (optional)_ - will be added in the future
+- _[DS3231 Real Time Clock Module](https://amzn.eu/d/ikNTko8) - will be added in the future_
 
 ## Setup
 The following sections will explain how to set up the Raspberry Pi Zero W. It is assumed that the Raspberry Pi Zero W is already set up and running (Optional - set up VNC if you have a hard time working in a headless setup). If you need help setting up the Raspberry Pi Zero W, please refer to the [Raspberry Pi Documentation](https://www.raspberrypi.org/documentation/).
 
 1. ### Hardware setup
-    The Instructions to the hardware setup can be found [here](./docs/HARDWARE.md).  
-    They explain how to connect the camera module and the magnetic reed switch to the Raspberry Pi.
+    The Instructions to the hardware setup can be found [here](./docs/HARDWARE.md). If you are new to the project, please start here.  
+    They explain how to connect the camera module and the magnetic reed switch to the Raspberry Pi and serve as entry point to the project.
 2. ### WiFi setup
     The Instructions to the WiFi setup can be found [here](./docs/WIFI.md).  
     They explain how to set up the Raspberry Pi as an access point and how to connect to it. This will be necessary to connect to the Raspberry Pi when outside of the home network and to access the web interface.
