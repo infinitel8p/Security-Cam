@@ -13,7 +13,7 @@ def update_annotation(camera):
 def is_device_connected_to_bt(bt_addresses):
     """Check if any of the given Bluetooth addresses are visible."""
     for addr in bt_addresses:
-        status = bluetooth.lookup_name(addr, timeout=5)
+        status = bluetooth.lookup_name(addr, timeout=3)
         if status:
             logging.info(f"Device with Bluetooth address {addr} is connected.")
             return True

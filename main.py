@@ -76,16 +76,14 @@ try:
                 if not recording:
                     logging.info("Device not detected. Start recording.")
                     camera.start_recording(
-                        f"video_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.h264")
+                        f"./recordings/video_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.h264")
                     recording = True
-        time.sleep(1)
-
 
 except KeyboardInterrupt:
     if recording:
         camera.stop_recording()
     camera.close()
-    logging.info("\nScript manually interrupted! Recording stopped.")
+    logging.info("Script manually interrupted! Recording stopped.")
 
 finally:
     GPIO.cleanup()
