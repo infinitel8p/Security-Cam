@@ -42,10 +42,14 @@ if isinstance(TARGET_AP_MAC_ADDRESSES, str):
 camera = picamera.PiCamera()
 app.camera = camera
 recording = False
+app.recording = recording
 
 # Start Flask app in a separate thread
+
+
 def start_flask_app():
     socketio.run(app, host='0.0.0.0', port=5000)
+
 
 flask_thread = Thread(target=start_flask_app)
 flask_thread.start()
@@ -68,6 +72,7 @@ try:
                 logging.info("Recording was in progress. Pausing recording.")
                 camera.stop_recording()
                 recording = False
+                app.recording = False
         else:
             logging.warning("Door is open.")
             # Check if any of the smartphones' Bluetooth addresses are visible or if they're connected to the AP
@@ -76,6 +81,7 @@ try:
                     logging.info("Device detected. Stop recording.")
                     camera.stop_recording()
                     recording = False
+                    app.recording = False
             # If no device is connected, start recording
             else:
                 if not recording:
@@ -83,6 +89,7 @@ try:
                     camera.start_recording(
                         f"./recordings/video_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.h264")
                     recording = True
+                    app.recording = True
         # Emit status to the client
         if GPIO.input(Digital_Pin):
             send_status_update('Door is closed.')

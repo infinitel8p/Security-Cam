@@ -13,7 +13,7 @@ def index():
 
 @app.route('/video_feed')
 def video_feed():
-    if recording:
+    if app.recording:
         return app.send_static_file('./static/images/paused_image.jpg')
     return Response(gen(app.camera), mimetype='multipart/x-mixed-replace; boundary=frame')
 
