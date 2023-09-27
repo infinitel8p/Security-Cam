@@ -78,6 +78,7 @@ try:
                     camera.start_recording(
                         f"./recordings/video_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.h264")
                     recording = True
+        time.sleep(1)
 
 except KeyboardInterrupt:
     if recording:
