@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Install</title>
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+  </style>
+  <style>
+    .task-list-item {
+      list-style-type: none;
+    }
+
+    .task-list-item-checkbox {
+      margin-left: -20px;
+      vertical-align: middle;
+      pointer-events: none;
+    }
+  </style>
+
+</head>
+
+<body class="vscode-body vscode-light">
+  <h2 id="install">Install</h2>
+  <p>To set up the necessary libraries and tools, run the following commands:</p>
+  <pre><code class="language-bash">sudo apt-get update
+sudo apt-get install python3-picamera
+sudo apt-get install python3-pip
+sudo pip3 install pybluez
+</code></pre>
+  <h2 id="setup">Setup</h2>
+  <ol>
+    <li>
+      <h4 id="modify-the-script">Modify the Script</h4>
+      <ul>
+        <li>Open the <a href="http://main.py">main.py</a> file in an editor.</li>
+        <li>Locate the line TARGET_BT_ADDRESS = &quot;XX:XX:XX:XX:XX:XX&quot;.</li>
+        <li>Replace XX:XX:XX:XX:XX:XX with the Bluetooth MAC address of your device (e.g., your smartphone).</li>
+      </ul>
+    </li>
+    <li>
+      <h4 id="pairing">Pairing</h4>
+      <ul>
+        <li>Ensure your Bluetooth device's visibility is turned on.</li>
+        <li>On the Raspberry Pi, run <code>bluetoothctl</code>.</li>
+        <li>In the bluetoothctl prompt, enter the following commands:
+          <pre><code class="language-bash">agent on
+default-agent
+scan on
+</code></pre>
+        </li>
+        <li>Once you see the MAC address of your device, pair with it using: <code>pair XX:XX:XX:XX:XX:XX</code>.</li>
+        <li>Trust the device using: <code>trust XX:XX:XX:XX:XX:XX</code>.</li>
+        <li>Exit <code>bluetoothctl</code>.</li>
+      </ul>
+    </li>
+    <li>
+      <h4 id="run-the-script">Run the Script</h4>
+      <ul>
+        <li>Start the security camera script with the following command:
+          <pre><code class="language-bash">python3 main.py
+</code></pre>
+        </li>
+      </ul>
+    </li>
+  </ol>
+
+
+
+</body>
+
+</html>

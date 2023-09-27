@@ -1,3 +1,4 @@
+# WiFi Setup
 1. ### Find your Raspberry's MAC address with `iw dev`:  
     ```bash
     pi@raspberrypizero2:~ $ iw dev
@@ -220,13 +221,24 @@
     2. #### Add the following content:
         ```bash
         #!/bin/bash
+        LOGFILE="/var/log/pi_startup.log"
+        echo "[$(date)] Starting script. Sleeping 45 sec..." >> $LOGFILE
         sleep 45
-        sudo ifdown --force wlan0 && sudo ifdown --force ap0 && sudo ifup ap0 && sudo ifup wlan0
+        echo "[$(date)] Starting execution" >> $LOGFILE
         sudo sysctl -w net.ipv4.ip_forward=1
+        echo "[$(date)] Enabled ip forwarding" >> $LOGFILE
         sudo iptables -t nat -A POSTROUTING -s 192.168.10.0/24 ! -d 192.168.10.0/24 -j MASQUERADE
+        echo "[$(date)] Modified iptables to set up NAT" >> $LOGFILE
         sudo systemctl restart dnsmasq
+        echo "[$(date)] Restarted dnsmasq" >> $LOGFILE
+        echo " " >> $LOGFILE
         ```
-    3. #### Add a cronjob to run the script on boot:
+
+    3. #### Make the script executable:
+        ```bash
+        sudo chmod +x start-ap-managed-wifi.sh
+        ```
+    4. #### Add a cronjob to run the script on boot:
         ```bash
         sudo crontab -e
         ```
@@ -235,8 +247,10 @@
         @reboot /home/pi/start-ap-managed-wifi.sh
         ```
 
-**Note:** These instructions are tested on Raspbian Buster.  
-Shoutout to [TheWalrus](https://blog.thewalr.us/2017/09/26/raspberry-pi-zero-w-simultaneous-ap-and-managed-mode-wifi/) for the original instructions. A comment under the post pointed out that the instructions depend upon if-up and if-down system which is no longer used in Raspian Buster. You might want to visit the original post for more information.
+Continue to [SCRIPT.md](./SCRIPT.md) to set up bluetooth and the script.
+
+***Note:** These instructions are tested on Raspbian Buster.  
+Shoutout to [TheWalrus](https://blog.thewalr.us/2017/09/26/raspberry-pi-zero-w-simultaneous-ap-and-managed-mode-wifi/) for the original instructions. A comment under the post pointed out that the instructions depend upon if-up and if-down system which is no longer used in Raspian Buster. You might want to visit the original post for more information.*
 
 >These instructions depend upon if-up and if-down system used by Raspbian Stretch version.  
 >

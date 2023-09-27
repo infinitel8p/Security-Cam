@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>WiFi Setup</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet"
+    type="text/css">
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+  </style>
+  <style>
+    .task-list-item {
+      list-style-type: none;
+    }
+
+    .task-list-item-checkbox {
+      margin-left: -20px;
+      vertical-align: middle;
+      pointer-events: none;
+    }
+  </style>
+
+</head>
+
+<body class="vscode-body vscode-light">
+  <h1 id="wifi-setup">WiFi Setup</h1>
+  <ol>
+    <li>
+      <h3 id="find-your-raspberrys-mac-address-with-iw-dev">Find your Raspberry's MAC address with <code>iw dev</code>:
+      </h3>
+      <pre><code class="language-bash">pi@raspberrypizero2:~ $ iw dev
+phy<span class="hljs-comment">#0</span>
+    Unnamed/non-netdev interface
+            wdev 0x2
+            addr ba:27:xx:xx:xx:xx
+            <span class="hljs-built_in">type</span> P2P-device
+            txpower 31.00 dBm
+    Interface wlan0
+            ifindex 2
+            wdev 0x1
+            addr b8:27:xx:xx:xx:xx
+            ssid FRITZ!Box 0420
+            <span class="hljs-built_in">type</span> managed
+            channel 1 (2412 MHz), width: 20 MHz, center1: 2412 MHz
+            txpower 31.00 dBm
+</code></pre>
+      <p>The MAC address of the <code>wlan0</code> interface is <code>b8:27:xx:xx:xx:xx</code> in this case.<br>
+        <em>Note: Remember the channel number (1 in this case) for later.</em>
+      </p>
+    </li>
+    <li>
+      <h3 id="allocate-a-device-for-the-ap">Allocate a device for the AP:</h3>
+      <p>This will create a new interface called <code>ap0</code> with the same MAC address as <code>wlan0</code>.
+        <code>ap0</code> will then be the interface used for the AP.
+      </p>
+      <pre><code class="language-bash">sudo nano /etc/udev/rules.d/70-persistent-net.rules
+</code></pre>
+      <p>Add the following lines and <strong>replace your MAC address</strong> accordingly:</p>
+      <pre><code class="language-bash">SUBSYSTEM==<span class="hljs-string">&quot;ieee80211&quot;</span>, ACTION==<span class="hljs-string">&quot;add|change&quot;</span>, ATTR{macaddress}==<span class="hljs-string">&quot;b8:27:xx:xx:xx:xx&quot;</span>, KERNEL==<span class="hljs-string">&quot;phy0&quot;</span>, \
+RUN+=<span class="hljs-string">&quot;/sbin/iw phy phy0 interface add ap0 type __ap&quot;</span>, \
+RUN+=<span class="hljs-string">&quot;/bin/ip link set ap0 address b8:27:xx:xx:xx:xx&quot;</span>
+</code></pre>
+    </li>
+    <li>
+      <h3 id="install-dnsmasq-and-hostapd">Install <code>Dnsmasq</code> and <code>Hostapd</code>:</h3>
+      <pre><code class="language-bash">sudo apt-get update
+sudo apt-get upgrade <span class="hljs-comment">#Optional</span>
+sudo apt-get install dnsmasq hostapd
+</code></pre>
+    </li>
+    <li>
+      <h3 id="configure-dnsmasq">Configure <code>Dnsmasq</code>:</h3>
+      <ol>
+        <li>
+          <h4 id="backup-the-original-dnsmasq-configuration">Backup the original <code>dnsmasq</code> configuration:
+          </h4>
+          <pre><code class="language-bash">sudo <span class="hljs-built_in">cp</span> /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
+</code></pre>
+        </li>
+        <li>
+          <h4 id="create-a-new-dnsmasq-configuration">Create a new <code>dnsmasq</code> configuration:</h4>
+          <pre><code class="language-bash">sudo nano /etc/dnsmasq.conf
+</code></pre>
+        </li>
+        <li>
+          <h4 id="add-the-following-content">Add the following content:</h4>
+          <pre><code class="language-conf">interface=lo,ap0
+no-dhcp-interface=lo,wlan0
+bind-interfaces
+server=8.8.8.8
+domain-needed
+bogus-priv
+dhcp-range=192.168.10.50,192.168.10.150,12h
+</code></pre>
+        </li>
+      </ol>
+    </li>
+    <li>
+      <h3 id="configure-hostapd">Configure <code>Hostapd</code>:</h3>
+      <ol>
+        <li>
+          <h4 id="open-the-configuration-file">Open the configuration file:</h4>
+          <pre><code class="language-bash">sudo nano /etc/hostapd/hostapd.conf
+</code></pre>
+        </li>
+        <li>
+          <h4 id="add-the-following-content-1">Add the following content:</h4>
+          <pre><code class="language-conf">ctrl_interface=/var/run/hostapd
+ctrl_interface_group=0
+interface=ap0
+driver=nl80211
+ssid=DevAccessPoint
+hw_mode=g
+channel=1
+wmm_enabled=0
+macaddr_acl=0
+auth_algs=1
+wpa=2
+wpa_passphrase=YourPassPhraseHere
+wpa_key_mgmt=WPA-PSK
+wpa_pairwise=TKIP CCMP
+rsn_pairwise=CCMP
+</code></pre>
+          <p>Before you save, make sure to do these changes to the configuration:</p>
+          <ol>
+            <li>Replace <code>DevAccessPoint</code> and <code>YourPassPhraseHere</code> with your desired values</li>
+            <li>Replace the <code>channel</code> with the channel your <code>wlan0</code> was running on (as reported by
+              <code>iw dev</code> in step 1)
+            </li>
+          </ol>
+        </li>
+        <li>
+          <h4 id="specify-where-hostapd-should-find-its-configuration">Specify where <code>hostapd</code> should find
+            its configuration:</h4>
+          <pre><code class="language-bash">sudo nano /etc/default/hostapd
+</code></pre>
+          <p>Find the line with <code>#DAEMON_CONF=&quot;&quot;</code> and replace <em>(uncomment it or add it if it
+              doesn't exist)</em> it with:</p>
+          <pre><code class="language-bash">DAEMON_CONF=<span class="hljs-string">&quot;/etc/hostapd/hostapd.conf&quot;</span>
+</code></pre>
+        </li>
+      </ol>
+    </li>
+    <li>
+      <h3 id="modify-wpa_supplicant">Modify <code>wpa_supplicant</code>:</h3>
+      <ol>
+        <li>
+          <h4 id="open-the-configuration-file-1">Open the configuration file:</h4>
+          <pre><code class="language-bash">sudo nano /etc/wpa_supplicant/wpa_supplicant.conf
+</code></pre>
+        </li>
+        <li>
+          <h4 id="add-the-following-content-if-it-doesnt-exist-already">Add the following content (if it doesn't exist
+            already):</h4>
+          <pre><code class="language-conf">country=US
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+
+network={
+    ssid=&quot;YourSSID1&quot;
+    psk=&quot;YourPassphrase1&quot;
+    id_str=&quot;AP1&quot;
+}
+
+network={
+    ssid=&quot;YourSSID2&quot;
+    psk=&quot;YourPassphrase2&quot;
+    id_str=&quot;AP2&quot;
+}
+</code></pre>
+          <p>Replace <code>YourSSID1</code> and <code>YourPassphrase1</code> with your WiFi's SSID and passphrase.
+            You can add as many networks as you want, just make sure to increment the <code>id_str</code> value for each
+            network. You are are not required to keep <code>YourSSID2</code> in the configuration if you only have one
+            WiFi network you want to connect to.<br>
+            Change your country code accordingly.</p>
+        </li>
+      </ol>
+    </li>
+    <li>
+      <h3 id="modify-etcnetworkinterfaces-to-support-the-new-ap">Modify <code>/etc/network/interfaces</code> to support
+        the new AP</h3>
+      <ol>
+        <li>
+          <h4 id="open-the-configuration-file-2">Open the configuration file:</h4>
+          <pre><code class="language-bash">sudo nano /etc/network/interfaces
+</code></pre>
+        </li>
+        <li>
+          <h4 id="add-the-following-content-2">Add the following content:</h4>
+          <pre><code class="language-conf">auto lo
+auto ap0
+auto wlan0
+iface lo inet loopback
+
+allow-hotplug ap0
+iface ap0 inet static
+    address 192.168.10.1
+    netmask 255.255.255.0
+    hostapd /etc/hostapd/hostapd.conf
+
+allow-hotplug wlan0
+iface wlan0 inet manual
+    wpa-roam /etc/wpa_supplicant/wpa_supplicant.conf
+iface AP1 inet dhcp
+iface AP2 inet dhcp
+</code></pre>
+        </li>
+      </ol>
+    </li>
+    <li>
+      <h3 id="start-both-interfaces">Start both interfaces:</h3>
+      <pre><code class="language-bash">sudo ifdown --force wlan0
+sudo ifdown --force ap0
+sudo ifup ap0
+sudo ifup wlan0
+</code></pre>
+      <p><em>Note: It's crucial to copy and paste the entire block of commands above all at once. Executing them one by
+          one will disconnect you from the Pi after disabling the interfaces, preventing you from re-enabling them
+          immediately.
+          If your Raspberry Pi Zero W does not reconnect to your WiFi network at this point, unplug the power and plug
+          it back in.<br>
+          On my setup it wouldn't connect even after a restart. I inserted the microSD card into my PC and recreated the
+          <code>wpa_supplier.conf</code> in the boot drive.</em></p>
+    </li>
+    <li>
+      <h3 id="check-the-interfaces">Check the interfaces:</h3>
+      <ol>
+        <li>SSH into the Pi again and check the interfaces:
+          <pre><code class="language-bash">pi@raspberrypi:~$ ip addr
+1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    <span class="hljs-built_in">link</span>/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+    valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host
+    valid_lft forever preferred_lft forever
+2: wlan0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+    <span class="hljs-built_in">link</span>/ether b8:27:xx:xx:xx:xx brd ff:ff:ff:ff:ff:ff
+    inet 192.168.178.102/24 brd 192.168.178.255 scope global dynamic noprefixroute wlan0
+    valid_lft 863907sec preferred_lft 755907sec
+    inet6 2a02:4500:4507:8d04:e2455:6452:6e45:2f66/64 scope global dynamic mngtmpaddr noprefixroute
+    valid_lft 7102sec preferred_lft 2496sec
+    inet6 fe45::4455:a1e3:45c9:5451/64 scope <span class="hljs-built_in">link</span>
+    valid_lft forever preferred_lft forever
+3: ap0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+    <span class="hljs-built_in">link</span>/ether b8:27:xx:xx:xx:xx brd ff:ff:ff:ff:ff:ff
+    inet 192.168.10.1/24 brd 192.168.10.255 scope global ap0
+    valid_lft forever preferred_lft forever
+    inet 169.254.165.183/16 brd 169.254.255.255 scope global noprefixroute ap0
+    valid_lft forever preferred_lft forever
+    inet6 fe45::7d45:45b8:b45:2f45/64 scope <span class="hljs-built_in">link</span>
+    valid_lft forever preferred_lft forever
+    inet6 fe45::ba27:eb45:fe7c:3cea/64 scope <span class="hljs-built_in">link</span>
+    valid_lft forever preferred_lft forever
+</code></pre>
+          You should see both <code>wlan0</code> and <code>ap0</code> interfaces with their respective IP addresses.
+          If you scan for WiFi networks with your phone you should also see the <code>DevAccessPoint</code> (or whatever
+          you've called it) network.
+        </li>
+      </ol>
+    </li>
+    <li>
+      <h3 id="bridge-traffic-between-ap-and-client-side">Bridge traffic between AP and Client side</h3>
+      <ol>
+        <li>
+          <h4 id="enbale-ip-forwarding">Enbale ip-forwarding:</h4>
+          <pre><code class="language-bash">sudo sysctl -w net.ipv4.ip_forward=1
+</code></pre>
+        </li>
+        <li>
+          <h4 id="add-iptables-rules">Add iptables rules:</h4>
+          <pre><code class="language-bash">sudo iptables -t nat -A POSTROUTING -s 192.168.10.0/24 ! -d 192.168.10.0/24 -j MASQUERADE
+</code></pre>
+        </li>
+        <li>
+          <h4 id="restart-dnsmasq">Restart <code>dnsmasq</code>:</h4>
+          <pre><code class="language-bash">sudo systemctl restart dnsmasq
+</code></pre>
+        </li>
+      </ol>
+      <p>Now you should be able to connect to the AP and use its internet connection to access the internet. (If you
+        have a working internet connection on its client side)</p>
+    </li>
+    <li>
+      <h3 id="automate-the-workaround">Automate the workaround:</h3>
+      <ol>
+        <li>
+          <h4 id="create-a-new-file">Create a new file:</h4>
+          <pre><code class="language-bash">sudo nano start-ap-managed-wifi.sh
+</code></pre>
+        </li>
+        <li>
+          <h4 id="add-the-following-content-3">Add the following content:</h4>
+          <pre><code class="language-bash"><span class="hljs-meta">#!/bin/bash</span>
+LOGFILE=<span class="hljs-string">&quot;/var/log/pi_startup.log&quot;</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;[<span class="hljs-subst">$(date)</span>] Starting script. Sleeping 45 sec...&quot;</span> &gt;&gt; <span class="hljs-variable">$LOGFILE</span>
+<span class="hljs-built_in">sleep</span> 45
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;[<span class="hljs-subst">$(date)</span>] Starting execution&quot;</span> &gt;&gt; <span class="hljs-variable">$LOGFILE</span>
+sudo sysctl -w net.ipv4.ip_forward=1
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;[<span class="hljs-subst">$(date)</span>] Enabled ip forwarding&quot;</span> &gt;&gt; <span class="hljs-variable">$LOGFILE</span>
+sudo iptables -t nat -A POSTROUTING -s 192.168.10.0/24 ! -d 192.168.10.0/24 -j MASQUERADE
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;[<span class="hljs-subst">$(date)</span>] Modified iptables to set up NAT&quot;</span> &gt;&gt; <span class="hljs-variable">$LOGFILE</span>
+sudo systemctl restart dnsmasq
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;[<span class="hljs-subst">$(date)</span>] Restarted dnsmasq&quot;</span> &gt;&gt; <span class="hljs-variable">$LOGFILE</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot; &quot;</span> &gt;&gt; <span class="hljs-variable">$LOGFILE</span>
+</code></pre>
+        </li>
+        <li>
+          <h4 id="make-the-script-executable">Make the script executable:</h4>
+          <pre><code class="language-bash">sudo <span class="hljs-built_in">chmod</span> +x start-ap-managed-wifi.sh
+</code></pre>
+        </li>
+        <li>
+          <h4 id="add-a-cronjob-to-run-the-script-on-boot">Add a cronjob to run the script on boot:</h4>
+          <pre><code class="language-bash">sudo crontab -e
+</code></pre>
+          <p>Add the following line to the end of the file:</p>
+          <pre><code class="language-bash">@reboot /home/pi/start-ap-managed-wifi.sh
+</code></pre>
+        </li>
+      </ol>
+    </li>
+  </ol>
+  <p>Continue to <a href="./SCRIPT.html">SCRIPT.md</a> to set up bluetooth and the script.</p>
+  <p><em><strong>Note:</strong> These instructions are tested on Raspbian Buster.<br>
+      Shoutout to <a
+        href="https://blog.thewalr.us/2017/09/26/raspberry-pi-zero-w-simultaneous-ap-and-managed-mode-wifi/">TheWalrus</a>
+      for the original instructions. A comment under the post pointed out that the instructions depend upon if-up and
+      if-down system which is no longer used in Raspian Buster. You might want to visit the original post for more
+      information.</em></p>
+  <blockquote>
+    <p>These instructions depend upon if-up and if-down system used by Raspbian Stretch version.</p>
+    <p>But as of 2020, you would be using Raspbian Buster, which uses a different system, based on dhcpcd daemon. While
+      it is technically possible to still get it working (because the ifup/ifdown system are still there), it is
+      recommended to use systemd-networkd approach, which doesn't depend upon having to introduce udev hook.</p>
+    <p>The instructions are here: <a
+        href="https://disq.us/url?url=https%3A%2F%2Fraspberrypi.stackexchange.com%2Fquestions%2F89803%2Faccess-point-as-wifi-router-repeater-optional-with-bridge%2F89804%2389804%3AtorAhAl318HVmaNbHEe6ej2YO6s&amp;cuid=4278722">https://raspberrypi.stackex...</a>
+    </p>
+  </blockquote>
+
+  <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+
+</body>
+
+</html>

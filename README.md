@@ -1,9 +1,11 @@
 # Security Camera
 A security camera script for the Raspberry Pi Zero W using the Waveshare RPi Camera (F).  
-This script allows the Raspberry Pi to start recording video and pause the recording when it's actively connected to a specified Bluetooth device, such as a smartphone.  
-  
-This script will be modified; I intend to add a web interface (to start and stop the recording and to view the recorded videos), add a magnetic reed switch to the Raspberry Pi to detect if the door is open or closed and a hardware clock to keep track of the date and time even when the Raspberry Pi has been powered off.  
-The script will start recording when the door is opened but only if the smartphone is not connected to the Raspberry Pi.
+The script will start recording a video when the magnetic reed switch is triggered (the door is opened) and the smartphone is not connected to the Raspberry Pi (bluetooth and/or WiFi). The recording will stop when the magnetic reed switch is triggered again (the door is closed).
+
+Integrations:
+- **Magnetic Reed Switch**: Integration with a magnetic reed switch to detect door open/close events and trigger recording accordingly.
+- **WIFI Detection**: Integration with WiFi Access Point to allow user to use bluetooth or WiFi to not trigger recording. Allows user to view recorded videos in the web interface when outside of the home network.
+- **Bluetooth Detection**: Integration with Bluetooth to allow user to use bluetooth to not trigger recording.
 
 ## Table of Contents
 
@@ -20,17 +22,25 @@ The script will start recording when the door is opened but only if the smartpho
 ## Prerequisites
 
 - Raspberry Pi Zero W (or Raspberry Pi Zero WH)
-- Waveshare RPi Camera (F) or compatible camera module
+- Headers for the Raspberry Pi Zero W if you did not choose a Raspberry Pi Zero WH (if you do not feel comfortable soldering the headers you can use solderless headers such as these [here](https://www.berrybase.de/en/solderless-stiftleiste-2x-20-polig-rm-2-54-gerade))
+- [Waveshare RPi Camera (F)](https://www.berrybase.de/en/noir-kamera-fuer-raspberry-pi-mit-einstellbarem-fokus-und-infrarot-leds) or another compatible camera module
+- Flexcable adapter for the camera module (such as this one [here](https://www.berrybase.de/en/flexkabel-fuer-raspberry-pi-zero-und-kameramodul?number=RPIZ-FLEX-15))
 - Bluetooth-enabled device (e.g., a smartphone) to pair with the Raspberry Pi
-- _Magnetic reed switch (optional)_ - will be added in the future
+- Magnetic reed switch (i chose the following [KY-025 module](https://www.amazon.de/dp/B089QJVBL7?psc=1&ref=ppx_yo2ov_dt_b_product_details))
+- a bunch of Dupont Jumper Wires
+- Breadboard (optional)
 - _Hardwareclock (optional)_ - will be added in the future
 
 ## Setup
+The following sections will explain how to set up the Raspberry Pi Zero W. It is assumed that the Raspberry Pi Zero W is already set up and running (Optional - set up VNC if you have a hard time working in a headless setup). If you need help setting up the Raspberry Pi Zero W, please refer to the [Raspberry Pi Documentation](https://www.raspberrypi.org/documentation/).
 
-1. ### WiFi setup
+1. ### Hardware setup
+    The Instructions to the hardware setup can be found [here](HARDWARE.md).  
+    They explain how to connect the camera module and the magnetic reed switch to the Raspberry Pi.
+2. ### WiFi setup
     The Instructions to the WiFi setup can be found [here](WIFI.md).  
     They explain how to set up the Raspberry Pi as an access point and how to connect to it. This will be necessary to connect to the Raspberry Pi when outside of the home network and to access the web interface.
-2. ### Bluetooth and Script setup
+3. ### Bluetooth and Script setup
     The Instructions to the Bluetooth setup and the script setup can be found [here](SCRIPT.md).
     They explain how to pair the Raspberry Pi with a Bluetooth device and how to set up the script.
 
@@ -39,8 +49,6 @@ The script will start recording when the door is opened but only if the smartpho
 Once the script is running, the Raspberry Pi will start recording a video when the magnetic reed switch is triggered (the door is opened) and the smartphone is not connected to the Raspberry Pi (bluetooth and/or WiFi). The recording will stop when the magnetic reed switch is triggered again (the door is closed). 
 
 ## Future Enhancements
-- **Magnetic Reed Switch**: Integration with a magnetic reed switch to detect door open/close events and trigger recording accordingly.
-- **WIFI Detection**: Integration with WiFi Access Point to allow user to use bluetooth or WiFi to trigger recording. Allows user to view recorded videos in the web interface when outside of the home network.
 - **Web Interface**: A user-friendly interface to view recorded videos.
 - **Hardware Clock**: Integration with a hardware clock to keep track of the date and time even when the Raspberry Pi has been powered off.
 

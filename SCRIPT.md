@@ -1,4 +1,4 @@
-
+# Bluetooth & Script Setup
 ## Install 
 
 To set up the necessary libraries and tools, run the following commands:

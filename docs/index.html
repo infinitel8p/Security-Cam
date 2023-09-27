@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Security Camera</title>
+
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+  </style>
+  <style>
+    .task-list-item {
+      list-style-type: none;
+    }
+
+    .task-list-item-checkbox {
+      margin-left: -20px;
+      vertical-align: middle;
+      pointer-events: none;
+    }
+  </style>
+
+</head>
+
+<body class="vscode-body vscode-light">
+  <h1 id="security-camera">Security Camera</h1>
+  <p>A security camera script for the Raspberry Pi Zero W using the Waveshare RPi Camera (F).<br>
+    The script will start recording a video when the magnetic reed switch is triggered (the door is opened) and the
+    smartphone is not connected to the Raspberry Pi (bluetooth and/or WiFi). The recording will stop when the magnetic
+    reed switch is triggered again (the door is closed).</p>
+  <p>Integrations:</p>
+  <ul>
+    <li><strong>Magnetic Reed Switch</strong>: Integration with a magnetic reed switch to detect door open/close events
+      and trigger recording accordingly.</li>
+    <li><strong>WIFI Detection</strong>: Integration with WiFi Access Point to allow user to use bluetooth or WiFi to
+      not trigger recording. Allows user to view recorded videos in the web interface when outside of the home network.
+    </li>
+    <li><strong>Bluetooth Detection</strong>: Integration with Bluetooth to allow user to use bluetooth to not trigger
+      recording.</li>
+  </ul>
+  <h2 id="table-of-contents">Table of Contents</h2>
+  <ul>
+    <li><a href="#security-camera">Security Camera</a>
+      <ul>
+        <li><a href="#table-of-contents">Table of Contents</a></li>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#setup">Setup</a></li>
+        <li><a href="#usage">Usage</a></li>
+        <li><a href="#future-enhancements">Future Enhancements</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+        <li><a href="#contribution-guidelines">Contribution Guidelines</a></li>
+        <li><a href="#license">License</a></li>
+      </ul>
+    </li>
+  </ul>
+  <h2 id="prerequisites">Prerequisites</h2>
+  <ul>
+    <li>Raspberry Pi Zero W (or Raspberry Pi Zero WH)</li>
+    <li>Headers for the Raspberry Pi Zero W if you did not choose a Raspberry Pi Zero WH (if you do not feel comfortable
+      soldering the headers you can use solderless headers such as these <a
+        href="https://www.berrybase.de/en/solderless-stiftleiste-2x-20-polig-rm-2-54-gerade">here</a>)</li>
+    <li><a
+        href="https://www.berrybase.de/en/noir-kamera-fuer-raspberry-pi-mit-einstellbarem-fokus-und-infrarot-leds">Waveshare
+        RPi Camera (F)</a> or another compatible camera module</li>
+    <li>Flexcable adapter for the camera module (such as this one <a
+        href="https://www.berrybase.de/en/flexkabel-fuer-raspberry-pi-zero-und-kameramodul?number=RPIZ-FLEX-15">here</a>)
+    </li>
+    <li>Bluetooth-enabled device (e.g., a smartphone) to pair with the Raspberry Pi</li>
+    <li>Magnetic reed switch (i chose the following <a
+        href="https://www.amazon.de/dp/B089QJVBL7?psc=1&amp;ref=ppx_yo2ov_dt_b_product_details">KY-025 module</a>)</li>
+    <li>a bunch of Dupont Jumper Wires</li>
+    <li>Breadboard (optional)</li>
+    <li><em>Hardwareclock (optional)</em> - will be added in the future</li>
+  </ul>
+  <h2 id="setup">Setup</h2>
+  <p>The following sections will explain how to set up the Raspberry Pi Zero W. It is assumed that the Raspberry Pi Zero
+    W is already set up and running (Optional - set up VNC if you have a hard time working in a headless setup). If you
+    need help setting up the Raspberry Pi Zero W, please refer to the <a
+      href="https://www.raspberrypi.org/documentation/">Raspberry Pi Documentation</a>.</p>
+  <ol>
+    <li>
+      <h3 id="hardware-setup">Hardware setup</h3>
+      The Instructions to the hardware setup can be found <a href="HARDWARE.html">here</a>.<br>
+      They explain how to connect the camera module and the magnetic reed switch to the Raspberry Pi.
+    </li>
+    <li>
+      <h3 id="wifi-setup">WiFi setup</h3>
+      The Instructions to the WiFi setup can be found <a href="WIFI.html">here</a>.<br>
+      They explain how to set up the Raspberry Pi as an access point and how to connect to it. This will be necessary to
+      connect to the Raspberry Pi when outside of the home network and to access the web interface.
+    </li>
+    <li>
+      <h3 id="bluetooth-and-script-setup">Bluetooth and Script setup</h3>
+      The Instructions to the Bluetooth setup and the script setup can be found <a href="SCRIPT.html">here</a>.
+      They explain how to pair the Raspberry Pi with a Bluetooth device and how to set up the script.
+    </li>
+  </ol>
+  <h2 id="usage">Usage</h2>
+  <p>Once the script is running, the Raspberry Pi will start recording a video when the magnetic reed switch is
+    triggered (the door is opened) and the smartphone is not connected to the Raspberry Pi (bluetooth and/or WiFi). The
+    recording will stop when the magnetic reed switch is triggered again (the door is closed).</p>
+  <h2 id="future-enhancements">Future Enhancements</h2>
+  <ul>
+    <li><strong>Web Interface</strong>: A user-friendly interface to view recorded videos.</li>
+    <li><strong>Hardware Clock</strong>: Integration with a hardware clock to keep track of the date and time even when
+      the Raspberry Pi has been powered off.</li>
+  </ul>
+  <h2 id="troubleshooting">Troubleshooting</h2>
+  <p><em>This section will be populated with common issues and their solutions as they are identified.</em></p>
+  <h2 id="contribution-guidelines">Contribution Guidelines</h2>
+  <p>If you'd like to contribute to this project, please follow these guidelines:</p>
+  <ol>
+    <li><strong>Fork the Repository</strong>: Create a fork of this repository to your account.</li>
+    <li><strong>Clone the Fork</strong>: Clone the forked repository to your local machine.</li>
+    <li><strong>Create a New Branch</strong>: Always create a new branch for your changes.</li>
+    <li><strong>Make Changes</strong>: Implement your changes, enhancements, or bug fixes.</li>
+    <li><strong>Commit and Push</strong>: Commit your changes and push them to your fork.</li>
+    <li><strong>Create a Pull Request</strong>: Create a pull request from your fork to the main repository.</li>
+  </ol>
+  <h2 id="license">License</h2>
+  <p>This project is licensed under the <a href="../LICENSE">MIT License</a>. Please see the <code>LICENSE</code> file
+    for more details.</p>
+
+
+
+</body>
+
+</html>

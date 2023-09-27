@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Hardware Setup</title>
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+  </style>
+  <style>
+    .task-list-item {
+      list-style-type: none;
+    }
+
+    .task-list-item-checkbox {
+      margin-left: -20px;
+      vertical-align: middle;
+      pointer-events: none;
+    }
+  </style>
+
+</head>
+
+<body class="vscode-body vscode-light">
+  <h1 id="hardware-setup">Hardware Setup</h1>
+  <h2 id="prerequisites">Prerequisites</h2>
+  <ul>
+    <li>Raspberry Pi Zero W (or Raspberry Pi Zero WH)</li>
+    <li>Headers for the Raspberry Pi Zero W if you did not choose a Raspberry Pi Zero WH (if you do not feel comfortable
+      soldering the headers you can use solderless headers such as these <a
+        href="https://www.berrybase.de/en/solderless-stiftleiste-2x-20-polig-rm-2-54-gerade">here</a>)</li>
+    <li>Raspberry Pi Camera Module (i chose the <a
+        href="https://www.berrybase.de/en/noir-kamera-fuer-raspberry-pi-mit-einstellbarem-fokus-und-infrarot-leds">Waveshare
+        RPi Camera (F)</a>)</li>
+    <li>Flexcable adapter for the camera module (such as this one <a
+        href="https://www.berrybase.de/en/flexkabel-fuer-raspberry-pi-zero-und-kameramodul?number=RPIZ-FLEX-15">here</a>)
+    </li>
+    <li>Magnet Reed Switch (i chose the following <a
+        href="https://www.amazon.de/dp/B089QJVBL7?psc=1&amp;ref=ppx_yo2ov_dt_b_product_details">KY-025 module</a>)</li>
+    <li>a bunch of Dupont Jumper Wires</li>
+    <li>Breadboard (optional)</li>
+  </ul>
+  <h2 id="camera">Camera</h2>
+  <p>Attach the camera to the Raspberry Pi. You will need a flex cable adapter for the Pi Zero for the camera module
+    since the Raspberry Pi Zero has a smaller smaller connector than the standard camera module. The camera should be
+    attached to the Raspberry Pi as shown below.</p>
+  <p><img src="https://github.com/infinitel8p/Security-Cam/assets/50703696/3232fdbe-9dc6-491a-aeac-1ead849368fb"
+      alt="270868898-25d4370a-b620-4d31-9c9b-fb232d06bef7"></p>
+  <p>If connected properly you should see a faint red glow from the camera's infrared LEDs when the raspberry is turned
+    on.</p>
+  <h3 id="update-the-camera-library">Update the Camera Library</h3>
+  <p>Update the camera library (and everything else) first if you have not already done so. Run the following commands
+    on the Raspberry Pi:</p>
+  <pre><code class="language-bash">sudo apt update
+sudo apt upgrade
+</code></pre>
+  <h3 id="camera-setup">Camera Setup</h3>
+  <p>Edit the <code>/boot/config.txt</code> file:</p>
+  <pre><code class="language-bash">sudo nano /boot/config.txt
+</code></pre>
+  <p>Add the following line to the end of the file:</p>
+  <pre><code class="language-bash">start_x=1
+</code></pre>
+  <p>Restart the Raspberry Pi now.</p>
+  <blockquote>
+    <p>If you use OV9281, IMX290, IMX378, or non-Raspberry Pi official IMX219 and IMX477 cameras, you need to configure
+      the config.txt file separately:</p>
+    <pre><code class="language-bash">sudo nano /boot/config.txt
+</code></pre>
+    <p>Find &quot;camera-auto-detect=1&quot; and modify it to &quot;camera_auto_detect=0&quot;.</p>
+    <p>At the end of the file, add the following setting statements according to the camera model:</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Camera Model</th>
+          <th>Setting Statement</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>OV9281</td>
+          <td>dtoverlay=ov9281</td>
+        </tr>
+        <tr>
+          <td>IMX290/IMX327</td>
+          <td>dtoverlay=imx290, clock-frequency=37125000</td>
+        </tr>
+        <tr>
+          <td>IMX477</td>
+          <td>dtoverlay=imx477</td>
+        </tr>
+        <tr>
+          <td>IMX378</td>
+          <td>dtoverlay=imx378</td>
+        </tr>
+        <tr>
+          <td>IMX219</td>
+          <td>dtoverlay=imx219</td>
+        </tr>
+      </tbody>
+    </table>
+  </blockquote>
+  <h3 id="test-the-camera">Test the Camera</h3>
+  <p>The WaveShare RPi Camera (F) has a OV5647 sensor which should be supported by <code>libcamera</code> and
+    <code>Raspicam</code>.
+    Depending on your chosen camera module you need to enable legacy camera support so to test the camera, run the
+    following commands on the Raspberry Pi:
+  </p>
+  <pre><code class="language-bash">vcgencmd get_camera
+</code></pre>
+  <p>This should return the following:</p>
+  <pre><code class="language-bash">supported=1 detected=1
+</code></pre>
+  <p><em>Note: If it returns <code>supported=0 detected=0</code> you need to enable legacy camera support first. See the
+      <a href="#enabling-legacy-camera-support">section below</a> for instructions on how to do that.</em></p>
+  <p>Now test the camera with the following command:</p>
+  <pre><code class="language-bash">raspistill -o test.jpg
+</code></pre>
+  <p>This should take a picture and save it as <code>test.jpg</code> in the current directory.</p>
+  <h3 id="enabling-legacy-camera-support">Enabling Legacy Camera Support</h3>
+  <p>To enable the legacy camera support, run the following command on the Raspberry Pi:</p>
+  <pre><code class="language-bash">sudo raspi-config
+</code></pre>
+  <p>In the menu, select <code>Interface Options</code> and then <code>Legacy Camera</code>. Select <code>Yes</code> to
+    enable it and then <code>Ok</code>. Select <code>Finish</code> to exit the configuration menu and reboot the
+    Raspberry Pi.</p>
+  <p>Test the camera again with the commands from the <a href="#test-the-camera">section above</a>.</p>
+  <h2 id="magnet-reed-switch">Magnet Reed Switch</h2>
+  <p>If you have a Raspberry Pi Zero W and you have not yet soldered the GPIO header, you can do so now. The magnet reed
+    switch will be connected to the Raspberry Pi as shown below.</p>
+  <p><img src="https://github.com/infinitel8p/Security-Cam/assets/50703696/56c40de5-69e2-4397-9365-49f6284a3ebe"
+      alt="20230927_072021">
+    <em>Note: This is the connection layout using a breadboard. The magnet reed can also just be connected directly to
+      the Raspberry Pi skipping the breadboard.</em>
+  </p>
+  <h3 id="ky-025-connection">KY-025 connection</h3>
+  <p>The pinout on the KY-025 module with the already connected jumper wires is shown below.</p>
+  <p><img src="https://github.com/infinitel8p/Security-Cam/assets/50703696/6ec39776-6104-42eb-9780-88899c248223"
+      alt="image"></p>
+  <table>
+    <thead>
+      <tr>
+        <th>KY-025 Pin</th>
+        <th>Wire</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>GND</strong></td>
+        <td>Black Jumper Wire</td>
+      </tr>
+      <tr>
+        <td><strong>DO</strong></td>
+        <td>Blue Jumper Wire</td>
+      </tr>
+      <tr>
+        <td><strong>+ (VCC)</strong></td>
+        <td>Red Jumper Wire</td>
+      </tr>
+    </tbody>
+  </table>
+  <p><em>Note: The KY-025 module has a fourth pin, marked with <code>AO</code>. This is the analog output pin and is not
+      used in this project since the Raspberry Pi does not have an analog input pin and a converter such as the ADS1115
+      would be required to use it.</em></p>
+  <h3 id="raspberry-pi-connection">Raspberry Pi connection</h3>
+  <p>The pinout on the Raspberry Pi with the already connected jumper wires is shown below.</p>
+  <p><img src="https://github.com/infinitel8p/Security-Cam/assets/50703696/9993c261-44fc-419b-ae6c-81c62854a4c3"
+      alt="image"></p>
+  <p><img src="https://github.com/infinitel8p/Security-Cam/assets/50703696/3438075e-0989-4f01-a75a-cd3aa3f42bbd"
+      alt="image"></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Raspberry Pi Pin</th>
+        <th>Wire</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>[pin 14] GND</strong></td>
+        <td>Black Jumper Wire</td>
+      </tr>
+      <tr>
+        <td><strong>[pin 15] GPIO22</strong></td>
+        <td>Blue Jumper Wire</td>
+      </tr>
+      <tr>
+        <td><strong>[pin 17] 3V3</strong></td>
+        <td>Red Jumper Wire</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="test-the-magnet-reed-switch">Test the Magnet Reed Switch</h3>
+  <p>If connected properly in the previous step, the red LED on the KY-025 module should be lit up when the Raspberry Pi
+    is turned on.<br>
+    To test the magnet reed switch, create the following python script on the Raspberry Pi:</p>
+  <pre><code class="language-bash">nano test.py
+</code></pre>
+  <p>Paste the following code into the file:</p>
+  <pre><code class="language-python"><span class="hljs-keyword">import</span> RPi.GPIO <span class="hljs-keyword">as</span> GPIO
+<span class="hljs-keyword">from</span> time <span class="hljs-keyword">import</span> sleep
+
+GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(<span class="hljs-literal">False</span>)
+
+Digital_Pin = <span class="hljs-number">22</span>
+GPIO.setup(Digital_Pin, GPIO.IN)
+
+<span class="hljs-keyword">try</span>:
+    <span class="hljs-keyword">while</span> <span class="hljs-literal">True</span>:
+        <span class="hljs-keyword">if</span> GPIO.<span class="hljs-built_in">input</span>(Digital_Pin):
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Magnet Detected!&quot;</span>)
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;No Magnet&quot;</span>)
+        sleep(<span class="hljs-number">1</span>)
+<span class="hljs-keyword">except</span> KeyboardInterrupt:
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\nScript closed!&quot;</span>)
+
+<span class="hljs-keyword">finally</span>:
+    GPIO.cleanup()
+</code></pre>
+  <p>Save the file and exit the editor. Run the script with the following command:</p>
+  <pre><code class="language-bash">python3 test.py
+</code></pre>
+  <p>Now test the switch. When you come near the sensor with a magnet the script should print
+    <code>Magnet Detected!</code> if the magnet reed switch is triggered and <code>No Magnet</code> if it is not.
+  </p>
+  <p>Continue to <a href="WIFI.html">WIFI.md</a> to set up the Raspberry Pi as an access point and connect to it.</p>
+
+
+
+</body>
+
+</html>
