@@ -221,7 +221,9 @@ The pinout on the DS3231 module is shown below.
         <td>Green Wire</td>
       </tr>
     </table>  
- *Note: for the connections on the Raspberry you can refer the diagram shown [here](#raspberry-pi-connection) again*
+ 
+*Note: for the connections on the Raspberry you can refer the diagram shown [here](#raspberry-pi-connection) again*
+
   </div>
   <!-- Image -->
   <div style="flex: 1;">
