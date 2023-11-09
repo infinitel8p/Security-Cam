@@ -1,20 +1,21 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 
 body {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Roboto', sans-serif;
     font-size: 16px;
     line-height: 1.6;
     margin: 0;
     padding: 0;
-    background-color: #f9f9f9;
+    background-color: #fff;
     color: #333;
 }
 
 header {
-    background-color: #333;
-    color: #f9f9f9;
+    background-color: #f8f8f8;
+    color: #333;
     text-align: center;
-    padding: .5em 0;
+    padding: 1em 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .container {
@@ -22,8 +23,7 @@ header {
     max-width: 1200px;
     margin: 2em auto;
     padding: 0 20px;
-    box-shadow: 0 2px 25px rgba(0, 0, 0, 0.1);
-    background-color: #ffffff;
+    background-color: #fff;
 }
 
 nav {
@@ -35,20 +35,28 @@ nav {
 nav ul {
     list-style-type: none;
     padding: 0;
+    margin: 0;
 }
 
 nav ul li {
-    padding: 0.5em;
+    padding: 0;
     cursor: pointer;
     transition: background-color 0.3s;
 }
 
+nav ul li a {
+    display: block;
+    padding: 0.75em;
+    color: inherit;
+    text-decoration: none;
+}
+
 nav ul li:hover {
-    background-color: #f6f6f6;
+    background-color: #f2f2f2;
 }
 
 nav ul li.active-tab {
-    background-color: #eee;
+    background-color: #e8e8e8;
 }
 
 a,
@@ -74,7 +82,10 @@ form {
     width: 100%;
     max-width: 600px;
     margin: 0 auto;
-    padding: 3em;
+    padding: 2em;
+    background-color: #f8f8f8;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
 }
 
 form label {
@@ -85,17 +96,18 @@ form label {
 
 form input[type="text"] {
     width: 100%;
-    padding: 0.5em;
+    padding: 0.75em;
     margin-bottom: 1em;
-    border: 1px solid #eaeaea;
+    border: 1px solid #ddd;
     border-radius: 4px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Roboto', sans-serif;
     font-size: 16px;
 }
 
 form input[type="submit"] {
-    background-color: #333;
-    color: #f9f9f9;
+    background-color: #007aff;
+    /* Apple blue */
+    color: #fff;
     padding: 0.5em 1em;
     border: none;
     border-radius: 4px;
@@ -105,5 +117,5 @@ form input[type="submit"] {
 }
 
 form input[type="submit"]:hover {
-    background-color: #555;
+    background-color: #005ecb;
 }
