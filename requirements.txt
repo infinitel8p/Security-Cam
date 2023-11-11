@@ -1,6 +1,7 @@
 picamera
 pybluez
 python-dotenv
-flask
-flask-socketio
 eventlet
+
+opencv-python
+websocket-client
