@@ -1,18 +1,16 @@
-const canvas = document.getElementById('videoCanvas');
-const context = canvas.getContext('2d');
+document.addEventListener('DOMContentLoaded', () => {
+    const navItems = document.querySelectorAll('.nav-item');
 
-const ws = new WebSocket('ws://localhost:3000');
-ws.binaryType = 'blob';
+    navItems.forEach(item => {
+        const navLink = item.querySelector('.nav-link');
+        let currentHref = window.location.href;
 
-ws.onmessage = function (event) {
-    const blob = new Blob([event.data], { type: 'image/jpeg' });
+        if (currentHref.endsWith('/')) {
+            currentHref += 'index.html';
+        }
 
-    const url = URL.createObjectURL(blob);
-
-    const image = new Image();
-    image.onload = function () {
-        context.drawImage(this, 0, 0, canvas.width, canvas.height);
-        URL.revokeObjectURL(url);
-    };
-    image.src = url;
-};
+        if (navLink.href === currentHref) {
+            navLink.classList.add('active');
+        }
+    });
+});

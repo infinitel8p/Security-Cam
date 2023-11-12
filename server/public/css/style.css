@@ -37,6 +37,10 @@ body {
     border-radius: 5px;
 }
 
+.active {
+    color: black !important;
+}
+
 .main-content {
     padding: 20px;
     text-align: center;
@@ -53,7 +57,7 @@ body {
 
 #videoCanvas {
     max-width: 100%;
-    height: auto;
+    height: 400px;
     border: 1px solid #ddd;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
