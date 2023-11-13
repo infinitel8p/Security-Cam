@@ -26,6 +26,11 @@ wss.on('connection', function connection(ws) {
             return;
         }
 
+        if (data.toString() === 'Recording in progress' && clientId === 'Python Script') {
+            broadcastData('Recording in progress', ws);
+            return;
+        }
+
         // Regular message handling
         broadcastData(data, ws);
     });

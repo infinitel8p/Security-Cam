@@ -23,6 +23,9 @@ ws.onmessage = function (event) {
         console.log('Python script disconnected');
         python_connected = false;
         setTimeout(() => showMessageOnCanvas("Stream disconnected. Waiting for stream..."), 2000);
+    } else if (event.data === 'Recording in progress') {
+        console.log('Recording in progress');
+        setTimeout(() => showMessageOnCanvas("Recording in progress. Waiting for stream to resume..."), 2000);
     } else if (python_connected) {
         const blob = new Blob([event.data], { type: 'image/jpeg' });
         const url = URL.createObjectURL(blob);
