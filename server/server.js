@@ -30,6 +30,7 @@ wss.on('connection', function connection(ws) {
 
     ws.on('close', () => {
         delete clients[clientId];
+        console.log(`Client disconnected: ${clientId}`);
         updateClients();
     });
 });
