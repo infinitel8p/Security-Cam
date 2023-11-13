@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test</title>
+  <link rel="stylesheet" href="./style.css">
+
+</head>
+
+<body>
+  <div class="container" id="container">
+    <header>
+      <section class="window--buttons">
+        <div class="window__close"></div>
+
+        <div class="window__minimize"></div>
+
+        <div class="window__maximize"></div>
+      </section>
+    </header>
+
+    <aside>
+      <div>
+        <button class="active" id="sidebar-btn">Live Feed</button>
+        <button id="sidebar-btn">Recordings</button>
+        <button id="sidebar-btn">Settings</button>
+      </div>
+
+      <div class="version">
+        <h1>v.0.0.1</h1>
+      </div>
+    </aside>
+
+    <div class="content">
+      <div class="ideas">
+        <div class="idea">
+          <p>Updates</p>
+          <h1>Check the GitHub repository</h1>
+          <p>Suggest new features and report bugs!</p>
+        </div>
+
+        <div class="idea">
+          <p>GET STARTED</p>
+          <h1>Check the documentation</h1>
+          <p>Read the documentation to find out how things work!</p>
+        </div>
+      </div>
+
+      <section class="updates">
+        <h1>Live Feed</h1>
+
+        <div class="update">
+          <canvas id="videoCanvas" width="1920" height="1080"></canvas>
+        </div>
+
+      </section>
+
+      <section class="trending">
+        <h1>More</h1>
+
+        <div class="grid">
+          <span class="grid__app">
+            <h1>Lorem ipsum</h1>
+
+            <button>Open</button>
+          </span>
+
+          <span class="grid__app">
+            <h1>Lorem ipsum</h1>
+
+            <button>Open</button>
+          </span>
+        </div>
+      </section>
+    </div>
+
+  </div>
+  <!-- partial -->
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
+  <script src="./script.js"></script>
+
+</body>
+
+</html>
