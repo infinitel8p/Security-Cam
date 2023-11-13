@@ -62,12 +62,15 @@ def send_frames(ws):
     global should_send_frames, streaming, recording
 
     while streaming:
+        logging.info("Sending frames...")
         if not should_send_frames:
             time.sleep(0.1)
             continue
 
         if recording:
             logging.warning("Recording in progress, skipping frame...")
+            time.sleep(0.1)
+            continue
 
         camera.capture(stream, format='jpeg',
                        use_video_port=True, quality=jpeg_quality)
