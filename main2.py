@@ -9,6 +9,7 @@ import RPi.GPIO as GPIO
 import websocket
 from dotenv import load_dotenv
 from functions import *
+import io
 
 # Set up logging with custom timestamp format
 logging.basicConfig(level=logging.INFO,
@@ -88,7 +89,7 @@ def on_open(ws):
     print("WebSocket opened and thread started")
     global streaming_running
     if not streaming_running:
-        threading.Thread(target=stream_frames).start()
+        threading.Thread(target=stream_frames(camera=camera)).start()
 
 
 def on_close(ws, close_status_code, close_msg):

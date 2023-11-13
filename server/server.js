@@ -20,6 +20,7 @@ wss.on('connection', function connection(ws) {
             clientId = data.toString();
             clients[clientId] = ws;
             updateClients();
+            console.log(`Client connected: ${clientId}`);
             return;
         }
 
