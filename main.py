@@ -142,7 +142,7 @@ try:
                 if not recording:
                     logging.info("Device not detected. Start recording.")
                     camera.start_recording(
-                        f"./server/public/recordings/video_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.mp4")
+                        f"./server/public/recordings/video_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.h264")
                     recording = True
         time.sleep(1)
 except KeyboardInterrupt:
