@@ -46,3 +46,36 @@ sudo pip3 install -r requirements.txt
        ```bash
        python3 main.py
        ```
+
+## Install Node.js
+- Install Node.js with the following commands:
+   1. Update the Raspberry Pi
+      ```bash
+      sudo apt update
+      sudo apt upgrade
+      ```
+   2. Check the Node.js Version Available
+      ```bash
+      apt-cache policy nodejs
+      ```
+      The output should look like this:
+      ```bash
+      pi@raspberrypizero2:~ $ apt-cache policy nodejs
+      nodejs:
+      Installed: (none)
+      Candidate: 12.22.12~dfsg-1~deb11u4
+      Version table:
+         12.22.12~dfsg-1~deb11u4 500
+            500 http://raspbian.raspberrypi.org/raspbian bullseye/main armhf Packages
+      ```
+      The apt-cache policy nodejs command shows that Node.js version 12.22.12 is available for installation from the Raspberry Pi repositories, but it hasn't been installed (Installed: (none)).
+   3. Install Node.JS and npm on the Raspberry Pi
+      ```bash
+      sudo apt install nodejs
+      sudo apt install npm
+      ```
+   4. Check the version
+      ```bash
+      nodejs -v  # Checks Node.js version
+      npm -v     # Checks npm version
+      ```

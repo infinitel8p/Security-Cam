@@ -40,6 +40,9 @@ if isinstance(TARGET_AP_MAC_ADDRESSES, str):
 
 # Initialize the camera
 camera = picamera.PiCamera()
+camera.annotate_background = picamera.Color('black')
+camera.resolution = (1920, 1080)
+camera.framerate = 24
 recording = False
 
 # Set up GPIO
@@ -61,29 +64,22 @@ streaming_running = False
 # Function to stream frames
 
 
-def stream_frames():
-    global should_stream_frames, streaming_running
-    streaming_running = True
+def stream_frames(camera):
+    global should_stream_frames
+    stream = io.BytesIO()
 
-    with picamera.PiCamera() as camera:
-        camera.resolution = (1920, 1080)
-        camera.framerate = 24
-        stream = io.BytesIO()
+    for _ in camera.capture_continuous(stream, 'jpeg', use_video_port=True):
+        if not should_stream_frames:
+            break
 
-        for _ in camera.capture_continuous(stream, 'jpeg', use_video_port=True):
-            if not should_stream_frames:
-                break
+        # Send frame
+        stream.seek(0)
+        buffer = stream.read()
+        if should_stream_frames:
+            ws.send(buffer, opcode=websocket.ABNF.OPCODE_BINARY)
 
-            # Send frame
-            stream.seek(0)
-            buffer = stream.read()
-            if should_stream_frames:
-                ws.send(buffer, opcode=websocket.ABNF.OPCODE_BINARY)
-
-            stream.seek(0)
-            stream.truncate()
-
-    streaming_running = False
+        stream.seek(0)
+        stream.truncate()
 
 # WebSocket handlers
 
