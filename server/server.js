@@ -74,10 +74,20 @@ function convertToMp4(inputPath, outputPath) {
                 console.error(`Error: ${error}`);
                 return reject(error);
             }
-            resolve(outputPath);
+
+            // Delete the original file after successful conversion
+            fs.unlink(inputPath, (err) => {
+                if (err) {
+                    console.error(`Error deleting original file ${inputPath}: ${err}`);
+                    return reject(err);
+                }
+                console.log(`Deleted original file: ${inputPath}`);
+                resolve(outputPath);
+            });
         });
     });
 }
+
 
 function convertAllH264ToMp4(directory) {
     fs.readdir(directory, (err, files) => {
