@@ -16,7 +16,7 @@ from functions import *
 
 # Set up logging with custom timestamp format
 logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s',
+                    format='%(asctime)s - %(levelname)s - [%(threadName)s] - %(message)s',
                     datefmt='%d-%m-%Y %H:%M:%S')
 
 logging.info("Initializing...")
@@ -77,35 +77,33 @@ def send_frames(ws):
         stream.truncate()
 
     camera.close()
-    print("Camera released and thread terminating...")
+    logging.info("Camera released and thread terminating...")
 
 
 def on_open(ws):
     def run(*args):
-        print("WebSocket opened and thread started")
+        logging.info("WebSocket opened and thread started")
         global streaming
         ws.send("Python Script")
         send_frames(ws)
         streaming = False
 
-    threading.Thread(target=run).start()
+    threading.Thread(target=run, name="WebSocketThread").start()
 
 
 def on_close(ws, close_status_code, close_msg):
     global streaming
-    print("WebSocket closed")
+    logging.info("WebSocket closed")
     streaming = False
 
 
 def on_message(ws, message):
     global should_send_frames
     if message == "START":
-        print(datetime.datetime.now().strftime("%H:%M:%S %d/%m/%Y") +
-              " - Streaming requested, sending frames...")
+        logging.info("Streaming requested, sending frames...")
         should_send_frames = True
     elif message == "STOP":
-        print(datetime.datetime.now().strftime("%H:%M:%S %d/%m/%Y") +
-              " - Streaming stopped, no longer sending frames...")
+        logging.info("Streaming stopped, no longer sending frames...")
         should_send_frames = False
 
 
