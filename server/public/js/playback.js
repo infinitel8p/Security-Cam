@@ -5,13 +5,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const container = document.querySelector('.video-grid');
             videos.forEach(video => {
                 const videoElement = document.createElement('video');
-                videoElement.width = 320; // set your dimensions
+                videoElement.width = 320;
                 videoElement.height = 240;
                 videoElement.controls = true;
 
                 const sourceElement = document.createElement('source');
                 sourceElement.src = `recordings/${video}`;
-                sourceElement.type = 'video/mp4';
+
+                // Determine the MIME type based on file extension
+                const fileType = video.split('.').pop();
+                if (fileType === 'mp4') {
+                    sourceElement.type = 'video/mp4';
+                } else if (fileType === 'h264') {
+                    sourceElement.type = 'video/h264';
+                }
 
                 videoElement.appendChild(sourceElement);
                 container.appendChild(videoElement);
