@@ -1,7 +1,7 @@
 const canvas = document.getElementById('videoCanvas');
 const context = canvas.getContext('2d');
 
-const ws = new WebSocket('ws://localhost:3000');
+const ws = new WebSocket(`ws://${window.location.hostname}:${window.location.port}`);
 ws.binaryType = 'blob';
 
 let python_connected = false;
