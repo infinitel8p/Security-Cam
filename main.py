@@ -66,6 +66,9 @@ def send_frames(ws):
             time.sleep(0.1)
             continue
 
+        if recording:
+            print("Recording in progress, skipping frame...")
+
         camera.capture(stream, format='jpeg',
                        use_video_port=True, quality=jpeg_quality)
         if should_send_frames:
