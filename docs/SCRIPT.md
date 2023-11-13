@@ -79,3 +79,15 @@ sudo pip3 install -r requirements.txt
       nodejs -v  # Checks Node.js version
       npm -v     # Checks npm version
       ```
+
+## Install FFmpeg
+- Install FFmpeg with the following commands:
+   1. Install FFmpeg
+      ```bash
+      sudo apt-get update
+      sudo apt-get install ffmpeg
+      ```
+   2. Check the version
+      ```bash
+      ffmpeg -version
+      ```

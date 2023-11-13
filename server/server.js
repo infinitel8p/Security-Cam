@@ -1,3 +1,4 @@
+const { exec } = require('child_process');
 const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
@@ -64,9 +65,50 @@ function broadcastData(data, senderWs) {
     });
 }
 
+function convertToMp4(inputPath, outputPath) {
+    return new Promise((resolve, reject) => {
+        const command = `ffmpeg -i "${inputPath}" -c:v libx264 -preset slow -crf 22 -c:a aac -b:a 128k "${outputPath}"`;
+
+        exec(command, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`Error: ${error}`);
+                return reject(error);
+            }
+            resolve(outputPath);
+        });
+    });
+}
+
+function convertAllH264ToMp4(directory) {
+    fs.readdir(directory, (err, files) => {
+        if (err) {
+            console.error('Error reading video files:', err);
+            return;
+        }
+
+        files.forEach(file => {
+            if (file.endsWith('.h264')) {
+                const inputPath = `${directory}/${file}`;
+                const outputPath = `${directory}/${file.replace('.h264', '.mp4')}`;
+
+                // Check if the MP4 file already exists
+                if (!fs.existsSync(outputPath)) {
+                    console.log(`Converting ${file} to MP4...`);
+                    convertToMp4(inputPath, outputPath)
+                        .then(() => console.log(`${file} converted to MP4`))
+                        .catch(error => console.error(`Failed to convert ${file}:`, error));
+                }
+            }
+        });
+    });
+}
+
+convertAllH264ToMp4('./public/recordings');
+
 // endpoint to get list of video files on server
 app.get('/video-list', (req, res) => {
     const recordingsPath = './public/recordings'
+    convertAllH264ToMp4(recordingsPath);
     fs.readdir(recordingsPath, (err, files) => {
         if (err) {
             res.status(500).send('Error reading video files');
