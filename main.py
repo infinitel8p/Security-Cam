@@ -59,7 +59,7 @@ GPIO.setup(Digital_Pin, GPIO.IN)
 
 
 def send_frames(ws):
-    global should_send_frames, streaming
+    global should_send_frames, streaming, recording
 
     while streaming:
         if not should_send_frames:
@@ -67,7 +67,7 @@ def send_frames(ws):
             continue
 
         if recording:
-            print("Recording in progress, skipping frame...")
+            logging.warning("Recording in progress, skipping frame...")
 
         camera.capture(stream, format='jpeg',
                        use_video_port=True, quality=jpeg_quality)
