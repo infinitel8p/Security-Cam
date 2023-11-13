@@ -27,7 +27,6 @@ wss.on('connection', function connection(ws) {
         }
 
         if (data.toString() === 'Recording in progress' && clientId === 'Python Script') {
-            console.log('Recording in progress, notifying browsers...');
             Object.values(clients).forEach(client => {
                 if (client !== ws && client.readyState === WebSocket.OPEN) {
                     client.send("Recording in progress");
