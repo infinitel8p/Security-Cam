@@ -60,15 +60,13 @@ GPIO.setup(Digital_Pin, GPIO.IN)
 
 def send_frames(ws):
     global should_send_frames, streaming, recording
-
     while streaming:
-        logging.info("Sending frames...")
-        if not should_send_frames:
-            time.sleep(0.1)
+        if recording:
+            ws.send("Recording in progress")
+            time.sleep(0.5)
             continue
 
-        if recording:
-            logging.warning("Recording in progress, skipping frame...")
+        if not should_send_frames:
             time.sleep(0.1)
             continue
 
@@ -157,6 +155,6 @@ except KeyboardInterrupt:
         camera.stop_recording()
     camera.close()
     logging.info(
-        "Script interrupted by user (Ctrl+C! Recording stopped. Exiting...")
+        "Script interrupted by user (Ctrl+C)! Recording stopped. Exiting...")
 finally:
     GPIO.cleanup()
