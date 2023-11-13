@@ -45,8 +45,9 @@ ws.onclose = function () {
 ws.onerror = function (error) {
     context.clearRect(0, 0, canvas.width, canvas.height);
     context.font = '40px Arial';
+    context.fillStyle = 'white';
     context.textAlign = 'center';
-    context.fillText('WebSocket connection error', canvas.width / 2, canvas.height / 2);
+    context.fillText('WebSocket connection error. Server is probably not online.', canvas.width / 2, canvas.height / 2);
 }
 
 function showMessageOnCanvas(message) {
