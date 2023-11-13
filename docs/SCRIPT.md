@@ -80,14 +80,14 @@ sudo pip3 install -r requirements.txt
       npm -v     # Checks npm version
       ```
 
-## Install FFmpeg
-- Install FFmpeg with the following commands:
-   1. Install FFmpeg
+## Install GPAC
+- Install GPAC with the following commands:
+   1. Install GPAC
       ```bash
       sudo apt-get update
-      sudo apt-get install ffmpeg
+      sudo apt-get install gpac
       ```
-   2. Check the version
+   1. Check if GPAC is installed
       ```bash
-      ffmpeg -version
+      gpac
       ```

@@ -68,7 +68,7 @@ function broadcastData(data, senderWs) {
 
 function convertToMp4(inputPath, outputPath) {
     return new Promise((resolve, reject) => {
-        const command = `ffmpeg -i "${inputPath}" -c:v libx264 -preset ultrafast -crf 22 -c:a aac -b:a 128k "${outputPath}"`;
+        const command = `MP4Box -add "${inputPath}#video" "${outputPath}"`;
 
         exec(command, (error, stdout, stderr) => {
             if (error) {
