@@ -13,6 +13,7 @@ def send_frames(ws):
     global should_send_frames, running
     camera = PiCamera()
     camera.resolution = (1920, 1080)
+    jpeg_quality = 85
     stream = io.BytesIO()
 
     while running:
@@ -20,7 +21,8 @@ def send_frames(ws):
             time.sleep(0.1)
             continue
 
-        camera.capture(stream, format='jpeg', use_video_port=True)
+        camera.capture(stream, format='jpeg',
+                       use_video_port=True, quality=jpeg_quality)
         if should_send_frames:
             stream.seek(0)
             buffer = stream.read()
@@ -28,8 +30,6 @@ def send_frames(ws):
 
         stream.seek(0)
         stream.truncate()
-
-        time.sleep(0.05)  # Control frame rate
 
     camera.close()
     print("Camera released and thread terminating...")
