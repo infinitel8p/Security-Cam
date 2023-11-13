@@ -5,18 +5,17 @@ import threading
 import time
 import datetime
 
+streaming = True
 should_send_frames = False
-running = True
 
 
 def send_frames(ws):
-    global should_send_frames, running
+    global should_send_frames, streaming
     camera = PiCamera()
-    camera.resolution = (1920, 1080)
     jpeg_quality = 85
     stream = io.BytesIO()
 
-    while running:
+    while streaming:
         if not should_send_frames:
             time.sleep(0.1)
             continue
@@ -38,18 +37,18 @@ def send_frames(ws):
 def on_open(ws):
     def run(*args):
         print("WebSocket opened and thread started")
-        global running
+        global streaming
         ws.send("Python Script")
         send_frames(ws)
-        running = False
+        streaming = False
 
     threading.Thread(target=run).start()
 
 
 def on_close(ws, close_status_code, close_msg):
-    global running
+    global streaming
     print("WebSocket closed")
-    running = False
+    streaming = False
 
 
 def on_message(ws, message):
@@ -75,4 +74,4 @@ if __name__ == "__main__":
         ws.run_forever()
     except KeyboardInterrupt:
         print("Script interrupted by user (Ctrl+C). Exiting...")
-        running = False
+        streaming = False
