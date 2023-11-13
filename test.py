@@ -88,7 +88,7 @@ def on_open(ws):
         send_frames(ws)
         streaming = False
 
-    threading.Thread(target=run, name="WebSocketThread").start()
+    threading.Thread(target=run, name="WebSocketStreamThread").start()
 
 
 def on_close(ws, close_status_code, close_msg):
@@ -118,7 +118,8 @@ def start_websocket():
 
 
 try:
-    threading.Thread(target=start_websocket, daemon=True).start()
+    threading.Thread(target=start_websocket,
+                     name="WebSocketSetupThread", daemon=True).start()
 
     while True:
         update_annotation(camera)
