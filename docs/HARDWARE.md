@@ -308,4 +308,4 @@ The pinout on the DS3231 module is shown below.
 
 With the RTC module connected and configured, the Raspberry Pi will now use the RTC module to keep track of the time even when it is turned off.
 
-Continue to [WIFI.md](WIFI.md) to set up the Raspberry Pi as an access point and connect to it.
+Continue to [WIFI.md](./WIFI.md) to set up the Raspberry Pi as an access point and connect to it.

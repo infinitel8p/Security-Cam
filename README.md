@@ -49,7 +49,10 @@ The following sections will explain how to set up the Raspberry Pi Zero W. It is
 Once the script is running, the Raspberry Pi will start recording a video when the magnetic reed switch is triggered (the door is opened) and the smartphone is not connected to the Raspberry Pi (bluetooth and/or WiFi). The recording will stop when the magnetic reed switch is triggered again (the door is closed). 
 
 ## Future Enhancements
-- **Web Interface**: A user-friendly interface to view recorded videos.
+- **Web Interface**: A user-friendly interface to view recorded videos. **_WIP_**.
+- **Captive Portal**: Captive portal to open Web Interface when connecting to the Raspberry Pi's WiFi.
+- **System Monitor**: A system monitor to view the status of the Raspberry Pi (e.g., CPU temperature, CPU usage, RAM usage, etc.).
+- **Improved Error Handling**: Improved error handling to prevent the script from crashing, server from freezing, etc.
 
 ## Troubleshooting
 _This section will be populated with common issues and their solutions as they are identified._
