@@ -11,6 +11,7 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
 let clients = {};
+const recordingsPath = './public/recordings'
 
 // Handle WebSocket connection
 wss.on('connection', function connection(ws) {
@@ -67,7 +68,7 @@ function broadcastData(data, senderWs) {
 
 function convertToMp4(inputPath, outputPath) {
     return new Promise((resolve, reject) => {
-        const command = `ffmpeg -i "${inputPath}" -c:v libx264 -preset slow -crf 22 -c:a aac -b:a 128k "${outputPath}"`;
+        const command = `ffmpeg -i "${inputPath}" -c:v libx264 -preset ultrafast -crf 22 -c:a aac -b:a 128k "${outputPath}"`;
 
         exec(command, (error, stdout, stderr) => {
             if (error) {
@@ -87,6 +88,7 @@ function convertToMp4(inputPath, outputPath) {
         });
     });
 }
+
 
 
 function convertAllH264ToMp4(directory) {
@@ -117,7 +119,6 @@ convertAllH264ToMp4('./public/recordings');
 
 // endpoint to get list of video files on server
 app.get('/video-list', (req, res) => {
-    const recordingsPath = './public/recordings'
     convertAllH264ToMp4(recordingsPath);
     fs.readdir(recordingsPath, (err, files) => {
         if (err) {
