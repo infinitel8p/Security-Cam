@@ -4,25 +4,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Security Cam Webserver</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/index.css">
-    <script src="./js/script.js"></script>
+    <title>Security Cam Webserver - Home</title>
+    <link rel="stylesheet" href="./css/style.css">
+
 </head>
 
 <body>
-    <nav class="navbar">
-        <ul class="navbar-nav">
-            <li class="nav-item"><a class="nav-link" href="./index.html">Home</a></li>
-            <li class="nav-item"><a class="nav-link" href="./recordings.html">Recordings</a></li>
-            <li class="nav-item"><a class="nav-link" href="./settings.html">Settings</a></li>
-        </ul>
-    </nav>
-    <div class="main-content">
-        <h1>Security Cam Webserver</h1>
-        <canvas id="videoCanvas" width="1920" height="1080"></canvas>
+    <div class="container" id="container">
+        <header>
+            <section class="window--buttons">
+                <div class="window__close"></div>
+
+                <div class="window__minimize"></div>
+
+                <div class="window__maximize"></div>
+            </section>
+        </header>
+
+        <aside>
+            <div>
+                <a class="nav-item" id="home-btn" href="./index.html">Home</a>
+                <a class="nav-item" id="recordings-btn" href="./recordings.html">Recordings</a>
+                <a class="nav-item" id="settings-btn" href="./settings.html">Settings</a>
+            </div>
+
+            <div class="version">
+                <h1>RAM: 0.0 MB</h1>
+                <h1>CPU: 0.0 %</h1>
+                <h1>DISK: 0.0 %</h1>
+                <h1>UPTIME: 0.0 min</h1>
+                <h1>---</h1>
+                <h1>v.0.0.1</h1>
+            </div>
+        </aside>
+
+        <div class="content">
+            <div class="ideas">
+                <div class="idea">
+                    <p>Updates</p>
+                    <h1>Check the GitHub repository</h1>
+                    <p>Suggest new features and report bugs!</p>
+                </div>
+
+                <div class="idea">
+                    <p>GET STARTED</p>
+                    <h1>Check the documentation</h1>
+                    <p>Read the documentation to find out how things work!</p>
+                </div>
+            </div>
+
+            <section class="feed">
+                <h1>Live Feed</h1>
+
+                <div class="stream">
+                    <canvas id="videoCanvas" width="1920" height="1080"></canvas>
+                </div>
+
+            </section>
+
+            <section class="trending">
+                <h1>More</h1>
+
+                <div class="grid">
+                    <span class="grid__app">
+                        <h1>Lorem ipsum</h1>
+
+                        <button>Open</button>
+                    </span>
+
+                    <span class="grid__app">
+                        <h1>Lorem ipsum</h1>
+
+                        <button>Open</button>
+                    </span>
+                </div>
+            </section>
+        </div>
+
     </div>
+    <!-- partial -->
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
+    <script src="./js/script.js"></script>
     <script src="./js/stream.js"></script>
+
 </body>
 
 </html>
