@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
     const navItems = document.querySelectorAll('.nav-item');
-
     navItems.forEach(item => {
         let currentHref = window.location.href;
 
@@ -14,14 +13,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-const side_bar_btns = document.querySelectorAll("#sidebar-btn");
-
-side_bar_btns.forEach((elem) => {
-    elem.addEventListener("click", () => {
-        for (let index = 0; index < side_bar_btns.length; index++) {
-            side_bar_btns[index].classList.remove("active");
-        }
-        elem.classList.add("active");
+const idea_btns = document.querySelectorAll(".idea");
+idea_btns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+        window.open(btn.getAttribute("href"), "_blank");
     });
 });
 
