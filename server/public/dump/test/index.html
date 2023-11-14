@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barba.js Test</title>
+</head>
+
+<body data-barba="wrapper">
+    <div>
+        <a href="./index.html" id="home-btn">Home</a>
+        <a href="./recordings.html" id="recordings-btn">Recordings</a>
+    </div>
+
+    <div data-barba="container" data-barba-namespace="home">
+        <p>This is the Home page content.</p>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/@barba/core"></script>
+    <script src="./script.js"></script>
+</body>
+
+</html>
