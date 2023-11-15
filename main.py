@@ -45,7 +45,9 @@ if isinstance(TARGET_AP_MAC_ADDRESSES, str):
 # Initialize the camera
 camera = picamera.PiCamera()
 camera.annotate_background = picamera.Color('black')
-jpeg_quality = 85
+camera.resolution = (1920, 1080)
+
+jpeg_quality = 10  # cut down on bandwidth for faster preview stream
 stream = io.BytesIO()
 recording = False
 streaming = True
