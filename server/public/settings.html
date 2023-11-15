@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Security Cam Webserver - Settings</title>
     <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/settings.css">
 
 </head>
 
@@ -29,10 +30,10 @@
             </div>
 
             <div class="version">
-                <h1>RAM: 0.0 MB</h1>
-                <h1>CPU: 0.0 %</h1>
-                <h1>DISK: 0.0 %</h1>
-                <h1>UPTIME: 0.0 min</h1>
+                <h1></h1>
+                <h1></h1>
+                <h1></h1>
+                <h1></h1>
                 <h1>---</h1>
                 <h1>v.0.0.1</h1>
             </div>
@@ -40,13 +41,13 @@
 
         <div class="content">
             <div class="ideas">
-                <div class="idea">
+                <div class="idea" href="https://github.com/infinitel8p/Security-Cam">
                     <p>Updates</p>
                     <h1>Check the GitHub repository</h1>
                     <p>Suggest new features and report bugs!</p>
                 </div>
 
-                <div class="idea">
+                <div class="idea" href="http://dev.infinitel8p.com/Security-Cam/">
                     <p>GET STARTED</p>
                     <h1>Check the documentation</h1>
                     <p>Read the documentation to find out how things work!</p>
@@ -55,7 +56,10 @@
 
             <section class="feed">
                 <h1>Settings</h1>
-                <p>To be added</p>
+                <label for="target_ap_mac_addresses">Target AP MAC addresses</label>
+                <input type="text" id="target_ap_mac_addresses">
+                <label for="target_bt_addresses">Target BT addresses</label>
+                <input type="text" id="target_bt_addresses">
             </section>
 
             <section class="trending">
@@ -81,6 +85,7 @@
     <!-- partial -->
     <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
     <script src="./js/script.js"></script>
+    <script src="./js/settings.js"></script>
 
 </body>
 

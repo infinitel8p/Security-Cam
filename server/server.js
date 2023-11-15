@@ -98,8 +98,6 @@ function convertToMp4(inputPath, outputPath) {
     });
 }
 
-
-
 function convertAllH264ToMp4(directory) {
     fs.readdir(directory, (err, files) => {
         if (err) {
@@ -135,6 +133,29 @@ app.get('/video-list', (req, res) => {
             return;
         }
         res.json(files.filter(file => file.endsWith('.mp4') || file.endsWith('.h264')));
+    });
+});
+
+
+// endpoint to get content of .//config.json
+app.get('/config', (req, res) => {
+    fs.readFile('../config.json', (err, data) => {
+        if (err) {
+            res.status(500).send('Error reading config file');
+            return;
+        }
+        res.json(JSON.parse(data));
+    });
+});
+
+app.get('/version', (req, res) => {
+    const command = `cat /proc/meminfo && uptime && df -h && cat /proc/uptime `;
+    exec(command, (error, stdout, stderr) => {
+        if (error) {
+            console.error(`Error: ${error}`);
+            return res.status(500).send('Error getting system info');
+        }
+        res.send(stdout);
     });
 });
 

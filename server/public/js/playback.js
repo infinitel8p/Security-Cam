@@ -4,6 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(videos => {
             const container = document.querySelector('.video-grid');
             videos.forEach(video => {
+                const videoContainer = document.createElement('div');
+                videoContainer.classList.add('video-container');
+
                 const videoElement = document.createElement('video');
                 videoElement.width = 320;
                 videoElement.height = 240;
@@ -21,7 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 videoElement.appendChild(sourceElement);
-                container.appendChild(videoElement);
+                videoContainer.appendChild(videoElement);
+                container.appendChild(videoContainer);
             });
         })
         .catch(error => console.error('Error fetching video list:', error));

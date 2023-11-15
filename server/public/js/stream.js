@@ -51,9 +51,9 @@ ws.onerror = function (error) {
 }
 
 function showMessageOnCanvas(message) {
-    context.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
-    context.font = '40px Arial'; // Set font size and style
-    context.fillStyle = 'black'; // Set font color
-    context.textAlign = 'center'; // Align text to center
-    context.fillText(message, canvas.width / 2, canvas.height / 2); // Draw text on canvas
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.font = '40px Arial';
+    context.fillStyle = 'white';
+    context.textAlign = 'center';
+    context.fillText(message, canvas.width / 2, canvas.height / 2);
 }
