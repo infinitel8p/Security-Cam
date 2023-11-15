@@ -152,7 +152,8 @@ app.get('/version', (req, res) => {
     const command = `cat /proc/meminfo && uptime && df -h && cat /proc/uptime `;
     exec(command, (error, stdout, stderr) => {
         if (error) {
-            console.error(`Error: ${error}`);
+            console.error(`Error: ${error.message}`);
+            console.error(`Error details: ${JSON.stringify(error)}`);
             return res.status(500).send('Error getting system info');
         }
         res.send(stdout);
