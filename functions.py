@@ -17,6 +17,7 @@ def is_device_connected_to_bt(bt_addresses):
         if status:
             logging.info(f"Device with Bluetooth address {addr} is connected.")
             return True
+    logging.warning("No devices connected via Bluetooth.")
     return False
 
 
@@ -46,7 +47,7 @@ def is_device_connected_to_ap(mac_addresses):
                 logging.info(
                     f"Device with MAC address {mac} is connected to AP.")
                 return True
-
+        logging.warning("No devices connected to AP.")
         return False
     except Exception as e:
         logging.error(f"Error checking connected devices: {e}")

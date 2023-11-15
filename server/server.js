@@ -116,7 +116,7 @@ function convertAllH264ToMp4(directory) {
                 if (!fs.existsSync(outputPath)) {
                     console.log(`Converting ${file} to MP4...`);
                     convertToMp4(inputPath, outputPath)
-                        .then(() => console.log(`${file} converted to MP4`))
+                        .then(() => console.log(`Converted ${file} to MP4!`))
                         .catch(error => console.error(`Failed to convert ${file}:`, error));
                 }
             }

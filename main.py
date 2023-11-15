@@ -82,13 +82,11 @@ def send_frames(ws):
         stream.seek(0)
         stream.truncate()
 
-    camera.close()
-    logging.info("Camera released and thread terminating...")
+    logging.info("Thread terminating...")
 
 
 def on_open(ws):
     def run(*args):
-        logging.info("WebSocket opened and thread started")
         global streaming
         ws.send("Python Script")
         send_frames(ws)
@@ -99,7 +97,6 @@ def on_open(ws):
 
 def on_close(ws, close_status_code, close_msg):
     global streaming
-    logging.info("WebSocket closed")
     streaming = False
 
 
@@ -129,6 +126,9 @@ try:
 
     while True:
         update_annotation(camera)
+        if threading.active_count() == 1:
+            threading.Thread(target=start_websocket,
+                     name="WebSocketSetupThread", daemon=True).start()
         if GPIO.input(Digital_Pin):
             logging.info("Door is closed.")
             if recording:
