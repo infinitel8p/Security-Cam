@@ -148,6 +148,13 @@ app.get('/config', (req, res) => {
     });
 });
 
+app.post('/update-config', (req, res) => {
+    console.log(req);
+    var data = 'Success'
+    res.json(data);
+    // TODO Update json, restart or update python
+});
+
 app.get('/version', (req, res) => {
     const command = `cat /proc/meminfo && uptime && df -h && cat /proc/uptime `;
     exec(command, (error, stdout, stderr) => {

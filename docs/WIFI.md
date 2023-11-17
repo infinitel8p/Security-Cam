@@ -167,7 +167,7 @@
     On my setup it wouldn't connect even after a restart. I inserted the microSD card into my PC and recreated the `wpa_supplier.conf` in the boot drive.*
 
 9. ### Check the interfaces:
-    1. SSH into the Pi again and check the interfaces:
+    1. SSH into the Pi again (Probably `192.168.10.1` as is [7.2]) and check the interfaces:
         ```bash
         pi@raspberrypi:~$ ip addr
         1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
