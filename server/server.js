@@ -7,6 +7,7 @@ const app = express();
 const port = 3000;
 
 app.use(express.static('public'));
+app.use(express.json());
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
@@ -148,11 +149,45 @@ app.get('/config', (req, res) => {
     });
 });
 
-app.post('/update-config', (req, res) => {
-    console.log(req);
-    var data = 'Success'
-    res.json(data);
-    // TODO Update json, restart or update python
+app.post('/remove-config-item', (req, res) => {
+    const { key, value } = req.body;
+    fs.readFile('../config.json', (err, data) => {
+        if (err) {
+            res.status(500).send('Error reading config file');
+            return;
+        }
+        const config = JSON.parse(data);
+        const index = config[key].indexOf(value);
+        if (index !== -1) {
+            config[key].splice(index, 1);
+        }
+        fs.writeFile('../config.json', JSON.stringify(config), err => {
+            if (err) {
+                res.status(500).send('Error writing config file');
+                return;
+            }
+            res.json(config);
+        });
+    });
+});
+
+app.post('/add-config-item', (req, res) => {
+    const { key, value } = req.body;
+    fs.readFile('../config.json', (err, data) => {
+        if (err) {
+            res.status(500).send('Error reading config file');
+            return;
+        }
+        const config = JSON.parse(data);
+        config[key].push(value);
+        fs.writeFile('../config.json', JSON.stringify(config), err => {
+            if (err) {
+                res.status(500).send('Error writing config file');
+                return;
+            }
+            res.json(config);
+        });
+    });
 });
 
 app.get('/version', (req, res) => {

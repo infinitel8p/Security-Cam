@@ -56,13 +56,34 @@
 
             <section class="feed">
                 <h1>Settings</h1>
-                <form>
-                    <label for="target_ap_mac_addresses">Target AP MAC addresses</label>
-                    <input type="text" id="target_ap_mac_addresses">
-                    <label for="target_bt_addresses">Target BT addresses</label>
-                    <input type="text" id="target_bt_addresses">
-                    <button type="submit">Save</button>
-                </form>
+                <label for="target_ap_mac_addresses">Target AP MAC addresses</label>
+                <input type="text" id="target_ap_mac_addresses" name="target_ap_mac_addresses">
+                <label for="target_bt_addresses">Target BT addresses</label>
+                <input type="text" id="target_bt_addresses" name="target_bt_addresses">
+
+                <div class="mac-address">
+                    <label for="test_add_ap_mac">Target AP address to add</label>
+                    <input id="test_add_ap_mac" value="XX:XX:XX:XX:XX:XX">
+                    <button id="add-ap">Add</button>
+                </div>
+
+                <div class="mac-address">
+                    <label for="test_remove_ap_mac">Target AP address to add</label>
+                    <input id="test_remove_ap_mac" value="XX:XX:XX:XX:XX:XX">
+                    <button id="remove-ap">Remove</button>
+                </div>
+
+                <div class="mac-address">
+                    <label for="test_add_bt_mac">Target BT address to add</label>
+                    <input id="test_add_bt_mac" value="XX:XX:XX:XX:XX:XX">
+                    <button id="add-bt">Add</button>
+                </div>
+
+                <div class="mac-address">
+                    <label for="test_remove_bt_mac">Target BT address to add</label>
+                    <input id="test_remove_bt_mac" value="XX:XX:XX:XX:XX:XX">
+                    <button id="remove-bt">Remove</button>
+                </div>
             </section>
 
             <section class="trending">
