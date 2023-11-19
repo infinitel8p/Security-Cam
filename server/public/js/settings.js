@@ -7,71 +7,25 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(error => console.error('Error fetching config:', error));
 
-    const addApButton = document.getElementById('add-ap');
-    addApButton.addEventListener('click', () => {
-        const input = addApButton.parentElement.querySelector('input').value;
-        fetch('/add-config-item', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ key: 'TARGET_AP_MAC_ADDRESSES', value: input })
-        })
-            .then(response => response.json())
-            .then(content => {
-                document.getElementById('target_ap_mac_addresses').value = content.TARGET_AP_MAC_ADDRESSES;
+    function configureButton(buttonId, url, key, outputElementId) {
+        const button = document.getElementById(buttonId);
+        button.addEventListener('click', () => {
+            const input = button.parentElement.querySelector('input').value;
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ key: key, value: input })
             })
-            .catch(error => console.error('Error adding config item:', error));
-    });
+                .then(response => response.json())
+                .then(content => {
+                    document.getElementById(outputElementId).value = content[key];
+                })
+                .catch(error => console.error(`Error at ${buttonId}:`, error));
+        });
+    }
 
-    const removeApButton = document.getElementById('remove-ap');
-    removeApButton.addEventListener('click', () => {
-        const input = removeApButton.parentElement.querySelector('input').value;
-        fetch('/remove-config-item', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ key: 'TARGET_AP_MAC_ADDRESSES', value: input })
-        })
-            .then(response => response.json())
-            .then(content => {
-                document.getElementById('target_ap_mac_addresses').value = content.TARGET_AP_MAC_ADDRESSES;
-            })
-            .catch(error => console.error('Error removing config item:', error));
-    });
-
-    const addBtButton = document.getElementById('add-bt');
-    addBtButton.addEventListener('click', () => {
-        const input = addBtButton.parentElement.querySelector('input').value;
-        fetch('/add-config-item', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ key: 'TARGET_BT_ADDRESSES', value: input })
-        })
-            .then(response => response.json())
-            .then(content => {
-                document.getElementById('target_bt_addresses').value = content.TARGET_BT_ADDRESSES;
-            })
-            .catch(error => console.error('Error adding config item:', error));
-    });
-
-    const removeBtButton = document.getElementById('remove-bt');
-    removeBtButton.addEventListener('click', () => {
-        const input = removeBtButton.parentElement.querySelector('input').value;
-        fetch('/remove-config-item', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ key: 'TARGET_BT_ADDRESSES', value: input })
-        })
-            .then(response => response.json())
-            .then(content => {
-                document.getElementById('target_bt_addresses').value = content.TARGET_BT_ADDRESSES;
-            })
-            .catch(error => console.error('Error removing config item:', error));
-    });
+    configureButton('add-ap', '/add-config-item', 'TARGET_AP_MAC_ADDRESSES', 'target_ap_mac_addresses');
+    configureButton('remove-ap', '/remove-config-item', 'TARGET_AP_MAC_ADDRESSES', 'target_ap_mac_addresses');
+    configureButton('add-bt', '/add-config-item', 'TARGET_BT_ADDRESSES', 'target_bt_addresses');
+    configureButton('remove-bt', '/remove-config-item', 'TARGET_BT_ADDRESSES', 'target_bt_addresses');
 });
