@@ -34,10 +34,26 @@ button {
     cursor: pointer;
 }
 
-.mac-address {
+.mac_address {
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 10px;
     display: flex;
     width: -moz-fit-content;
     width: fit-content;
+
+    justify-content: center;
+    align-items: center;
+}
+
+#mac_lists {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+#mac_lists>div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
 }

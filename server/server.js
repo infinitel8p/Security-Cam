@@ -3,16 +3,16 @@ const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
 const fs = require('fs');
+
 const app = express();
 const port = 3000;
-
 app.use(express.static('public'));
 app.use(express.json());
+
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
-
-let clients = {};
 const recordingsPath = './public/recordings'
+let clients = {};
 
 // Handle WebSocket connection
 wss.on('connection', function connection(ws) {
@@ -123,9 +123,8 @@ function convertAllH264ToMp4(directory) {
     });
 }
 
-convertAllH264ToMp4('./public/recordings');
-
-// endpoint to get list of video files on server
+// API endpoints
+// return list of video files
 app.get('/video-list', (req, res) => {
     convertAllH264ToMp4(recordingsPath);
     fs.readdir(recordingsPath, (err, files) => {
@@ -137,8 +136,7 @@ app.get('/video-list', (req, res) => {
     });
 });
 
-
-// endpoint to get content of .//config.json
+// return config file
 app.get('/config', (req, res) => {
     fs.readFile('../config.json', (err, data) => {
         if (err) {
@@ -149,6 +147,7 @@ app.get('/config', (req, res) => {
     });
 });
 
+// update config file
 app.post('/remove-config-item', (req, res) => {
     const { key, value } = req.body;
     fs.readFile('../config.json', (err, data) => {
@@ -171,6 +170,7 @@ app.post('/remove-config-item', (req, res) => {
     });
 });
 
+// update config file
 app.post('/add-config-item', (req, res) => {
     const { key, value } = req.body;
     fs.readFile('../config.json', (err, data) => {
@@ -190,6 +190,7 @@ app.post('/add-config-item', (req, res) => {
     });
 });
 
+// return system info
 app.get('/version', (req, res) => {
     const command = `cat /proc/meminfo && uptime && df -h && cat /proc/uptime `;
     exec(command, (error, stdout, stderr) => {
@@ -201,6 +202,9 @@ app.get('/version', (req, res) => {
         res.send(stdout);
     });
 });
+
+// Convert all H264 files to MP4 on startup
+convertAllH264ToMp4(recordingsPath);
 
 // start server
 server.listen(port, () => {

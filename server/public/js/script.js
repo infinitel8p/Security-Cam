@@ -72,7 +72,6 @@ document.querySelector(".window__close").addEventListener("click", () => {
 document.querySelector(".window__maximize").addEventListener("click", () => {
     if (min == false) {
         min = true;
-        console.log(min);
         document.querySelector(".container").style.width = "90%";
         document.querySelector(".container").style.height = "90%";
     } else {
