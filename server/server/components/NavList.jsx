@@ -1,23 +1,15 @@
 "use client";
-import { useState } from 'react';
-import NavListItem from './NavListItem'
+import NavListItem from "./NavListItem";
 
-function NavList() {
-
-  const [active, setActive] = useState('Home');
-
-  const makeActive = (title) => {
-    setActive(title);
-  }
-
-  return (
-    <nav className='flex flex-col gap-12 list-none'>
-        <NavListItem title="Home" link="/" makeActive={makeActive} state={active} />
-        <NavListItem title="Info" link="/info" makeActive={makeActive} state={active} />
-        <NavListItem title="Archive" link="/archive" makeActive={makeActive} state={active} />
-        <NavListItem title="Settings" link="/settings" makeActive={makeActive} state={active} />
-    </nav>
-  )
+function NavList({ state, makeActive }) {
+	return (
+		<nav className="flex flex-col gap-12 list-none">
+			<NavListItem title="Home" link="/" makeActive={makeActive} state={state} />
+			<NavListItem title="Info" link="/info" makeActive={makeActive} state={state} />
+			<NavListItem title="Archive" link="/archive" makeActive={makeActive} state={state} />
+			<NavListItem title="Settings" link="/settings" makeActive={makeActive} state={state} />
+		</nav>
+	);
 }
 
-export default NavList
+export default NavList;
