@@ -46,7 +46,7 @@ function SideBar() {
 				ref={ref}
 				className={`${
 					isOpen ? "flex" : "hidden"
-				} lg:flex lg:relative absolute top-0 right-0 pt-5 lg:pt-0 h-[100vh] w-[250px] lg:w-full bg-[var(--color-primary)] items-center justify-center px-10`}
+				} lg:flex lg:relative absolute top-0 right-0 pt-5 lg:pt-0 h-[100vh] w-[250px] lg:w-full bg-[var(--color-primary)] border-l-2 border-[var(--color-secondary)] lg:border-l-0 items-center justify-center px-10`}
 			>
 				<NavList state={active} makeActive={makeActive} />
 			</div>
