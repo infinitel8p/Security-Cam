@@ -1,6 +1,7 @@
 "use client";
 import { ThemeProvider } from "next-themes";
 import SideBar from "@/components/SideBar";
+import StatusBar from "./StatusBar";
 
 function Providers({ children }) {
 	return (

@@ -4,6 +4,7 @@ import { handleClickOutside } from "@/hooks/handleClickOutside";
 import { FaUserCircle } from "react-icons/fa";
 import NavList from "./NavList";
 import Link from "next/link";
+import StatusBar from "./StatusBar";
 
 function SideBar() {
 	const [isOpen, setIsOpen] = useState(false);
@@ -50,6 +51,7 @@ function SideBar() {
 			>
 				<NavList state={active} makeActive={makeActive} />
 			</div>
+			<StatusBar />
 			<div>
 				<Link href="/settings/color-theme" onClick={() => makeActive("/settings/color-theme")}>
 					<FaUserCircle
