@@ -20,7 +20,7 @@ function HomepageHeader() {
           <Link
             className="button button--secondary button--lg"
             to="/docs/intro">
-            &gt; Security-Cam Introduction &lt;
+            Security-Cam Introduction - 5min ⏱️
           </Link>
         </div>
       </div>
@@ -33,7 +33,8 @@ export default function Home(): JSX.Element {
   return (
     <Layout
       title={`Hello from ${siteConfig.title}`}
-      description="Description will go into a meta tag in <head />">
+      description="Security-Cam is a simple and easy to use security camera software."
+    >
       <HomepageHeader />
       <main>
         <HomepageFeatures />

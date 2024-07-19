@@ -7,17 +7,11 @@ const config: Config = {
   tagline: 'A security camera for the Raspberry Pi Zero W using the Waveshare RPi Camera (F).',
   favicon: 'img/favicon.ico',
 
-  // Set the production url of your site here
   url: 'https://dev.infinitel8p.com',
-  // Set the /<baseUrl>/ pathname under which your site is served
-  // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/Security-Cam/',
   trailingSlash: false,
-
-  // GitHub pages deployment config.
-  // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'infinitel8p', // Usually your GitHub org/user name.
-  projectName: 'Security-Cam', // Usually your repo name.
+  organizationName: 'infinitel8p',
+  projectName: 'Security-Cam',
 
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
@@ -118,7 +112,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Security-Cam, InfiniteL8p. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} InfiniteL8p`,
     },
     prism: {
       theme: prismThemes.github,
