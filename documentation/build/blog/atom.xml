@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://github.com/blog</id>
+    <title>Security-Cam Blog</title>
+    <updated>2024-07-19T00:00:00.000Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://github.com/blog"/>
+    <subtitle>Security-Cam Blog</subtitle>
+    <icon>https://github.com/img/favicon.ico</icon>
+    <entry>
+        <title type="html"><![CDATA[The start of something new]]></title>
+        <id>https://github.com/blog/welcome</id>
+        <link href="https://github.com/blog/welcome"/>
+        <updated>2024-07-19T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[Welcome on our journey]]></summary>
+        <content type="html"><![CDATA[<h3 class="anchor anchorWithStickyNavbar_LWe7" id="welcome-on-our-journey">Welcome on our journey<a class="hash-link" aria-label="Direct link to Welcome on our journey" title="Direct link to Welcome on our journey" href="https://github.com/blog/welcome#welcome-on-our-journey">​</a></h3>
+<p>We mark the 19th of July 2024, the day we start to rebuild this project.<br>
+<!-- -->After a long time of inactivity, we decided to start from scratch and rebuild most of the stuff we already did.
+We are excited to see where this journey will take us.<br>
+<!-- -->This blog will be the place where we share our progress and thoughts (In case we become some famous dudes in the future).</p>
+<div class="language-py codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-py codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token keyword" style="color:#00009f">print</span><span class="token punctuation" style="color:#393A34">(</span><span class="token string" style="color:#e3116c">"Hello World"</span><span class="token punctuation" style="color:#393A34">)</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<button>Click me!</button>]]></content>
+        <author>
+            <name>Ludovico Ferrara</name>
+            <uri>https://github.com/infinitel8p</uri>
+        </author>
+        <author>
+            <name>Lennert Pfundtner</name>
+            <uri>https://github.com/KrokoNinja</uri>
+        </author>
+        <category label="Hello" term="Hello"/>
+    </entry>
+</feed>
