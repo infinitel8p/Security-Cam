@@ -1,17 +1,11 @@
-endi:
-  name: Endilie Yacop Sucipto
-  title: Maintainer of Docusaurus
-  url: https://github.com/endiliey
-  image_url: https://github.com/endiliey.png
+ludo:
+  name: Ludovico Ferrara
+  title: Maintainer of Security-Cam
+  url: https://github.com/infinitel8p
+  image_url: https://avatars.githubusercontent.com/u/50703696?s=400&u=761df587f17316eb28a4768b8092ec4dbc137f1c&v=4
 
-yangshun:
-  name: Yangshun Tay
-  title: Front End Engineer @ Facebook
-  url: https://github.com/yangshun
-  image_url: https://github.com/yangshun.png
-
-slorber:
-  name: Sébastien Lorber
-  title: Docusaurus maintainer
-  url: https://sebastienlorber.com
-  image_url: https://github.com/slorber.png
+lenni:
+  name: Lennert Pfundtner
+  title: Front End Engineer
+  url: https://github.com/KrokoNinja
+  image_url: https://avatars.githubusercontent.com/u/79910460?v=4
