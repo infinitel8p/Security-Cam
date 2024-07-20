@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdocumentation=self.webpackChunkdocumentation||[]).push([[7472],{5513:e=>{e.exports=JSON.parse('{"title":"Recent posts","items":[{"title":"Building a dashboard","permalink":"/Security-Cam/blog/building-a-dashboard","unlisted":false},{"title":"The start of something new","permalink":"/Security-Cam/blog/welcome","unlisted":false}]}')}}]);

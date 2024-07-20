@@ -128,7 +128,7 @@ try:
         update_annotation(camera)
         if threading.active_count() == 1:
             threading.Thread(target=start_websocket,
-                     name="WebSocketSetupThread", daemon=True).start()
+                             name="WebSocketSetupThread", daemon=True).start()
         if GPIO.input(Digital_Pin):
             logging.info("Door is closed.")
             if recording:
@@ -160,3 +160,5 @@ except KeyboardInterrupt:
         "Script interrupted by user (Ctrl+C)! Recording stopped. Exiting...")
 finally:
     GPIO.cleanup()
+
+# raspivid -o - -t 0 -n -w 320 -h 240 -fps 30| cvlc -vvv stream:///dev/stdin --sout '#rtp{sdp=rtsp://:8000/}' :demux=h264

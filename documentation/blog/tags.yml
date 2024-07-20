@@ -2,3 +2,13 @@ hello:
   label: Hello
   permalink: /hello
   description: Hello World!
+
+server:
+  label: Server
+  permalink: /server
+  description: Web Interface related posts.
+
+dashboard:
+  label: Dashboard
+  permalink: /dashboard
+  description: Web Interface related posts.
