@@ -119,8 +119,8 @@ const config: Config = {
       darkTheme: prismThemes.dracula,
     },
     algolia: {
-      appId: 'ZYHG7T27TF',
-      apiKey: '49473ce96994e7cb806ee76d360224a6',
+      appId: 'HBU6GZICYZ',
+      apiKey: '06fb9e308006070519f922b70996e210',
       indexName: 'infinitel8p',
       contextualSearch: true,
 
