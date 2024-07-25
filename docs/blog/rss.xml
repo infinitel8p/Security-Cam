@@ -4,10 +4,28 @@
         <title>Security-Cam Blog</title>
         <link>https://dev.infinitel8p.com/Security-Cam/blog</link>
         <description>Security-Cam Blog</description>
-        <lastBuildDate>Fri, 19 Jul 2024 00:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 25 Jul 2024 00:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
+        <item>
+            <title><![CDATA[Build a Dashboard]]></title>
+            <link>https://dev.infinitel8p.com/Security-Cam/blog/starting-the-dashboard</link>
+            <guid>https://dev.infinitel8p.com/Security-Cam/blog/starting-the-dashboard</guid>
+            <pubDate>Thu, 25 Jul 2024 00:00:00 GMT</pubDate>
+            <description><![CDATA[Starting to build the Dashboard]]></description>
+            <content:encoded><![CDATA[<h3 class="anchor anchorWithStickyNavbar_LWe7" id="starting-to-build-the-dashboard">Starting to build the Dashboard<a class="hash-link" aria-label="Direct link to Starting to build the Dashboard" title="Direct link to Starting to build the Dashboard" href="https://dev.infinitel8p.com/Security-Cam/blog/starting-the-dashboard#starting-to-build-the-dashboard">​</a></h3>
+<p>Today we started building the first steps of the dashboard. We chose NextJS with TypeScript and TailwindCSS as the main technologies.
+Before that we talked about how to integrate the video stream and found out about the ability of the HTML5 video tag to stream a video via RTSP.</p>
+<p>Now the decision was easy as Lenni is used to coding with NextJS.
+So we began installing the necessary packages and setting up the project.</p>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">npx create-next-app@latest</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<p>First step was made and we started to delete the boilerplate code and build our first component.
+Design isnt necessary at this point. We just want to have something running to try out streaming as soon as possible.</p>
+<p>First steps are done and more to come.</p>]]></content:encoded>
+            <category>Dashboard</category>
+            <category>next</category>
+        </item>
         <item>
             <title><![CDATA[The start of something new]]></title>
             <link>https://dev.infinitel8p.com/Security-Cam/blog/welcome</link>
