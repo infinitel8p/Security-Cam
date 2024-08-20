@@ -1,4 +1,5 @@
-import ClientVideoPlayer from "@/components/ClientVideoPlayer"
+import React from "react";
+import ClientVideoPlayer from "@/components/ClientVideoPlayer";
 
 const Home = () => {
   return (
@@ -9,7 +10,7 @@ const Home = () => {
 
       <div className="grid grid-cols-2 border border-red-200 gap-10">
         <div className="border border-red-500 h-96">
-          <ClientVideoPlayer url="https://www.youtube.com/watch?v=dQw4w9WgXcQ" />
+          <ClientVideoPlayer url="http://localhost:5000/video_feed" />
         </div>
         <div className="border border-red-500">
           (log) monitor -  (un-)befugter zutritt als status ggfs, date time, falls bekannte person/handy auch namen,bild
@@ -29,7 +30,7 @@ const Home = () => {
         <div className="border border-red-500">storage: 2.69gb / 64gb</div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;

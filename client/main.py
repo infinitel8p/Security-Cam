@@ -1,164 +1,86 @@
-import io
-import json
-import logging
-import os
-import time
-from datetime import datetime
-
-import RPi.GPIO as GPIO
-import picamera
-from dotenv import load_dotenv
-import websocket
+import cv2
+from flask import Flask, render_template, Response, request, jsonify
 import threading
+import os
+from datetime import datetime
+from flask_cors import CORS
 
-from functions import *
+app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
+# Create a lock for thread-safe access to the recording flag and writer
+lock = threading.Lock()
+out = None
+is_recording = False
 
-# Set up logging with custom timestamp format
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - [%(threadName)s] - %(message)s',
-                    datefmt='%d-%m-%Y %H:%M:%S')
-
-logging.info("Initializing...")
-
-# Try to load config from .env file
-logging.info("Loading config from .env file...")
-load_dotenv()
-
-TARGET_BT_ADDRESSES = os.getenv("TARGET_BT_ADDRESSES")
-TARGET_AP_MAC_ADDRESSES = os.getenv("TARGET_AP_MAC_ADDRESSES")
-
-# If not found in .env, fall back to config.json
-if not TARGET_BT_ADDRESSES or not TARGET_AP_MAC_ADDRESSES:
-    logging.info(".env not found, falling back to config.json file...")
-    with open('config.json', 'r') as f:
-        config = json.load(f)
-        TARGET_BT_ADDRESSES = config["TARGET_BT_ADDRESSES"]
-        TARGET_AP_MAC_ADDRESSES = config["TARGET_AP_MAC_ADDRESSES"]
-
-# Convert the comma-separated string from .env to a list
-if isinstance(TARGET_BT_ADDRESSES, str):
-    TARGET_BT_ADDRESSES = TARGET_BT_ADDRESSES.split(',')
-if isinstance(TARGET_AP_MAC_ADDRESSES, str):
-    TARGET_AP_MAC_ADDRESSES = TARGET_AP_MAC_ADDRESSES.split(',')
-
-# Initialize the camera
-camera = picamera.PiCamera()
-camera.annotate_background = picamera.Color('black')
-camera.resolution = (1920, 1080)
-
-jpeg_quality = 10  # cut down on bandwidth for faster preview stream
-stream = io.BytesIO()
-recording = False
-streaming = True
-should_send_frames = False
-
-# Set up GPIO
-GPIO.setmode(GPIO.BCM)
-GPIO.setwarnings(False)
-Digital_Pin = 22
-GPIO.setup(Digital_Pin, GPIO.IN)
+os.makedirs('./recordings', exist_ok=True)
 
 
-def send_frames(ws):
-    global should_send_frames, streaming, recording
-    while streaming:
-        if recording:
-            ws.send("Recording in progress")
-            time.sleep(0.5)
-            continue
-
-        if not should_send_frames:
-            time.sleep(0.1)
-            continue
-
-        camera.capture(stream, format='jpeg',
-                       use_video_port=True, quality=jpeg_quality)
-        if should_send_frames:
-            stream.seek(0)
-            buffer = stream.read()
-            ws.send(buffer, opcode=websocket.ABNF.OPCODE_BINARY)
-
-        stream.seek(0)
-        stream.truncate()
-
-    logging.info("Thread terminating...")
-
-
-def on_open(ws):
-    def run(*args):
-        global streaming
-        ws.send("Python Script")
-        send_frames(ws)
-        streaming = False
-
-    threading.Thread(target=run, name="WebSocketStreamThread").start()
-
-
-def on_close(ws, close_status_code, close_msg):
-    global streaming
-    streaming = False
-
-
-def on_message(ws, message):
-    global should_send_frames
-    if message == "START":
-        logging.info("Streaming requested, sending frames...")
-        should_send_frames = True
-    elif message == "STOP":
-        logging.info("Streaming stopped, no longer sending frames...")
-        should_send_frames = False
-
-
-def start_websocket():
-    ws = websocket.WebSocketApp(
-        "ws://localhost:3000",
-        on_open=on_open,
-        on_message=on_message,
-        on_close=on_close
-    )
-    ws.run_forever()
-
-
-try:
-    threading.Thread(target=start_websocket,
-                     name="WebSocketSetupThread", daemon=True).start()
+def generate_frames():
+    global out, is_recording
+    cap = cv2.VideoCapture(0)
 
     while True:
-        update_annotation(camera)
-        if threading.active_count() == 1:
-            threading.Thread(target=start_websocket,
-                             name="WebSocketSetupThread", daemon=True).start()
-        if GPIO.input(Digital_Pin):
-            logging.info("Door is closed.")
-            if recording:
-                logging.info("Recording was in progress. Pausing recording.")
-                camera.stop_recording()
-                recording = False
-        else:
-            logging.warning("Door is open.")
-            # Check if any of the smartphones' Bluetooth addresses are visible or if they're connected to the AP
-            if is_device_connected_to_bt(TARGET_BT_ADDRESSES) or is_device_connected_to_ap(TARGET_AP_MAC_ADDRESSES):
-                if recording:
-                    logging.info("Device detected. Stop recording.")
-                    camera.stop_recording()
-                    recording = False
-            # If no device is connected, start recording
-            else:
-                if not recording:
-                    logging.info("Device not detected. Start recording.")
-                    camera.start_recording(
-                        f"./server/public/recordings/video_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.h264")
-                    recording = True
-        time.sleep(1)
-except KeyboardInterrupt:
-    streaming = False
-    if recording:
-        camera.stop_recording()
-    camera.close()
-    logging.info(
-        "Script interrupted by user (Ctrl+C)! Recording stopped. Exiting...")
-finally:
-    GPIO.cleanup()
+        success, frame = cap.read()
+        if not success:
+            break
 
-# raspivid -o - -t 0 -n -w 320 -h 240 -fps 30| cvlc -vvv stream:///dev/stdin --sout '#rtp{sdp=rtsp://:8000/}' :demux=h264
+        with lock:
+            if is_recording and out is not None:
+                out.write(frame)
+
+        # Encode the frame in JPEG format
+        ret, buffer = cv2.imencode('.jpg', frame)
+        frame = buffer.tobytes()
+
+        # Use yield to return the frame as a byte array
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+    cap.release()
+
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+
+@app.route('/video_feed')
+def video_feed():
+    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+def start_recording():
+    global out, is_recording
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f'./recordings/output_{timestamp}.avi'
+
+    # Set up the video writer
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    with lock:
+        out = cv2.VideoWriter(filename, fourcc, 20.0, (640, 480))
+        is_recording = True
+
+
+def stop_recording():
+    global out, is_recording
+    with lock:
+        if out is not None:
+            out.release()
+            out = None
+        is_recording = False
+
+
+@app.route('/toggle_recording', methods=['POST'])
+def toggle_recording():
+    global is_recording
+    if is_recording:
+        stop_recording()
+        return jsonify({"message": "Recording stopped"})
+    else:
+        start_recording()
+        return jsonify({"message": "Recording started"})
+
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000)
