@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -H 0.0.0.0",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -12,7 +12,8 @@
     "next": "14.2.5",
     "react": "^18",
     "react-dom": "^18",
-    "react-player": "^2.16.0"
+    "react-player": "^2.16.0",
+    "server": "file:"
   },
   "devDependencies": {
     "@types/node": "^20",

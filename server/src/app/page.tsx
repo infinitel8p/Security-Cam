@@ -2,6 +2,7 @@ import React from "react";
 import ClientVideoPlayer from "@/components/ClientVideoPlayer";
 
 const Home = () => {
+
   return (
     <div className="space-y-10 mx-10">
       <div className="text-center border border-red-500">
@@ -10,7 +11,7 @@ const Home = () => {
 
       <div className="grid grid-cols-2 border border-red-200 gap-10">
         <div className="border border-red-500 h-96">
-          <ClientVideoPlayer url="http://localhost:5000/video_feed" />
+          <ClientVideoPlayer />
         </div>
         <div className="border border-red-500">
           (log) monitor -  (un-)befugter zutritt als status ggfs, date time, falls bekannte person/handy auch namen,bild

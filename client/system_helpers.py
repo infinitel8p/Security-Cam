@@ -1,4 +1,3 @@
-import os
 import psutil
 
 
@@ -11,10 +10,8 @@ def get_cpu_temp() -> float | None:
         None: If the temperature file is not found.
     """
     try:
-        # Read temperature from thermal zone
         with open("/sys/class/thermal/thermal_zone0/temp", "r") as file:
             temp_str = file.read().strip()
-            # Convert to Celsius
             cpu_temp = int(temp_str) / 1000.0
             return cpu_temp
     except FileNotFoundError:

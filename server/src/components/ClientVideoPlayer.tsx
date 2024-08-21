@@ -2,12 +2,13 @@
 
 import React, { useState } from 'react';
 
-const ClientVideoPlayer = ({ url }: { url: string }) => {
+const ClientVideoPlayer = () => {
     const [isRecording, setIsRecording] = useState(false);
+    const videoFeedUrl = `${window.location.protocol}//${window.location.hostname}:5005`;
 
     const toggleRecording = async () => {
         try {
-            const response = await fetch("http://localhost:5000/toggle_recording", {
+            const response = await fetch(`${videoFeedUrl}/toggle_recording`, {
                 method: "POST",
             });
             const data = await response.json();
@@ -25,7 +26,7 @@ const ClientVideoPlayer = ({ url }: { url: string }) => {
     return (
         <>
             <img
-                src={url}
+                src={`${videoFeedUrl}/video_feed`}
                 alt="Live Stream"
                 style={{ width: '100%', height: '100%' }}
             />
