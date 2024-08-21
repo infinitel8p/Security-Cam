@@ -1,9 +1,10 @@
-from flask import Flask, Response, jsonify, request
+from flask import Flask, jsonify, send_file, Response, request, abort
 from flask_cors import CORS
 from urllib.parse import unquote
 from modules import system_helpers
 from modules import stream_helpers
 from modules import settings_helpers
+from modules import archive_helpers
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -70,6 +71,21 @@ def list_directories():
         return jsonify(directories)
     else:
         return jsonify({"error": "Invalid directory path"}), 400
+    
+@app.route('/archive', methods=['GET'])
+def archive():
+    video_list = archive_helpers.get_videos()
+    return jsonify(video_list)
+
+@app.route('/stream_video', methods=['GET'])
+def stream_video():
+    import os
+    video_path = request.args.get('video_path')
+    
+    if not video_path or not os.path.exists(video_path):
+        abort(404, description="Video not found")
+
+    return send_file(video_path, as_attachment=True, download_name=os.path.basename(video_path), mimetype='video/mp4')
 
 
 if __name__ == "__main__":

@@ -5,6 +5,7 @@ import BTDeviceList from "@/components/BTDeviceList";
 import WiFiDeviceList from "@/components/WiFiDeviceList";
 
 const Page = () => {
+    const settingsFeedUrl = `${window.location.protocol}//${window.location.hostname}:5005/settings`;
     const [selectedDirectory, setSelectedDirectory] = useState('');
     const [settings, setSettings] = useState({
         VideoSaveLocation: "Loading...",
@@ -17,7 +18,7 @@ const Page = () => {
     useEffect(() => {
         const fetchSettingsInfo = async () => {
             try {
-                const settingsFeedUrl = `${window.location.protocol}//${window.location.hostname}:5005/settings`;
+
                 const response = await fetch(settingsFeedUrl);
                 const data = await response.json();
                 setSettings(data);
@@ -33,7 +34,6 @@ const Page = () => {
     }, []);
 
     const handleSaveLocationChange = async () => {
-        const settingsFeedUrl = `${window.location.protocol}//${window.location.hostname}:5005/settings`;
         try {
             const response = await fetch(settingsFeedUrl, {
                 method: "POST",
