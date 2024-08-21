@@ -1,7 +1,8 @@
-from flask import Flask, Response, jsonify
+from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
 import system_helpers
 import stream_helpers
+import settings_helpers
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -36,6 +37,23 @@ def toggle_recording():
     else:
         stream_helpers.start_recording()
         return jsonify({"message": "Recording started"})
+    
+@app.route('/settings', methods=['GET', 'POST'])
+def settings():
+    if request.method == 'GET':
+        return jsonify(settings_helpers.get_settings())
+    elif request.method == 'POST':
+        new_settings = request.json
+        if "VideoSaveLocation" in new_settings:
+            success = settings_helpers.update_video_save_location(new_settings["VideoSaveLocation"])
+            if success:
+                return jsonify({"message": "Settings updated"})
+            else:
+                return jsonify({"message": "Invalid directory or insufficient permissions"}), 400
+        else:
+            settings_helpers.update_settings(new_settings)
+            return jsonify({"message": "Settings updated"})
+
 
 
 if __name__ == "__main__":

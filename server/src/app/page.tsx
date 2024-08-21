@@ -1,5 +1,6 @@
 import React from "react";
 import ClientVideoPlayer from "@/components/ClientVideoPlayer";
+import SystemMonitor from "@/components/SystemMonitor";
 
 const Home = () => {
 
@@ -25,11 +26,7 @@ const Home = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 border border-red-200 gap-10">
-        <div className="border border-red-500">temp: 20°C</div>
-        <div className="border border-red-500">cpu: 20%</div>
-        <div className="border border-red-500">storage: 2.69gb / 64gb</div>
-      </div>
+      <SystemMonitor />
     </div>
   );
 };

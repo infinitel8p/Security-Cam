@@ -1,0 +1,23 @@
+{
+    "TARGET_BT_ADDRESSES": [
+        {
+            "address": "XX:XX:XX:XX:XX:XX",
+            "name": "Device 1"
+        },
+        {
+            "address": "XX:XX:XX:XX:XX:XX",
+            "name": "Device 2"
+        }
+    ],
+    "TARGET_AP_MAC_ADDRESSES": [
+        {
+            "address": "XX:XX:XX:XX:XX:XX",
+            "name": "Device 1"
+        },
+        {
+            "address": "XX:XX:XX:XX:XX:XX",
+            "name": "Device 2"
+        }
+    ],
+    "VideoSaveLocation": "./recordings"
+}

@@ -1,5 +1,6 @@
 import os
 import cv2
+import json
 import threading
 from datetime import datetime
 
@@ -8,8 +9,8 @@ lock = threading.Lock()
 out = None
 is_recording = False
 
-# Ensure recordings directory exists
-os.makedirs('./recordings', exist_ok=True)
+# Load settings.json
+SETTINGS_FILE = './settings/settings.json'
 
 
 def generate_frames():
@@ -51,10 +52,16 @@ def start_recording() -> None:
     Returns:
         None
     """
-
     global out, is_recording
+    
+    with open(SETTINGS_FILE, 'r') as f:
+        settings = json.load(f)
+
+    video_save_location = settings.get('VideoSaveLocation', './recordings')
+    os.makedirs(video_save_location, exist_ok=True)
+
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f'./recordings/output_{timestamp}.avi'
+    filename = os.path.join(video_save_location, f'output_{timestamp}.avi')
 
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     with lock:
