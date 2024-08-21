@@ -1,9 +1,9 @@
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
 from urllib.parse import unquote
-import system_helpers
-import stream_helpers
-import settings_helpers
+from modules import system_helpers
+from modules import stream_helpers
+from modules import settings_helpers
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
