@@ -24,6 +24,7 @@ const Page = () => {
         console.log(`Delete video: ${video}`);
     };
 
+
     return (
         <div className="grid grid-cols-3 gap-5 text-center">
             {videos.length > 0 ? (
@@ -39,7 +40,8 @@ const Page = () => {
                                 controls
                                 className="w-full"
                                 onLoadedMetadata={(e) => {
-                                    const duration = e.target.duration;
+                                    const target = e.target as HTMLVideoElement;
+                                    const duration = target.duration;
                                     document.getElementById(`duration-${index}`).textContent = `Duration: ${Math.floor(duration / 60)}m ${Math.floor(duration % 60)}s`;
                                 }}
                             >

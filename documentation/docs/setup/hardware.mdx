@@ -5,29 +5,14 @@ description: "Step 1: Setup the hardware components"
 
 # Hardware Setup
 
-## Table of Contents
-
-- [Hardware Setup](#hardware-setup)
-  - [Table of Contents](#table-of-contents)
-  - [Prerequisites](#prerequisites)
-  - [Camera](#camera)
-    - [Update the Camera Library](#update-the-camera-library)
-    - [Camera Setup](#camera-setup)
-    - [Test the Camera](#test-the-camera)
-    - [Enabling Legacy Camera Support](#enabling-legacy-camera-support)
-  - [Magnet Reed Switch](#magnet-reed-switch)
-    - [KY-025 connection](#ky-025-connection)
-    - [Raspberry Pi connection](#raspberry-pi-connection)
-    - [Test the Magnet Reed Switch](#test-the-magnet-reed-switch)
-  - [Real Time Clock Module](#real-time-clock-module)
-    - [DS3231 connection](#ds3231-connection)
-    - [Raspberry Pi connection](#raspberry-pi-connection-1)
-    - [Enable I2C Interface](#enable-i2c-interface)
+:::note
+Please ignore possible occurences of the Raspberry Pi Zero **1** W in the instructions. The instructions were originally written for the Raspberry Pi Zero W but were updated to work with the Raspberry Pi Zero 2 W it is recommended for it's better performance.
+:::
 
 ## Prerequisites
 
-- [Raspberry Pi Zero W](https://www.raspberrypi.com/products/raspberry-pi-zero-w/) (or Raspberry Pi Zero WH)
-- [Headers](https://amzn.eu/d/hULoAo6) for the Raspberry Pi Zero W if you did not choose a Raspberry Pi Zero WH (if you do not feel comfortable soldering the headers you can use solderless headers such as these [here](https://www.berrybase.de/en/solderless-stiftleiste-2x-20-polig-rm-2-54-gerade))
+- [Raspberry Pi Zero 2 W](https://www.raspberrypi.com/products/raspberry-pi-zero-2-w/) (or Raspberry Pi Zero 2 WH)
+- [Headers](https://amzn.eu/d/hULoAo6) for the Raspberry Pi Zero 2 W if you did not choose a Raspberry Pi Zero 2 WH (if you do not feel comfortable soldering the headers you can use solderless headers such as these [here](https://www.berrybase.de/en/solderless-stiftleiste-2x-20-polig-rm-2-54-gerade))
 - [Waveshare RPi Camera (F)](https://www.berrybase.de/en/noir-kamera-fuer-raspberry-pi-mit-einstellbarem-fokus-und-infrarot-leds) or another compatible camera module
 - [Flexcable adapter](https://www.berrybase.de/en/flexkabel-fuer-raspberry-pi-zero-und-kameramodul?number=RPIZ-FLEX-15) for the camera module
 - Bluetooth-enabled device (e.g., a smartphone) to pair with the Raspberry Pi
@@ -49,42 +34,39 @@ If connected properly you should see a faint red glow from the camera's infrared
 Update the camera library (and everything else) first if you have not already done so. Run the following commands on the Raspberry Pi:
 
 ```bash
-sudo apt update
-sudo apt upgrade
+sudo apt update && sudo apt upgrade -y
 ```
 
 ### Camera Setup
 
-Edit the `/boot/config.txt` file:
+Edit the `/boot/firmware/config.txt` file:
 
 ```bash
-sudo nano /boot/config.txt
+sudo sh -c 'echo "start_x=1" >> /boot/firmware/config.txt'
+sudo nano /boot/firmware/config.txt
 ```
 
-Add the following line to the end of the file:
-
-```bash
-start_x=1
-```
+Find `camera-auto-detect=1` and modify it to `camera_auto_detect=0`.
 
 Restart the Raspberry Pi now.
 
-> If you use OV9281, IMX290, IMX378, or non-Raspberry Pi official IMX219 and IMX477 cameras, you need to configure the config.txt file separately:
->
-> ```bash
-> sudo nano /boot/config.txt
-> ```
->
-> Find "camera-auto-detect=1" and modify it to "camera_auto_detect=0".
->
-> At the end of the file, add the following setting statements according to the camera model:
-> | Camera Model | Setting Statement |
-> | ------------- | ------------------------------------------ |
-> | OV9281 | dtoverlay=ov9281 |
-> | IMX290/IMX327 | dtoverlay=imx290, clock-frequency=37125000 |
-> | IMX477 | dtoverlay=imx477 |
-> | IMX378 | dtoverlay=imx378 |
-> | IMX219 | dtoverlay=imx219 |
+:::info
+If you use `OV9281`, `IMX290`, `IMX378` or non-Raspberry Pi official `IMX219` and `IMX477` cameras, you need to configure the config.txt file separately:
+
+```bash title="/boot/firmware/config.txt"
+sudo nano /boot/firmware/config.txt
+```
+
+Find `camera-auto-detect=1` and modify it to `camera_auto_detect=0`.
+At the end of the file, add the following setting statements according to the camera model:
+| Camera Model | Setting Statement |
+| ------------- | ------------------------------------------ |
+| OV9281 | `dtoverlay=ov9281` |
+| IMX290/IMX327 | `dtoverlay=imx290, clock-frequency=37125000` |
+| IMX477 | `dtoverlay=imx477` |
+| IMX378 | `dtoverlay=imx378` |
+| IMX219 | `dtoverlay=imx219` |
+:::
 
 ### Test the Camera
 
@@ -101,31 +83,17 @@ This should return the following:
 supported=1 detected=1
 ```
 
-_Note: If it returns `supported=0 detected=0` you need to enable legacy camera support first. See the [section below](#enabling-legacy-camera-support) for instructions on how to do that._
-
 Now test the camera with the following command:
 
 ```bash
-raspistill -o test.jpg
+python3 -c "import cv2; cap=cv2.VideoCapture(0); ret,frame=cap.read(); cv2.imwrite('opencv_test.jpg', frame) if ret else print('Error: Could not read frame'); cap.release()"
 ```
 
-This should take a picture and save it as `test.jpg` in the current directory.
-
-### Enabling Legacy Camera Support
-
-To enable the legacy camera support, run the following command on the Raspberry Pi:
-
-```bash
-sudo raspi-config
-```
-
-In the menu, select `Interface Options` and then `Legacy Camera`. Select `Yes` to enable it and then `Ok`. Select `Finish` to exit the configuration menu and reboot the Raspberry Pi.
-
-Test the camera again with the commands from the [section above](#test-the-camera).
+This should take a picture and save it as `opencv_test.jpg` in the current directory. You can now either view the image on the Raspberry Pi or transfer it to your computer to view it there.
 
 ## Magnet Reed Switch
 
-If you have a Raspberry Pi Zero W and you have not yet soldered the GPIO header, you can do so now. The magnet reed switch will be connected to the Raspberry Pi as shown below.
+If you have a Raspberry Pi Zero 2 W and you have not yet soldered the GPIO header, you can do so now (You should probably remove the camera flex cable from the raspberry first). The magnet reed switch will be connected to the Raspberry Pi as shown below.
 
 ![20230927_072021](https://github.com/infinitel8p/Security-Cam/assets/50703696/56c40de5-69e2-4397-9365-49f6284a3ebe)
 _Note: This is the connection layout using a breadboard. The magnet reed can also just be connected directly to the Raspberry Pi skipping the breadboard._
@@ -169,7 +137,7 @@ nano test.py
 
 Paste the following code into the file:
 
-```python
+```python title="test.py"
 import RPi.GPIO as GPIO
 from time import sleep
 
@@ -208,8 +176,16 @@ Now test the switch. When you come near the sensor with a magnet the script shou
 The pinout on the DS3231 module is shown below.
 
 <div style={{ display: "flex" }}>
-	<img src="https://github.com/infinitel8p/Security-Cam/assets/50703696/23d48c70-2e41-4f6f-baf1-836163926949" alt="Image 1" width="400" />
-	<img src="https://github.com/infinitel8p/Security-Cam/assets/50703696/be0c37e0-1c15-44e3-8dba-51f63615c5c3" alt="Image 2" width="400" />
+	<img
+		src="https://github.com/infinitel8p/Security-Cam/assets/50703696/23d48c70-2e41-4f6f-baf1-836163926949"
+		alt="Image 1"
+		width="400"
+	/>
+	<img
+		src="https://github.com/infinitel8p/Security-Cam/assets/50703696/be0c37e0-1c15-44e3-8dba-51f63615c5c3"
+		alt="Image 2"
+		width="400"
+	/>
 </div>
 
 | DS3231 Pin | Wire        |
@@ -252,7 +228,9 @@ _Note: The DS3231 module has a fifth pin, marked with `NC`. This "NC" (Not Conne
       </tr>
     </table> 
  
-*Note: for the connections on the Raspberry you can refer the diagram shown [here](#raspberry-pi-connection) again*
+:::note
+For the connections on the Raspberry you can refer the diagram shown [here](#raspberry-pi-connection) again
+:::
 
   </div>
   <!-- Image -->
@@ -261,7 +239,9 @@ _Note: The DS3231 module has a fifth pin, marked with `NC`. This "NC" (Not Conne
   </div>
 </div>
 
-_Note: This is the connection layout using a breadboard. The clock can also just be connected directly to the Raspberry Pi skipping the breadboard as shown below._
+:::tip
+This is the connection layout using a breadboard. The clock can also just be connected directly to the Raspberry Pi skipping the breadboard as shown below.
+:::
 
 ![61JfhAHWeKL _AC_SX679_](https://github.com/infinitel8p/Security-Cam/assets/50703696/40ddedeb-509f-41e2-b50f-63aa0e9d1f3e)
 

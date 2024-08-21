@@ -5,6 +5,9 @@
     sudo git clone https://github.com/infinitel8p/Security-Cam.git /opt/security-cam
     ``` 
 
+    sudo apt install nodejs
+    sudo apt install npm
+
 
 2. Create the Service File
     ```bash
@@ -20,17 +23,9 @@
 
     [Service]
     Type=simple
-    User=root
+    User=pi
     WorkingDirectory=/opt/security-cam
-    ExecStart=/bin/bash -c '
-        git pull &&
-        chmod +x /opt/security-cam/install_requirements.sh &&
-        cd /opt/security-cam/server && npm install &&
-        cd /opt/security-cam/client &&
-        bash /opt/security-cam/install_requirements.sh &&
-        chmod +x /opt/security-cam/start.sh &&
-        /opt/security-cam/start.sh
-    '
+    ExecStart=sudo chmod +x /opt/security-cam/start.sh && sudo /opt/security-cam/start.sh
     Restart=on-failure
 
     [Install]

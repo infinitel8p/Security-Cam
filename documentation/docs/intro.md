@@ -3,7 +3,7 @@ sidebar_position: 1
 ---
 
 # Intro
-A security camera script for the Raspberry Pi Zero W using the Waveshare RPi Camera (F).  
+A security camera script for the Raspberry Pi Zero 2 W using the Waveshare RPi Camera (F).  
 The script will start recording a video when the magnetic reed switch is triggered (the door is opened) and the smartphone is not connected to the Raspberry Pi (bluetooth and/or WiFi). The recording will stop when the magnetic reed switch is triggered again (the door is closed).
 
 Integrations:
@@ -25,8 +25,8 @@ Integrations:
 
 ## Prerequisites
 
-- [Raspberry Pi Zero W](https://www.raspberrypi.com/products/raspberry-pi-zero-w/) (or Raspberry Pi Zero WH)
-- [Headers](https://amzn.eu/d/hULoAo6) for the Raspberry Pi Zero W if you did not choose a Raspberry Pi Zero WH (if you do not feel comfortable soldering the headers you can use solderless headers such as these [here](https://www.berrybase.de/en/solderless-stiftleiste-2x-20-polig-rm-2-54-gerade))
+- [Raspberry Pi Zero 2 W](https://www.raspberrypi.com/products/raspberry-pi-zero-2-w/) (or Raspberry Pi Zero 2 WH)
+- [Headers](https://amzn.eu/d/hULoAo6) for the Raspberry Pi Zero 2 W if you did not choose a Raspberry Pi Zero 2 WH (if you do not feel comfortable soldering the headers you can use solderless headers such as these [here](https://www.berrybase.de/en/solderless-stiftleiste-2x-20-polig-rm-2-54-gerade))
 - [Waveshare RPi Camera (F)](https://www.berrybase.de/en/noir-kamera-fuer-raspberry-pi-mit-einstellbarem-fokus-und-infrarot-leds) or another compatible camera module
 - [Flexcable adapter](https://www.berrybase.de/en/flexkabel-fuer-raspberry-pi-zero-und-kameramodul?number=RPIZ-FLEX-15) for the camera module
 - Bluetooth-enabled device (e.g., a smartphone) to pair with the Raspberry Pi
@@ -36,7 +36,7 @@ Integrations:
 - [DS3231 Real Time Clock Module](https://amzn.eu/d/ikNTko8)
 
 ## Setup
-The following sections will explain how to set up the Raspberry Pi Zero W. It is assumed that the Raspberry Pi Zero W is already set up and running (Optional - set up VNC if you have a hard time working in a headless setup). If you need help setting up the Raspberry Pi Zero W, please refer to the [Raspberry Pi Documentation](https://www.raspberrypi.org/documentation/).
+The following sections will explain how to set up the Raspberry Pi Zero 2 W. It is assumed that the Raspberry Pi Zero 2 W is already set up and running (Optional - set up VNC if you have a hard time working in a headless setup). If you need help setting up the Raspberry Pi Zero 2 W, please refer to the [Raspberry Pi Documentation](https://www.raspberrypi.org/documentation/).
 
 1. ### Hardware setup
     The Instructions to the hardware setup can be found [here](./setup/hardware). If you are new to the project, please start here.  
