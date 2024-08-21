@@ -8,21 +8,28 @@ const SystemMonitor = () => {
         storage_info_gb: { total_gb: "Loading...", used_gb: "Loading..." },
         ram_usage_mb: { total_mb: "Loading...", used_mb: "Loading..." },
     });
-
-    const systemFeedUrl = `${window.location.protocol}//${window.location.hostname}:5005/system_info`;
+    const [systemFeedUrl, setSystemFeedUrl] = useState('');
 
     useEffect(() => {
-        const fetchSystemInfo = async () => {
-            try {
-                const response = await fetch(systemFeedUrl);
-                const data = await response.json();
-                setSystemInfo(data);
-            } catch (error) {
-                console.error("Error fetching system info:", error);
-            }
-        };
+        if (typeof window !== "undefined") {
+            setSystemFeedUrl(`${window.location.protocol}//${window.location.hostname}:5005/system_info`);
+        }
+    }, []);
 
-        fetchSystemInfo();
+    useEffect(() => {
+        if (systemFeedUrl) {
+            const fetchSystemInfo = async () => {
+                try {
+                    const response = await fetch(systemFeedUrl);
+                    const data = await response.json();
+                    setSystemInfo(data);
+                } catch (error) {
+                    console.error("Error fetching system info:", error);
+                }
+            };
+
+            fetchSystemInfo();
+        }
     }, [systemFeedUrl]);
 
     return (

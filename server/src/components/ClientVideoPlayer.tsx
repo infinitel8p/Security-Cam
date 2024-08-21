@@ -1,10 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const ClientVideoPlayer = () => {
     const [isRecording, setIsRecording] = useState(false);
-    const videoFeedUrl = `${window.location.protocol}//${window.location.hostname}:5005`;
+    const [videoFeedUrl, setVideoFeedUrl] = useState('');
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            setVideoFeedUrl(`${window.location.protocol}//${window.location.hostname}:5005`);
+        }
+    }, []);
 
     const toggleRecording = async () => {
         try {
@@ -25,11 +31,13 @@ const ClientVideoPlayer = () => {
 
     return (
         <>
-            <img
-                src={`${videoFeedUrl}/video_feed`}
-                alt="Live Stream"
-                style={{ width: '100%', height: '100%' }}
-            />
+            {videoFeedUrl && (
+                <img
+                    src={`${videoFeedUrl}/video_feed`}
+                    alt="Live Stream"
+                    style={{ width: '100%', height: '100%' }}
+                />
+            )}
             <button onClick={toggleRecording}>
                 {isRecording ? "Stop Recording" : "Start Recording"}
             </button>
