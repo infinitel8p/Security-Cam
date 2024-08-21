@@ -4,10 +4,24 @@
         <title>Security-Cam Blog</title>
         <link>https://dev.infinitel8p.com/Security-Cam/blog</link>
         <description>Security-Cam Blog</description>
-        <lastBuildDate>Thu, 25 Jul 2024 00:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Wed, 21 Aug 2024 00:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
+        <item>
+            <title><![CDATA[Fix the stream]]></title>
+            <link>https://dev.infinitel8p.com/Security-Cam/blog/fix-the-stream</link>
+            <guid>https://dev.infinitel8p.com/Security-Cam/blog/fix-the-stream</guid>
+            <pubDate>Wed, 21 Aug 2024 00:00:00 GMT</pubDate>
+            <description><![CDATA[Fixing old issues]]></description>
+            <content:encoded><![CDATA[<h3 class="anchor anchorWithStickyNavbar_LWe7" id="fixing-old-issues">Fixing old issues<a class="hash-link" aria-label="Direct link to Fixing old issues" title="Direct link to Fixing old issues" href="https://dev.infinitel8p.com/Security-Cam/blog/fix-the-stream#fixing-old-issues">​</a></h3>
+<p>In my previous setup, I used <code>picamera</code> for recording and streaming video on the Raspberry Pi. However, I noticed a recurring issue: the video stream would consistently freeze whenever a recording started, only resuming after the recording was complete. While this wasn't a big problem, it was frustrating enough to warrant a closer look.</p>
+<p>To address this, I decided to explore an alternative approach using <code>OpenCV</code>. I wrote a small test script that streams frames to a <code>Flask</code> endpoint. After modifying the <code>ClientVideoPlayer</code> component in our placeholder dashboard, I successfully established a stable video stream. The next step was to test whether the video could be recorded while maintaining a continuous and stable feed to the dashboard—and I'm happy to report that this was a success.</p>
+<p>As a result, we're transitioning from using <code>picamera</code> and <code>WebSockets</code> for streaming to using <code>Flask</code> and <code>OpenCV</code>. While I still have a few more tests to conduct before finalizing this decision, resolving the most frustrating issue from the old code feels like a significant step forward.</p>]]></content:encoded>
+            <category>Stream</category>
+            <category>Python</category>
+            <category>Dashboard</category>
+        </item>
         <item>
             <title><![CDATA[Build a Dashboard]]></title>
             <link>https://dev.infinitel8p.com/Security-Cam/blog/starting-the-dashboard</link>
@@ -24,7 +38,7 @@ So we began installing the necessary packages and setting up the project.</p>
 Design isnt necessary at this point. We just want to have something running to try out streaming as soon as possible.</p>
 <p>First steps are done and more to come.</p>]]></content:encoded>
             <category>Dashboard</category>
-            <category>next</category>
+            <category>Next</category>
         </item>
         <item>
             <title><![CDATA[The start of something new]]></title>

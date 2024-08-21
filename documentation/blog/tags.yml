@@ -12,3 +12,18 @@ dashboard:
   label: Dashboard
   permalink: /dashboard
   description: Web Interface related posts.
+
+python:
+  label: Python
+  permalink: /python
+  description: Python related posts.
+
+next:
+  label: Next
+  permalink: /next
+  description: Next.js related posts.
+
+stream:
+  label: Stream
+  permalink: /stream
+  description: Stream related posts.
