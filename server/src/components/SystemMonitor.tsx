@@ -16,7 +16,6 @@ const SystemMonitor = () => {
             try {
                 const response = await fetch(systemFeedUrl);
                 const data = await response.json();
-                console.log("Fetched System Info:", data); // Log the data structure
                 setSystemInfo(data);
             } catch (error) {
                 console.error("Error fetching system info:", error);

@@ -1,5 +1,6 @@
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
+from urllib.parse import unquote
 import system_helpers
 import stream_helpers
 import settings_helpers
@@ -38,6 +39,7 @@ def toggle_recording():
         stream_helpers.start_recording()
         return jsonify({"message": "Recording started"})
     
+
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
     if request.method == 'GET':
@@ -54,6 +56,20 @@ def settings():
             settings_helpers.update_settings(new_settings)
             return jsonify({"message": "Settings updated"})
 
+
+@app.route('/list_directories', methods=['GET'])
+def list_directories():
+    path = request.args.get('path', "./")
+    decoded_path = unquote(path)  # Decode the path
+
+    if settings_helpers.is_directory(decoded_path):
+        directories, error = settings_helpers.list_directories(decoded_path)
+        if error:
+            print(f"Error listing directories: {error}")
+            return jsonify({"error": error}), 500
+        return jsonify(directories)
+    else:
+        return jsonify({"error": "Invalid directory path"}), 400
 
 
 if __name__ == "__main__":
