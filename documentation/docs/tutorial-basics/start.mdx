@@ -12,7 +12,9 @@ Clone the Repository
 
 ```bash
 sudo git clone https://github.com/infinitel8p/Security-Cam.git /opt/security-cam
-``` 
+sudo chown -R pi:pi /opt/security-cam
+sudo chmod -R u+rwX /opt/security-cam
+```
 
 Install Node.js and npm
 
@@ -23,9 +25,26 @@ sudo apt install npm
 
 ## Setup
 
+:::warning
+The following steps are subject to change. They are based on the current state of the project and may be outdated.
+Since the project is still in development, the setup process may change in the future.
+:::
+
+Allow pi to Run chmod Without Password:
+
+```bash
+sudo visudo
+```
+
+Add the following line:
+
+```bash
+pi ALL=(ALL) NOPASSWD: /bin/chmod +x /opt/security-cam/start.sh
+```
+
 Create the Service File
 
-```bash 
+```bash
 sudo bash -c 'cat <<EOF > /etc/systemd/system/security-cam.service
 [Unit]
 Description=Security Cam Flask and Node.js Servers
@@ -35,7 +54,8 @@ After=network.target
 Type=simple
 User=pi
 WorkingDirectory=/opt/security-cam
-ExecStart=sudo chmod +x /opt/security-cam/start.sh && sudo /opt/security-cam/start.sh
+ExecStartPre=/usr/bin/sudo /bin/chmod +x /opt/security-cam/start.sh
+ExecStart=/opt/security-cam/start.sh
 Restart=on-failure
 
 [Install]

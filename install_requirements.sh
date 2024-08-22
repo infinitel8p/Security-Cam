@@ -6,6 +6,22 @@ sudo apt-get update
 # Install system dependencies
 sudo apt-get install -y python3 python3-pip nodejs npm
 
+# Pull the latest code from the repository
+git config --global --add safe.directory /opt/security-cam
+cd /opt/security-cam/ || { echo "Failed to change directory to /opt/security-cam/"; exit 1; }
+git pull || { echo "git pull failed"; exit 1; }
+
+# Ensure the install_requirements.sh script is executable
+# chmod +x /opt/security-cam/install_requirements.sh
+
+# Install system packages and Python dependencies 
+# cd /opt/security-cam/client || { echo "Failed to change directory to /opt/security-cam/client"; exit 1; }
+# bash /opt/security-cam/install_requirements.sh || { echo "install_requirements.sh failed"; exit 1; }
+
+# Install Node.js dependencies for the server
+cd /opt/security-cam/server || { echo "Failed to change directory to /opt/security-cam/server"; exit 1; }
+npm install || { echo "npm install failed"; exit 1; }
+
 # Path to the requirements.txt file
 REQUIREMENTS_FILE="/opt/security-cam/requirements.txt"
 
