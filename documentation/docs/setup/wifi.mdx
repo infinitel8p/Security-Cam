@@ -5,291 +5,321 @@ description: "Step 2: Setup the WiFi Access Point"
 
 # WiFi Setup
 
-1.  ### Find your Raspberry's MAC address with `iw dev`:
+## Find your Raspberry's MAC address:
 
-    ```bash
-    pi@raspberrypizero2:~ $ iw dev
-    phy#0
-        Unnamed/non-netdev interface
-                wdev 0x2
-                addr ba:27:xx:xx:xx:xx
-                type P2P-device
-                txpower 31.00 dBm
-        Interface wlan0
-                ifindex 2
-                wdev 0x1
-                addr b8:27:xx:xx:xx:xx
-                ssid FRITZ!Box 0420
-                type managed
-                channel 1 (2412 MHz), width: 20 MHz, center1: 2412 MHz
-                txpower 31.00 dBm
-    ```
+Enter the following command to find the MAC address of your Raspberry Pi's WiFi interface:
 
-    The MAC address of the `wlan0` interface is `b8:27:xx:xx:xx:xx` in this case.
+```bash
+iw dev
+```
 
-    :::info
-    Remember the channel number (1 in this case) for later.
-    :::
+You should see an output similar to this:
 
-1.  ### Allocate a device for the AP:
+```bash title="iw dev output:"
+pi@securitycam:~ $ iw dev
+phy#0
+    Unnamed/non-netdev interface
+            wdev 0x2
+            addr ba:27:xx:xx:xx:xx
+            type P2P-device
+            txpower 31.00 dBm
+    Interface wlan0
+            ifindex 2
+            wdev 0x1
+            addr b8:27:xx:xx:xx:xx
+            ssid FRITZ!Box 420
+            type managed
+            channel 1 (2412 MHz), width: 20 MHz, center1: 2412 MHz
+            txpower 31.00 dBm
+```
 
-    This will create a new interface called `ap0` with the same MAC address as `wlan0`. `ap0` will then be the interface used for the AP.
+The MAC address of the `wlan0` interface is `b8:27:xx:xx:xx:xx` in this case.
 
-    ```bash
-    sudo nano /etc/udev/rules.d/70-persistent-net.rules
-    ```
+:::info
+Remember the channel number (`channel 1` in this case) for later.
+:::
 
-    Add the following lines and **replace your MAC address** accordingly:
+## Allocate a device for the Access Point
 
-    ```bash
-    SUBSYSTEM=="ieee80211", ACTION=="add|change", ATTR{macaddress}=="b8:27:xx:xx:xx:xx", KERNEL=="phy0", \
-    RUN+="/sbin/iw phy phy0 interface add ap0 type __ap", \
-    RUN+="/bin/ip link set ap0 address b8:27:xx:xx:xx:xx"
-    ```
+Create a new interface called `ap0` with the same MAC address as `wlan0`.  
+`ap0` will then be the interface used for the Access Point.
 
-1.  ### Install `Dnsmasq` and `Hostapd`:
+```bash
+sudo nano /etc/udev/rules.d/70-persistent-net.rules
+```
 
-    ```bash
-    sudo apt-get update
-    sudo apt-get upgrade #Optional
-    sudo apt-get install dnsmasq hostapd
-    ```
+Add the following lines and **replace your MAC address** (!) accordingly:
 
-1.  ### Configure `Dnsmasq`:
+```bash
+SUBSYSTEM=="ieee80211", ACTION=="add|change", ATTR{macaddress}=="REPLACEWITHMACADDRESS", KERNEL=="phy0", \
+RUN+="/sbin/iw phy phy0 interface add ap0 type __ap", \
+RUN+="/bin/ip link set ap0 address REPLACEWITHMACADDRESS"
+```
 
-    1. #### Backup the original `dnsmasq` configuration:
+## Install `Dnsmasq`, `Hostapd` and `Nftables`
 
-       ```bash
-       sudo cp /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
-       ```
+```bash
+sudo apt-get update
+sudo apt-get upgrade #Optional
+sudo apt-get install dnsmasq hostapd nftables
+```
 
-    2. #### Create a new `dnsmasq` configuration:
+## Configure `Dnsmasq`
 
-       ```bash
-       sudo nano /etc/dnsmasq.conf
-       ```
+Backup the original and create a new `dnsmasq` configuration:
 
-    3. #### Add the following content:
-       ```conf
-       interface=lo,ap0
-       no-dhcp-interface=lo,wlan0
-       bind-interfaces
-       server=8.8.8.8
-       domain-needed
-       bogus-priv
-       dhcp-range=192.168.10.50,192.168.10.150,12h
-       ```
+```bash
+sudo cp /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
+sudo sh -c 'echo "interface=lo,ap0
+no-dhcp-interface=lo,wlan0
+bind-interfaces
+server=8.8.8.8
+domain-needed
+bogus-priv
+dhcp-range=192.168.10.50,192.168.10.150,12h" > /etc/dnsmasq.conf'
+```
 
-1.  ### Configure `Hostapd`:
+## Configure `Hostapd`
 
-    1. #### Open the configuration file:
+Open the configuration file:
 
-       ```bash
-       sudo nano /etc/hostapd/hostapd.conf
-       ```
+```bash
+sudo nano /etc/hostapd/hostapd.conf
+```
 
-    2. #### Add the following content:
+Add the following content:
 
-       ```conf
-       ctrl_interface=/var/run/hostapd
-       ctrl_interface_group=0
-       interface=ap0
-       driver=nl80211
-       ssid=DevAccessPoint
-       hw_mode=g
-       channel=1
-       wmm_enabled=0
-       macaddr_acl=0
-       auth_algs=1
-       wpa=2
-       wpa_passphrase=YourPassPhraseHere
-       wpa_key_mgmt=WPA-PSK
-       wpa_pairwise=TKIP CCMP
-       rsn_pairwise=CCMP
-       ```
+```conf
+ctrl_interface=/var/run/hostapd
+ctrl_interface_group=0
+interface=ap0
+driver=nl80211
+ssid=DevAccessPoint
+hw_mode=g
+channel=1
+wmm_enabled=0
+macaddr_acl=0
+auth_algs=1
+wpa=2
+wpa_passphrase=YourPassPhraseHere
+wpa_key_mgmt=WPA-PSK
+wpa_pairwise=TKIP CCMP
+rsn_pairwise=CCMP
+```
 
-       :::info
-       Before you save, make sure to do these changes to the configuration:
+:::info
+Before you save, make sure to do these changes to the configuration:
 
-       1. Replace `DevAccessPoint` and `YourPassPhraseHere` with your desired values
-       2. Replace the `channel` with the channel your `wlan0` was running on (as reported by `iw dev` in step 1)
-          :::
+1. Replace `DevAccessPoint` and `YourPassPhraseHere` with your desired values
+2. Replace the `channel` with the channel your `wlan0` was running on (as reported by `iw dev` in step 1)
 
-    3. #### Specify where `hostapd` should find its configuration:
+:::
 
-       ```bash
-       sudo nano /etc/default/hostapd
-       ```
+Now after having saved, we want to specify where `hostapd` should find its configuration:
 
-       Find the line with `#DAEMON_CONF=""` and replace _(uncomment it or add it if it doesn't exist)_ it with:
+```bash
+sudo nano /etc/default/hostapd
+```
 
-       ```bash
-       DAEMON_CONF="/etc/hostapd/hostapd.conf"
-       ```
+Find the line with `#DAEMON_CONF=""` and replace _(uncomment it or add it if it doesn't exist)_ it with:
 
-1.  ### Modify `wpa_supplicant`:
+```bash
+DAEMON_CONF="/etc/hostapd/hostapd.conf"
+```
 
-    1. #### Open the configuration file:
+## Modify the `wpa_supplicant` configuration
 
-       ```bash
-       sudo nano /etc/wpa_supplicant/wpa_supplicant.conf
-       ```
+Open the configuration file:
 
-    2. #### Add the following content (if it doesn't exist already):
+```bash
+sudo nano /etc/wpa_supplicant/wpa_supplicant.conf
+```
 
-       ```conf
-       country=US
-       ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
-       update_config=1
+Add the following content if it's not already present:
 
-       network={
-           ssid="YourSSID1"
-           psk="YourPassphrase1"
-           id_str="AP1"
-       }
+```conf
+country=US
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
 
-       network={
-           ssid="YourSSID2"
-           psk="YourPassphrase2"
-           id_str="AP2"
-       }
-       ```
+network={
+    ssid="YourSSID1"
+    psk="YourPassphrase1"
+    id_str="AP1"
+}
 
-       Replace `YourSSID1` and `YourPassphrase1` with your WiFi's SSID and passphrase.
-       You can add as many networks as you want, just make sure to increment the `id_str` value for each network. You are are not required to keep `YourSSID2` in the configuration if you only have one WiFi network you want to connect to.  
-       Change your country code accordingly.
+network={
+    ssid="YourSSID2"
+    psk="YourPassphrase2"
+    id_str="AP2"
+}
+```
 
-1.  ### Modify `/etc/network/interfaces` to support the new AP
+Customize the configuration:
 
-    1. #### Open the configuration file:
+- Replace `YourSSID1` and `YourPassphrase1` with your Wi-Fi network’s SSID and passphrase (the network you want to connect to, not the one created in the previous step).
+- Update the `country=US` line to reflect your country code.
+- If you only have one Wi-Fi network, remove the second network block.
 
-       ```bash
-       sudo nano /etc/network/interfaces
-       ```
+:::note
+You can add multiple networks by duplicating the network block, incrementing the `id_str` for each one. Only keep the blocks for the networks you plan to connect to.
+:::
 
-    2. #### Add the following content:
+## Enable support for the new AP
 
-       ```conf
-       auto lo
-       auto ap0
-       auto wlan0
-       iface lo inet loopback
+### Modify `/etc/network/interfaces` to support the new AP
 
-       allow-hotplug ap0
-       iface ap0 inet static
-           address 192.168.10.1
-           netmask 255.255.255.0
-           hostapd /etc/hostapd/hostapd.conf
+Open the configuration file:
 
-       allow-hotplug wlan0
-       iface wlan0 inet manual
-           wpa-roam /etc/wpa_supplicant/wpa_supplicant.conf
-       iface AP1 inet dhcp
-       iface AP2 inet dhcp
-       ```
+```bash
+sudo nano /etc/network/interfaces
+```
 
-1.  ### Start both interfaces:
+Add the following content:
 
-    ```bash
-    sudo ifdown --force wlan0
-    sudo ifdown --force ap0
-    sudo ifup ap0
-    sudo ifup wlan0
-    ```
+```conf
+auto lo
+auto ap0
+auto wlan0
+iface lo inet loopback
 
-    :::danger
-    It's crucial to copy and paste the entire block of commands above all at once.  
-    Executing them one by one will disconnect you from the Pi after disabling the interfaces, preventing you from re-enabling them immediately.
-    If your Raspberry Pi Zero 2 W does not reconnect to your WiFi network at this point, unplug the power and plug it back in.  
-    On my setup it wouldn't connect even after a restart. I inserted the microSD card into my PC and recreated the `wpa_supplier.conf` in the boot drive.
-    :::
+allow-hotplug ap0
+iface ap0 inet static
+    address 192.168.10.1
+    netmask 255.255.255.0
+    hostapd /etc/hostapd/hostapd.conf
 
-1.  ### Check the interfaces:
+allow-hotplug wlan0
+iface wlan0 inet manual
+    wpa-roam /etc/wpa_supplicant/wpa_supplicant.conf
+iface AP1 inet dhcp
+iface AP2 inet dhcp
+```
 
-    1. SSH into the Pi again (Probably `192.168.10.1` as is [7.2]) and check the interfaces:
-       ```bash
-       pi@raspberrypi:~$ ip addr
-       1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
-           link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
-           inet 127.0.0.1/8 scope host lo
-           valid_lft forever preferred_lft forever
-           inet6 ::1/128 scope host
-           valid_lft forever preferred_lft forever
-       2: wlan0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
-           link/ether b8:27:xx:xx:xx:xx brd ff:ff:ff:ff:ff:ff
-           inet 192.168.178.102/24 brd 192.168.178.255 scope global dynamic noprefixroute wlan0
-           valid_lft 863907sec preferred_lft 755907sec
-           inet6 2a02:4500:4507:8d04:e2455:6452:6e45:2f66/64 scope global dynamic mngtmpaddr noprefixroute
-           valid_lft 7102sec preferred_lft 2496sec
-           inet6 fe45::4455:a1e3:45c9:5451/64 scope link
-           valid_lft forever preferred_lft forever
-       3: ap0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
-           link/ether b8:27:xx:xx:xx:xx brd ff:ff:ff:ff:ff:ff
-           inet 192.168.10.1/24 brd 192.168.10.255 scope global ap0
-           valid_lft forever preferred_lft forever
-           inet 169.254.165.183/16 brd 169.254.255.255 scope global noprefixroute ap0
-           valid_lft forever preferred_lft forever
-           inet6 fe45::7d45:45b8:b45:2f45/64 scope link
-           valid_lft forever preferred_lft forever
-           inet6 fe45::ba27:eb45:fe7c:3cea/64 scope link
-           valid_lft forever preferred_lft forever
-       ```
-       You should see both `wlan0` and `ap0` interfaces with their respective IP addresses.
-       If you scan for WiFi networks with your phone you should also see the `DevAccessPoint` (or whatever you've called it) network.
+:::note
 
-1.  ### Bridge traffic between AP and Client side
+- `iface AP2 inet dhcp`: Remove this line if you do not have a second network configured in wpa_supplicant.conf.
+- `iface AP1 inet dhcp`: Keep this line since it corresponds to the first network (SSID `YourSSID1` in the `wpa_supplicant.conf`).
 
-    1.  #### Enbale ip-forwarding:
-        ```bash
-        sudo sysctl -w net.ipv4.ip_forward=1
-        ```
-    2.  #### Add iptables rules:
-        ```bash
-        sudo iptables -t nat -A POSTROUTING -s 192.168.10.0/24 ! -d 192.168.10.0/24 -j MASQUERADE
-        ```
-    3.  #### Restart `dnsmasq`:
-            ```bash
-            sudo systemctl restart dnsmasq
-            ```
-        Now you should be able to connect to the AP and use its internet connection to access the internet. (If you have a working internet connection on its client side)
+:::
 
-1.  ### Automate the workaround:
+Start both interfaces:
 
-    1. #### Create a new file:
-       ```bash
-       sudo nano start-ap-managed-wifi.sh
-       ```
-    2. #### Add the following content:
+```bash
+sudo ifdown --force wlan0
+sudo ifdown --force ap0
+sudo ifup ap0
+sudo ifup wlan0
+```
 
-       ```bash
-       #!/bin/bash
-       LOGFILE="/var/log/pi_startup.log"
-       echo "[$(date)] Starting script. Sleeping 45 sec..." >> $LOGFILE
-       sleep 45
-       echo "[$(date)] Starting execution" >> $LOGFILE
-       sudo sysctl -w net.ipv4.ip_forward=1
-       echo "[$(date)] Enabled ip forwarding" >> $LOGFILE
-       sudo iptables -t nat -A POSTROUTING -s 192.168.10.0/24 ! -d 192.168.10.0/24 -j MASQUERADE
-       echo "[$(date)] Modified iptables to set up NAT" >> $LOGFILE
-       sudo systemctl restart dnsmasq
-       echo "[$(date)] Restarted dnsmasq" >> $LOGFILE
-       echo " " >> $LOGFILE
-       ```
+:::danger
+It's crucial to copy and paste the entire block of commands above all at once.  
+Executing them one by one will disconnect you from the Pi after disabling the interfaces, preventing you from re-enabling them immediately.  
+If your Raspberry Pi Zero 2 W does not reconnect to your WiFi network at this point, unplug the power and plug it back in.  
+On my setup it wouldn't connect even after a restart. I inserted the microSD card into my PC and recreated the `wpa_supplier.conf` in the boot drive.  
+:::
 
-    3. #### Make the script executable:
-       ```bash
-       sudo chmod +x start-ap-managed-wifi.sh
-       ```
-    4. #### Add a cronjob to run the script on boot:
-       ```bash
-       sudo crontab -e
-       ```
-       Add the following line to the end of the file:
-       ```bash
-       @reboot /home/pi/start-ap-managed-wifi.sh
-       ```
+### Check the interfaces
 
-Continue to [SCRIPT.md](./script) to set up bluetooth and the script.
+After waiting a few seconds, unplug the raspberry pi and plug it back in. After it has booted up you should be able to see the `DevAccessPoint` network on your device.
+Connect to it and ssh into the raspberry pi.
+
+SSH into the Pi again (probably with `ssh pi@192.168.10.1` as configured in [here](#modify-etcnetworkinterfaces-to-support-the-new-ap)) and check the interfaces:
+
+```bash
+pi@securitycam:~$ ip addr
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+    valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host
+    valid_lft forever preferred_lft forever
+2: wlan0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+    link/ether b8:27:xx:xx:xx:xx brd ff:ff:ff:ff:ff:ff
+    inet 192.168.178.102/24 brd 192.168.178.255 scope global dynamic noprefixroute wlan0
+    valid_lft 863907sec preferred_lft 755907sec
+    inet6 2a02:4500:4507:8d04:e2455:6452:6e45:2f66/64 scope global dynamic mngtmpaddr noprefixroute
+    valid_lft 7102sec preferred_lft 2496sec
+    inet6 fe45::4455:a1e3:45c9:5451/64 scope link
+    valid_lft forever preferred_lft forever
+3: ap0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+    link/ether b8:27:xx:xx:xx:xx brd ff:ff:ff:ff:ff:ff
+    inet 192.168.10.1/24 brd 192.168.10.255 scope global ap0
+    valid_lft forever preferred_lft forever
+    inet 169.254.165.183/16 brd 169.254.255.255 scope global noprefixroute ap0
+    valid_lft forever preferred_lft forever
+    inet6 fe45::7d45:45b8:b45:2f45/64 scope link
+    valid_lft forever preferred_lft forever
+    inet6 fe45::ba27:eb45:fe7c:3cea/64 scope link
+    valid_lft forever preferred_lft forever
+```
+
+You should see both `wlan0` and `ap0` interfaces with their respective IP addresses.
+
+### Bridge traffic between AP and Client side
+
+Enbale ip-forwarding:
+
+```bash
+sudo sysctl -w net.ipv4.ip_forward=1
+```
+
+Create an nftables rule to handle NAT (Masquerading):
+
+```bash
+sudo sh -c 'echo "
+table ip nat {
+    chain postrouting {
+        type nat hook postrouting priority 100; policy accept;
+        ip saddr 192.168.10.0/24 oifname != \"ap0\" masquerade
+    }
+}" >> /etc/nftables.conf && sudo nft -f /etc/nftables.conf'
+```
+
+Restart `dnsmasq`:
+
+```bash
+sudo systemctl restart dnsmasq
+```
+
+Now you should be able to connect to the AP and use its internet connection to access the internet. (If you have a working internet connection on its client side)
+
+### Automate the workaround
+
+Create a new file:
+
+```bash
+sudo sh -c 'cat <<EOF > /opt/start-ap-managed-wifi.sh
+#!/bin/bash
+LOGFILE="/var/log/pi_startup.log"
+echo "[$(date)] Starting script. Sleeping 15 sec..." >> \$LOGFILE
+sleep 15
+echo "[$(date)] Starting execution" >> \$LOGFILE
+sudo sysctl -w net.ipv4.ip_forward=1
+echo "[$(date)] Enabled IP forwarding" >> \$LOGFILE
+sudo sh -c "echo \"
+table ip nat {
+chain postrouting {
+    type nat hook postrouting priority 100; policy accept;
+    ip saddr 192.168.10.0/24 oifname != 'ap0' masquerade
+}
+}\" >> /etc/nftables.conf && sudo nft -f /etc/nftables.conf"
+echo "[$(date)] Applied nftables rules for NAT" >> \$LOGFILE
+sudo systemctl restart dnsmasq
+echo "[$(date)] Restarted dnsmasq" >> \$LOGFILE
+echo " " >> \$LOGFILE
+EOF
+
+sudo chmod +x /opt/start-ap-managed-wifi.sh'
+```
+
+Add a cronjob to run the script on boot:
+
+```bash
+sudo bash -c 'echo "@reboot /opt/start-ap-managed-wifi.sh" >> /var/spool/cron/crontabs/root'
+```
+
+Continue to [script.md](./script) to set up bluetooth and the script.
 
 :::note
 These instructions are tested on Raspbian Buster. (With a Raspberry Pi Zero W)

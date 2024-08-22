@@ -6,7 +6,7 @@ description: "Step 1: Setup the hardware components"
 # Hardware Setup
 
 :::note
-Please ignore possible occurences of the Raspberry Pi Zero **1** W in the instructions. The instructions were originally written for the Raspberry Pi Zero W but were updated to work with the Raspberry Pi Zero 2 W it is recommended for it's better performance.
+Please ignore possible occurences of the Raspberry Pi Zero **1** W in the instructions. The instructions were originally written for the Raspberry Pi Zero W but were updated to work with the Raspberry Pi Zero 2 W as it is recommended for it's better performance.
 :::
 
 ## Prerequisites
@@ -15,11 +15,11 @@ Please ignore possible occurences of the Raspberry Pi Zero **1** W in the instru
 - [Headers](https://amzn.eu/d/hULoAo6) for the Raspberry Pi Zero 2 W if you did not choose a Raspberry Pi Zero 2 WH (if you do not feel comfortable soldering the headers you can use solderless headers such as these [here](https://www.berrybase.de/en/solderless-stiftleiste-2x-20-polig-rm-2-54-gerade))
 - [Waveshare RPi Camera (F)](https://www.berrybase.de/en/noir-kamera-fuer-raspberry-pi-mit-einstellbarem-fokus-und-infrarot-leds) or another compatible camera module
 - [Flexcable adapter](https://www.berrybase.de/en/flexkabel-fuer-raspberry-pi-zero-und-kameramodul?number=RPIZ-FLEX-15) for the camera module
-- Bluetooth-enabled device (e.g., a smartphone) to pair with the Raspberry Pi
 - [KY-025 module](https://amzn.eu/d/grjoopD) (Magnetic reed switch)
+- [DS3231 Real Time Clock Module](https://amzn.eu/d/ikNTko8)
 - a bunch of [Dupont Jumper Wires](https://amzn.eu/d/6ZgE4N6)
 - Breadboard (optional)
-- [DS3231 Real Time Clock Module](https://amzn.eu/d/ikNTko8)
+- Bluetooth-enabled device (e.g., a smartphone) to pair with the Raspberry Pi
 
 ## Camera
 
@@ -70,14 +70,14 @@ At the end of the file, add the following setting statements according to the ca
 
 ### Test the Camera
 
-The WaveShare RPi Camera (F) has a OV5647 sensor which should be supported by `libcamera` and `Raspicam`.
-Depending on your chosen camera module you need to enable legacy camera support so to test the camera, run the following commands on the Raspberry Pi:
+The WaveShare RPi Camera (F) has a OV5647 sensor which should be supported by `libcamera` and `Raspicam` (Raspbian Buster).  
+Check if the camera is detected by the Raspberry Pi with the following command:
 
 ```bash
 vcgencmd get_camera
 ```
 
-This should return the following:
+This should return something like:
 
 ```bash
 supported=1 detected=1
@@ -93,10 +93,13 @@ This should take a picture and save it as `opencv_test.jpg` in the current direc
 
 ## Magnet Reed Switch
 
-If you have a Raspberry Pi Zero 2 W and you have not yet soldered the GPIO header, you can do so now (You should probably remove the camera flex cable from the raspberry first). The magnet reed switch will be connected to the Raspberry Pi as shown below.
+If you have a Raspberry Pi Zero 2 W and you have not yet soldered the GPIO header, do it now (You should probably remove the camera flex cable from the raspberry first).  
+The magnet reed switch will be connected to the Raspberry Pi as shown below.
 
 ![20230927_072021](https://github.com/infinitel8p/Security-Cam/assets/50703696/56c40de5-69e2-4397-9365-49f6284a3ebe)
-_Note: This is the connection layout using a breadboard. The magnet reed can also just be connected directly to the Raspberry Pi skipping the breadboard._
+:::note
+This is the connection layout using a breadboard. The magnet reed can also just be connected directly to the Raspberry Pi skipping the breadboard.
+:::
 
 ### KY-025 connection
 
@@ -104,13 +107,27 @@ The pinout on the KY-025 module with the already connected jumper wires is shown
 
 ![image](https://github.com/infinitel8p/Security-Cam/assets/50703696/6ec39776-6104-42eb-9780-88899c248223)
 
+<div style={{ display: 'flex', justifyContent: 'space-between' }}>
+
+<div style={{ flex: 1, paddingRight: '10px' }}>
+
 | KY-025 Pin  | Wire              |
 | ----------- | ----------------- |
 | **GND**     | Black Jumper Wire |
 | **DO**      | Blue Jumper Wire  |
 | **+ (VCC)** | Red Jumper Wire   |
 
-_Note: The KY-025 module has a fourth pin, marked with `AO`. This is the analog output pin and is not used in this project since the Raspberry Pi does not have an analog input pin and a converter such as the ADS1115 would be required to use it._
+</div>
+
+<div style={{ flex: 1}}>
+
+:::note
+The KY-025 module has a fourth pin, marked with `AO`. This is the analog output pin and is not used in this project since the Raspberry Pi does not have an analog input pin and a converter such as the ADS1115 would be required to use it.
+:::
+
+</div>
+
+</div>
 
 ### Raspberry Pi connection
 
@@ -196,14 +213,15 @@ The pinout on the DS3231 module is shown below.
 | **SCK**    | Yellow Wire |
 | **GND**    | Green Wire  |
 
-_Note: The DS3231 module has a fifth pin, marked with `NC`. This "NC" (Not Connected) pin is not used or connected to anything._
+:::note
+The DS3231 module has a fifth pin, marked with `NC`. This "NC" (Not Connected) pin is not used or connected to anything. (obviously)
+:::
 
 ### Raspberry Pi connection
 
 ![20230927_172741](https://github.com/infinitel8p/Security-Cam/assets/50703696/b1fa89fb-877d-44ab-9870-e8b178a2d528)
 
 <div style={{ display: 'flex', alignItems: 'center' }}>
-  <!-- Table -->
   <div style={{ flex: 1, marginRight: '20px' }}>
     <table>
       <tr>
@@ -233,7 +251,6 @@ For the connections on the Raspberry you can refer the diagram shown [here](#ras
 :::
 
   </div>
-  <!-- Image -->
   <div style={{ flex: 1 }}>
     <img src="https://github.com/infinitel8p/Security-Cam/assets/50703696/b317925d-4eb0-4f59-a70e-86bfebb64f05" alt="Image 2" width="400" />
   </div>
@@ -265,13 +282,18 @@ This is the connection layout using a breadboard. The clock can also just be con
 
 3. #### Test the DS3231 RTC module:
 
-   You can use the `sudo i2cdetect -y 1` command to see if your Raspberry Pi detects the DS3231 RTC.  
-   You should see a number (usually 68 or 0x68) in the grid that corresponds to the module's address:
+   You can use the following command to see if your Raspberry Pi detects the DS3231 RTC:
 
    ```bash
-   pi@raspberrypizero2:~ $ sudo i2cdetect -y 1
-        0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
-   00:                         -- -- -- -- -- -- -- --
+   sudo i2cdetect -y 1
+   ```
+
+   You should see a number (usually 68 or 0x68) in the grid that corresponds to the module's address:
+
+   ```bash title="Example Output:"
+   pi@securitycam:~ $ sudo i2cdetect -y 1
+   0 1 2 3 4 5 6 7 8 9 a b c d e f
+   00: -- -- -- -- -- -- -- --
    10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
    20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
    30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -287,7 +309,7 @@ This is the connection layout using a breadboard. The clock can also just be con
    echo ds3231 0x68 | sudo tee /sys/class/i2c-adapter/i2c-1/new_device
    ```
 
-   `sudo hwclock` should now return the time from the RTC.
+   The command `sudo hwclock` should now return the time from the RTC.
 
 5. #### Set the System Time:
 
@@ -319,7 +341,7 @@ This is the connection layout using a breadboard. The clock can also just be con
    ```
 
    This will prevent the fake-hwclock from overwriting the hardware clock at boot.
-   If you have internet and want to sync the RTC time with the time servers, you can manually run the following command:
+   If you have internet and want to sync the RTC time with the time servers, you can manually run this command again:
 
    ```bash
    sudo hwclock -w
