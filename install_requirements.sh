@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# Update package list
-sudo apt-get update
-
-# Install system dependencies
-sudo apt-get install -y python3 python3-pip nodejs npm
-
 # Pull the latest code from the repository
 git config --global --add safe.directory /opt/security-cam
 cd /opt/security-cam/ || { echo "Failed to change directory to /opt/security-cam/"; exit 1; }
