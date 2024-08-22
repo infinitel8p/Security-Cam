@@ -1,7 +1,7 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
-  "/archive/page": "app/archive/page.js",
   "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/archive/page": "app/archive/page.js",
   "/page": "app/page.js",
   "/settings/page": "app/settings/page.js"
 }
