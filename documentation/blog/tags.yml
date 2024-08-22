@@ -27,3 +27,8 @@ stream:
   label: Stream
   permalink: /stream
   description: Stream related posts.
+
+raspberry:
+  label: Raspberry
+  permalink: /raspberry
+  description: Raspberry Pi related posts.

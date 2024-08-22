@@ -1,4 +1,4 @@
-// File: /Users/lennertpfundtner/Dev/Security-Cam/server/src/app/settings/page.tsx
+// File: C:\Users\Ludo\Desktop\Security Cam\server\src\app\settings\page.tsx
 import * as entry from '../../../../src/app/settings/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
