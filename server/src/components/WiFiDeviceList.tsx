@@ -1,22 +1,12 @@
 "use client";
 import React, { useState, useEffect } from 'react';
+import { fetchDeviceList } from '@/lib/helpers';
 
 const WiFiDeviceList = () => {
-    const [wifiDevices, setWifiDevices] = useState([]);
-
+    const [wifiDevices, setWifiDevices] = useState<Device[]>([]);
+    
     useEffect(() => {
-        const fetchSettings = async () => {
-            try {
-                const settingsFeedUrl = `${window.location.protocol}//${window.location.hostname}:5005/settings`;
-                const response = await fetch(settingsFeedUrl);
-                const data = await response.json();
-                setWifiDevices(data.TARGET_AP_MAC_ADDRESSES);
-            } catch (error) {
-                console.error("Error fetching Wi-Fi devices:", error);
-            }
-        };
-
-        fetchSettings();
+        fetchDeviceList(setWifiDevices, "AP_MAC");
     }, []);
 
     return (

@@ -3,12 +3,24 @@ import React, { useEffect, useState } from "react";
 
 const Page = () => {
     const [videos, setVideos] = useState<string[]>([]);
-    const archiveUrl = `${window.location.protocol}//${window.location.hostname}:5005/archive`;
+    const [archiveUrl, setArchiveUrl] = useState<string>('');
 
     useEffect(() => {
+        if (typeof window !== "undefined") {
+            setArchiveUrl(`${window.location.protocol}//${window.location.hostname}:5005/archive`);
+        }
+    }, []);
+
+    // Fetch videos once archiveUrl is set
+    useEffect(() => {
         const fetchVideos = async () => {
+            if (!archiveUrl) return;
+
             try {
                 const response = await fetch(archiveUrl);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
                 const data = await response.json();
                 setVideos(data);
             } catch (error) {
@@ -17,7 +29,7 @@ const Page = () => {
         };
 
         fetchVideos();
-    }, []);
+    }, [archiveUrl]); // Only run this effect when archiveUrl changes
 
     const handleDelete = (video: any) => {
         //! Implement delete functionality
@@ -31,9 +43,19 @@ const Page = () => {
                 videos.map((video, index) => {
                     const filename = video.split('/').pop();
                     if (!filename) return null;
-                    const [datePart, timePart] = filename.match(/\d+/g); // Extract date and time from the filename
-                    const date = `${datePart.slice(0, 4)}-${datePart.slice(4, 6)}-${datePart.slice(6, 8)}`;
-                    const time = `${timePart.slice(0, 2)}:${timePart.slice(2, 4)}:${timePart.slice(4, 6)}`;
+                    const matchResult = filename.match(/\d+/g); // Extract date and time from the filename
+                    let date: string | undefined;
+                    let time: string | undefined;
+
+                    if (matchResult) {
+                        const [datePart, timePart] = matchResult;
+
+                        date = `${datePart.slice(0, 4)}-${datePart.slice(4, 6)}-${datePart.slice(6, 8)}`;
+                        time = `${timePart.slice(0, 2)}:${timePart.slice(2, 4)}:${timePart.slice(4, 6)}`;
+                    } else {
+                        // Handle the case where the match fails (e.g., set default values or throw an error)
+                        console.error("No match found in the filename");
+                    }
 
                     return (
                         <div key={index} className="border border-red-500 flex flex-col justify-between m-2 p-2">

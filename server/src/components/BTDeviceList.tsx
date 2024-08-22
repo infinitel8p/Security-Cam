@@ -1,22 +1,12 @@
 "use client";
+import { fetchDeviceList } from '@/lib/helpers';
 import React, { useState, useEffect } from 'react';
 
 const BTDeviceList = () => {
-    const [btDevices, setBtDevices] = useState([]);
-
+    const [btDevices, setBtDevices] = useState<Device[]>([]);
+    
     useEffect(() => {
-        const fetchSettings = async () => {
-            try {
-                const settingsFeedUrl = `${window.location.protocol}//${window.location.hostname}:5005/settings`;
-                const response = await fetch(settingsFeedUrl);
-                const data = await response.json();
-                setBtDevices(data.TARGET_BT_ADDRESSES);
-            } catch (error) {
-                console.error("Error fetching BT devices:", error);
-            }
-        };
-
-        fetchSettings();
+        fetchDeviceList(setBtDevices, "BT");
     }, []);
 
     return (

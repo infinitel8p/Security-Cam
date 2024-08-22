@@ -1,22 +1,22 @@
 {
     "TARGET_BT_ADDRESSES": [
         {
-            "address": "1X:XX:XX:XX:XX:XX",
-            "name": "Device 1"
+            "name": "Device 1",
+            "address": "1X:XX:XX:XX:XX:XX"
         },
         {
-            "address": "2X:XX:XX:XX:XX:XX",
-            "name": "Device 2"
+            "name": "Device 2",
+            "address": "2X:XX:XX:XX:XX:XX"
         }
     ],
     "TARGET_AP_MAC_ADDRESSES": [
         {
-            "address": "XX:XX:XX:XX:XX:X1",
-            "name": "Device 1"
+            "name": "Device 1",
+            "address": "XX:XX:XX:XX:XX:X1"
         },
         {
-            "address": "XX:XX:XX:XX:XX:X2",
-            "name": "Device 2"
+            "name": "Device 2",
+            "address": "XX:XX:XX:XX:XX:X2"
         }
     ],
     "VideoSaveLocation": "./recordings"

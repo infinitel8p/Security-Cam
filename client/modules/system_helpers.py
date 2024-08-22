@@ -1,7 +1,7 @@
 import psutil
 
 
-def get_cpu_temp() -> int | None:
+def get_cpu_temp():
     """
     Returns the CPU temperature of the Raspberry Pi.
 
@@ -19,7 +19,7 @@ def get_cpu_temp() -> int | None:
         return None
 
 
-def get_cpu_load() -> int:
+def get_cpu_load():
     """
     Returns the CPU load as a percentage, considering the maximum load across all cores.
 
@@ -32,7 +32,7 @@ def get_cpu_load() -> int:
     return round(max_load)
 
 
-def get_storage_info() -> dict[str, int]:
+def get_storage_info():
     """
     Returns the total size and used space of the disk where the root directory is mounted.
 
@@ -46,7 +46,7 @@ def get_storage_info() -> dict[str, int]:
     return {'total_gb': round(total), 'used_gb': round(used)}
 
 
-def get_ram_usage() -> dict[str, int]:
+def get_ram_usage():
     """
     Returns the total and used RAM in MB.
 

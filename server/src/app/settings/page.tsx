@@ -5,37 +5,48 @@ import BTDeviceList from "@/components/BTDeviceList";
 import WiFiDeviceList from "@/components/WiFiDeviceList";
 
 const Page = () => {
-    const settingsFeedUrl = `${window.location.protocol}//${window.location.hostname}:5005/settings`;
+
+    const [settingsURL, setSettingsURL] = useState<string>('');
     const [selectedDirectory, setSelectedDirectory] = useState('');
     const [settings, setSettings] = useState({
         VideoSaveLocation: "Loading...",
     });
 
-    const handleDirectorySelect = (path) => {
+    const handleDirectorySelect = (path: string) => {
         setSelectedDirectory(path);
     };
 
+    // Set the settingsURL when the component mounts
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            setSettingsURL(`${window.location.protocol}//${window.location.hostname}:5005/settings`);
+        }
+    }, []);
+
+    // Fetch settings once settingsURL is set
     useEffect(() => {
         const fetchSettingsInfo = async () => {
-            try {
-
-                const response = await fetch(settingsFeedUrl);
-                const data = await response.json();
-                setSettings(data);
-            } catch (error) {
-                console.error("Error fetching settings info:", error);
-                setSettings({
-                    VideoSaveLocation: "Error loading data",
-                });
+            if (settingsURL) {
+                try {
+                    console.log(settingsURL);
+                    const response = await fetch(settingsURL);
+                    const data = await response.json();
+                    setSettings(data);
+                } catch (error) {
+                    console.error("Error fetching settings info:", error);
+                    setSettings({
+                        VideoSaveLocation: "Error loading data",
+                    });
+                }
             }
         };
 
         fetchSettingsInfo();
-    }, []);
+    }, [settingsURL]); // Run this effect whenever settingsURL changes
 
     const handleSaveLocationChange = async () => {
         try {
-            const response = await fetch(settingsFeedUrl, {
+            const response = await fetch(settingsURL, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

@@ -1,11 +1,16 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 
-const DirectoryPicker = ({ onDirectorySelect }) => {
-    const [directories, setDirectories] = useState([]);
-    const [currentPath, setCurrentPath] = useState('/');
-    const [error, setError] = useState('');
-    const [directoriesUrl, setDirectoriesUrl] = useState('');
+type DirectoryList = {
+    name: string;
+    path: string;
+}[];
+
+const DirectoryPicker = ({ onDirectorySelect } : {onDirectorySelect: any}) => {
+    const [directories, setDirectories] = useState<DirectoryList>([]);
+    const [currentPath, setCurrentPath] = useState<string>('/');
+    const [error, setError] = useState<string>('');
+    const [directoriesUrl, setDirectoriesUrl] = useState<string>('');
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -19,7 +24,7 @@ const DirectoryPicker = ({ onDirectorySelect }) => {
         }
     }, [directoriesUrl, currentPath]);
 
-    const fetchDirectories = async (path) => {
+    const fetchDirectories = async (path: string) => {
         try {
             const response = await fetch(`${directoriesUrl}?path=${encodeURIComponent(path)}`);
             const data = await response.json();
@@ -34,7 +39,7 @@ const DirectoryPicker = ({ onDirectorySelect }) => {
         }
     };
 
-    const handleDirectoryClick = (path) => {
+    const handleDirectoryClick = (path: string) => {
         setCurrentPath(path);
         onDirectorySelect(path);
     };
