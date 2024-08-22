@@ -27,6 +27,7 @@ def generate_frames():
 
     global out, is_recording
     cap = cv2.VideoCapture(0)
+    cap.set(cv2.CAP_PROP_FPS, 15)
 
     while True:
         success, frame = cap.read()
@@ -67,7 +68,7 @@ def start_recording() -> None:
 
     fourcc = cv2.VideoWriter_fourcc(*'X264')  # used XVID before
     with lock:
-        out = cv2.VideoWriter(recorded_filename, fourcc, 20.0, (640, 480))
+        out = cv2.VideoWriter(recorded_filename, fourcc, 15.0, (640, 480))
         is_recording = True
 
 

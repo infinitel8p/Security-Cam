@@ -14,9 +14,6 @@ bash /opt/security-cam/install_requirements.sh || { echo "install_requirements.s
 cd /opt/security-cam/server || { echo "Failed to change directory to /opt/security-cam/server"; exit 1; }
 npm install || { echo "npm install failed"; exit 1; }
 
-# Make the start.sh script executable (if needed)
-chmod +x /opt/security-cam/start.sh
-
 # Start the Node.js server
 cd /opt/security-cam/server || { echo "Failed to change directory to /opt/security-cam/server"; exit 1; }
 npm run dev &
