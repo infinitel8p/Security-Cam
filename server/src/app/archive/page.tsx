@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 
 const Page = () => {
-    const [videos, setVideos] = useState([]);
+    const [videos, setVideos] = useState<string[]>([]);
     const archiveUrl = `${window.location.protocol}//${window.location.hostname}:5005/archive`;
 
     useEffect(() => {
@@ -19,7 +19,7 @@ const Page = () => {
         fetchVideos();
     }, []);
 
-    const handleDelete = (video) => {
+    const handleDelete = (video: any) => {
         //! Implement delete functionality
         console.log(`Delete video: ${video}`);
     };
@@ -30,6 +30,7 @@ const Page = () => {
             {videos.length > 0 ? (
                 videos.map((video, index) => {
                     const filename = video.split('/').pop();
+                    if (!filename) return null;
                     const [datePart, timePart] = filename.match(/\d+/g); // Extract date and time from the filename
                     const date = `${datePart.slice(0, 4)}-${datePart.slice(4, 6)}-${datePart.slice(6, 8)}`;
                     const time = `${timePart.slice(0, 2)}:${timePart.slice(2, 4)}:${timePart.slice(4, 6)}`;
@@ -42,7 +43,7 @@ const Page = () => {
                                 onLoadedMetadata={(e) => {
                                     const target = e.target as HTMLVideoElement;
                                     const duration = target.duration;
-                                    document.getElementById(`duration-${index}`).textContent = `Duration: ${Math.floor(duration / 60)}m ${Math.floor(duration % 60)}s`;
+                                    document.getElementById(`duration-${index}`)!.textContent = `Duration: ${Math.floor(duration / 60)}m ${Math.floor(duration % 60)}s`;
                                 }}
                             >
                                 <source
