@@ -6,14 +6,15 @@ Integrations:
 - **Magnetic Reed Switch**: Integration with a magnetic reed switch to detect door open/close events and trigger recording accordingly.
 - **WIFI Detection**: Integration with WiFi Access Point to allow user to use bluetooth or WiFi to not trigger recording. Allows user to view recorded videos in the web interface when outside of the home network.
 - **Bluetooth Detection**: Integration with Bluetooth to allow user to use bluetooth to not trigger recording.
+- **Real Time Clock**: Integration with a Real Time Clock to keep track of the time when the Raspberry Pi is powered off.
+- **Web Dashboard**: A web dashboard to view the status of the Raspberry Pi and the recorded videos.
 
 ## Table of Contents
 
 - [Security Camera](#security-camera)
   - [Table of Contents](#table-of-contents)
   - [Prerequisites](#prerequisites)
-  - [Setup](#setup)
-  - [Usage](#usage)
+  - [Setup \& Usage](#setup--usage)
   - [Future Enhancements](#future-enhancements)
   - [Troubleshooting](#troubleshooting)
   - [Contribution Guidelines](#contribution-guidelines)
@@ -31,27 +32,13 @@ Integrations:
 - Breadboard (optional)
 - [DS3231 Real Time Clock Module](https://amzn.eu/d/ikNTko8)
 
-## Setup
-The following sections will explain how to set up the Raspberry Pi Zero 2 W. It is assumed that the Raspberry Pi Zero 2 W is already set up and running (Optional - set up VNC if you have a hard time working in a headless setup). If you need help setting up the Raspberry Pi Zero 2 W, please refer to the [Raspberry Pi Documentation](https://www.raspberrypi.org/documentation/).
-
-1. ### Hardware setup
-    The Instructions to the hardware setup can be found [here](./documentation/docs/setup/hardware.mdx). If you are new to the project, please start here.  
-    They explain how to connect the camera module and the magnetic reed switch to the Raspberry Pi and serve as entry point to the project.
-2. ### WiFi setup
-    The Instructions to the WiFi setup can be found [here](./documentation/docs/setup/wifi.mdx).  
-    They explain how to set up the Raspberry Pi as an access point and how to connect to it. This will be necessary to connect to the Raspberry Pi when outside of the home network and to access the web interface.
-3. ### Bluetooth and Script setup
-    The Instructions to the Bluetooth setup and the script setup can be found [here](./documentation/docs/setup/script.mdx).
-    They explain how to pair the Raspberry Pi with a Bluetooth device and how to set up the script.
-
-
-## Usage
-Once the script is running, the Raspberry Pi will start recording a video when the magnetic reed switch is triggered (the door is opened) and the smartphone is not connected to the Raspberry Pi (bluetooth and/or WiFi). The recording will stop when the magnetic reed switch is triggered again (the door is closed). 
+## Setup & Usage
+Follow the instructions on our [documentation](https://dev.infinitel8p.com/Security-Cam/) to set up the hardware and find out how to use it.
 
 ## Future Enhancements
 - **Web Interface**: A user-friendly interface to view recorded videos. **_WIP_**.
 - **Captive Portal**: Captive portal to open Web Interface when connecting to the Raspberry Pi's WiFi.
-- **System Monitor**: A system monitor to view the status of the Raspberry Pi (e.g., CPU temperature, CPU usage, RAM usage, etc.).
+- **System Monitor**: A system monitor to view the status of the Raspberry Pi (e.g., CPU temperature, CPU usage, RAM usage, etc.). **_WIP (included in the dashboard)_**.
 - **Improved Error Handling**: Improved error handling to prevent the script from crashing, server from freezing, etc.
 
 ## Troubleshooting

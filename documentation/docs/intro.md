@@ -10,18 +10,9 @@ Integrations:
 - **Magnetic Reed Switch**: Integration with a magnetic reed switch to detect door open/close events and trigger recording accordingly.
 - **WIFI Detection**: Integration with WiFi Access Point to allow user to use bluetooth or WiFi to not trigger recording. Allows user to view recorded videos in the web interface when outside of the home network.
 - **Bluetooth Detection**: Integration with Bluetooth to allow user to use bluetooth to not trigger recording.
+- **Real Time Clock**: Integration with a Real Time Clock to keep track of the time when the Raspberry Pi is powered off.
+- **Web Dashboard**: A web dashboard to view the status of the Raspberry Pi and the recorded videos.
 
-## Table of Contents
-
-- [Intro](#intro)
-  - [Table of Contents](#table-of-contents)
-  - [Prerequisites](#prerequisites)
-  - [Setup](#setup)
-  - [Usage](#usage)
-  - [Future Enhancements](#future-enhancements)
-  - [Troubleshooting](#troubleshooting)
-  - [Contribution Guidelines](#contribution-guidelines)
-  - [License](#license)
 
 ## Prerequisites
 
@@ -51,11 +42,12 @@ The following sections will explain how to set up the Raspberry Pi Zero 2 W. It 
 
 ## Usage
 Once the script is running, the Raspberry Pi will start recording a video when the magnetic reed switch is triggered (the door is opened) and the smartphone is not connected to the Raspberry Pi (bluetooth and/or WiFi). The recording will stop when the magnetic reed switch is triggered again (the door is closed). 
+Find out more about the usage [here](./basics/start).
 
 ## Future Enhancements
 - **Web Interface**: A user-friendly interface to view recorded videos. **_WIP_**.
 - **Captive Portal**: Captive portal to open Web Interface when connecting to the Raspberry Pi's WiFi.
-- **System Monitor**: A system monitor to view the status of the Raspberry Pi (e.g., CPU temperature, CPU usage, RAM usage, etc.).
+- **System Monitor**: A system monitor to view the status of the Raspberry Pi (e.g., CPU temperature, CPU usage, RAM usage, etc.). **_WIP (included in the dashboard)_**.
 - **Improved Error Handling**: Improved error handling to prevent the script from crashing, server from freezing, etc.
 
 ## Troubleshooting

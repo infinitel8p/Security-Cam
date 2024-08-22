@@ -19,7 +19,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <Navbar />
-        <div className="ml-40">
+        <div className="ml-40 bg-[#121019] min-h-dvh text-white"> {/*changed do a darker color to disabled this flashbang*/}
           {children}
         </div>
       </body>

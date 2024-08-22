@@ -21,6 +21,31 @@ Please ignore possible occurences of the Raspberry Pi Zero **1** W in the instru
 - Breadboard (optional)
 - Bluetooth-enabled device (e.g., a smartphone) to pair with the Raspberry Pi
 
+### Installations
+
+Clone the Repository to the Raspberry Pi first:
+
+```bash
+sudo git clone https://github.com/infinitel8p/Security-Cam.git /opt/security-cam
+sudo chown -R pi:pi /opt/security-cam
+sudo chmod -R u+rwX /opt/security-cam
+```
+
+Now install Node.js, npm and Python3
+
+```bash
+sudo apt update && sudo apt upgrade -y
+sudo apt install nodejs npm python3 python3-pip -y
+```
+
+After the installation is complete install the required Python and Node.js packages:
+
+```bash
+cd /opt/security-cam
+sudo chmod +x install_requirements.sh
+sudo ./install_requirements.sh
+```
+
 ## Camera
 
 Attach the camera to the Raspberry Pi. You will need a flex cable adapter for the Pi Zero for the camera module since the Raspberry Pi Zero has a smaller smaller connector than the standard camera module. The camera should be attached to the Raspberry Pi as shown below.
@@ -29,35 +54,27 @@ Attach the camera to the Raspberry Pi. You will need a flex cable adapter for th
 
 If connected properly you should see a faint red glow from the camera's infrared LEDs when the raspberry is turned on.
 
-### Update the Camera Library
-
-Update the camera library (and everything else) first if you have not already done so. Run the following commands on the Raspberry Pi:
-
-```bash
-sudo apt update && sudo apt upgrade -y
-```
-
 ### Camera Setup
 
 Edit the `/boot/firmware/config.txt` file:
 
 ```bash
 sudo sh -c 'echo "start_x=1" >> /boot/firmware/config.txt'
-sudo nano /boot/firmware/config.txt
+sudo sed -i 's/camera_auto_detect=1/camera_auto_detect=0/' /boot/firmware/config.txt
+sudo reboot
 ```
 
-Find `camera-auto-detect=1` and modify it to `camera_auto_detect=0`.
-
-Restart the Raspberry Pi now.
+This will enable the camera interface and disable the camera auto-detection feature. The Raspberry Pi will then reboot.
 
 :::info
 If you use `OV9281`, `IMX290`, `IMX378` or non-Raspberry Pi official `IMX219` and `IMX477` cameras, you need to configure the config.txt file separately:
 
 ```bash title="/boot/firmware/config.txt"
+sudo sh -c 'echo "start_x=1" >> /boot/firmware/config.txt'
 sudo nano /boot/firmware/config.txt
 ```
 
-Find `camera-auto-detect=1` and modify it to `camera_auto_detect=0`.
+Find `camera_auto_detect=1` and modify it to `camera_auto_detect=0`.
 At the end of the file, add the following setting statements according to the camera model:
 | Camera Model | Setting Statement |
 | ------------- | ------------------------------------------ |
@@ -79,8 +96,9 @@ vcgencmd get_camera
 
 This should return something like:
 
-```bash
-supported=1 detected=1
+```bash title="Example Output:"
+pi@securitycam:~ $ vcgencmd get_camera
+supported=1 detected=1, libcamera interfaces=0
 ```
 
 Now test the camera with the following command:
@@ -267,15 +285,12 @@ This is the connection layout using a breadboard. The clock can also just be con
 1. #### To enable the I2C interface, run the following command on the Raspberry Pi:
 
    ```bash
-   sudo raspi-config
+   sudo raspi-config nonint do_i2c 0
    ```
-
-   In the menu, select `Interface Options` and then `I2C`. Select `Yes` to enable it and then `Ok`. Select `Finish` to exit the configuration menu and reboot the Raspberry Pi.
 
 2. #### Install the required packages:
 
    ```bash
-   sudo apt-get update
    sudo apt-get install python3-smbus
    sudo apt-get install i2c-tools
    ```
@@ -324,13 +339,7 @@ This is the connection layout using a breadboard. The clock can also just be con
 6. #### Enable automatic bus configuration:
 
    ```bash
-   sudo nano /etc/rc.local
-   ```
-
-   At the end of the file **before** `exit 0`, add the following line:
-
-   ```bash
-   echo ds3231 0x68 > /sys/class/i2c-adapter/i2c-1/new_device
+   sudo sed -i '/^exit 0/i echo ds3231 0x68 > /sys/class/i2c-adapter/i2c-1/new_device' /etc/rc.local
    ```
 
 7. #### Disable the fake-hwclock:

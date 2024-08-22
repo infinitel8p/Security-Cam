@@ -15,7 +15,8 @@ const Home = () => {
           <ClientVideoPlayer />
         </div>
         <div className="border border-red-500">
-          (log) monitor -  (un-)befugter zutritt als status ggfs, date time, falls bekannte person/handy auch namen,bild
+          (log) monitor -  (un-)befugter zutritt als status ggfs, date time, falls bekannte person/handy auch namen,bild <br></br>
+          JSON?
           <ul className="mt-10">
             <li>Status - Date - Unknown</li>
             <li>Status - Date - Max Mustermann</li>

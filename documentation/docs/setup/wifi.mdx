@@ -5,6 +5,8 @@ description: "Step 2: Setup the WiFi Access Point"
 
 # WiFi Setup
 
+This guide will help you set up a WiFi Access Point on your Raspberry Pi.
+
 ## Find your Raspberry's MAC address:
 
 Enter the following command to find the MAC address of your Raspberry Pi's WiFi interface:
@@ -36,7 +38,7 @@ phy#0
 The MAC address of the `wlan0` interface is `b8:27:xx:xx:xx:xx` in this case.
 
 :::info
-Remember the channel number (`channel 1` in this case) for later.
+Remember this MAC address (write it down) and the channel number (`channel 1` in this case) for later.
 :::
 
 ## Allocate a device for the Access Point
@@ -59,9 +61,7 @@ RUN+="/bin/ip link set ap0 address REPLACEWITHMACADDRESS"
 ## Install `Dnsmasq`, `Hostapd` and `Nftables`
 
 ```bash
-sudo apt-get update
-sudo apt-get upgrade #Optional
-sudo apt-get install dnsmasq hostapd nftables
+sudo apt-get install dnsmasq hostapd nftables -y
 ```
 
 ## Configure `Dnsmasq`
@@ -74,6 +74,7 @@ sudo sh -c 'echo "interface=lo,ap0
 no-dhcp-interface=lo,wlan0
 bind-interfaces
 server=8.8.8.8
+server=1.1.1.1
 domain-needed
 bogus-priv
 dhcp-range=192.168.10.50,192.168.10.150,12h" > /etc/dnsmasq.conf'
@@ -118,13 +119,7 @@ Before you save, make sure to do these changes to the configuration:
 Now after having saved, we want to specify where `hostapd` should find its configuration:
 
 ```bash
-sudo nano /etc/default/hostapd
-```
-
-Find the line with `#DAEMON_CONF=""` and replace _(uncomment it or add it if it doesn't exist)_ it with:
-
-```bash
-DAEMON_CONF="/etc/hostapd/hostapd.conf"
+sudo sed -i 's|^#DAEMON_CONF=""|DAEMON_CONF="/etc/hostapd/hostapd.conf"|' /etc/default/hostapd
 ```
 
 ## Modify the `wpa_supplicant` configuration
@@ -215,16 +210,16 @@ sudo ifup wlan0
 :::danger
 It's crucial to copy and paste the entire block of commands above all at once.  
 Executing them one by one will disconnect you from the Pi after disabling the interfaces, preventing you from re-enabling them immediately.  
-If your Raspberry Pi Zero 2 W does not reconnect to your WiFi network at this point, unplug the power and plug it back in.  
-On my setup it wouldn't connect even after a restart. I inserted the microSD card into my PC and recreated the `wpa_supplier.conf` in the boot drive.  
+If your Raspberry Pi Zero 2 W does not reconnect to your WiFi network at this point wait a few more seconds, unplug the power and plug it back in.
 :::
 
 ### Check the interfaces
 
-After waiting a few seconds, unplug the raspberry pi and plug it back in. After it has booted up you should be able to see the `DevAccessPoint` network on your device.
-Connect to it and ssh into the raspberry pi.
+You should be able to see the `DevAccessPoint` network on your device.
 
-SSH into the Pi again (probably with `ssh pi@192.168.10.1` as configured in [here](#modify-etcnetworkinterfaces-to-support-the-new-ap)) and check the interfaces:
+SSH into the Pi again (either you connect to the `DevAccessPoint` and ssh with `ssh pi@192.168.10.1` as configured in [here](#modify-etcnetworkinterfaces-to-support-the-new-ap) or find the Raspberry Pi's new IP address in your router and ssh into it).
+
+Now check the interfaces:
 
 ```bash
 pi@securitycam:~$ ip addr
@@ -322,10 +317,10 @@ sudo bash -c 'echo "@reboot /opt/start-ap-managed-wifi.sh" >> /var/spool/cron/cr
 Continue to [script.md](./script) to set up bluetooth and the script.
 
 :::note
-These instructions are tested on Raspbian Buster. (With a Raspberry Pi Zero W)
+These instructions are tested on Raspbian Bookworm with a Raspberry Pi Zero 2 W.
 :::
 :::info
-Shoutout to [TheWalrus](https://blog.thewalr.us/2017/09/26/raspberry-pi-zero-w-simultaneous-ap-and-managed-mode-wifi/) for the original instructions. A comment under the post pointed out that the instructions depend upon if-up and if-down system which is no longer used in Raspian Buster. You might want to visit the original post for more information.
+Shoutout to [TheWalrus](https://blog.thewalr.us/2017/09/26/raspberry-pi-zero-w-simultaneous-ap-and-managed-mode-wifi/) for the original instructions. A comment under the post pointed out that the instructions depend upon if-up and if-down system which is no longer used as of Raspian Buster. You might want to visit the original post for more information.
 
 > These instructions depend upon if-up and if-down system used by Raspbian Stretch version.
 >
