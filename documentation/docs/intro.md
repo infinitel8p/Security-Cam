@@ -26,20 +26,6 @@ Integrations:
 - Breadboard (optional)
 - [DS3231 Real Time Clock Module](https://amzn.eu/d/ikNTko8)
 
-## Setup
-The following sections will explain how to set up the Raspberry Pi Zero 2 W. It is assumed that the Raspberry Pi Zero 2 W is already set up and running (Optional - set up VNC if you have a hard time working in a headless setup). If you need help setting up the Raspberry Pi Zero 2 W, please refer to the [Raspberry Pi Documentation](https://www.raspberrypi.org/documentation/).
-
-1. ### Hardware setup
-    The Instructions to the hardware setup can be found [here](./setup/hardware). If you are new to the project, please start here.  
-    They explain how to connect the camera module and the magnetic reed switch to the Raspberry Pi and serve as entry point to the project.
-2. ### WiFi setup
-    The Instructions to the WiFi setup can be found [here](./setup/wifi).  
-    They explain how to set up the Raspberry Pi as an access point and how to connect to it. This will be necessary to connect to the Raspberry Pi when outside of the home network and to access the web interface.
-3. ### Bluetooth and Script setup
-    The Instructions to the Bluetooth setup and the script setup can be found [here](./setup/script).
-    They explain how to pair the Raspberry Pi with a Bluetooth device and how to set up the script.
-
-
 ## Usage
 Once the script is running, the Raspberry Pi will start recording a video when the magnetic reed switch is triggered (the door is opened) and the smartphone is not connected to the Raspberry Pi (bluetooth and/or WiFi). The recording will stop when the magnetic reed switch is triggered again (the door is closed). 
 Find out more about the usage [here](./basics/start).

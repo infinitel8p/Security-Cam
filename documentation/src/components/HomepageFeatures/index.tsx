@@ -10,29 +10,29 @@ type FeatureItem = {
 
 const FeatureList: FeatureItem[] = [
   {
-    title: 'Magnetic Reed Switch:',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+    title: 'Night Vision:',
+    Svg: require('@site/static/img/undraw_surveillance.svg').default,
     description: (
       <>
-        Integration with a magnetic reed switch to detect door open/close events and trigger recording accordingly.
+        Elevating the Raspberry Pi Zero 2 W along with the Waveshare RPi Camera (F) for a complete view - even in the dark.
       </>
     ),
   },
   {
-    title: 'WIFI Detection:',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    title: 'Device Detection:',
+    Svg: require('@site/static/img/undraw_broadcast.svg').default,
     description: (
       <>
-        Integration with WiFi Access Point to allow user to use bluetooth or WiFi to not trigger recording. Allows user to view recorded videos in the web interface when outside of the home network.
+        Integration with WiFi Access Point and Bluetooth to prevent recording when you are nearby.
       </>
     ),
   },
   {
-    title: 'Bluetooth Detection:',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    title: 'Admin Dashboard:',
+    Svg: require('@site/static/img/undraw_responsive.svg').default,
     description: (
       <>
-        Integration with Bluetooth to allow user to use bluetooth to not trigger recording.
+        Check the status of your camera, view the live feed, download recordings, and change settings on all your devices.
       </>
     ),
   },
