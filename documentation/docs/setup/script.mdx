@@ -1,119 +1,43 @@
 ---
 sidebar_position: 3
-description: "Step 3: Setup Bluetooth and the Script"
+description: "Step 3: Setup Bluetooth"
 ---
 
-# Bluetooth & Script Setup
-
-## Install
-
-To set up the necessary libraries and tools, run the following commands:
-
-```bash
-sudo apt-get update
-sudo apt-get install python3-picamera
-sudo apt-get install python3-pip
-```
-
-Now clone the repository and install the required Python libraries:
-
-```bash
-git clone https://github.com/infinitel8p/Security-Cam/
-cd Security-Cam
-sudo pip3 install -r requirements.txt
-```
+# Bluetooth Setup
 
 ## Pairing
 
-- Ensure your Bluetooth device's visibility is turned on.
-- On the Raspberry Pi, run `bluetoothctl`.
-- In the bluetoothctl prompt, enter the following commands:
-  ```bash
-  agent on
-  default-agent
-  scan on
-  ```
-- Once you see the MAC address of your device, pair with it using: `pair XX:XX:XX:XX:XX:XX`.
-- Trust the device using: `trust XX:XX:XX:XX:XX:XX`.
-- `exit` from `bluetoothctl`.
+Ensure your Bluetooth device's visibility is turned on.
+On the Raspberry Pi, enter the following command:
 
-## Install Node.js
+```bash
+bluetoothctl
+```
 
-- Install Node.js with the following commands:
-  1.  Update the Raspberry Pi
-      ```bash
-      sudo apt update
-      sudo apt upgrade
-      ```
-  2.  Check the Node.js Version Available
-      ```bash
-      apt-cache policy nodejs
-      ```
-      The output should look like this:
-      ```bash
-      pi@raspberrypizero2:~ $ apt-cache policy nodejs
-      nodejs:
-      Installed: (none)
-      Candidate: 12.22.12~dfsg-1~deb11u4
-      Version table:
-         12.22.12~dfsg-1~deb11u4 500
-            500 http://raspbian.raspberrypi.org/raspbian bullseye/main armhf Packages
-      ```
-      The apt-cache policy nodejs command shows that Node.js version 12.22.12 is available for installation from the Raspberry Pi repositories, but it hasn't been installed (Installed: (none)).
-  3.  Install Node.JS and npm on the Raspberry Pi
-      ```bash
-      sudo apt install nodejs
-      sudo apt install npm
-      ```
-  4.  Check the version
-      ```bash
-      nodejs -v  # Checks Node.js version
-      npm -v     # Checks npm version
-      ```
+In the bluetoothctl prompt, enter the following commands:
 
-## Install GPAC
+```bash
+agent on
+```
 
-- Install GPAC with the following commands:
-  1.  Install GPAC
-      ```bash
-      sudo apt-get update
-      sudo apt-get install gpac
-      ```
-  1.  Check if GPAC is installed
-      ```bash
-      gpac
-      ```
+```bash
+default-agent
+```
 
-## Script Setup
+```bash
+scan on
+```
 
-1. #### Modify the Script
+Once you see the MAC address of your device, pair with it using (replace `XX:XX:XX:XX:XX:XX` with the **Bluetooth** MAC address of your target device):
 
-   - Open the `config.json` file.
-   - Replace XX:XX:XX:XX:XX:XX with the Bluetooth MAC address of your device (e.g., your smartphone).
-   - Replace XX:XX:XX:XX:XX:XX with the WiFi MAC address of your device (e.g., your smartphone).
+```bash
+pair XX:XX:XX:XX:XX:XX
+```
 
-   Your `config.json` could look like this:
+Then trust the device:
 
-   ```json
-   {
-   	"TARGET_BT_ADDRESSES": ["12:34:56:78:9A:BC"],
-   	"TARGET_AP_MAC_ADDRESSES": ["A1:B2:C3:D4:E5:F6"]
-   }
-   ```
+```bash
+trust XX:XX:XX:XX:XX:XX
+```
 
-   ```json
-   {
-   	"TARGET_BT_ADDRESSES": ["12:34:56:78:9A:BC", "DE:F1:23:45:67:89"],
-   	"TARGET_AP_MAC_ADDRESSES": ["A1:B2:C3:D4:E5:F6", "F6:E5:D4:C3:B2:A1"]
-   }
-   ```
-
-1. #### Run the Script
-   - Start the security camera script from within the `Security-Cam/` folder with thefollowing command:
-     ```bash
-     python3 main.py
-     ```
-   - Now startt the server with the following command:
-     ```bash
-     node ./server/server.js
-     ```
+Now type `exit` to exit the bluetoothctl prompt.

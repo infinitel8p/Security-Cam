@@ -14,7 +14,7 @@
             <guid>https://dev.infinitel8p.com/Security-Cam/blog/fix-the-stream</guid>
             <pubDate>Wed, 21 Aug 2024 00:00:00 GMT</pubDate>
             <description><![CDATA[Fixing old issues]]></description>
-            <content:encoded><![CDATA[<h3 class="anchor anchorWithStickyNavbar_LWe7" id="fixing-old-issues">Fixing old issues<a class="hash-link" aria-label="Direct link to Fixing old issues" title="Direct link to Fixing old issues" href="https://dev.infinitel8p.com/Security-Cam/blog/fix-the-stream#fixing-old-issues">​</a></h3>
+            <content:encoded><![CDATA[<h3 class="anchor anchorWithStickyNavbar_LWe7" id="fixing-old-issues">Fixing old issues<a href="https://dev.infinitel8p.com/Security-Cam/blog/fix-the-stream#fixing-old-issues" class="hash-link" aria-label="Direct link to Fixing old issues" title="Direct link to Fixing old issues">​</a></h3>
 <p>In my previous setup, I used <code>picamera</code> for recording and streaming video on the Raspberry Pi. However, I noticed a recurring issue: the video stream would consistently freeze whenever a recording started, only resuming after the recording was complete. While this wasn't a big problem, it was frustrating enough to warrant a closer look.</p>
 <p>To address this, I decided to explore an alternative approach using <code>OpenCV</code>. I wrote a small test script that streams frames to a <code>Flask</code> endpoint. After modifying the <code>ClientVideoPlayer</code> component in our placeholder dashboard, I successfully established a stable video stream. The next step was to test whether the video could be recorded while maintaining a continuous and stable feed to the dashboard—and I'm happy to report that this was a success.</p>
 <p>As a result, we're transitioning from using <code>picamera</code> and <code>WebSockets</code> for streaming to using <code>Flask</code> and <code>OpenCV</code>. While I still have a few more tests to conduct before finalizing this decision, resolving the most frustrating issue from the old code feels like a significant step forward.</p>]]></content:encoded>
@@ -28,7 +28,7 @@
             <guid>https://dev.infinitel8p.com/Security-Cam/blog/starting-the-dashboard</guid>
             <pubDate>Thu, 25 Jul 2024 00:00:00 GMT</pubDate>
             <description><![CDATA[Starting to build the Dashboard]]></description>
-            <content:encoded><![CDATA[<h3 class="anchor anchorWithStickyNavbar_LWe7" id="starting-to-build-the-dashboard">Starting to build the Dashboard<a class="hash-link" aria-label="Direct link to Starting to build the Dashboard" title="Direct link to Starting to build the Dashboard" href="https://dev.infinitel8p.com/Security-Cam/blog/starting-the-dashboard#starting-to-build-the-dashboard">​</a></h3>
+            <content:encoded><![CDATA[<h3 class="anchor anchorWithStickyNavbar_LWe7" id="starting-to-build-the-dashboard">Starting to build the Dashboard<a href="https://dev.infinitel8p.com/Security-Cam/blog/starting-the-dashboard#starting-to-build-the-dashboard" class="hash-link" aria-label="Direct link to Starting to build the Dashboard" title="Direct link to Starting to build the Dashboard">​</a></h3>
 <p>Today we started building the first steps of the dashboard. We chose NextJS with TypeScript and TailwindCSS as the main technologies.
 Before that we talked about how to integrate the video stream and found out about the ability of the HTML5 video tag to stream a video via RTSP.</p>
 <p>Now the decision was easy as Lenni is used to coding with NextJS.
@@ -46,7 +46,7 @@ Design isnt necessary at this point. We just want to have something running to t
             <guid>https://dev.infinitel8p.com/Security-Cam/blog/welcome</guid>
             <pubDate>Fri, 19 Jul 2024 00:00:00 GMT</pubDate>
             <description><![CDATA[Welcome on our journey]]></description>
-            <content:encoded><![CDATA[<h3 class="anchor anchorWithStickyNavbar_LWe7" id="welcome-on-our-journey">Welcome on our journey<a class="hash-link" aria-label="Direct link to Welcome on our journey" title="Direct link to Welcome on our journey" href="https://dev.infinitel8p.com/Security-Cam/blog/welcome#welcome-on-our-journey">​</a></h3>
+            <content:encoded><![CDATA[<h3 class="anchor anchorWithStickyNavbar_LWe7" id="welcome-on-our-journey">Welcome on our journey<a href="https://dev.infinitel8p.com/Security-Cam/blog/welcome#welcome-on-our-journey" class="hash-link" aria-label="Direct link to Welcome on our journey" title="Direct link to Welcome on our journey">​</a></h3>
 <p>We mark the 19th of July 2024, the day we start to rebuild this project.<br>
 <!-- -->After a long time of inactivity, we decided to start from scratch and rebuild most of the stuff we already did.
 We are excited to see where this journey will take us.<br>

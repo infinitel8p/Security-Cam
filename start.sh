@@ -16,7 +16,7 @@ npm install || { echo "npm install failed"; exit 1; }
 
 # Start the Node.js server
 cd /opt/security-cam/server || { echo "Failed to change directory to /opt/security-cam/server"; exit 1; }
-npm run dev &
+npm start &
 
 # Start the Flask server
 cd /opt/security-cam/client || { echo "Failed to change directory to /opt/security-cam/client"; exit 1; }
