@@ -87,6 +87,11 @@ def stream_video():
 
     return send_file(video_path, as_attachment=True, download_name=os.path.basename(video_path), mimetype='video/mp4')
 
+@app.route('/delete_video', methods=['POST'])
+def delete_video_route():
+    video_path = request.json.get('video_path')
+    response, status_code = archive_helpers.delete_video(video_path)
+    return jsonify(response), status_code
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5005, debug=True)

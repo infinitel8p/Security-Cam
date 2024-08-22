@@ -8,14 +8,12 @@ const Navbar = () => {
                 <ul className="flex flex-col gap-y-10">
                     <Navitem title="Home" slug="/" />
                     <Navitem title="Archive" slug="/archive" />
-                    {/* Clients (wifi / bt) */}
-                    {/* modular trigger sensors */}
-                    {/* video save location */}
+                    <Navitem title="Settings" slug="/settings" />
                 </ul>
             </nav>
             <div>
                 <ul>
-                    <Navitem title="Settings" slug="/settings" />
+                    <Navitem title="Github" slug="https://github.com/infinitel8p/Security-Cam" />
                 </ul>
             </div>
         </div>

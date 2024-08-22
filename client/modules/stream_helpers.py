@@ -34,7 +34,7 @@ def generate_frames():
         if not success:
             break
 
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        timestamp = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
         cv2.putText(frame, timestamp, (10, frame.shape[0] - 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2, cv2.LINE_AA)
 

@@ -33,7 +33,7 @@ Integrations:
 - [DS3231 Real Time Clock Module](https://amzn.eu/d/ikNTko8)
 
 ## Setup & Usage
-Follow the instructions on our [documentation](https://dev.infinitel8p.com/Security-Cam/) to set up the hardware and find out how to use it.
+Follow the instructions in our [documentation](https://dev.infinitel8p.com/Security-Cam/) to set up the hardware and find out how to use it.
 
 ## Future Enhancements
 - **Web Interface**: A user-friendly interface to view recorded videos. **_WIP_**.

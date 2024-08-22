@@ -31,11 +31,26 @@ const Page = () => {
         fetchVideos();
     }, [archiveUrl]); // Only run this effect when archiveUrl changes
 
-    const handleDelete = (video: any) => {
-        //! Implement delete functionality
-        console.log(`Delete video: ${video}`);
-    };
+    const handleDelete = async (video: any) => {
+        try {
+            const response = await fetch(`${archiveUrl.replace('/archive', '/delete_video')}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ video_path: video }),
+            });
 
+            if (response.ok) {
+                setVideos((prevVideos) => prevVideos.filter((v) => v !== video));
+                console.log(`Deleted video: ${video}`);
+            } else {
+                console.error("Failed to delete the video");
+            }
+        } catch (error) {
+            console.error("Error deleting video:", error);
+        }
+    };
 
     return (
         <div className="grid grid-cols-3 gap-5 text-center">
