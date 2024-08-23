@@ -4,7 +4,7 @@ import { fetchDeviceList } from '@/lib/helpers';
 
 const WiFiDeviceList = () => {
     const [wifiDevices, setWifiDevices] = useState<Device[]>([]);
-    
+
     useEffect(() => {
         fetchDeviceList(setWifiDevices, "AP_MAC");
     }, []);

@@ -1,24 +1,19 @@
-import json
 import logging
 import bluetooth
 import subprocess
+from . import settings_helpers
 
-SETTINGS_FILE = './settings/settings.json'
-settings = None
-with open(SETTINGS_FILE, 'r') as file:
-    settings = json.load(file)
+settings = settings_helpers.get_settings()
 
-
-def is_device_connected_to_bt(bt_addresses) -> bool:
+def is_device_connected_to_bt() -> bool:
     """Check if any of the given Bluetooth addresses are visible."""
-    for addr in bt_addresses:
+    for addr in settings.get("TARGET_BT_ADDRESSES"):
         status = bluetooth.lookup_name(addr["address"], timeout=3)
         if status:
             logging.info(f"Device {addr['name']} is connected.")
             return True
     logging.warning("No devices connected via Bluetooth.")
     return False
-
 
 def is_in_ap_mode() -> bool:
     """Check if the device is in AP mode."""

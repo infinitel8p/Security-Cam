@@ -1,17 +1,16 @@
 import os
 import cv2
-import json
 import threading
 from datetime import datetime
+from . import settings_helpers
+
+settings = settings_helpers.get_settings()
 
 # Lock for thread-safe access to the recording flag and writer
 lock = threading.Lock()
 out = None
 is_recording = False
 recorded_filename = None
-
-# Load settings.json
-SETTINGS_FILE = './settings/settings.json'
 
 
 def generate_frames():
@@ -59,9 +58,6 @@ def start_recording() -> None:
         None
     """
     global out, is_recording, recorded_filename
-
-    with open(SETTINGS_FILE, 'r') as f:
-        settings = json.load(f)
 
     video_save_location = settings.get('VideoSaveLocation', './recordings')
     os.makedirs(video_save_location, exist_ok=True)

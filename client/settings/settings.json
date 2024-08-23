@@ -2,11 +2,11 @@
     "TARGET_BT_ADDRESSES": [
         {
             "name": "Device 1",
-            "address": "1X:XX:XX:XX:XX:XX"
+            "address": "20:50:CF:A2:90:69"
         },
         {
             "name": "Device 2",
-            "address": "2X:XX:XX:XX:XX:XX"
+            "address": "20:50:CF:A2:90:69"
         }
     ],
     "TARGET_AP_MAC_ADDRESSES": [

@@ -6,7 +6,7 @@ type DirectoryList = {
     path: string;
 }[];
 
-const DirectoryPicker = ({ onDirectorySelect } : {onDirectorySelect: any}) => {
+const DirectoryPicker = ({ onDirectorySelect }: { onDirectorySelect: any }) => {
     const [directories, setDirectories] = useState<DirectoryList>([]);
     const [currentPath, setCurrentPath] = useState<string>('/');
     const [error, setError] = useState<string>('');
@@ -51,7 +51,7 @@ const DirectoryPicker = ({ onDirectorySelect } : {onDirectorySelect: any}) => {
             <ul>
                 {directories.map((dir) => (
                     <li key={dir.path}>
-                        <button className='bg-red-500 m-1' onClick={() => handleDirectoryClick(dir.path)}>
+                        <button className='bg-red-500 m-1 py-1 px-2' onClick={() => handleDirectoryClick(dir.path)}>
                             {dir.name}
                         </button>
                     </li>

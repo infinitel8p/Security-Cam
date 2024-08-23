@@ -82,7 +82,7 @@ const Page = () => {
                         <h1>Select a new directory to save the videos:</h1>
                         <DirectoryPicker onDirectorySelect={handleDirectorySelect} />
                     </div>
-                    <button className="bg-gray-200" onClick={handleSaveLocationChange}>Update Location</button>
+                    <button className="bg-gray-500 border rounded-md p-2 h-10 m-auto" onClick={handleSaveLocationChange}>Update Location</button>
                 </div>
             </div>
             <div className="border border-red-500 text-gray-300">modular trigger sensors: TBD</div>

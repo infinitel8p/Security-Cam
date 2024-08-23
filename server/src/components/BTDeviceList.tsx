@@ -4,14 +4,14 @@ import React, { useState, useEffect } from 'react';
 
 const BTDeviceList = () => {
     const [btDevices, setBtDevices] = useState<Device[]>([]);
-    
+
     useEffect(() => {
         fetchDeviceList(setBtDevices, "BT");
     }, []);
 
     return (
         <div>
-            <h3>Bluetooth Devices:</h3>
+            <h3>Bluetooth Devices: <span className='text-xs'>(need to add pairing and unpairing)</span></h3>
             <ul>
                 {btDevices.map((device, index) => (
                     <li key={index}>

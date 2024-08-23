@@ -2,7 +2,7 @@ import os
 import json
 import subprocess
 
-SETTINGS_FILE = './settings/settings.json'
+SETTINGS_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "settings/settings.json")
 
 def get_settings():
     """

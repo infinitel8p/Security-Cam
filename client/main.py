@@ -5,6 +5,7 @@ from modules import system_helpers
 from modules import stream_helpers
 from modules import settings_helpers
 from modules import archive_helpers
+from modules import activity_helpers
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -33,11 +34,18 @@ def video_feed():
 @app.route('/toggle_recording', methods=['POST'])
 def toggle_recording():
     global is_recording
+
     if stream_helpers.is_recording:
         stream_helpers.stop_recording()
+        print("Recording stopped")
         return jsonify({"message": "Recording stopped"})
     else:
+        if activity_helpers.is_device_connected_to_bt():
+            print("Cannot record while connected to Bluetooth")
+            return jsonify({"message": "Cannot record while connected to Bluetooth"}), 400
+        
         stream_helpers.start_recording()
+        print("Recording started")
         return jsonify({"message": "Recording started"})
     
 

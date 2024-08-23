@@ -1,11 +1,9 @@
-import json
 import os
+from . import settings_helpers
 
-SETTINGS_FILE = './settings/settings.json'
+settings = settings_helpers.get_settings()
 
 def get_videos():
-    with open(SETTINGS_FILE, 'r') as f:
-        settings = json.load(f)
     
     video_dir = settings["VideoSaveLocation"]
     videos = []
