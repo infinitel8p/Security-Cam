@@ -1,5 +1,6 @@
-import json
 import os
+import json
+import subprocess
 
 SETTINGS_FILE = './settings/settings.json'
 
@@ -30,6 +31,112 @@ def update_settings(new_settings) -> None:
         json.dump(settings, f, indent=4)
         f.truncate()
 
+# Bluetooth helper functions
+def pair_bt_device(device_mac: str):
+    """
+    Pair a Bluetooth device using a shell script.
+
+    Args:
+        device_mac (str): The MAC address of the device to pair.
+
+    Raises:
+        FileNotFoundError: If the shell script is not found.
+        RuntimeError: If the pairing fails.
+    """
+
+    current_dir = os.path.dirname(os.path.realpath(__file__))
+    script_path = os.path.join(current_dir, "shell/pair.sh")
+
+    try:
+        # Check if the file actually exists
+        if not os.path.exists(script_path):
+            raise FileNotFoundError(f"pair.sh not found")
+
+        # Ensure the shell script is executable
+        subprocess.run(["chmod", "+x", script_path], check=True, capture_output=True, text=True)
+
+        # Run the shell script with the MAC address as an argument
+        result = subprocess.run(f"{script_path} {device_mac}", capture_output=True, text=True, shell=True)
+
+        # Check if the process was successful
+        if result.returncode != 0:
+            if "Device is already paired" in result.stdout:
+                print("Device is already paired, skipping pairing...")
+            else:
+                print(f"Script returned non-zero exit code: {result.returncode}")
+                print(f"STDOUT: {result.stdout.strip()}")
+                print(f"STDERR: {result.stderr.strip()}")
+        else:
+            # Check for success message or specific output conditions
+            if "Pairing successful" in result.stdout:
+                print("Pairing was successful!")
+            elif "Device is already paired" in result.stdout:
+                print("Device is already paired, skipping pairing...")
+            elif "trust succeeded" in result.stdout:
+                print("Device trusted successfully!")
+            else:
+                print(f"Unexpected output during pairing: {result.stdout.strip()}")
+
+    except FileNotFoundError as fnf_error:
+        print(fnf_error)
+    except RuntimeError as re:
+        # Print only the error message without traceback
+        print(re)
+    except Exception as e:
+        # Print exception message without traceback
+        print(f"An error occurred: {e}")
+
+def unpair_bt_device(device_mac: str):
+    """
+    Unpair a Bluetooth device using a shell script.
+
+    Args:
+        device_mac (str): The MAC address of the device to unpair.
+
+    Raises:
+        FileNotFoundError: If the shell script is not found.
+        RuntimeError: If the unpairing fails.
+    """
+
+    current_dir = os.path.dirname(os.path.realpath(__file__))
+    script_path = os.path.join(current_dir, "shell/unpair.sh")
+
+    try:
+        # Check if the file actually exists
+        if not os.path.exists(script_path):
+            raise FileNotFoundError(f"unpair.sh not found")
+
+        # Ensure the shell script is executable
+        subprocess.run(["chmod", "+x", script_path], check=True, capture_output=True, text=True)
+
+        # Run the shell script with MAC address as an argument
+        result = subprocess.run(f"{script_path} {device_mac}", capture_output=True, text=True, shell=True)
+
+        # Check if the process was successful
+        if result.returncode != 0:
+            if "Device not found or already unpaired" in result.stdout:
+                print("Device not found or already unpaired.")
+            else:
+                print(f"Script returned non-zero exit code: {result.returncode}")
+                print(f"STDOUT: {result.stdout.strip()}")
+                print(f"STDERR: {result.stderr.strip()}")
+        else:
+            # Check for success message
+            if "Unpairing successful" in result.stdout:
+                print("Unpairing was successful!")
+            else:
+                print(f"Unexpected output during unpairing: {result.stdout.strip()}")
+
+    except FileNotFoundError as fnf_error:
+        print(fnf_error)
+    except RuntimeError as re:
+        # Print only the error message without traceback
+        print(re)
+    except Exception as e:
+        # Print exception message without traceback
+        print(f"An error occurred: {e}")
+
+# Directory helper functions
 def is_directory(path: str) -> bool:
     """
     Check if a given path is a valid directory.

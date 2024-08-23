@@ -1,27 +1,26 @@
+import json
 import logging
-import subprocess
-from datetime import datetime
-
 import bluetooth
+import subprocess
+
+SETTINGS_FILE = './settings/settings.json'
+settings = None
+with open(SETTINGS_FILE, 'r') as file:
+    settings = json.load(file)
 
 
-def update_annotation(camera):
-    """Update the annotation text on the camera."""
-    camera.annotate_text = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-
-def is_device_connected_to_bt(bt_addresses):
+def is_device_connected_to_bt(bt_addresses) -> bool:
     """Check if any of the given Bluetooth addresses are visible."""
     for addr in bt_addresses:
-        status = bluetooth.lookup_name(addr, timeout=3)
+        status = bluetooth.lookup_name(addr["address"], timeout=3)
         if status:
-            logging.info(f"Device with Bluetooth address {addr} is connected.")
+            logging.info(f"Device {addr['name']} is connected.")
             return True
     logging.warning("No devices connected via Bluetooth.")
     return False
 
 
-def is_in_ap_mode():
+def is_in_ap_mode() -> bool:
     """Check if the device is in AP mode."""
     try:
         output = subprocess.check_output(
@@ -31,7 +30,7 @@ def is_in_ap_mode():
         return False
 
 
-def is_device_connected_to_ap(mac_addresses):
+def is_device_connected_to_ap(mac_addresses) -> bool:
     """Check if any of the given MAC addresses are connected to the AP."""
     if not is_in_ap_mode():
         logging.warning("Device is not in AP mode.")
