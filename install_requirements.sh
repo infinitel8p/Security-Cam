@@ -16,6 +16,21 @@ git pull || { echo "git pull failed"; exit 1; }
 cd /opt/security-cam/server || { echo "Failed to change directory to /opt/security-cam/server"; exit 1; }
 npm install || { echo "npm install failed"; exit 1; }
 
+# Install the Bluetooth development headers required for pybluez
+if dpkg -s libbluetooth-dev >/dev/null 2>&1; then
+    echo "libbluetooth-dev is already installed, skipping..."
+else
+    sudo apt-get update || { echo "apt-get update failed"; exit 1; }
+    sudo apt-get install -y libbluetooth-dev || { echo "Failed to install libbluetooth-dev"; exit 1; }
+fi
+
+# Install expect for automated Bluetooth pairing
+if dpkg -s expect >/dev/null 2>&1; then
+    echo "expect is already installed, skipping..."
+else
+    sudo apt-get install -y expect || { echo "Failed to install expect"; exit 1; }
+fi
+
 # Path to the requirements.txt file
 REQUIREMENTS_FILE="/opt/security-cam/requirements.txt"
 
