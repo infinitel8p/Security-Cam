@@ -45,14 +45,7 @@ Follow the instructions in our [documentation](https://dev.infinitel8p.com/Secur
 _This section will be populated with common issues and their solutions as they are identified._
 
 ## Contribution Guidelines
-If you'd like to contribute to this project, please follow these guidelines:
-
-1. **Fork the Repository**: Create a fork of this repository to your account.
-2. **Clone the Fork**: Clone the forked repository to your local machine.
-3. **Create a New Branch**: Always create a new branch for your changes.
-4. **Make Changes**: Implement your changes, enhancements, or bug fixes.
-5. **Commit and Push**: Commit your changes and push them to your fork.
-6. **Create a Pull Request**: Create a pull request from your fork to the main repository.
+If you'd like to contribute to this project, please follow the guidelines in the [CONTRIBUTING.md](../CONTRIBUTING.md) file.
 
 ## License
 This project is licensed under the [MIT License](../LICENSE). Please see the `LICENSE` file for more details.
