@@ -5,12 +5,7 @@
 If you discover a security vulnerability within this project, please follow the steps below:
 
 1. **Do Not Open a Public Issue**: Do not report security vulnerabilities in the issue tracker, as it is public.
-2. **Contact Us Directly**: Send an email to [admin@infinitel8p.com](mailto:admin@infinitel8p.com) with the details of the vulnerability. Please include:
-   - A detailed description of the vulnerability.
-   - Steps to reproduce the issue.
-   - Any potential impact or severity level.
-3. **Acknowledgment**: We will acknowledge your email within 48 hours and provide a detailed response, including our next steps.
-4. **Disclosure**: After a fix has been implemented, we will notify you and coordinate a public disclosure.
+2. **Contact Us Directly**: Under the repository name, click  Security. If you cannot see the "Security" tab, select the dropdown menu, and then click Security. Click [**Report a vulnerability** to open the advisory form](https://github.com/infinitel8p/Security-Cam/security/advisories/new).
 
 ## Security Updates
 
@@ -26,4 +21,4 @@ We appreciate your responsible disclosure and contributions to making this proje
 
 ---
 
-For further questions regarding security, feel free to reach out via the contact information provided above.
+By following these guidelines, you help us ensure the security and privacy of our users. Thank you for your cooperation and support.
