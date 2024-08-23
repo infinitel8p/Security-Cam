@@ -8,7 +8,7 @@ The script will start recording a video when the magnetic reed switch is trigger
 
 Integrations:
 - **Magnetic Reed Switch**: Integration with a magnetic reed switch to detect door open/close events and trigger recording accordingly.
-- **WIFI Detection**: Integration with WiFi Access Point to allow user to use bluetooth or WiFi to not trigger recording. Allows user to view recorded videos in the web interface when outside of the home network.
+- **WIFI Detection**: Integration with WiFi Access Point to allow user to use WiFi to not trigger recording. Allows user to view recorded videos in the web interface when outside of the home network.
 - **Bluetooth Detection**: Integration with Bluetooth to allow user to use bluetooth to not trigger recording.
 - **Real Time Clock**: Integration with a Real Time Clock to keep track of the time when the Raspberry Pi is powered off.
 - **Web Dashboard**: A web dashboard to view the status of the Raspberry Pi and the recorded videos.
@@ -40,14 +40,7 @@ Find out more about the usage [here](./basics/start).
 _This section will be populated with common issues and their solutions as they are identified._
 
 ## Contribution Guidelines
-If you'd like to contribute to this project, please follow these guidelines:
-
-1. **Fork the Repository**: Create a fork of this repository to your account.
-2. **Clone the Fork**: Clone the forked repository to your local machine.
-3. **Create a New Branch**: Always create a new branch for your changes.
-4. **Make Changes**: Implement your changes, enhancements, or bug fixes.
-5. **Commit and Push**: Commit your changes and push them to your fork.
-6. **Create a Pull Request**: Create a pull request from your fork to the main repository.
+If you'd like to contribute to this project, please follow the guidelines in the [CONTRIBUTING.md](https://github.com/infinitel8p/Security-Cam/blob/main/CONTRIBUTING.md) file.
 
 ## License
 This project is licensed under the [MIT License](https://github.com/infinitel8p/Security-Cam/blob/main/LICENSE). Please see the `LICENSE` file for more details.
