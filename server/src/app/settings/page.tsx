@@ -67,6 +67,30 @@ const Page = () => {
         }
     };
 
+    const handleRotationChange = async () => {
+        const rotation = (document.getElementById("rotation") as HTMLSelectElement).value;
+        try {
+            const response = await fetch(settingsURL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ RotationAngle: rotation }),
+            });
+
+            const result = await response.json();
+            if (!response.ok) {
+                alert(result.message || "Error updating settings");
+            } else {
+                setSettings(prevSettings => ({ ...prevSettings, RotationAngle: rotation }));
+                window.location.reload();
+            }
+        } catch (error) {
+            console.error("Error updating settings:", error);
+            alert("Error updating settings");
+        }
+    };
+
     return (
         <div className="flex flex-col gap-5 space-y-10 px-10 pt-10">
             <div className="border border-red-500">
@@ -74,6 +98,16 @@ const Page = () => {
             </div>
             <div className="border border-red-500">
                 <WiFiDeviceList />
+            </div>
+            <div className="border border-red-500">
+                <p>Camera Rotation: {settings["RotationAngle"]}</p>
+                <select name="rotation" id="rotation" className="border border-gray-500 rounded-md p-2 h-10 m-auto">
+                    <option value="0">0</option>
+                    <option value="90">90</option>
+                    <option value="180">180</option>
+                    <option value="270">270</option>
+                </select>
+                <button className="bg-gray-500 border rounded-md p-2 h-10 ml-5" onClick={handleRotationChange}>Update Rotation</button>
             </div>
             <div className="flex w-full border border-red-500">
                 <div>Video save location: <span className="text-blue-700">{settings.VideoSaveLocation}</span></div>

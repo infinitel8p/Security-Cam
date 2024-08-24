@@ -43,11 +43,11 @@ def toggle_recording():
         if activity_helpers.is_device_connected_to_bt():
             print("Cannot record while connected to Bluetooth")
             return jsonify({"message": "Cannot record while connected to Bluetooth"}), 400
-        
+
         stream_helpers.start_recording()
         print("Recording started")
         return jsonify({"message": "Recording started"})
-    
+
 
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
@@ -56,7 +56,8 @@ def settings():
     elif request.method == 'POST':
         new_settings = request.json
         if "VideoSaveLocation" in new_settings:
-            success = settings_helpers.update_video_save_location(new_settings["VideoSaveLocation"])
+            success = settings_helpers.update_video_save_location(
+                new_settings["VideoSaveLocation"])
             if success:
                 return jsonify({"message": "Settings updated"})
             else:
@@ -79,27 +80,47 @@ def list_directories():
         return jsonify(directories)
     else:
         return jsonify({"error": "Invalid directory path"}), 400
-    
+
+
 @app.route('/archive', methods=['GET'])
 def archive():
     video_list = archive_helpers.get_videos()
     return jsonify(video_list)
 
+
 @app.route('/stream_video', methods=['GET'])
 def stream_video():
     import os
     video_path = request.args.get('video_path')
-    
+
     if not video_path or not os.path.exists(video_path):
         abort(404, description="Video not found")
 
     return send_file(video_path, as_attachment=True, download_name=os.path.basename(video_path), mimetype='video/mp4')
+
 
 @app.route('/delete_video', methods=['POST'])
 def delete_video_route():
     video_path = request.json.get('video_path')
     response, status_code = archive_helpers.delete_video(video_path)
     return jsonify(response), status_code
+
+
+@app.route('/get_rotation', methods=['GET'])
+def get_rotation():
+    rotation_angle = settings_helpers.get_rotation_angle()
+    return jsonify({"RotationAngle": rotation_angle})
+
+
+@app.route('/update_rotation', methods=['POST'])
+def update_rotation():
+    rotation_angle = request.json.get('RotationAngle')
+    if rotation_angle not in [0, 90, 180, 270]:
+        return jsonify({"message": "Invalid rotation angle"}), 400
+
+    settings_helpers.update_rotation_angle(rotation_angle)
+    return jsonify({"message": "Rotation angle updated"})
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5005, debug=True)

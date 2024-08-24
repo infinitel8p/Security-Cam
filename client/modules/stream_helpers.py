@@ -13,6 +13,11 @@ is_recording = False
 recorded_filename = None
 
 
+def reload_settings():
+    global settings
+    settings = settings_helpers.get_settings()
+
+
 def generate_frames():
     """
     Captures frames from the default camera feed, encodes them as JPEG images, and yields them as byte streams.
@@ -25,29 +30,46 @@ def generate_frames():
     """
 
     global out, is_recording
+
+    reload_settings()
+
+    # Initialize the camera capture here
     cap = cv2.VideoCapture(0)
     cap.set(cv2.CAP_PROP_FPS, 15)
 
-    while True:
-        success, frame = cap.read()
-        if not success:
-            break
+    rotation_angle = settings.get('RotationAngle', 0)
+    print(f"Rotation angle: {rotation_angle}")
 
-        timestamp = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-        cv2.putText(frame, timestamp, (10, frame.shape[0] - 10),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2, cv2.LINE_AA)
+    try:
+        while True:
+            success, frame = cap.read()
+            if not success:
+                break
 
-        with lock:
-            if is_recording and out is not None:
-                out.write(frame)
+            # Apply rotation
+            if rotation_angle == "90":
+                frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
+            elif rotation_angle == "180":
+                frame = cv2.rotate(frame, cv2.ROTATE_180)
+            elif rotation_angle == "270":
+                frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
 
-        ret, buffer = cv2.imencode('.jpg', frame)
-        frame = buffer.tobytes()
+            timestamp = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+            cv2.putText(frame, timestamp, (10, frame.shape[0] - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2, cv2.LINE_AA)
 
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+            with lock:
+                if is_recording and out is not None:
+                    out.write(frame)
 
-    cap.release()
+            ret, buffer = cv2.imencode('.jpg', frame)
+            frame = buffer.tobytes()
+
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+    finally:
+        # Release the camera when done
+        cap.release()
 
 
 def start_recording() -> None:

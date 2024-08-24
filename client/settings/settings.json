@@ -19,5 +19,6 @@
             "address": "XX:XX:XX:XX:XX:X2"
         }
     ],
-    "VideoSaveLocation": "./recordings"
+    "VideoSaveLocation": "./recordings",
+    "RotationAngle": "0"
 }

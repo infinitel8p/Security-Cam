@@ -2,7 +2,9 @@ import os
 import json
 import subprocess
 
-SETTINGS_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "settings/settings.json")
+SETTINGS_FILE = os.path.join(os.path.dirname(os.path.dirname(
+    os.path.realpath(__file__))), "settings/settings.json")
+
 
 def get_settings():
     """
@@ -11,10 +13,11 @@ def get_settings():
     Returns:
         Dict[str, Any]: The settings as a dictionary.
     """
-    
+
     with open(SETTINGS_FILE, 'r') as f:
         settings = json.load(f)
     return settings
+
 
 def update_settings(new_settings) -> None:
     """
@@ -31,7 +34,10 @@ def update_settings(new_settings) -> None:
         json.dump(settings, f, indent=4)
         f.truncate()
 
-# Bluetooth helper functions
+
+##### Bluetooth helper functions #####
+
+
 def pair_bt_device(device_mac: str):
     """
     Pair a Bluetooth device using a shell script.
@@ -53,17 +59,20 @@ def pair_bt_device(device_mac: str):
             raise FileNotFoundError(f"pair.sh not found")
 
         # Ensure the shell script is executable
-        subprocess.run(["chmod", "+x", script_path], check=True, capture_output=True, text=True)
+        subprocess.run(["chmod", "+x", script_path],
+                       check=True, capture_output=True, text=True)
 
         # Run the shell script with the MAC address as an argument
-        result = subprocess.run(f"{script_path} {device_mac}", capture_output=True, text=True, shell=True)
+        result = subprocess.run(
+            f"{script_path} {device_mac}", capture_output=True, text=True, shell=True)
 
         # Check if the process was successful
         if result.returncode != 0:
             if "Device is already paired" in result.stdout:
                 print("Device is already paired, skipping pairing...")
             else:
-                print(f"Script returned non-zero exit code: {result.returncode}")
+                print(
+                    f"Script returned non-zero exit code: {result.returncode}")
                 print(f"STDOUT: {result.stdout.strip()}")
                 print(f"STDERR: {result.stderr.strip()}")
         else:
@@ -75,7 +84,8 @@ def pair_bt_device(device_mac: str):
             elif "trust succeeded" in result.stdout:
                 print("Device trusted successfully!")
             else:
-                print(f"Unexpected output during pairing: {result.stdout.strip()}")
+                print(f"Unexpected output during pairing: {
+                      result.stdout.strip()}")
 
     except FileNotFoundError as fnf_error:
         print(fnf_error)
@@ -85,6 +95,7 @@ def pair_bt_device(device_mac: str):
     except Exception as e:
         # Print exception message without traceback
         print(f"An error occurred: {e}")
+
 
 def unpair_bt_device(device_mac: str):
     """
@@ -107,17 +118,20 @@ def unpair_bt_device(device_mac: str):
             raise FileNotFoundError(f"unpair.sh not found")
 
         # Ensure the shell script is executable
-        subprocess.run(["chmod", "+x", script_path], check=True, capture_output=True, text=True)
+        subprocess.run(["chmod", "+x", script_path],
+                       check=True, capture_output=True, text=True)
 
         # Run the shell script with MAC address as an argument
-        result = subprocess.run(f"{script_path} {device_mac}", capture_output=True, text=True, shell=True)
+        result = subprocess.run(
+            f"{script_path} {device_mac}", capture_output=True, text=True, shell=True)
 
         # Check if the process was successful
         if result.returncode != 0:
             if "Device not found or already unpaired" in result.stdout:
                 print("Device not found or already unpaired.")
             else:
-                print(f"Script returned non-zero exit code: {result.returncode}")
+                print(
+                    f"Script returned non-zero exit code: {result.returncode}")
                 print(f"STDOUT: {result.stdout.strip()}")
                 print(f"STDERR: {result.stderr.strip()}")
         else:
@@ -125,7 +139,8 @@ def unpair_bt_device(device_mac: str):
             if "Unpairing successful" in result.stdout:
                 print("Unpairing was successful!")
             else:
-                print(f"Unexpected output during unpairing: {result.stdout.strip()}")
+                print(f"Unexpected output during unpairing: {
+                      result.stdout.strip()}")
 
     except FileNotFoundError as fnf_error:
         print(fnf_error)
@@ -136,7 +151,20 @@ def unpair_bt_device(device_mac: str):
         # Print exception message without traceback
         print(f"An error occurred: {e}")
 
-# Directory helper functions
+
+##### Video helper functions ######
+
+def update_rotation_angle(angle):
+    settings = get_settings()
+    settings['RotationAngle'] = angle
+    with open(SETTINGS_FILE, 'w') as f:
+        json.dump(settings, f, indent=4)
+    return True
+
+
+##### Directory helper functions #####
+
+
 def is_directory(path: str) -> bool:
     """
     Check if a given path is a valid directory.
@@ -149,6 +177,7 @@ def is_directory(path: str) -> bool:
     """
 
     return os.path.isdir(path)
+
 
 def is_valid_directory(path: str) -> bool:
     """
@@ -175,6 +204,7 @@ def is_valid_directory(path: str) -> bool:
     else:
         return False
 
+
 def update_video_save_location(new_location: str) -> bool:
     """
     Update the video save location in the settings if the provided directory is valid.
@@ -191,6 +221,7 @@ def update_video_save_location(new_location: str) -> bool:
         return True
     else:
         return False
+
 
 def list_directories(path: str = "./"):
     """
