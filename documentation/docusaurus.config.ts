@@ -5,7 +5,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 const config: Config = {
   title: 'Security-Cam',
   tagline: 'A security camera for the Raspberry Pi Zero 2 W using the Waveshare RPi Camera (F).',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/favicon.png',
 
   url: 'https://dev.infinitel8p.com',
   baseUrl: '/Security-Cam/',
@@ -55,7 +55,7 @@ const config: Config = {
       playgroundPosition: 'bottom',
     },
     // Replace with your project's social card
-    image: 'img/docusaurus-social-card.jpg',
+    image: 'img/social-card.png',
     navbar: {
       title: 'Security-Cam',
       logo: {

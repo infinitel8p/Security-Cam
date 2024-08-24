@@ -6,7 +6,7 @@
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://dev.infinitel8p.com/Security-Cam/blog"/>
     <subtitle>Security-Cam Blog</subtitle>
-    <icon>https://dev.infinitel8p.com/Security-Cam/img/favicon.ico</icon>
+    <icon>https://dev.infinitel8p.com/Security-Cam/img/favicon.png</icon>
     <entry>
         <title type="html"><![CDATA[Upgrading to the Raspberry Pi Zero 2 W]]></title>
         <id>https://dev.infinitel8p.com/Security-Cam/blog/switch-to-raspberry-pi-zero-2</id>

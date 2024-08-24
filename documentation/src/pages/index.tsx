@@ -20,7 +20,7 @@ function HomepageHeader() {
           <Link
             className="button button--secondary button--lg"
             to="/docs/intro">
-            Security-Cam Introduction - 5min ⏱️
+            Get started with Security-Cam
           </Link>
         </div>
       </div>
@@ -29,10 +29,9 @@ function HomepageHeader() {
 }
 
 export default function Home(): JSX.Element {
-  const { siteConfig } = useDocusaurusContext();
   return (
     <Layout
-      title={`Hello from ${siteConfig.title}`}
+      title={`Documentation`}
       description="Security-Cam is a simple and easy to use security camera software."
     >
       <HomepageHeader />
