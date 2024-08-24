@@ -39,7 +39,6 @@ Now install Node.js, npm and Python3
 
 ```bash
 sudo apt update && sudo apt upgrade -y
-sudo apt install nodejs npm python3 python3-pip -y
 ```
 
 After the installation is complete install the required Python and Node.js packages:
@@ -292,14 +291,7 @@ This is the connection layout using a breadboard. The clock can also just be con
    sudo raspi-config nonint do_i2c 0
    ```
 
-2. #### Install the required packages:
-
-   ```bash
-   sudo apt-get install python3-smbus
-   sudo apt-get install i2c-tools
-   ```
-
-3. #### Test the DS3231 RTC module:
+2. #### Test the DS3231 RTC module:
 
    You can use the following command to see if your Raspberry Pi detects the DS3231 RTC:
 
@@ -322,7 +314,7 @@ This is the connection layout using a breadboard. The clock can also just be con
    70: -- -- -- -- -- -- -- --
    ```
 
-4. #### Configure the I2C-Bus for the x68 address:
+3. #### Configure the I2C-Bus for the x68 address:
 
    ```bash
    echo ds3231 0x68 | sudo tee /sys/class/i2c-adapter/i2c-1/new_device
@@ -330,7 +322,7 @@ This is the connection layout using a breadboard. The clock can also just be con
 
    The command `sudo hwclock` should now return the time from the RTC.
 
-5. #### Set the System Time:
+4. #### Set the System Time:
 
    Synchronize the RTC time:
 
@@ -340,13 +332,13 @@ This is the connection layout using a breadboard. The clock can also just be con
 
    This will set the hardware clock to the current system time.
 
-6. #### Enable automatic bus configuration:
+5. #### Enable automatic bus configuration:
 
    ```bash
    sudo sed -i '/^exit 0/i echo ds3231 0x68 > /sys/class/i2c-adapter/i2c-1/new_device' /etc/rc.local
    ```
 
-7. #### Disable the fake-hwclock:
+6. #### Disable the fake-hwclock:
 
    ```bash
    sudo systemctl disable fake-hwclock
@@ -360,11 +352,11 @@ This is the connection layout using a breadboard. The clock can also just be con
    sudo hwclock -w
    ```
 
-8. #### Reboot the Raspberry Pi:
+7. #### Reboot the Raspberry Pi:
    ```bash
    sudo reboot
    ```
 
 With the RTC module connected and configured, the Raspberry Pi will now use the RTC module to keep track of the time even when it is turned off.
 
-Continue to [wifi.md](./wifi) to set up the Raspberry Pi as an access point and connect to it.
+Continue to [wifi.mdx](./wifi) to set up the Raspberry Pi as an access point and connect to it.

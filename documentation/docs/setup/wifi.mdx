@@ -58,12 +58,6 @@ RUN+="/sbin/iw phy phy0 interface add ap0 type __ap", \
 RUN+="/bin/ip link set ap0 address REPLACEWITHMACADDRESS"
 ```
 
-## Install `Dnsmasq`, `Hostapd` and `Nftables`
-
-```bash
-sudo apt-get install dnsmasq hostapd nftables -y
-```
-
 ## Configure `Dnsmasq`
 
 Backup the original and create a new `dnsmasq` configuration:
@@ -314,7 +308,7 @@ Add a cronjob to run the script on boot:
 sudo bash -c 'echo "@reboot /opt/start-ap-managed-wifi.sh" >> /var/spool/cron/crontabs/root'
 ```
 
-Continue to [script.md](./script) to set up bluetooth and the script.
+Continue to [bluetooth.mdx](./bluetooth) to set up bluetooth.
 
 :::note
 These instructions are tested on Raspbian Bookworm with a Raspberry Pi Zero 2 W.
