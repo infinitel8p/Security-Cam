@@ -13,19 +13,6 @@ Integrations:
 - **Real Time Clock**: Integration with a Real Time Clock to keep track of the time when the Raspberry Pi is powered off.
 - **Web Dashboard**: A web dashboard to view the status of the Raspberry Pi and the recorded videos.
 
-
-## Prerequisites
-
-- [Raspberry Pi Zero 2 W](https://www.raspberrypi.com/products/raspberry-pi-zero-2-w/) (or Raspberry Pi Zero 2 WH)
-- [Headers](https://amzn.eu/d/hULoAo6) for the Raspberry Pi Zero 2 W if you did not choose a Raspberry Pi Zero 2 WH (if you do not feel comfortable soldering the headers you can use solderless headers such as these [here](https://www.berrybase.de/en/solderless-stiftleiste-2x-20-polig-rm-2-54-gerade))
-- [Waveshare RPi Camera (F)](https://www.berrybase.de/en/noir-kamera-fuer-raspberry-pi-mit-einstellbarem-fokus-und-infrarot-leds) or another compatible camera module
-- [Flexcable adapter](https://www.berrybase.de/en/flexkabel-fuer-raspberry-pi-zero-und-kameramodul?number=RPIZ-FLEX-15) for the camera module
-- Bluetooth-enabled device (e.g., a smartphone) to pair with the Raspberry Pi
-- [KY-025 module](https://amzn.eu/d/grjoopD) (Magnetic reed switch)
-- a bunch of [Dupont Jumper Wires](https://amzn.eu/d/6ZgE4N6)
-- Breadboard (optional)
-- [DS3231 Real Time Clock Module](https://amzn.eu/d/ikNTko8)
-
 ## Usage
 Once the script is running, the Raspberry Pi will start recording a video when the magnetic reed switch is triggered (the door is opened) and the smartphone is not connected to the Raspberry Pi (bluetooth and/or WiFi). The recording will stop when the magnetic reed switch is triggered again (the door is closed). 
 Find out more about the usage [here](./basics/start).
