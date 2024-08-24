@@ -55,7 +55,7 @@ const config: Config = {
       playgroundPosition: 'bottom',
     },
     // Replace with your project's social card
-    image: 'img/social-card.png',
+    image: 'img/social-card.webp',
     navbar: {
       title: 'Security-Cam',
       logo: {
