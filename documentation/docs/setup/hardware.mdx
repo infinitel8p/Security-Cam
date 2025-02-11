@@ -107,7 +107,7 @@ supported=1 detected=1, libcamera interfaces=0
 Now test the camera with the following command:
 
 ```bash
-python3 -c "import cv2; cap=cv2.VideoCapture(0); ret,frame=cap.read(); cv2.imwrite('opencv_test.jpg', frame) if ret else print('Error: Could not read frame'); cap.release()"
+python3 -c "import cv2; cap=cv2.VideoCapture(0, cv2.CAP_V4L2); cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640); cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480); cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG')); ret,frame=cap.read(); cv2.imwrite('opencv_test.jpg', frame) if ret else print('Error: Could not read frame'); cap.release()"
 ```
 
 This should take a picture and save it as `opencv_test.jpg` in the current directory. You can now either view the image on the Raspberry Pi or transfer it to your computer to view it there.
@@ -335,7 +335,7 @@ This is the connection layout using a breadboard. The clock can also just be con
 5. #### Enable automatic bus configuration:
 
    ```bash
-   sudo sed -i '/^exit 0/i echo ds3231 0x68 > /sys/class/i2c-adapter/i2c-1/new_device' /etc/rc.local
+   echo -e "[Unit]\nDescription=Load DS3231 RTC on boot\nAfter=multi-user.target\n\n[Service]\nType=oneshot\nExecStart=/bin/sh -c 'echo ds3231 0x68 > /sys/class/i2c-adapter/i2c-1/new_device'\nRemainAfterExit=yes\n\n[Install]\nWantedBy=multi-user.target" | sudo tee /etc/systemd/system/ds3231.service && sudo systemctl enable ds3231.service
    ```
 
 6. #### Disable the fake-hwclock:
