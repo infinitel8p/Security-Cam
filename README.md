@@ -1,5 +1,8 @@
 # Security Camera
 A security camera script for the Raspberry Pi Zero 2 W using the Waveshare RPi Camera (F).  
+
+**Currently WIP ⚠**
+
 The script will start recording a video when the magnetic reed switch is triggered (the door is opened) and the smartphone is not connected to the Raspberry Pi (bluetooth and/or WiFi). The recording will stop when the magnetic reed switch is triggered again (the door is closed).
 
 Integrations:
