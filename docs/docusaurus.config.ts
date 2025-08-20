@@ -33,12 +33,6 @@ const config: Config = {
           // Remove this to remove the "edit this page" links.
           editUrl: 'https://github.com/infinitel8p/Security-Cam/edit/main/documentation/',
         },
-        blog: {
-          showReadingTime: true,
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl: 'https://github.com/infinitel8p/Security-Cam/edit/main/documentation/',
-        },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
         },
@@ -69,7 +63,6 @@ const config: Config = {
           position: 'left',
           label: 'Documentation',
         },
-        { to: '/blog', label: 'Blog', position: 'left' },
         {
           href: 'https://github.com/infinitel8p/Security-Cam',
           label: 'GitHub',
@@ -101,22 +94,14 @@ const config: Config = {
               label: 'Ludo - GitHub',
               href: 'https://github.com/infinitel8p',
             },
-            {
-              label: 'Lenni - GitHub',
-              href: 'https://github.com/KrokoNinja',
-            },
           ],
         },
         {
           title: 'More',
           items: [
             {
-              label: 'Blog',
-              to: '/blog',
-            },
-            {
               label: 'GitHub',
-              href: 'https://github.com/facebook/docusaurus',
+              href: 'https://github.com/infinitel8p/Security-Cam',
             },
           ],
         },
