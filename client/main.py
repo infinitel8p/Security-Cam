@@ -89,7 +89,7 @@ def stream_video():
     if not video_path or not os.path.exists(video_path):
         abort(404, description="Video not found")
 
-    return send_file(video_path, mimetype='video/mp4', conditional=True)
+    return send_file(os.path.abspath(video_path), mimetype='video/mp4', conditional=True)
 
 
 @app.route('/delete_video', methods=['POST'])
