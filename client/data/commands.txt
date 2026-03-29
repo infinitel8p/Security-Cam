@@ -1,0 +1,4 @@
+cat camera-stream.sh
+cat /etc/systemd/system/camera-stream.service
+cat /etc/systemd/system/mediamtx.service
+cat /home/pi/mediamtx.yml
