@@ -1,43 +1,44 @@
 ---
 sidebar_position: 3
 description: "Step 3: Setup Bluetooth"
+last_update:
+  date: 2026-03-29
+  author: Ludo
 ---
 
 # Bluetooth Setup
 
 ## Pairing
 
-Ensure your Bluetooth device's visibility is turned on.
-On the Raspberry Pi, enter the following command:
+Ensure your Bluetooth device's visibility is turned on, then run the included pairing script:
+
+```bash
+chmod +x /opt/security-cam/tests/pair_bluetooth.sh
+/opt/security-cam/tests/pair_bluetooth.sh
+```
+
+The script will scan for nearby devices, list them, and let you pick one to pair and trust.
+
+:::info
+If you prefer to do it manually, you can use `bluetoothctl` directly:
 
 ```bash
 bluetoothctl
 ```
 
-In the bluetoothctl prompt, enter the following commands:
+In the prompt:
 
 ```bash
 agent on
-```
-
-```bash
 default-agent
-```
-
-```bash
 scan on
 ```
 
-Once you see the MAC address of your device, pair with it using (replace `XX:XX:XX:XX:XX:XX` with the **Bluetooth** MAC address of your target device):
+Once you see your device's MAC address:
 
 ```bash
 pair XX:XX:XX:XX:XX:XX
-```
-
-Then trust the device:
-
-```bash
 trust XX:XX:XX:XX:XX:XX
+exit
 ```
-
-Now type `exit` to exit the bluetoothctl prompt.
+:::
