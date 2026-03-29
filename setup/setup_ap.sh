@@ -7,11 +7,16 @@ set -e
 #
 # Prerequisites:
 #   - Raspberry Pi connected to WiFi via wlan0
-#   - Run as root or with sudo
+#   - Run with sudo
 #
 # Usage:
-#   ./setup_ap.sh                          # Interactive (prompts for SSID, password, channel)
-#   ./setup_ap.sh --ssid MyAP --password secret123 --channel 6  # Non-interactive
+#   sudo ./setup_ap.sh                          # Interactive (prompts for SSID, password, channel)
+#   sudo ./setup_ap.sh --ssid MyAP --password secret123 --channel 6  # Non-interactive
+
+if [ "$EUID" -ne 0 ]; then
+    echo "Error: this script must be run with sudo"
+    exit 1
+fi
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -28,7 +33,7 @@ while [[ $# -gt 0 ]]; do
         --password) AP_PASSWORD="$2"; shift 2 ;;
         --channel)  AP_CHANNEL="$2"; shift 2 ;;
         -h|--help)
-            echo "Usage: $0 [--ssid NAME] [--password PASS] [--channel N]"
+            echo "Usage: sudo $0 [--ssid NAME] [--password PASS] [--channel N]"
             echo ""
             echo "Sets up a WiFi Access Point on the Raspberry Pi using hostapd."
             echo "If arguments are omitted, you will be prompted interactively."
@@ -77,48 +82,38 @@ echo ""
 
 # --- Install dependencies ---
 echo "Installing hostapd and dnsmasq..."
-sudo apt-get update -qq
-sudo apt-get install -y hostapd dnsmasq
+apt-get update -qq
+apt-get install -y hostapd dnsmasq
 
 # --- Remove any conflicting NetworkManager AP connection ---
 if nmcli connection show SecurityCamAP &>/dev/null; then
     echo "Removing old NetworkManager AP connection..."
-    sudo nmcli connection delete SecurityCamAP
+    nmcli connection delete SecurityCamAP
 fi
 
 # --- Tell NetworkManager to ignore ap0 ---
 echo "Configuring NetworkManager to ignore $AP_INTERFACE..."
-sudo tee /etc/NetworkManager/conf.d/ignore-ap0.conf > /dev/null << EOF
+mkdir -p /etc/NetworkManager/conf.d
+tee /etc/NetworkManager/conf.d/ignore-ap0.conf > /dev/null << EOF
 [keyfile]
 unmanaged-devices=interface-name:$AP_INTERFACE
 EOF
-sudo systemctl reload NetworkManager
+systemctl reload NetworkManager
 
 # --- Install create-ap0 service ---
 echo "Installing create-ap0 systemd service..."
-sudo cp "$DATA_DIR/create-ap0.service" /etc/systemd/system/create-ap0.service
-sudo systemctl daemon-reload
-sudo systemctl enable create-ap0.service
+cp "$DATA_DIR/create-ap0.service" /etc/systemd/system/create-ap0.service
+systemctl daemon-reload
+systemctl enable create-ap0.service
 
 # Recreate the interface cleanly to ensure no leftover wpa_supplicant attachment
 echo "Recreating $AP_INTERFACE interface..."
-sudo iw dev "$AP_INTERFACE" del 2>/dev/null || true
-sudo iw dev wlan0 interface add "$AP_INTERFACE" type __ap
-
-# --- Configure static IP for ap0 ---
-echo "Configuring static IP for $AP_INTERFACE..."
-sudo tee /etc/systemd/network/10-ap0.network > /dev/null << EOF
-[Match]
-Name=$AP_INTERFACE
-
-[Network]
-Address=$AP_IP/$AP_NETMASK
-EOF
-sudo systemctl enable systemd-networkd
+iw dev "$AP_INTERFACE" del 2>/dev/null || true
+iw dev wlan0 interface add "$AP_INTERFACE" type __ap
 
 # --- Configure hostapd ---
 echo "Configuring hostapd..."
-sudo tee /etc/hostapd/hostapd.conf > /dev/null << EOF
+tee /etc/hostapd/hostapd.conf > /dev/null << EOF
 interface=$AP_INTERFACE
 driver=nl80211
 ssid=$AP_SSID
@@ -132,39 +127,69 @@ wpa_key_mgmt=WPA-PSK
 rsn_pairwise=CCMP
 EOF
 
-# Point hostapd daemon config to our conf file
-sudo tee /etc/default/hostapd > /dev/null << 'EOF'
+# Point hostapd daemon to our conf file and suppress DAEMON_OPTS warning
+tee /etc/default/hostapd > /dev/null << 'EOF'
 DAEMON_CONF="/etc/hostapd/hostapd.conf"
+DAEMON_OPTS=""
+EOF
+
+# Ensure hostapd starts after ap0 is created
+mkdir -p /etc/systemd/system/hostapd.service.d
+tee /etc/systemd/system/hostapd.service.d/after-ap0.conf > /dev/null << 'EOF'
+[Unit]
+After=create-ap0.service
+Requires=create-ap0.service
 EOF
 
 # --- Configure dnsmasq ---
 echo "Configuring dnsmasq for $AP_INTERFACE..."
-sudo cp "$DATA_DIR/dnsmasq-ap0.conf" /etc/dnsmasq.d/ap0.conf
+cp "$DATA_DIR/dnsmasq-ap0.conf" /etc/dnsmasq.d/ap0.conf
+
+# Ensure dnsmasq starts after hostapd (so ap0 has an IP)
+mkdir -p /etc/systemd/system/dnsmasq.service.d
+tee /etc/systemd/system/dnsmasq.service.d/after-hostapd.conf > /dev/null << 'EOF'
+[Unit]
+After=hostapd.service
+Requires=hostapd.service
+EOF
+
+# --- Configure static IP for ap0 via networkd (scoped to ap0 only) ---
+echo "Configuring static IP for $AP_INTERFACE..."
+mkdir -p /etc/systemd/network
+tee /etc/systemd/network/10-ap0.network > /dev/null << EOF
+[Match]
+Name=$AP_INTERFACE
+
+[Network]
+Address=$AP_IP/$AP_NETMASK
+EOF
+
+# Enable networkd but ensure it doesn't interfere with NM-managed interfaces
+systemctl enable systemd-networkd
+systemctl restart systemd-networkd
 
 # --- Enable and start services ---
 echo "Enabling services..."
-sudo systemctl unmask hostapd
-sudo systemctl enable hostapd
-sudo systemctl enable dnsmasq
+systemctl daemon-reload
+systemctl unmask hostapd
+systemctl enable hostapd
+systemctl enable dnsmasq
 
-# Release ap0 from any leftover wpa_supplicant attachment (NM retry loops can leave it held)
-sudo pkill -f "wpa_supplicant.*$AP_INTERFACE" 2>/dev/null || true
-sleep 1
-
-# Set IP and start now
-sudo ip addr flush dev "$AP_INTERFACE" 2>/dev/null || true
-sudo ip addr add "$AP_IP/$AP_NETMASK" dev "$AP_INTERFACE" 2>/dev/null || true
-sudo ip link set "$AP_INTERFACE" up
+# Set IP and bring interface up
+ip addr flush dev "$AP_INTERFACE" 2>/dev/null || true
+ip addr add "$AP_IP/$AP_NETMASK" dev "$AP_INTERFACE" 2>/dev/null || true
+ip link set "$AP_INTERFACE" up
 
 echo "Starting hostapd..."
-sudo systemctl restart hostapd
+systemctl restart hostapd
+sleep 2
 
 echo "Starting dnsmasq..."
-sudo systemctl restart dnsmasq
+systemctl restart dnsmasq
 
 # --- Verify ---
 echo ""
-if sudo systemctl is-active --quiet hostapd; then
+if systemctl is-active --quiet hostapd; then
     echo "=== Access Point is running ==="
     echo "  SSID:     $AP_SSID"
     echo "  IP:       $AP_IP"
@@ -174,8 +199,15 @@ if sudo systemctl is-active --quiet hostapd; then
     echo "  sudo systemctl status hostapd    # Check AP status"
     echo "  sudo systemctl restart hostapd   # Restart AP"
     echo "  journalctl -u hostapd -f         # View AP logs"
+    echo ""
+    echo "Reboot to verify persistence: sudo reboot"
 else
     echo "=== ERROR: hostapd failed to start ==="
-    echo "Check logs: journalctl -u hostapd --no-pager -l"
+    echo ""
+    journalctl -u hostapd --no-pager -n 10
+    echo ""
+    echo "Common fixes:"
+    echo "  - Channel mismatch: check 'iw dev' and update /etc/hostapd/hostapd.conf"
+    echo "  - Interface held: try 'sudo iw dev ap0 del && sudo iw dev wlan0 interface add ap0 type __ap'"
     exit 1
 fi

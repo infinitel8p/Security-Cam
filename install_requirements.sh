@@ -17,4 +17,7 @@ echo "=== Installing Node.js dependencies ==="
 cd "$SCRIPT_DIR/server"
 npm install
 
+echo "=== Building frontend ==="
+npm run build
+
 echo "=== Done ==="

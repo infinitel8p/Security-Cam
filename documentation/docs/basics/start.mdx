@@ -1,84 +1,141 @@
 ---
 sidebar_position: 1
+last_update:
+  date: 2026-03-29
+  author: Ludo
 ---
 
-# Start with Security-Cam
+# Starting Security-Cam
 
-Now that you have set up your Raspberry Pi, you can start with the Security-Cam project.
+Now that you have completed the setup ([hardware](../setup/hardware), [WiFi AP](../setup/wifi), [Bluetooth](../setup/bluetooth), [MediaMTX](../setup/mediamtx)), you can start the Security-Cam system.
 
-Run:
+## Quick start
+
+To start both the Flask backend and Astro frontend manually:
 
 ```bash
 cd /opt/security-cam
-sudo chmod +x start.sh
-sudo ./start.sh
+./start.sh
 ```
 
-## Setup
+This launches:
+- **Flask API** on port `5005` — handles recording, system monitoring, device detection
+- **Astro frontend** on port `3000` — the web dashboard (serves pre-built static files)
 
-:::warning
-⚠️ DONT FOLLOW THESE STEPS YET. ⚠️
-The following steps are subject to change. They are based on the current state of the project and may be outdated.
-Since the project is still in development, the setup process may change in the future.
+:::note
+The frontend must be built before the first start. This is done automatically by `install_requirements.sh`. If you change frontend code, rebuild with:
+
+```bash
+cd /opt/security-cam/server && npm run build
+```
 :::
 
-Allow pi to Run chmod Without Password:
+Open the dashboard in your browser:
 
-```bash
-sudo visudo
+```
+http://<raspberry-pi-ip>:3000
 ```
 
-Add the following line:
+If you're connected to the Pi's Access Point:
 
-```bash
-pi ALL=(ALL) NOPASSWD: /bin/chmod +x /opt/security-cam/start.sh
+```
+http://192.168.4.1:3000
 ```
 
-Create the Service File
+## Running as a systemd service
+
+The recommended way to run Security-Cam is as a systemd service. On every boot it will automatically pull the latest code from git, rebuild if anything changed, and start the servers.
+
+### Install the service
 
 ```bash
-sudo bash -c 'cat <<EOF > /etc/systemd/system/security-cam.service
-[Unit]
-Description=Security Cam Flask and Node.js Servers
-After=network.target
-
-[Service]
-Type=simple
-User=pi
-WorkingDirectory=/opt/security-cam
-ExecStartPre=/usr/bin/sudo /bin/chmod +x /opt/security-cam/start.sh
-ExecStart=/opt/security-cam/start.sh
-Restart=on-failure
-
-[Install]
-WantedBy=multi-user.target
-EOF'
-```
-
-Reload the systemd manager configuration
-
-```bash
+sudo cp /opt/security-cam/client/data/security-cam.service /etc/systemd/system/
 sudo systemctl daemon-reload
-```
-
-Enable the service to start on boot
-
-```bash
 sudo systemctl enable security-cam.service
-```
-
-Start the service
-
-```bash
 sudo systemctl start security-cam.service
 ```
 
-Check the status of the service
+### Check the status
 
 ```bash
 sudo systemctl status security-cam.service
 ```
 
-You should now be able to access the Security-Cam web interface by navigating to `http://<raspberry-pi-ip>:5000` in your web browser.
+### How auto-update works
 
-The ip address of your Raspberry Pi can vary. If you are connected to the Raspberry Pi's AP and you have followed the instructions on how to set it up, you can access the web interface by navigating to `http://192.168.10.1:5000` in your web browser. If you are connected to the same network as the Raspberry Pi, you can find the ip address by running `hostname -I` on the Raspberry Pi.
+The service runs `setup/update.sh` before starting. This script:
+
+1. Runs `git pull` to fetch the latest code
+2. Compares the current commit with the last successful build
+3. If the code changed, runs `install_requirements.sh` (installs deps + rebuilds frontend)
+4. Saves a stamp so it skips the rebuild on next boot if nothing changed
+
+To force a rebuild (e.g. after manually editing files):
+
+```bash
+sudo /opt/security-cam/setup/update.sh --force
+sudo systemctl restart security-cam
+```
+
+## Verifying everything is running
+
+After a fresh boot, all services should be active:
+
+```bash
+sudo systemctl status hostapd --no-pager
+sudo systemctl status mediamtx --no-pager
+sudo systemctl status security-cam --no-pager
+```
+
+| Service | Purpose | Port |
+| --- | --- | --- |
+| `hostapd` | WiFi Access Point | — |
+| `mediamtx` | Camera stream (WebRTC/RTSP) | 8889 / 8554 |
+| `security-cam` | Flask API + Astro dashboard | 5005 / 3000 |
+
+## Environment configuration
+
+The frontend needs to know where the backend and MediaMTX are. This is configured in `server/.env`:
+
+```ini
+PUBLIC_BACKEND_URL=http://<raspberry-pi-ip>:5005
+PUBLIC_MEDIAMTX_URL=http://<raspberry-pi-ip>:8889
+```
+
+If you access the dashboard through the Access Point, set these to `192.168.4.1`:
+
+```ini
+PUBLIC_BACKEND_URL=http://192.168.4.1:5005
+PUBLIC_MEDIAMTX_URL=http://192.168.4.1:8889
+```
+
+## Troubleshooting
+
+### Dashboard loads but no video feed
+
+- Check MediaMTX is running: `sudo systemctl status mediamtx`
+- Verify the stream directly: open `http://<pi-ip>:8889/cam` in a browser
+- Check `PUBLIC_MEDIAMTX_URL` in `server/.env` matches the IP you're connecting from
+
+### Cannot reach the dashboard
+
+- Check the Astro server is running: `sudo systemctl status security-cam`
+- Make sure you're using port `3000`
+- Check firewall: `sudo nft list ruleset`
+
+### API errors in the dashboard
+
+- Check Flask is running: `curl http://localhost:5005/system_info`
+- Check `PUBLIC_BACKEND_URL` in `server/.env`
+
+### Service fails on boot
+
+Check the update and start logs:
+
+```bash
+journalctl -u security-cam --no-pager -n 30
+```
+
+Common causes:
+- **No internet** — `git pull` fails. The service continues with the current code, but if this is the first run and deps aren't installed, it will fail. Run `install_requirements.sh` manually once.
+- **Build fails** — check Node.js is installed: `node --version`

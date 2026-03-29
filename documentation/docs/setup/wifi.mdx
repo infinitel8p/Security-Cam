@@ -72,7 +72,7 @@ Note the **channel number** (`channel 6` in this case) — you will need it late
 
 ### Create the virtual AP interface
 
-The Pi's WiFi chip supports running a second virtual interface for the Access Point. We create a systemd service so this interface is automatically set up on every boot before other services start.
+The Pi's WiFi chip supports running a second virtual interface for the Access Point. We create a systemd service so this interface is automatically set up on every boot.
 
 1. Copy the service file:
 
@@ -99,6 +99,7 @@ The Pi's WiFi chip supports running a second virtual interface for the Access Po
 NetworkManager must not manage `ap0` — hostapd will handle it directly.
 
 ```bash
+sudo mkdir -p /etc/NetworkManager/conf.d
 sudo tee /etc/NetworkManager/conf.d/ignore-ap0.conf > /dev/null << 'EOF'
 [keyfile]
 unmanaged-devices=interface-name:ap0
@@ -118,7 +119,7 @@ Create the hostapd configuration. Replace the values as needed:
 
 - `SecurityCam` — your desired network name (SSID)
 - `YourPasswordHere` — your desired WiFi password (min 8 characters)
-- `channel 6` — the channel from the first step
+- `channel=6` — the channel from the first step
 
 ```bash
 sudo tee /etc/hostapd/hostapd.conf > /dev/null << 'EOF'
@@ -141,7 +142,30 @@ Point the hostapd daemon to this config:
 ```bash
 sudo tee /etc/default/hostapd > /dev/null << 'EOF'
 DAEMON_CONF="/etc/hostapd/hostapd.conf"
+DAEMON_OPTS=""
 EOF
+```
+
+### Ensure correct service ordering
+
+hostapd must start after `ap0` is created, and dnsmasq after hostapd:
+
+```bash
+sudo mkdir -p /etc/systemd/system/hostapd.service.d
+sudo tee /etc/systemd/system/hostapd.service.d/after-ap0.conf > /dev/null << 'EOF'
+[Unit]
+After=create-ap0.service
+Requires=create-ap0.service
+EOF
+
+sudo mkdir -p /etc/systemd/system/dnsmasq.service.d
+sudo tee /etc/systemd/system/dnsmasq.service.d/after-hostapd.conf > /dev/null << 'EOF'
+[Unit]
+After=hostapd.service
+Requires=hostapd.service
+EOF
+
+sudo systemctl daemon-reload
 ```
 
 ### Configure dnsmasq
@@ -155,6 +179,7 @@ sudo cp /opt/security-cam/client/data/dnsmasq-ap0.conf /etc/dnsmasq.d/ap0.conf
 ### Set a static IP on ap0
 
 ```bash
+sudo mkdir -p /etc/systemd/network
 sudo tee /etc/systemd/network/10-ap0.network > /dev/null << 'EOF'
 [Match]
 Name=ap0
@@ -163,12 +188,13 @@ Name=ap0
 Address=192.168.4.1/24
 EOF
 sudo systemctl enable systemd-networkd
+sudo systemctl restart systemd-networkd
 ```
 
 ### Start the services
 
 ```bash
-sudo ip addr add 192.168.4.1/24 dev ap0
+sudo ip addr add 192.168.4.1/24 dev ap0 2>/dev/null || true
 sudo ip link set ap0 up
 sudo systemctl unmask hostapd
 sudo systemctl enable hostapd
@@ -225,9 +251,18 @@ journalctl -u hostapd --no-pager -l | tail -20
 ```
 
 Common causes:
+
 - **Channel mismatch** — `ap0` must use the same channel as `wlan0`. Check with `iw dev` and update `/etc/hostapd/hostapd.conf`.
 - **ap0 doesn't exist** — check `create-ap0.service`: `sudo systemctl status create-ap0.service`
-- **Interface busy** — make sure NetworkManager isn't managing `ap0`: `nmcli device status` should show `ap0` as `unmanaged`.
+- **Interface held by wpa_supplicant** — if NetworkManager previously tried to manage `ap0` as an AP, `wpa_supplicant` may still be attached. Recreate the interface:
+  ```bash
+  sudo iw dev ap0 del
+  sudo iw dev wlan0 interface add ap0 type __ap
+  sudo ip addr add 192.168.4.1/24 dev ap0
+  sudo ip link set ap0 up
+  sudo systemctl restart hostapd
+  ```
+- **Interface managed by NM** — `nmcli device status` should show `ap0` as `unmanaged`. If not, check `/etc/NetworkManager/conf.d/ignore-ap0.conf` exists and reload NM.
 
 ### No IP address on connected devices
 
@@ -239,6 +274,20 @@ journalctl -u dnsmasq --no-pager -l | tail -20
 ```
 
 Make sure `ap0` has its static IP: `ip addr show ap0`
+
+### Checking connected devices
+
+List devices currently connected to the AP:
+
+```bash
+sudo hostapd_cli all_sta
+```
+
+View DHCP leases:
+
+```bash
+cat /var/lib/misc/dnsmasq.leases
+```
 
 :::note
 These instructions were tested on Raspberry Pi OS Trixie with a Raspberry Pi Zero 2 W.

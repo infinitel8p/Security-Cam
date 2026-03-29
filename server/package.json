@@ -9,12 +9,14 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
+    "start": "serve dist -l 3000",
     "astro": "astro"
   },
   "dependencies": {
     "@astrojs/svelte": "^8.0.4",
     "@tailwindcss/vite": "^4.2.2",
     "astro": "^6.1.1",
+    "serve": "^14.2.6",
     "svelte": "^5.55.0",
     "tailwindcss": "^4.2.2",
     "typescript": "^5.9.3"

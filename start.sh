@@ -1,10 +1,12 @@
 #!/bin/bash
 
-# Start the Flask server
-cd /opt/security-cam/client || { echo "Failed to change directory to /opt/security-cam/client"; exit 1; }
+PROJECT_DIR="/opt/security-cam"
+
+# Start the Flask API server
+cd "$PROJECT_DIR/client" || { echo "Failed to cd to client/"; exit 1; }
 sudo python3 main.py &
 
-# Start the Node.js server
-cd /opt/security-cam/server || { echo "Failed to change directory to /opt/security-cam/server"; exit 1; }
+# Serve the Astro frontend (static files, port 3000)
+# Run 'npm run build' in server/ after any code changes or first install
+cd "$PROJECT_DIR/server" || { echo "Failed to cd to server/"; exit 1; }
 npm start &
-
