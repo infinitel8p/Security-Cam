@@ -1,0 +1,17 @@
+{
+  "name": "Security Cam",
+  "short_name": "SecCam",
+  "description": "Raspberry Pi security camera dashboard",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#08090c",
+  "theme_color": "#08090c",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
