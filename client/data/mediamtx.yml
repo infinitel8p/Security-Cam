@@ -51,12 +51,12 @@ hls: no
 webrtc: yes
 webrtcAddress: :8889
 webrtcEncryption: no
-webrtcAllowOrigin: '*'
+webrtcAllowOrigins: ['*']
 webrtcLocalUDPAddress: :8189
-webrtcLocalTCPAddress: ''
+webrtcLocalTCPAddress: :8190
 webrtcIPsFromInterfaces: yes
 webrtcIPsFromInterfacesList: []
-webrtcAdditionalHosts: []
+webrtcAdditionalHosts: [192.168.178.22]
 webrtcHandshakeTimeout: 10s
 webrtcTrackGatherTimeout: 2s
 webrtcSTUNGatherTimeout: 5s

@@ -10,3 +10,4 @@ expect
 nodejs
 npm
 nftables
+ffmpeg
