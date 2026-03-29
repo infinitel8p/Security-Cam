@@ -100,11 +100,10 @@ sudo cp "$DATA_DIR/create-ap0.service" /etc/systemd/system/create-ap0.service
 sudo systemctl daemon-reload
 sudo systemctl enable create-ap0.service
 
-# Create the interface now if it doesn't exist
-if ! ip link show "$AP_INTERFACE" &>/dev/null; then
-    echo "Creating $AP_INTERFACE interface..."
-    sudo iw dev wlan0 interface add "$AP_INTERFACE" type __ap
-fi
+# Recreate the interface cleanly to ensure no leftover wpa_supplicant attachment
+echo "Recreating $AP_INTERFACE interface..."
+sudo iw dev "$AP_INTERFACE" del 2>/dev/null || true
+sudo iw dev wlan0 interface add "$AP_INTERFACE" type __ap
 
 # --- Configure static IP for ap0 ---
 echo "Configuring static IP for $AP_INTERFACE..."
@@ -147,6 +146,10 @@ echo "Enabling services..."
 sudo systemctl unmask hostapd
 sudo systemctl enable hostapd
 sudo systemctl enable dnsmasq
+
+# Release ap0 from any leftover wpa_supplicant attachment (NM retry loops can leave it held)
+sudo pkill -f "wpa_supplicant.*$AP_INTERFACE" 2>/dev/null || true
+sleep 1
 
 # Set IP and start now
 sudo ip addr flush dev "$AP_INTERFACE" 2>/dev/null || true
