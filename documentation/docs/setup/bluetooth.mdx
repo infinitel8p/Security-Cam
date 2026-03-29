@@ -25,13 +25,18 @@ bluetoothctl devices Paired
 
 ## Pairing
 
-Ensure your Bluetooth device's visibility is turned on, then run the included pairing script:
+Run the included pairing script:
 
 ```bash
 /opt/security-cam/setup/pair_bluetooth.sh
 ```
 
-The script will scan for nearby devices, list them, and let you pick one to pair and trust.
+The script offers two modes:
+
+- **Mode 1 — Scan for devices**: The Pi scans for nearby Bluetooth devices (30 seconds). You pick your device from the list after the scan is done and the script handles pairing and trusting. Make sure your device's Bluetooth visibility is turned on. On iPhone, keep Settings → Bluetooth open during the scan.
+- **Mode 2 — Wait for incoming pairing**: The Pi makes itself discoverable as `securitycam` and waits for your device to initiate pairing (120 seconds). On your device, open Bluetooth settings and tap `securitycam`.
+
+If one mode doesn't find your device, you can try the other without restarting the script. A confirmation prompt will appear on your device during pairing — make sure to accept it.
 
 :::info
 If you prefer to do it manually or the script fails, you can use `bluetoothctl` directly.
