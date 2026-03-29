@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("https://fonts.gstatic.com/s/inter/v18/UcCo3FwrK3iLTcviYwY.woff2")
+    format("woff2");
+}
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* ── Dark theme (default) ─────────────────────────────────────────────── */
+
+  /* Surfaces — inspired by UniFi Protect's layered dark panels */
+  --color-surface-base: #0b0a10;
+  --color-surface-raised: #141320;
+  --color-surface-overlay: #1c1b2e;
+  --color-surface-elevated: #24223a;
+  --color-surface-glass: rgba(20, 19, 32, 0.7);
+
+  /* Borders — subtle, almost invisible separators */
+  --color-border-subtle: rgba(255, 255, 255, 0.06);
+  --color-border-default: rgba(255, 255, 255, 0.1);
+  --color-border-strong: rgba(255, 255, 255, 0.16);
+
+  /* Text — high contrast primary, soft secondary */
+  --color-text-primary: #f0eef5;
+  --color-text-secondary: #9694a8;
+  --color-text-muted: #5c5a6e;
+
+  /* Accent (UniFi-style blue) */
+  --color-accent: #006fff;
+  --color-accent-hover: #338fff;
+  --color-accent-muted: rgba(0, 111, 255, 0.12);
+  --color-accent-strong: rgba(0, 111, 255, 0.2);
+
+  /* Status */
+  --color-status-ok: #00e676;
+  --color-status-warning: #ffab00;
+  --color-status-critical: #ff3d57;
+
+  /* Shadows — layered depth like Protect's floating panels */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4), 0 1px 4px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-glow: 0 0 20px rgba(0, 111, 255, 0.15);
+}
+
+/* ── Light theme overrides ──────────────────────────────────────────────── */
+:root.light {
+  --color-surface-base: #f4f5f7;
+  --color-surface-raised: #ffffff;
+  --color-surface-overlay: #f9f9fb;
+  --color-surface-elevated: #eeeef2;
+  --color-surface-glass: rgba(255, 255, 255, 0.8);
+
+  --color-border-subtle: rgba(0, 0, 0, 0.06);
+  --color-border-default: rgba(0, 0, 0, 0.1);
+  --color-border-strong: rgba(0, 0, 0, 0.16);
+
+  --color-text-primary: #1a1a2e;
+  --color-text-secondary: #5c5c72;
+  --color-text-muted: #9494a8;
+
+  --color-accent: #006fff;
+  --color-accent-hover: #0058cc;
+  --color-accent-muted: rgba(0, 111, 255, 0.08);
+  --color-accent-strong: rgba(0, 111, 255, 0.14);
+
+  --color-status-ok: #00b862;
+  --color-status-warning: #e09600;
+  --color-status-critical: #e02b44;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-glow: 0 0 20px rgba(0, 111, 255, 0.08);
+}
+
+/* ── Base styles ────────────────────────────────────────────────────────── */
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-surface-base);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Utility: UniFi-style card */
+.card {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-border-default);
+}
+
+/* Utility: glass panel (navbar, overlays) */
+.glass {
+  background: var(--color-surface-glass);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+/* Scrollbar styling (dark) */
+:root:not(.light) ::-webkit-scrollbar { width: 6px; }
+:root:not(.light) ::-webkit-scrollbar-track { background: transparent; }
+:root:not(.light) ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 3px; }
+:root:not(.light) ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }

@@ -1,0 +1,13 @@
+[Unit]
+Description=Libcamera stream to MediaMTX
+After=mediamtx.service
+Requires=mediamtx.service
+
+[Service]
+ExecStart=/home/pi/camera-stream.sh
+Restart=always
+User=pi
+WorkingDirectory=/home/pi
+
+[Install]
+WantedBy=multi-user.target

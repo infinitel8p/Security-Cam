@@ -1,0 +1,11 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SettingsPage from "../components/SettingsPage.svelte";
+---
+
+<Layout title="Settings — Security Cam">
+  <div class="mx-auto max-w-2xl space-y-5 sm:space-y-6">
+    <h1 class="text-base font-bold text-text-primary sm:text-lg">Settings</h1>
+    <SettingsPage client:load />
+  </div>
+</Layout>

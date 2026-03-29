@@ -1,0 +1,35 @@
+---
+import "../styles/global.css";
+import Navbar from "../components/Navbar.astro";
+import MobileNav from "../components/MobileNav.svelte";
+
+interface Props {
+  title?: string;
+}
+
+const { title = "Security Cam" } = Astro.props;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <title>{title}</title>
+    <!-- Prevent flash: apply saved theme before paint -->
+    <script is:inline>
+      (function () {
+        const saved = localStorage.getItem("theme");
+        if (saved === "light") document.documentElement.classList.add("light");
+      })();
+    </script>
+  </head>
+  <body class="flex min-h-screen">
+    <Navbar />
+    <MobileNav client:load />
+    <main class="flex-1 p-4 pt-16 sm:p-6 sm:pt-16 lg:ml-[13rem] lg:p-8 lg:pt-8">
+      <slot />
+    </main>
+  </body>
+</html>

@@ -1,0 +1,118 @@
+<script lang="ts">
+  import ThemeToggle from "./ThemeToggle.svelte";
+
+  let open = $state(false);
+
+  function close() {
+    open = false;
+  }
+
+  // Close on navigation
+  function handleClick(e: MouseEvent) {
+    const target = e.target as HTMLElement;
+    if (target.closest("a[href]")) {
+      open = false;
+    }
+  }
+
+  // Close on Escape
+  function handleKeydown(e: KeyboardEvent) {
+    if (e.key === "Escape") open = false;
+  }
+</script>
+
+<svelte:window onkeydown={handleKeydown} />
+
+<!-- Hamburger button — visible only on mobile -->
+<button
+  onclick={() => (open = !open)}
+  class="fixed left-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-xl bg-surface-raised shadow-[var(--shadow-md)] transition-colors hover:bg-surface-overlay lg:hidden"
+  aria-label="Toggle navigation"
+>
+  {#if open}
+    <svg class="h-5 w-5 text-text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  {:else}
+    <svg class="h-5 w-5 text-text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="3" y1="12" x2="21" y2="12" />
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <line x1="3" y1="18" x2="21" y2="18" />
+    </svg>
+  {/if}
+</button>
+
+<!-- Overlay -->
+{#if open}
+  <div
+    class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+    onclick={close}
+    role="presentation"
+  ></div>
+{/if}
+
+<!-- Slide-out drawer -->
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div
+  class="fixed left-0 top-0 z-40 flex h-screen w-[13rem] flex-col border-r border-border-subtle transition-transform duration-300 ease-out lg:hidden
+    {open ? 'translate-x-0' : '-translate-x-full'}"
+  style="background: var(--color-surface-raised);"
+  onclick={handleClick}
+>
+  <!-- Logo -->
+  <div class="flex items-center gap-3 px-5 py-6">
+    <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-accent shadow-[var(--shadow-glow)]">
+      <svg class="h-[18px] w-[18px] text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+        <circle cx="12" cy="13" r="4" />
+      </svg>
+    </div>
+    <div>
+      <span class="text-sm font-bold tracking-tight text-text-primary">Security-Cam</span>
+      <p class="text-[10px] font-medium uppercase tracking-widest text-text-muted">v.0.0.alpha</p>
+    </div>
+  </div>
+
+  <!-- Links -->
+  <div class="mt-1 flex flex-col gap-0.5 px-3">
+    <a href="/" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary">
+      <svg class="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" />
+      </svg>
+      Dashboard
+    </a>
+    <a href="/archive" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary">
+      <svg class="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
+        <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+      </svg>
+      Archive
+    </a>
+    <a href="/settings" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary">
+      <svg class="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3" />
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+      </svg>
+      Settings
+    </a>
+  </div>
+
+  <!-- Bottom -->
+  <div class="mt-auto border-t border-border-subtle px-3 py-4">
+    <div class="flex items-center justify-between px-1">
+      <a
+        href="https://github.com/infinitel8p/Security-Cam"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-surface-overlay hover:text-text-secondary"
+        title="GitHub"
+      >
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
+        </svg>
+      </a>
+      <ThemeToggle />
+    </div>
+  </div>
+</div>

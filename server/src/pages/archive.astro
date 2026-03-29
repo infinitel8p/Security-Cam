@@ -1,0 +1,11 @@
+---
+import Layout from "../layouts/Layout.astro";
+import ArchiveGrid from "../components/ArchiveGrid.svelte";
+---
+
+<Layout title="Archive — Security Cam">
+  <div class="mx-auto max-w-6xl space-y-5 sm:space-y-6">
+    <h1 class="text-base font-bold text-text-primary sm:text-lg">Archive</h1>
+    <ArchiveGrid client:load />
+  </div>
+</Layout>
