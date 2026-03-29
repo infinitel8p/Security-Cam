@@ -1,6 +1,9 @@
 ---
 sidebar_position: 1
 description: "Step 1: Setup the hardware components"
+last_update:
+  date: 2026-03-29
+  author: Ludo
 ---
 
 # Hardware Setup
@@ -249,23 +252,21 @@ This is the connection layout using a breadboard. The clock can also just be con
 
 ![61JfhAHWeKL _AC_SX679_](https://github.com/infinitel8p/Security-Cam/assets/50703696/40ddedeb-509f-41e2-b50f-63aa0e9d1f3e)
 
-### Enable I2C Interface
+### RTC Setup
 
-1. #### To enable the I2C interface, run the following command on the Raspberry Pi:
+1. #### Enable the I2C interface:
 
    ```bash
    sudo raspi-config nonint do_i2c 0
    ```
 
-2. #### Test the DS3231 RTC module:
-
-   You can use the following command to see if your Raspberry Pi detects the DS3231 RTC:
+2. #### Verify the DS3231 RTC module is detected:
 
    ```bash
    sudo i2cdetect -y 1
    ```
 
-   You should see a number (usually 68 or 0x68) in the grid that corresponds to the module's address:
+   You should see `68` in the grid, which is the module's address:
 
    ```bash title="Example Output:"
    pi@securitycam:~ $ sudo i2cdetect -y 1
@@ -280,47 +281,41 @@ This is the connection layout using a breadboard. The clock can also just be con
    70: -- -- -- -- -- -- -- --
    ```
 
-3. #### Configure the I2C-Bus for the x68 address:
+3. #### Add the RTC device tree overlay:
+
+   This tells the kernel to automatically handle the DS3231 RTC on boot:
 
    ```bash
-   echo ds3231 0x68 | sudo tee /sys/class/i2c-adapter/i2c-1/new_device
+   sudo sh -c 'echo "dtoverlay=i2c-rtc,ds3231" >> /boot/firmware/config.txt'
    ```
 
-   The command `sudo hwclock` should now return the time from the RTC.
+4. #### Disable fake-hwclock (if present):
 
-4. #### Set the System Time:
-
-   Synchronize the RTC time:
+   If `fake-hwclock` is installed, disable it so it doesn't conflict with the real hardware clock. It's safe to run this even if it's not installed — the commands will simply report that the services don't exist.
 
    ```bash
-   sudo hwclock -w
+   sudo systemctl disable fake-hwclock fake-hwclock-load fake-hwclock-save 2>/dev/null
+   sudo systemctl stop fake-hwclock fake-hwclock-load fake-hwclock-save 2>/dev/null
    ```
 
-   This will set the hardware clock to the current system time.
+5. #### Reboot the Raspberry Pi:
 
-5. #### Enable automatic bus configuration:
-
-   ```bash
-   echo -e "[Unit]\nDescription=Load DS3231 RTC on boot\nAfter=multi-user.target\n\n[Service]\nType=oneshot\nExecStart=/bin/sh -c 'echo ds3231 0x68 > /sys/class/i2c-adapter/i2c-1/new_device'\nRemainAfterExit=yes\n\n[Install]\nWantedBy=multi-user.target" | sudo tee /etc/systemd/system/ds3231.service && sudo systemctl enable ds3231.service
-   ```
-
-6. #### Disable the fake-hwclock:
-
-   ```bash
-   sudo systemctl disable fake-hwclock
-   sudo systemctl stop fake-hwclock
-   ```
-
-   This will prevent the fake-hwclock from overwriting the hardware clock at boot.
-   If you have internet and want to sync the RTC time with the time servers, you can manually run this command again:
-
-   ```bash
-   sudo hwclock -w
-   ```
-
-7. #### Reboot the Raspberry Pi:
    ```bash
    sudo reboot
+   ```
+
+6. #### Verify the RTC is working:
+
+   After reboot, read the hardware clock time:
+
+   ```bash
+   sudo hwclock -r
+   ```
+
+   If you have internet and want to sync the RTC time with the time servers, run:
+
+   ```bash
+   sudo hwclock -w
    ```
 
 With the RTC module connected and configured, the Raspberry Pi will now use the RTC module to keep track of the time even when it is turned off.

@@ -4,6 +4,7 @@ python3-venv
 python3-opencv
 python3-smbus
 i2c-tools
+util-linux-extra
 libbluetooth-dev
 expect
 nodejs
