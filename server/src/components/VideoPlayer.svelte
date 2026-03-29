@@ -10,10 +10,13 @@
   let recording = $state(false);
   let toggling = $state(false);
   let isFullscreen = $state(false);
+  let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
+  let destroyed = false;
 
   const STREAM_PATH = "cam";
 
   async function startWebRTC() {
+    if (destroyed) return;
     error = "";
 
     const whepUrl = `${getMediaMtxUrl()}/${STREAM_PATH}/whep`;
@@ -34,7 +37,8 @@
         connected = false;
         error = "Stream disconnected";
         cleanup();
-        setTimeout(startWebRTC, 3000);
+        clearTimeout(reconnectTimer);
+        reconnectTimer = setTimeout(startWebRTC, 3000);
       }
     };
 
@@ -61,7 +65,8 @@
       console.error("WebRTC connection failed:", e);
       error = "Failed to connect to stream";
       cleanup();
-      setTimeout(startWebRTC, 5000);
+      clearTimeout(reconnectTimer);
+      reconnectTimer = setTimeout(startWebRTC, 5000);
     }
   }
 
@@ -106,6 +111,8 @@
   });
 
   onDestroy(() => {
+    destroyed = true;
+    clearTimeout(reconnectTimer);
     cleanup();
   });
 </script>

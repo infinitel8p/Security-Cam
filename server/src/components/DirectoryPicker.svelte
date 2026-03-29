@@ -12,9 +12,11 @@
   let loading = $state(false);
   let saving = $state(false);
   let open = $state(false);
+  let dirError = $state(false);
 
   async function loadDirectories(path: string) {
     loading = true;
+    dirError = false;
     try {
       const res = await fetch(
         `${getBackendUrl()}/list_directories?path=${encodeURIComponent(path)}`
@@ -22,12 +24,14 @@
       const data = await res.json();
       if (data.error) {
         console.error(data.error);
+        dirError = true;
         return;
       }
       browsePath = data.current_path;
       directories = data.directories ?? [];
     } catch (e) {
       console.error("Failed to list directories:", e);
+      dirError = true;
     } finally {
       loading = false;
     }
@@ -88,10 +92,12 @@
 </div>
 
 {#if open}
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
     role="dialog"
     aria-modal="true"
+    onkeydown={(e) => e.key === "Escape" && (open = false)}
   >
     <div class="mx-4 w-full max-w-md overflow-hidden rounded-2xl border border-border-subtle bg-surface-raised shadow-[var(--shadow-lg)]">
       <!-- Header -->
@@ -116,6 +122,11 @@
       <div class="max-h-64 overflow-y-auto p-2">
         {#if loading}
           <p class="px-3 py-6 text-center text-sm text-text-muted">Loading...</p>
+        {:else if dirError}
+          <div class="px-3 py-6 text-center">
+            <p class="text-sm text-status-critical">Failed to load directories</p>
+            <button onclick={() => loadDirectories(browsePath)} class="mt-2 text-[0.8125rem] font-medium text-accent hover:text-accent-hover">Retry</button>
+          </div>
         {:else}
           <button
             onclick={goUp}

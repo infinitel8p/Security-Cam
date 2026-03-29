@@ -156,6 +156,19 @@ body {
   animation: status-pulse 2.5s ease-in-out infinite;
 }
 
+/* ── Reduced motion ────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .animate-in { animation: none; opacity: 1; }
+  .stagger-1, .stagger-2, .stagger-3, .stagger-4, .stagger-5 { animation-delay: 0ms; }
+  .status-live { animation: none; }
+
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* Scrollbar styling (dark) */
 :root:not(.light) ::-webkit-scrollbar { width: 5px; }
 :root:not(.light) ::-webkit-scrollbar-track { background: transparent; }

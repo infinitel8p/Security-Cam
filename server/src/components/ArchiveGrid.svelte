@@ -207,7 +207,7 @@
       </div>
       <h3 class="mt-3 text-sm font-semibold text-text-primary">Delete recording?</h3>
       <p class="mt-1 text-[0.8125rem] leading-relaxed text-text-secondary">
-        <span class="font-medium text-text-primary">{deleteTarget.filename}</span> will be permanently removed.
+        <span class="break-all font-medium text-text-primary">{deleteTarget.filename}</span> will be permanently removed.
       </p>
       <div class="mt-5 flex justify-end gap-2.5">
         <button

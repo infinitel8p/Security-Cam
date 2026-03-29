@@ -38,11 +38,11 @@
     <ul class="divide-y divide-border-subtle">
       {#each devices as device, i (i)}
         <li class="flex flex-col gap-1 px-4 py-2.5 transition-colors hover:bg-surface-overlay/50 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-3">
-          <div class="flex items-center gap-3">
+          <div class="flex min-w-0 items-center gap-3">
             <span class="h-2 w-2 shrink-0 rounded-full bg-status-ok shadow-[0_0_6px_rgba(0,230,118,0.4)]"></span>
-            <span class="text-sm font-medium text-text-primary">{device.name}</span>
+            <span class="truncate text-sm font-medium text-text-primary">{device.name}</span>
           </div>
-          <code class="ml-5 w-fit rounded-lg bg-surface-elevated px-2.5 py-1 text-[0.6875rem] font-medium text-text-muted sm:ml-0">{device.address}</code>
+          <code class="ml-5 shrink-0 rounded-lg bg-surface-elevated px-2.5 py-1 text-[0.6875rem] font-medium text-text-muted sm:ml-0">{device.address}</code>
         </li>
       {/each}
     </ul>

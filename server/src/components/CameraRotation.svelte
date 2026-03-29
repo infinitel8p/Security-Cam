@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
 
   interface Props {
@@ -9,6 +10,7 @@
   let value = $state(current);
   let saving = $state(false);
   let saved = $state(false);
+  let savedTimer: ReturnType<typeof setTimeout> | undefined;
 
   async function save() {
     if (value === current) return;
@@ -21,7 +23,8 @@
       });
       current = value;
       saved = true;
-      setTimeout(() => (saved = false), 2000);
+      clearTimeout(savedTimer);
+      savedTimer = setTimeout(() => (saved = false), 2000);
     } catch (e) {
       console.error("Failed to save rotation:", e);
       value = current;
@@ -29,6 +32,8 @@
       saving = false;
     }
   }
+
+  onDestroy(() => clearTimeout(savedTimer));
 </script>
 
 <div class="card px-4 py-3.5 sm:px-5 sm:py-4">
