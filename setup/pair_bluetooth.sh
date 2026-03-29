@@ -1,13 +1,19 @@
 #!/bin/bash
 # Scan for nearby Bluetooth devices and pair with a selected one
 
-echo "Scanning for Bluetooth devices (10 seconds)..."
+# Ensure Bluetooth is unblocked and powered on
+sudo rfkill unblock bluetooth > /dev/null 2>&1
 bluetoothctl power on > /dev/null 2>&1
 bluetoothctl agent on > /dev/null 2>&1
 bluetoothctl default-agent > /dev/null 2>&1
 
-# Scan for 10 seconds and collect devices
-bluetoothctl --timeout 10 scan on > /dev/null 2>&1
+echo "Scanning for Bluetooth devices (15 seconds)..."
+# Run scan in background (scan on = both BR/EDR and BLE, finds iPhones too)
+bluetoothctl scan on &>/dev/null &
+SCAN_PID=$!
+sleep 15
+kill "$SCAN_PID" 2>/dev/null
+bluetoothctl scan off &>/dev/null
 
 # List discovered devices
 echo ""

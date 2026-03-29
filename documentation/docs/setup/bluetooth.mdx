@@ -8,37 +8,41 @@ last_update:
 
 # Bluetooth Setup
 
+## Finding your device's Bluetooth MAC address
+
+You'll need your device's Bluetooth MAC address to identify it in the scan results and for the security camera's presence detection. Here's where to find it:
+
+- **Android**: Settings → About phone → Status information → Bluetooth address
+- **iPhone**: Settings → General → About → Bluetooth
+
+:::tip
+If you've already paired, you can list paired devices and their MAC addresses anytime with:
+
+```bash
+bluetoothctl devices Paired
+```
+:::
+
 ## Pairing
 
 Ensure your Bluetooth device's visibility is turned on, then run the included pairing script:
 
 ```bash
-chmod +x /opt/security-cam/tests/pair_bluetooth.sh
-/opt/security-cam/tests/pair_bluetooth.sh
+chmod +x /opt/security-cam/setup/pair_bluetooth.sh
+/opt/security-cam/setup/pair_bluetooth.sh
 ```
 
 The script will scan for nearby devices, list them, and let you pick one to pair and trust.
 
 :::info
-If you prefer to do it manually, you can use `bluetoothctl` directly:
+If you prefer to do it manually or the script fails, you can use `bluetoothctl` directly.
+Enter `bluetoothctl` to open the prompt, then run the following commands **one at a time**:
 
-```bash
-bluetoothctl
-```
-
-In the prompt:
-
-```bash
-agent on
-default-agent
-scan on
-```
-
-Once you see your device's MAC address:
-
-```bash
-pair XX:XX:XX:XX:XX:XX
-trust XX:XX:XX:XX:XX:XX
-exit
-```
+1. `agent on`
+2. `default-agent`
+3. `scan on`
+4. Wait for your device to appear, then:
+5. `pair XX:XX:XX:XX:XX:XX` (replace with your device's MAC address)
+6. `trust XX:XX:XX:XX:XX:XX`
+7. `exit`
 :::
