@@ -8,6 +8,7 @@ User=root
 WorkingDirectory=/opt/security-cam
 ExecStartPre=/opt/security-cam/setup/update.sh
 ExecStart=/opt/security-cam/start.sh
+TimeoutStartSec=300
 Restart=on-failure
 RestartSec=10
 

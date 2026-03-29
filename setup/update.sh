@@ -14,6 +14,9 @@ STAMP_FILE="$PROJECT_DIR/.last-built-commit"
 
 cd "$PROJECT_DIR"
 
+# Fix safe.directory when running as root (service) on a pi-owned repo
+git config --global --add safe.directory "$PROJECT_DIR" 2>/dev/null || true
+
 FORCE=false
 if [ "$1" = "--force" ]; then
     FORCE=true
@@ -21,11 +24,11 @@ fi
 
 # --- Pull latest code (skip if no internet) ---
 echo "=== Pulling latest code ==="
-BEFORE=$(git rev-parse HEAD)
+BEFORE=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
 timeout 15 git pull --ff-only 2>/dev/null || {
     echo "Warning: git pull failed (no internet or dirty tree). Continuing with current code."
 }
-AFTER=$(git rev-parse HEAD)
+AFTER=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
 
 # --- Check if rebuild is needed ---
 LAST_BUILT=$(cat "$STAMP_FILE" 2>/dev/null || echo "none")
