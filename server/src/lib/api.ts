@@ -8,3 +8,14 @@ export function getBackendUrl(): string {
   if (env) return env.replace(/\/$/, "");
   return `${window.location.protocol}//${window.location.hostname}:5005`;
 }
+
+/**
+ * Build the MediaMTX WebRTC WHEP endpoint URL.
+ * Set PUBLIC_MEDIAMTX_URL in a .env file to override (e.g. http://192.168.1.50:8889).
+ * Falls back to same-hostname:8889 for production on the Pi.
+ */
+export function getMediaMtxUrl(): string {
+  const env = (import.meta as any).env?.PUBLIC_MEDIAMTX_URL;
+  if (env) return env.replace(/\/$/, "");
+  return `${window.location.protocol}//${window.location.hostname}:8889`;
+}

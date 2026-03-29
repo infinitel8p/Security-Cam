@@ -17,13 +17,10 @@
 
   function parseFilename(filepath: string): Video {
     const filename = filepath.split("/").pop() ?? filepath;
-    const base = filename.replace(".mp4", "");
-    const date = base.length >= 8
-      ? `${base.slice(0, 4)}-${base.slice(4, 6)}-${base.slice(6, 8)}`
-      : "Unknown";
-    const time = base.length >= 14
-      ? `${base.slice(8, 10)}:${base.slice(10, 12)}:${base.slice(12, 14)}`
-      : "";
+    // Expected format: output_YYYYMMDD_HHMMSS.mp4
+    const match = filename.match(/(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/);
+    const date = match ? `${match[1]}-${match[2]}-${match[3]}` : "Unknown";
+    const time = match ? `${match[4]}:${match[5]}:${match[6]}` : "";
     return { path: filepath, filename, date, time };
   }
 

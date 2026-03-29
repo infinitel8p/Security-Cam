@@ -1,16 +1,17 @@
 import os
-import cv2
+import subprocess
 import threading
 from datetime import datetime
 from . import settings_helpers
 
 settings = settings_helpers.get_settings()
 
-# Lock for thread-safe access to the recording flag and writer
 lock = threading.Lock()
-out = None
+_ffmpeg_process = None
 is_recording = False
 recorded_filename = None
+
+RTSP_URL = "rtsp://localhost:8554/cam"
 
 
 def reload_settings():
@@ -18,127 +19,82 @@ def reload_settings():
     settings = settings_helpers.get_settings()
 
 
-def generate_frames():
-    """
-    Captures frames from the default camera feed, encodes them as JPEG images, and yields them as byte streams.
-
-    Yields:
-        bytes: A sequence of JPEG-encoded image frames as byte streams, suitable for streaming in an HTTP response.
-
-    Returns:
-        None
-    """
-
-    global out, is_recording
+def start_recording() -> None:
+    global _ffmpeg_process, is_recording, recorded_filename
 
     reload_settings()
-
-    # Initialize the camera capture here
-    cap = cv2.VideoCapture(0)
-    cap.set(cv2.CAP_PROP_FPS, 15)
-
-    rotation_angle = settings.get('RotationAngle', 0)
-    print(f"Rotation angle: {rotation_angle}")
-
-    try:
-        while True:
-            success, frame = cap.read()
-            if not success:
-                break
-
-            # Apply rotation
-            if rotation_angle == "90":
-                frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
-            elif rotation_angle == "180":
-                frame = cv2.rotate(frame, cv2.ROTATE_180)
-            elif rotation_angle == "270":
-                frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
-
-            timestamp = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-            cv2.putText(frame, timestamp, (10, frame.shape[0] - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2, cv2.LINE_AA)
-
-            with lock:
-                if is_recording and out is not None:
-                    out.write(frame)
-
-            ret, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
-
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-    finally:
-        # Release the camera when done
-        cap.release()
-
-
-def start_recording() -> None:
-    """
-    Starts recording video frames from the default camera feed and saves them to a file.
-
-    Returns:
-        None
-    """
-    global out, is_recording, recorded_filename
 
     video_save_location = settings.get('VideoSaveLocation', './recordings')
     os.makedirs(video_save_location, exist_ok=True)
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    recorded_filename = os.path.join(
-        video_save_location, f'output_{timestamp}.mp4')  # used .avi before
+    recorded_filename = os.path.join(video_save_location, f'output_{timestamp}.mp4')
 
-    fourcc = cv2.VideoWriter_fourcc(*'X264')  # used XVID before
     with lock:
-        out = cv2.VideoWriter(recorded_filename, fourcc, 15.0, (640, 480))
+        if is_recording:
+            return
+
+        _ffmpeg_process = subprocess.Popen(
+            [
+                "ffmpeg", "-y",
+                "-rtsp_transport", "tcp",
+                "-i", RTSP_URL,
+                "-c", "copy",
+                "-movflags", "+frag_keyframe+empty_moov+default_base_moof",
+                recorded_filename,
+            ],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
         is_recording = True
+        print(f"Recording started: {recorded_filename}")
 
 
 def stop_recording() -> None:
-    """
-    Stops recording video frames and releases the video writer. Converts the recorded AVI file to MP4 in a separate thread.
+    global _ffmpeg_process, is_recording, recorded_filename
 
-    Returns:
-        None
-    """
-
-    global out, is_recording, recorded_filename
     with lock:
-        if out is not None:
-            out.release()
-            out = None
-            is_recording = False
+        if _ffmpeg_process is None:
+            return
 
-            # if recorded_filename:
-            #     conversion_thread = threading.Thread(
-            #         target=convert_to_mp4, args=(recorded_filename,))
-            #     conversion_thread.start()
-            # else:
-            #     print("No recorded file to convert.")
+        # Send 'q' to ffmpeg for a graceful stop (writes proper file trailer)
+        try:
+            _ffmpeg_process.stdin.write(b"q")
+            _ffmpeg_process.stdin.flush()
+        except BrokenPipeError:
+            pass
 
+        proc = _ffmpeg_process
+        filename = recorded_filename
+        _ffmpeg_process = None
+        is_recording = False
 
-def convert_to_mp4(avi_file_path: str) -> str:
-    """
-    Converts an AVI file to MP4 format using ffmpeg in a separate thread.
-
-    Args:
-        avi_file_path (str): The path to the AVI file to be converted.
-
-    Returns:
-        str: The path to the converted MP4 file.
-    """
-    mp4_file_path = avi_file_path.rsplit('.', 1)[0] + '.mp4'
-    command = f"ffmpeg -i {avi_file_path} -vcodec h264 -acodec aac {mp4_file_path}"
-
+    # Wait for ffmpeg to finish outside the lock
     try:
-        os.system(command)
-        print(f"Conversion successful: {mp4_file_path}")
+        proc.wait(timeout=10)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        proc.wait()
 
-        if os.path.exists(avi_file_path):
-            os.remove(avi_file_path)
-            print(f"Original .avi file removed: {avi_file_path}")
+    # Re-mux with faststart for browser seeking support
+    if filename and os.path.exists(filename) and os.path.getsize(filename) > 0:
+        threading.Thread(target=_fix_faststart, args=(filename,)).start()
 
-        return mp4_file_path
+    print(f"Recording stopped: {filename}")
+
+
+def _fix_faststart(file_path: str) -> None:
+    """Re-mux to move moov atom to start for browser playback."""
+    tmp_path = file_path + ".tmp.mp4"
+    try:
+        subprocess.run(
+            ["ffmpeg", "-y", "-i", file_path, "-c", "copy", "-movflags", "+faststart", tmp_path],
+            check=True, capture_output=True,
+        )
+        os.replace(tmp_path, file_path)
+        print(f"Faststart applied: {file_path}")
     except Exception as e:
-        print(f"Error during conversion: {e}")
-        return None
+        print(f"Failed to apply faststart: {e}")
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)

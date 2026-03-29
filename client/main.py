@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, send_file, Response, request, abort
+from flask import Flask, jsonify, send_file, request, abort
 from flask_cors import CORS
 from urllib.parse import unquote
 from modules import system_helpers
@@ -26,15 +26,8 @@ def system_info():
     })
 
 
-@app.route('/video_feed')
-def video_feed():
-    return Response(stream_helpers.generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-
 @app.route('/toggle_recording', methods=['POST'])
 def toggle_recording():
-    global is_recording
-
     if stream_helpers.is_recording:
         stream_helpers.stop_recording()
         print("Recording stopped")
@@ -96,7 +89,7 @@ def stream_video():
     if not video_path or not os.path.exists(video_path):
         abort(404, description="Video not found")
 
-    return send_file(video_path, as_attachment=True, download_name=os.path.basename(video_path), mimetype='video/mp4')
+    return send_file(video_path, mimetype='video/mp4', conditional=True)
 
 
 @app.route('/delete_video', methods=['POST'])
