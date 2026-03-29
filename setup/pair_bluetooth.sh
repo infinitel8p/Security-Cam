@@ -133,8 +133,8 @@ expect {
         send "yes\r"
         exp_continue
     }
-    "Pairing successful" {
-        puts ">>> Pairing successful! Finalizing connection..."
+    -re "(Paired: yes|Pairing successful|ServicesResolved: yes)" {
+        puts ">>> Success condition met! Finalizing connection..."
         send "discoverable off\r"
         send "quit\r"
     }
