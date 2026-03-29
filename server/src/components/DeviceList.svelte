@@ -27,7 +27,7 @@
       </div>
     {/if}
     <h3 class="text-sm font-semibold text-text-primary">{title}</h3>
-    <span class="ml-auto rounded-full bg-surface-elevated px-2 py-0.5 text-[11px] font-semibold text-text-muted">
+    <span class="ml-auto rounded-full bg-surface-elevated px-2 py-0.5 text-[0.6875rem] font-semibold text-text-muted">
       {devices.length}
     </span>
   </div>
@@ -42,7 +42,7 @@
             <span class="h-2 w-2 shrink-0 rounded-full bg-status-ok shadow-[0_0_6px_rgba(0,230,118,0.4)]"></span>
             <span class="text-sm font-medium text-text-primary">{device.name}</span>
           </div>
-          <code class="ml-5 w-fit rounded-lg bg-surface-elevated px-2.5 py-1 text-[11px] font-medium text-text-muted sm:ml-0">{device.address}</code>
+          <code class="ml-5 w-fit rounded-lg bg-surface-elevated px-2.5 py-1 text-[0.6875rem] font-medium text-text-muted sm:ml-0">{device.address}</code>
         </li>
       {/each}
     </ul>

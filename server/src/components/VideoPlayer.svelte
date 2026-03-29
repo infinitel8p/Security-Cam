@@ -112,7 +112,7 @@
 
 <svelte:document on:fullscreenchange={onFullscreenChange} />
 
-<div bind:this={containerEl} class="card overflow-hidden" class:fullscreen={isFullscreen}>
+<div bind:this={containerEl} class="card overflow-hidden transition-shadow duration-700 {connected ? 'shadow-[0_0_30px_rgba(79,143,247,0.08),var(--shadow-sm)]' : ''}" class:fullscreen={isFullscreen}>
   <!-- Feed -->
   <div class="relative w-full bg-black/80 {isFullscreen ? 'h-full' : 'aspect-video'}">
     <video
@@ -162,12 +162,12 @@
         {#if recording}
           <div class="flex items-center gap-2 rounded-lg bg-black/50 px-2.5 py-1.5 backdrop-blur-sm">
             <span class="h-2 w-2 animate-pulse rounded-full bg-status-critical shadow-[0_0_8px_rgba(240,104,104,0.6)]"></span>
-            <span class="text-[11px] font-semibold tracking-wide text-white/90">REC</span>
+            <span class="text-[0.6875rem] font-semibold tracking-wide text-white/90">REC</span>
           </div>
         {:else if connected}
           <div class="flex items-center gap-1.5 rounded-lg bg-black/50 px-2.5 py-1.5 backdrop-blur-sm">
             <span class="h-1.5 w-1.5 rounded-full bg-status-ok shadow-[0_0_6px_rgba(45,212,168,0.5)]"></span>
-            <span class="text-[11px] font-medium tracking-wide text-white/80">LIVE</span>
+            <span class="text-[0.6875rem] font-medium tracking-wide text-white/80">LIVE</span>
           </div>
         {/if}
       </div>
@@ -181,25 +181,25 @@
         <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
         <circle cx="12" cy="13" r="4" />
       </svg>
-      <span class="text-[13px] font-medium text-text-secondary">Live Feed</span>
+      <span class="hidden text-[0.8125rem] font-medium text-text-secondary sm:inline">Live Feed</span>
     </div>
-    <div class="flex items-center gap-1.5">
+    <div class="flex items-center gap-1">
       <button
         onclick={toggleRecording}
         disabled={toggling}
-        class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] font-medium transition-colors duration-150
+        class="flex min-h-[2.75rem] items-center gap-1.5 rounded-lg px-3.5 text-[0.8125rem] font-medium transition-colors duration-150 sm:min-h-0 sm:py-1.5
           {recording
             ? 'bg-status-critical/10 text-status-critical hover:bg-status-critical/15'
             : 'bg-accent/10 text-accent hover:bg-accent/15'}
           disabled:opacity-40"
       >
         {#if recording}
-          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
             <rect x="6" y="6" width="12" height="12" rx="2" />
           </svg>
           Stop
         {:else}
-          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
             <circle cx="12" cy="12" r="6" />
           </svg>
           Record
@@ -208,7 +208,7 @@
 
       <button
         onclick={toggleFullscreen}
-        class="flex items-center justify-center rounded-lg p-1.5 text-text-muted transition-colors duration-150 hover:bg-surface-overlay hover:text-text-secondary"
+        class="flex min-h-[2.75rem] min-w-[2.75rem] items-center justify-center rounded-lg text-text-muted transition-colors duration-150 hover:bg-surface-overlay hover:text-text-secondary sm:min-h-0 sm:min-w-0 sm:p-1.5"
         title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
       >
         {#if isFullscreen}

@@ -112,8 +112,8 @@
         <line x1="12" y1="16" x2="12.01" y2="16" />
       </svg>
     </div>
-    <p class="mt-3 text-[13px] text-text-secondary">Unable to load archive</p>
-    <p class="mt-1 text-[12px] text-text-muted">Check that the backend is running</p>
+    <p class="mt-3 text-[0.8125rem] text-text-secondary">Unable to load archive</p>
+    <p class="mt-1 text-[0.8125rem] text-text-muted">Check that the backend is running</p>
   </div>
 {:else if videos.length === 0}
   <div class="card px-6 py-14 text-center">
@@ -129,12 +129,12 @@
         <line x1="17" y1="17" x2="22" y2="17" />
       </svg>
     </div>
-    <p class="mt-3 text-[13px] text-text-secondary">No recordings yet</p>
-    <p class="mt-1 text-[12px] text-text-muted">Recordings will appear here once you start capturing</p>
+    <p class="mt-3 text-[0.8125rem] text-text-secondary">No recordings yet</p>
+    <p class="mt-1 text-[0.8125rem] text-text-muted">Recordings will appear here once you start capturing</p>
   </div>
 {:else}
   <!-- Count -->
-  <p class="text-[12px] text-text-muted">{videos.length} recording{videos.length !== 1 ? "s" : ""}</p>
+  <p class="text-[0.8125rem] text-text-muted">{videos.length} recording{videos.length !== 1 ? "s" : ""}</p>
 
   <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
     {#each videos as video (video.path)}
@@ -153,18 +153,18 @@
         <!-- Info + actions -->
         <div class="flex items-center justify-between border-t border-border-subtle px-3.5 py-2.5">
           <div class="min-w-0">
-            <p class="text-[13px] font-medium text-text-primary">{formatDate(video.date)}</p>
+            <p class="text-[0.8125rem] font-medium text-text-primary">{formatDate(video.date)}</p>
             {#if video.time}
-              <p class="text-[11px] tabular-nums text-text-muted">{video.time}</p>
+              <p class="text-[0.6875rem] tabular-nums text-text-muted">{video.time}</p>
             {/if}
           </div>
           <div class="flex shrink-0 gap-0.5 sm:opacity-0 sm:transition-opacity sm:duration-150 sm:group-hover:opacity-100">
             <button
               onclick={() => downloadVideo(video)}
-              class="rounded-lg p-2 text-text-muted transition-colors hover:bg-accent-muted hover:text-accent"
+              class="flex h-10 w-10 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-accent-muted hover:text-accent sm:h-auto sm:w-auto sm:p-2"
               title="Download"
             >
-              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg class="h-[1.125rem] w-[1.125rem] sm:h-4 sm:w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                 <polyline points="7 10 12 15 17 10" />
                 <line x1="12" y1="15" x2="12" y2="3" />
@@ -172,7 +172,7 @@
             </button>
             <button
               onclick={() => (deleteTarget = video)}
-              class="rounded-lg p-2 text-text-muted transition-colors hover:bg-status-critical/8 hover:text-status-critical"
+              class="flex h-10 w-10 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-status-critical/8 hover:text-status-critical sm:h-auto sm:w-auto sm:p-2"
               title="Delete"
             >
               <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -205,21 +205,21 @@
           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
         </svg>
       </div>
-      <h3 class="mt-3 text-[15px] font-semibold text-text-primary">Delete recording?</h3>
-      <p class="mt-1 text-[13px] leading-relaxed text-text-secondary">
+      <h3 class="mt-3 text-sm font-semibold text-text-primary">Delete recording?</h3>
+      <p class="mt-1 text-[0.8125rem] leading-relaxed text-text-secondary">
         <span class="font-medium text-text-primary">{deleteTarget.filename}</span> will be permanently removed.
       </p>
       <div class="mt-5 flex justify-end gap-2.5">
         <button
           onclick={() => (deleteTarget = null)}
-          class="rounded-lg px-3.5 py-2 text-[13px] font-medium text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary"
+          class="rounded-lg px-4 py-2.5 text-[0.8125rem] font-medium text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary"
         >
           Cancel
         </button>
         <button
           onclick={confirmDelete}
           disabled={deleting}
-          class="rounded-lg bg-status-critical/10 px-3.5 py-2 text-[13px] font-semibold text-status-critical transition-colors hover:bg-status-critical/18 disabled:opacity-40"
+          class="rounded-lg bg-status-critical/10 px-4 py-2.5 text-[0.8125rem] font-semibold text-status-critical transition-colors hover:bg-status-critical/18 disabled:opacity-40"
         >
           {deleting ? "Deleting..." : "Delete"}
         </button>

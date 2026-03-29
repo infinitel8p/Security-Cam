@@ -44,28 +44,28 @@
   }
 </script>
 
-<div class="grid grid-cols-2 gap-2 lg:grid-cols-1">
+<div class="grid grid-cols-2 gap-2 lg:grid-cols-1 lg:gap-2.5">
   {#if error}
-    <div class="card col-span-2 row-span-4 flex items-center justify-center px-4 py-8 text-center text-[13px] text-text-muted lg:col-span-1">
+    <div class="card col-span-2 row-span-4 flex items-center justify-center px-4 py-8 text-center text-[0.8125rem] text-text-muted lg:col-span-1">
       Unable to reach system monitor
     </div>
   {:else if info}
     <!-- CPU Temperature -->
-    <div class="card flex flex-col justify-center px-4 py-3">
+    <div class="card flex flex-col justify-center px-4 py-3 lg:px-5 lg:py-3.5">
       <div class="flex items-center gap-1.5">
         <svg class="h-3.5 w-3.5 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" />
         </svg>
-        <p class="text-[11px] font-medium uppercase tracking-wider text-text-muted">CPU Temp</p>
+        <p class="text-[0.6875rem] font-medium uppercase tracking-wider text-text-muted">CPU Temp</p>
       </div>
-      <p class="mt-1.5 text-xl font-semibold tabular-nums {tempColor(info.cpu_temp_celsius)}">
+      <p class="mt-1.5 text-2xl font-bold tabular-nums leading-none {tempColor(info.cpu_temp_celsius)}">
         {info.cpu_temp_celsius.toFixed(1)}<span class="text-xs font-medium">&deg;C</span>
       </p>
     </div>
 
     <!-- CPU Load -->
     {@const loadPct = Math.round(info.cpu_load_percent)}
-    <div class="card flex flex-col justify-center px-4 py-3">
+    <div class="card flex flex-col justify-center px-4 py-3 lg:px-5 lg:py-3.5">
       <div class="flex items-center gap-1.5">
         <svg class="h-3.5 w-3.5 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="4" y="4" width="16" height="16" rx="2" />
@@ -75,12 +75,12 @@
           <line x1="20" y1="9" x2="23" y2="9" /><line x1="20" y1="14" x2="23" y2="14" />
           <line x1="1" y1="9" x2="4" y2="9" /><line x1="1" y1="14" x2="4" y2="14" />
         </svg>
-        <p class="text-[11px] font-medium uppercase tracking-wider text-text-muted">CPU Load</p>
+        <p class="text-[0.6875rem] font-medium uppercase tracking-wider text-text-muted">CPU Load</p>
       </div>
-      <p class="mt-1.5 text-xl font-semibold tabular-nums text-text-primary">
+      <p class="mt-1.5 text-2xl font-bold tabular-nums leading-none text-text-primary">
         {loadPct}<span class="text-xs font-medium">%</span>
       </p>
-      <div class="mt-1.5 h-1 rounded-full {barTrackColor(loadPct)}">
+      <div class="mt-2 h-1.5 rounded-full {barTrackColor(loadPct)}">
         <div
           class="h-full rounded-full {barColor(loadPct)} transition-[width] duration-500"
           style="width: {loadPct}%"
@@ -90,50 +90,50 @@
 
     <!-- Storage -->
     {@const storagePct = usagePct(info.storage_info_gb.used_gb, info.storage_info_gb.total_gb)}
-    <div class="card flex flex-col justify-center px-4 py-3">
+    <div class="card flex flex-col justify-center px-4 py-3 lg:px-5 lg:py-3.5">
       <div class="flex items-center gap-1.5">
         <svg class="h-3.5 w-3.5 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="22" y1="12" x2="2" y2="12" />
           <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
           <line x1="6" y1="16" x2="6.01" y2="16" /><line x1="10" y1="16" x2="10.01" y2="16" />
         </svg>
-        <p class="text-[11px] font-medium uppercase tracking-wider text-text-muted">Storage</p>
+        <p class="text-[0.6875rem] font-medium uppercase tracking-wider text-text-muted">Storage</p>
       </div>
-      <p class="mt-1.5 text-xl font-semibold tabular-nums text-text-primary">
+      <p class="mt-1.5 text-2xl font-bold tabular-nums leading-none text-text-primary">
         {storagePct}<span class="text-xs font-medium">%</span>
       </p>
-      <div class="mt-1.5 h-1 rounded-full {barTrackColor(storagePct)}">
+      <div class="mt-2 h-1.5 rounded-full {barTrackColor(storagePct)}">
         <div
           class="h-full rounded-full {barColor(storagePct)} transition-[width] duration-500"
           style="width: {storagePct}%"
         ></div>
       </div>
-      <p class="mt-1 text-[11px] text-text-muted">
+      <p class="mt-1 text-[0.6875rem] text-text-muted">
         {info.storage_info_gb.used_gb.toFixed(1)} / {info.storage_info_gb.total_gb.toFixed(1)} GB
       </p>
     </div>
 
     <!-- RAM -->
     {@const ramPct = usagePct(info.ram_usage_mb.used_mb, info.ram_usage_mb.total_mb)}
-    <div class="card flex flex-col justify-center px-4 py-3">
+    <div class="card flex flex-col justify-center px-4 py-3 lg:px-5 lg:py-3.5">
       <div class="flex items-center gap-1.5">
         <svg class="h-3.5 w-3.5 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="2" y="6" width="20" height="12" rx="2" />
           <line x1="6" y1="10" x2="6" y2="14" /><line x1="10" y1="10" x2="10" y2="14" />
           <line x1="14" y1="10" x2="14" y2="14" /><line x1="18" y1="10" x2="18" y2="14" />
         </svg>
-        <p class="text-[11px] font-medium uppercase tracking-wider text-text-muted">RAM</p>
+        <p class="text-[0.6875rem] font-medium uppercase tracking-wider text-text-muted">RAM</p>
       </div>
-      <p class="mt-1.5 text-xl font-semibold tabular-nums text-text-primary">
+      <p class="mt-1.5 text-2xl font-bold tabular-nums leading-none text-text-primary">
         {ramPct}<span class="text-xs font-medium">%</span>
       </p>
-      <div class="mt-1.5 h-1 rounded-full {barTrackColor(ramPct)}">
+      <div class="mt-2 h-1.5 rounded-full {barTrackColor(ramPct)}">
         <div
           class="h-full rounded-full {barColor(ramPct)} transition-[width] duration-500"
           style="width: {ramPct}%"
         ></div>
       </div>
-      <p class="mt-1 text-[11px] text-text-muted">
+      <p class="mt-1 text-[0.6875rem] text-text-muted">
         {info.ram_usage_mb.used_mb.toFixed(0)} / {info.ram_usage_mb.total_mb.toFixed(0)} MB
       </p>
     </div>

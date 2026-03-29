@@ -5,38 +5,38 @@ import SystemMonitor from "../components/SystemMonitor.svelte";
 ---
 
 <Layout title="Dashboard — Security Cam">
-	<div class="mx-auto max-w-6xl space-y-4 sm:space-y-5">
+	<div class="mx-auto max-w-6xl">
 		<!-- Header -->
-		<div class="flex items-center justify-between">
-			<h1 class="text-base font-semibold text-text-primary sm:text-lg">
+		<div class="animate-in flex items-center justify-between">
+			<h1 class="text-xl font-bold tracking-tight text-text-primary sm:text-2xl">
 				Dashboard
 			</h1>
 			<div
-				class="flex items-center gap-2 rounded-full border border-status-ok/20 bg-status-ok/8 px-3 py-1">
+				class="flex items-center gap-2 rounded-full border border-status-ok/20 bg-status-ok/8 px-3.5 py-1.5">
 				<span
-					class="h-1.5 w-1.5 rounded-full bg-status-ok shadow-[0_0_6px_rgba(45,212,168,0.5)]"
+					class="status-live h-2 w-2 rounded-full bg-status-ok shadow-[0_0_8px_rgba(45,212,168,0.6)]"
 				></span>
 				<span
-					class="text-[11px] font-medium text-status-ok">
+					class="text-[0.8125rem] font-semibold text-status-ok">
 					Online
 				</span>
 			</div>
 		</div>
 
-		<div class="grid grid-cols-1 items-start gap-4 sm:gap-5 lg:grid-cols-3">
+		<div class="mt-4 grid grid-cols-1 items-start gap-4 sm:mt-5 sm:gap-5 lg:grid-cols-3">
 			<!-- Live Feed (takes 2 cols on desktop) -->
-			<div class="min-w-0 lg:col-span-2">
+			<div class="animate-in stagger-1 min-w-0 lg:col-span-2">
 				<h2
-					class="mb-2 text-[11px] font-semibold uppercase tracking-wider text-text-muted">
+					class="mb-2.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-text-muted">
 					Live Feed
 				</h2>
 				<VideoPlayer client:load />
 			</div>
 
 			<!-- System Monitor -->
-			<div class="min-w-0">
+			<div class="animate-in stagger-2 min-w-0">
 				<h2
-					class="mb-2 text-[11px] font-semibold uppercase tracking-wider text-text-muted">
+					class="mb-2.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-text-muted">
 					System Health
 				</h2>
 				<SystemMonitor client:load />
@@ -44,34 +44,83 @@ import SystemMonitor from "../components/SystemMonitor.svelte";
 		</div>
 
 		<!-- Access Log -->
-		<section>
+		<section class="animate-in stagger-3 mt-8 sm:mt-10">
 			<div class="flex items-center justify-between mb-3">
 				<h2
-					class="text-[11px] font-semibold uppercase tracking-wider text-text-muted">
+					class="text-[0.6875rem] font-semibold uppercase tracking-wider text-text-muted">
 					Access Log
 				</h2>
-				<span class="text-[11px] text-text-muted">Last 24h</span>
+				<span class="text-[0.6875rem] text-text-muted">Last 24h</span>
 			</div>
-			<div class="card overflow-hidden">
+			<!-- Mobile: stacked cards -->
+			<div class="card divide-y divide-border-subtle sm:hidden">
+				<div class="flex items-center justify-between px-4 py-3">
+					<div class="min-w-0">
+						<p class="text-sm font-medium text-text-primary">iPhone (John)</p>
+						<p class="mt-0.5 text-[0.6875rem] tabular-nums text-text-secondary">2025-03-28 &middot; 08:32</p>
+					</div>
+					<span class="inline-flex items-center gap-1.5 text-[0.8125rem] text-status-ok">
+						<span class="h-1.5 w-1.5 rounded-full bg-current"></span>Arrived
+					</span>
+				</div>
+				<div class="flex items-center justify-between px-4 py-3">
+					<div class="min-w-0">
+						<p class="text-sm font-medium text-text-primary">iPhone (John)</p>
+						<p class="mt-0.5 text-[0.6875rem] tabular-nums text-text-secondary">2025-03-28 &middot; 17:45</p>
+					</div>
+					<span class="inline-flex items-center gap-1.5 text-[0.8125rem] text-text-muted">
+						<span class="h-1.5 w-1.5 rounded-full bg-current"></span>Left
+					</span>
+				</div>
+				<div class="flex items-center justify-between px-4 py-3">
+					<div class="min-w-0">
+						<p class="text-sm font-medium text-text-primary">Galaxy (Jane)</p>
+						<p class="mt-0.5 text-[0.6875rem] tabular-nums text-text-secondary">2025-03-27 &middot; 09:10</p>
+					</div>
+					<span class="inline-flex items-center gap-1.5 text-[0.8125rem] text-status-ok">
+						<span class="h-1.5 w-1.5 rounded-full bg-current"></span>Arrived
+					</span>
+				</div>
+				<div class="flex items-center justify-between px-4 py-3">
+					<div class="min-w-0">
+						<p class="text-sm font-medium text-text-primary">Galaxy (Jane)</p>
+						<p class="mt-0.5 text-[0.6875rem] tabular-nums text-text-secondary">2025-03-27 &middot; 18:20</p>
+					</div>
+					<span class="inline-flex items-center gap-1.5 text-[0.8125rem] text-text-muted">
+						<span class="h-1.5 w-1.5 rounded-full bg-current"></span>Left
+					</span>
+				</div>
+				<div class="flex items-center justify-between px-4 py-3">
+					<div class="min-w-0">
+						<p class="text-sm font-medium text-text-primary">iPad (Office)</p>
+						<p class="mt-0.5 text-[0.6875rem] tabular-nums text-text-secondary">2025-03-26 &middot; 07:00</p>
+					</div>
+					<span class="inline-flex items-center gap-1.5 text-[0.8125rem] text-status-ok">
+						<span class="h-1.5 w-1.5 rounded-full bg-current"></span>Arrived
+					</span>
+				</div>
+			</div>
+
+			<!-- Desktop: table -->
+			<div class="card hidden overflow-hidden sm:block">
 				<div class="overflow-x-auto">
 					<table class="w-full text-left text-sm">
 						<thead>
 							<tr
-								class="border-b border-border-default text-[11px] font-medium uppercase tracking-wider text-text-muted">
-								<th class="whitespace-nowrap px-4 py-3 sm:px-5"
+								class="border-b border-border-default text-[0.6875rem] font-medium uppercase tracking-wider text-text-muted">
+								<th class="whitespace-nowrap px-5 py-3"
 									>Device</th
 								>
-								<th class="whitespace-nowrap px-4 py-3 sm:px-5"
+								<th class="whitespace-nowrap px-5 py-3"
 									>Date</th
 								>
-								<th class="whitespace-nowrap px-4 py-3 sm:px-5"
+								<th class="whitespace-nowrap px-5 py-3"
 									>Time</th
 								>
-								<th class="whitespace-nowrap px-4 py-3 sm:px-5"
+								<th class="whitespace-nowrap px-5 py-3"
 									>Status</th
 								>
-								<th
-									class="hidden whitespace-nowrap px-4 py-3 sm:table-cell sm:px-5"
+								<th class="whitespace-nowrap px-5 py-3"
 									>Event</th
 								>
 							</tr>
@@ -80,18 +129,18 @@ import SystemMonitor from "../components/SystemMonitor.svelte";
 							<tr
 								class="transition-colors hover:bg-surface-overlay/40">
 								<td
-									class="whitespace-nowrap px-4 py-3 font-medium text-text-primary sm:px-5"
+									class="whitespace-nowrap px-5 py-3 font-medium text-text-primary"
 									>iPhone (John)</td
 								>
 								<td
-									class="whitespace-nowrap px-4 py-3 tabular-nums text-text-secondary sm:px-5"
+									class="whitespace-nowrap px-5 py-3 tabular-nums text-text-secondary"
 									>2025-03-28</td
 								>
 								<td
-									class="whitespace-nowrap px-4 py-3 tabular-nums text-text-secondary sm:px-5"
+									class="whitespace-nowrap px-5 py-3 tabular-nums text-text-secondary"
 									>08:32</td
 								>
-								<td class="whitespace-nowrap px-4 py-3 sm:px-5"
+								<td class="whitespace-nowrap px-5 py-3"
 									><span
 										class="inline-flex items-center gap-1.5 text-status-ok"
 										><span
@@ -100,25 +149,25 @@ import SystemMonitor from "../components/SystemMonitor.svelte";
 									></td
 								>
 								<td
-									class="hidden whitespace-nowrap px-4 py-3 text-text-secondary sm:table-cell sm:px-5"
+									class="whitespace-nowrap px-5 py-3 text-text-secondary"
 									>Arrived</td
 								>
 							</tr>
 							<tr
 								class="transition-colors hover:bg-surface-overlay/40">
 								<td
-									class="whitespace-nowrap px-4 py-3 font-medium text-text-primary sm:px-5"
+									class="whitespace-nowrap px-5 py-3 font-medium text-text-primary"
 									>iPhone (John)</td
 								>
 								<td
-									class="whitespace-nowrap px-4 py-3 tabular-nums text-text-secondary sm:px-5"
+									class="whitespace-nowrap px-5 py-3 tabular-nums text-text-secondary"
 									>2025-03-28</td
 								>
 								<td
-									class="whitespace-nowrap px-4 py-3 tabular-nums text-text-secondary sm:px-5"
+									class="whitespace-nowrap px-5 py-3 tabular-nums text-text-secondary"
 									>17:45</td
 								>
-								<td class="whitespace-nowrap px-4 py-3 sm:px-5"
+								<td class="whitespace-nowrap px-5 py-3"
 									><span
 										class="inline-flex items-center gap-1.5 text-text-muted"
 										><span
@@ -127,25 +176,25 @@ import SystemMonitor from "../components/SystemMonitor.svelte";
 									></td
 								>
 								<td
-									class="hidden whitespace-nowrap px-4 py-3 text-text-secondary sm:table-cell sm:px-5"
+									class="whitespace-nowrap px-5 py-3 text-text-secondary"
 									>Left</td
 								>
 							</tr>
 							<tr
 								class="transition-colors hover:bg-surface-overlay/40">
 								<td
-									class="whitespace-nowrap px-4 py-3 font-medium text-text-primary sm:px-5"
+									class="whitespace-nowrap px-5 py-3 font-medium text-text-primary"
 									>Galaxy (Jane)</td
 								>
 								<td
-									class="whitespace-nowrap px-4 py-3 tabular-nums text-text-secondary sm:px-5"
+									class="whitespace-nowrap px-5 py-3 tabular-nums text-text-secondary"
 									>2025-03-27</td
 								>
 								<td
-									class="whitespace-nowrap px-4 py-3 tabular-nums text-text-secondary sm:px-5"
+									class="whitespace-nowrap px-5 py-3 tabular-nums text-text-secondary"
 									>09:10</td
 								>
-								<td class="whitespace-nowrap px-4 py-3 sm:px-5"
+								<td class="whitespace-nowrap px-5 py-3"
 									><span
 										class="inline-flex items-center gap-1.5 text-status-ok"
 										><span
@@ -154,25 +203,25 @@ import SystemMonitor from "../components/SystemMonitor.svelte";
 									></td
 								>
 								<td
-									class="hidden whitespace-nowrap px-4 py-3 text-text-secondary sm:table-cell sm:px-5"
+									class="whitespace-nowrap px-5 py-3 text-text-secondary"
 									>Arrived</td
 								>
 							</tr>
 							<tr
 								class="transition-colors hover:bg-surface-overlay/40">
 								<td
-									class="whitespace-nowrap px-4 py-3 font-medium text-text-primary sm:px-5"
+									class="whitespace-nowrap px-5 py-3 font-medium text-text-primary"
 									>Galaxy (Jane)</td
 								>
 								<td
-									class="whitespace-nowrap px-4 py-3 tabular-nums text-text-secondary sm:px-5"
+									class="whitespace-nowrap px-5 py-3 tabular-nums text-text-secondary"
 									>2025-03-27</td
 								>
 								<td
-									class="whitespace-nowrap px-4 py-3 tabular-nums text-text-secondary sm:px-5"
+									class="whitespace-nowrap px-5 py-3 tabular-nums text-text-secondary"
 									>18:20</td
 								>
-								<td class="whitespace-nowrap px-4 py-3 sm:px-5"
+								<td class="whitespace-nowrap px-5 py-3"
 									><span
 										class="inline-flex items-center gap-1.5 text-text-muted"
 										><span
@@ -181,25 +230,25 @@ import SystemMonitor from "../components/SystemMonitor.svelte";
 									></td
 								>
 								<td
-									class="hidden whitespace-nowrap px-4 py-3 text-text-secondary sm:table-cell sm:px-5"
+									class="whitespace-nowrap px-5 py-3 text-text-secondary"
 									>Left</td
 								>
 							</tr>
 							<tr
 								class="transition-colors hover:bg-surface-overlay/40">
 								<td
-									class="whitespace-nowrap px-4 py-3 font-medium text-text-primary sm:px-5"
+									class="whitespace-nowrap px-5 py-3 font-medium text-text-primary"
 									>iPad (Office)</td
 								>
 								<td
-									class="whitespace-nowrap px-4 py-3 tabular-nums text-text-secondary sm:px-5"
+									class="whitespace-nowrap px-5 py-3 tabular-nums text-text-secondary"
 									>2025-03-26</td
 								>
 								<td
-									class="whitespace-nowrap px-4 py-3 tabular-nums text-text-secondary sm:px-5"
+									class="whitespace-nowrap px-5 py-3 tabular-nums text-text-secondary"
 									>07:00</td
 								>
-								<td class="whitespace-nowrap px-4 py-3 sm:px-5"
+								<td class="whitespace-nowrap px-5 py-3"
 									><span
 										class="inline-flex items-center gap-1.5 text-status-ok"
 										><span
@@ -208,7 +257,7 @@ import SystemMonitor from "../components/SystemMonitor.svelte";
 									></td
 								>
 								<td
-									class="hidden whitespace-nowrap px-4 py-3 text-text-secondary sm:table-cell sm:px-5"
+									class="whitespace-nowrap px-5 py-3 text-text-secondary"
 									>Arrived</td
 								>
 							</tr>
@@ -219,9 +268,9 @@ import SystemMonitor from "../components/SystemMonitor.svelte";
 		</section>
 
 		<!-- Activity Timeline -->
-		<section>
+		<section class="animate-in stagger-4 mt-6 sm:mt-8">
 			<h2
-				class="mb-3 text-[11px] font-semibold uppercase tracking-wider text-text-muted">
+				class="mb-3 text-[0.6875rem] font-semibold uppercase tracking-wider text-text-muted">
 				Activity Timeline
 			</h2>
 			<div class="card px-6 py-10 text-center">
@@ -234,7 +283,7 @@ import SystemMonitor from "../components/SystemMonitor.svelte";
 					<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"
 					></polyline>
 				</svg>
-				<p class="mt-2.5 text-[13px] text-text-muted">
+				<p class="mt-2.5 text-[0.8125rem] text-text-muted">
 					Activity timeline coming soon
 				</p>
 			</div>

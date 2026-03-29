@@ -109,7 +109,7 @@
 
       <!-- Current path -->
       <div class="border-b border-border-subtle bg-surface-overlay/50 px-5 py-2">
-        <code class="text-[11px] font-medium text-text-muted">{browsePath}</code>
+        <code class="text-[0.6875rem] font-medium text-text-muted">{browsePath}</code>
       </div>
 
       <!-- Directory list -->

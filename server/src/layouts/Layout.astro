@@ -34,7 +34,7 @@ const { title = "Security Cam" } = Astro.props;
 		<Navbar />
 		<MobileNav client:load />
 		<main
-			class="min-w-0 flex-1 overflow-x-hidden p-4 pb-20 sm:p-6 sm:pb-20 lg:ml-52 lg:p-8 lg:pb-8">
+			class="min-w-0 flex-1 overflow-x-hidden p-4 pb-20 landscape:pb-4 sm:p-6 sm:pb-20 landscape:sm:pb-6 lg:ml-52 lg:p-8 lg:pb-8">
 			<slot />
 		</main>
 	</body>

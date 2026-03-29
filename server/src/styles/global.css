@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant landscape (@media (orientation: landscape) and (max-height: 500px));
+
 @font-face {
   font-family: "Inter";
   font-style: normal;
@@ -82,11 +84,16 @@
 /* ── Base styles ────────────────────────────────────────────────────────── */
 body {
   font-family: var(--font-sans);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11"; /* Inter stylistic alternates */
   background-color: var(--color-surface-base);
   color: var(--color-text-primary);
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Slightly looser leading for light-on-dark readability */
+:root:not(.light) body { line-height: 1.6; }
 
 /* Utility: card */
 .card {
@@ -120,6 +127,33 @@ body {
 .card-interactive {
   content-visibility: auto;
   contain-intrinsic-size: auto 240px;
+}
+
+/* ── Entrance animations (CSS-only, GPU-friendly for Pi) ───────────────── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-in {
+  animation: fade-up 0.4s ease-out both;
+}
+
+/* Stagger delays — apply via style="--delay: N" or utility classes */
+.stagger-1 { animation-delay: 50ms; }
+.stagger-2 { animation-delay: 100ms; }
+.stagger-3 { animation-delay: 150ms; }
+.stagger-4 { animation-delay: 200ms; }
+.stagger-5 { animation-delay: 250ms; }
+
+/* Status pulse — living indicator */
+@keyframes status-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.status-live {
+  animation: status-pulse 2.5s ease-in-out infinite;
 }
 
 /* Scrollbar styling (dark) */
