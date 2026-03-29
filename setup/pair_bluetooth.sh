@@ -107,7 +107,9 @@ run_wait_mode() {
     echo ""
 
     # Use expect to make Pi discoverable and wait for pairing
-    expect <<'WAIT_EOF'
+    # Output is suppressed — only status messages are shown via puts
+    expect <<'WAIT_EOF' > /dev/null 2>&1
+log_user 0
 set timeout 120
 spawn bluetoothctl
 expect "Agent registered"
@@ -116,15 +118,19 @@ send "default-agent\r"
 send "discoverable on\r"
 send "pairable on\r"
 expect {
-    -re "Confirm passkey (\\d+)" {
+    "Confirm passkey" {
+        send "yes\r"
+        exp_continue
+    }
+    "Authorize service" {
         send "yes\r"
         exp_continue
     }
     "Paired: yes" {
-        sleep 2
+        sleep 3
     }
     timeout {
-        puts "\nNo pairing request received within 120 seconds."
+        send_user "\nNo pairing request received within 120 seconds.\n"
     }
 }
 send "discoverable off\r"
