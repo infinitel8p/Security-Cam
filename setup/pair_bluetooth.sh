@@ -23,7 +23,7 @@ send "scan on\r"
 sleep 30
 send "scan off\r"
 sleep 1
-send "exit\r"
+send "quit\r"
 expect eof
 SCAN_EOF
 
@@ -75,6 +75,10 @@ expect {
         send "yes\r"
         expect "Pairing successful"
     }
+    "Authorize service" {
+        send "yes\r"
+        expect "Pairing successful"
+    }
     "Pairing successful" {}
     timeout {
         puts "Pairing timed out"
@@ -83,7 +87,7 @@ expect {
 }
 send "trust $mac\r"
 expect "trust succeeded"
-send "exit\r"
+send "quit\r"
 expect eof
 PAIR_EOF
 
@@ -92,7 +96,7 @@ PAIR_EOF
         echo "Done! $name ($mac) is paired and trusted."
         return 0
     else
-        echo "Pairing may have failed."
+        echo "Pairing may have failed. Check manually with: bluetoothctl info $mac"
         return 1
     fi
 }
@@ -100,15 +104,15 @@ PAIR_EOF
 run_wait_mode() {
     echo ""
     echo "=== Mode 2: Wait for incoming pairing ==="
-    echo "The Pi is now discoverable as 'securitycam'."
-    echo "On your device, open Bluetooth settings and tap 'securitycam' to pair."
+    echo "The Pi is now discoverable."
+    echo "On your device, open Bluetooth settings and pair with the Pi."
     echo "Waiting for incoming pairing request (120 seconds)..."
     echo "A confirmation prompt may appear on your device — please accept it."
     echo ""
 
     # Use expect to make Pi discoverable and wait for pairing
-    # Output is suppressed — only status messages are shown via puts
-    expect <<'WAIT_EOF' > /dev/null 2>&1
+    # log_user 0 hides the spam, but send_user prints our custom status updates
+    expect <<'WAIT_EOF'
 log_user 0
 set timeout 120
 spawn bluetoothctl
@@ -117,25 +121,28 @@ send "agent on\r"
 send "default-agent\r"
 send "discoverable on\r"
 send "pairable on\r"
+
 expect {
     "Confirm passkey" {
+        puts ">>> Passkey prompt detected. Auto-confirming..."
         send "yes\r"
         exp_continue
     }
     "Authorize service" {
+        puts ">>> Service authorization requested. Auto-approving..."
         send "yes\r"
         exp_continue
     }
-    "Paired: yes" {
-        sleep 3
+    "Pairing successful" {
+        puts ">>> Pairing successful! Finalizing connection..."
+        send "discoverable off\r"
+        send "quit\r"
     }
     timeout {
-        send_user "\nNo pairing request received within 120 seconds.\n"
+        puts "\n>>> No pairing request received within 120 seconds."
+        send "quit\r"
     }
 }
-send "discoverable off\r"
-sleep 1
-send "exit\r"
 expect eof
 WAIT_EOF
 
@@ -150,7 +157,7 @@ WAIT_EOF
         return 0
     else
         echo ""
-        echo "No device was paired."
+        echo "No new device was paired."
         return 1
     fi
 }
