@@ -110,8 +110,16 @@ run_wait_mode() {
     echo "A confirmation prompt may appear on your device — please accept it."
     echo ""
 
-    # Use expect to make Pi discoverable and wait for pairing
-    # log_user 0 hides the spam, but send_user prints our custom status updates
+    # Use expect to make Pi discoverable and wait for pairing.
+    #
+    # Strategy: only match interactive prompts (passkey / authorize) that
+    # need a "yes".  Do NOT match success strings like "Paired: yes" because
+    # they appear in the buffer BEFORE the "Authorize service" prompt and
+    # would cause expect to exit without answering it.
+    #
+    # After the first prompt is handled the timeout drops to 15 s so we
+    # don't sit around once the pairing handshake is done.  The bash code
+    # below then checks whether a device was actually paired.
     expect <<'WAIT_EOF'
 log_user 0
 set timeout 120
@@ -126,23 +134,21 @@ expect {
     "Confirm passkey" {
         puts ">>> Passkey prompt detected. Auto-confirming..."
         send "yes\r"
+        set timeout 15
         exp_continue
     }
     "Authorize service" {
         puts ">>> Service authorization requested. Auto-approving..."
         send "yes\r"
+        set timeout 15
         exp_continue
     }
-    -re "(Paired: yes|Pairing successful|ServicesResolved: yes)" {
-        puts ">>> Success condition met! Finalizing connection..."
-        send "discoverable off\r"
-        send "quit\r"
-    }
-    timeout {
-        puts "\n>>> No pairing request received within 120 seconds."
-        send "quit\r"
-    }
+    timeout {}
 }
+
+send "discoverable off\r"
+sleep 1
+send "quit\r"
 expect eof
 WAIT_EOF
 
@@ -157,7 +163,7 @@ WAIT_EOF
         return 0
     else
         echo ""
-        echo "No new device was paired."
+        echo "No new device was paired within the time limit."
         return 1
     fi
 }
