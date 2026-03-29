@@ -1,7 +1,6 @@
 [Unit]
 Description=Security-Cam (Flask API + Astro frontend)
-After=network-online.target hostapd.service mediamtx.service
-Wants=network-online.target
+After=network.target hostapd.service mediamtx.service
 
 [Service]
 Type=forking

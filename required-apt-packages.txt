@@ -7,8 +7,6 @@ i2c-tools
 util-linux-extra
 libbluetooth-dev
 expect
-nodejs
-npm
 nftables
 ffmpeg
 hostapd

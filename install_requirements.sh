@@ -4,6 +4,14 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
 
+echo "=== Installing Node.js 22 (via NodeSource) ==="
+NODE_MAJOR=$(node --version 2>/dev/null | sed 's/v\([0-9]*\).*/\1/')
+if [ -z "$NODE_MAJOR" ] || [ "$NODE_MAJOR" -lt 22 ]; then
+    curl -fsSL https://deb.nodesource.com/setup_22.x | sudo bash -
+else
+    echo "Node.js $NODE_MAJOR already installed, skipping."
+fi
+
 echo "=== Installing system packages ==="
 sudo apt-get update
 sudo apt-get install -y $(grep -v '^\s*#' "$SCRIPT_DIR/required-apt-packages.txt" | grep -v '^\s*$')

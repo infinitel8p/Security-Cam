@@ -19,11 +19,11 @@ if [ "$1" = "--force" ]; then
     FORCE=true
 fi
 
-# --- Pull latest code ---
+# --- Pull latest code (skip if no internet) ---
 echo "=== Pulling latest code ==="
 BEFORE=$(git rev-parse HEAD)
-git pull --ff-only || {
-    echo "Warning: git pull failed (dirty tree or diverged branch). Continuing with current code."
+timeout 15 git pull --ff-only 2>/dev/null || {
+    echo "Warning: git pull failed (no internet or dirty tree). Continuing with current code."
 }
 AFTER=$(git rev-parse HEAD)
 
