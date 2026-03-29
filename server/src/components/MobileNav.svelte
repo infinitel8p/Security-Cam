@@ -64,7 +64,7 @@
   <div class="flex items-center gap-3 px-5 py-6">
 		<div
 			class="flex h-9 w-9 items-center justify-center">
-			<img src="icon.png" alt="icon">
+			<img src="icon.png" alt="icon" width="36" height="36">
 		</div>
     <div>
       <span class="text-sm font-bold tracking-tight text-text-primary">Security-Cam</span>

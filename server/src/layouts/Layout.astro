@@ -15,13 +15,13 @@ const { title = "Security Cam" } = Astro.props;
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<link rel="icon" href="/icon.png" />
-		<title>{title}</title>
+<title>{title}</title>
 		<!-- Prevent flash: apply saved theme before paint -->
 		<script is:inline>
 			(function () {
-				const saved = localStorage.getItem("theme");
-				if (saved === "light")
-					document.documentElement.classList.add("light");
+				var saved = localStorage.getItem("theme");
+				var isLight = saved === "light" || (saved !== "dark" && window.matchMedia("(prefers-color-scheme: light)").matches);
+				if (isLight) document.documentElement.classList.add("light");
 			})();
 		</script>
 	</head>
@@ -29,7 +29,7 @@ const { title = "Security Cam" } = Astro.props;
 		<Navbar />
 		<MobileNav client:load />
 		<main
-			class="flex-1 p-4 pt-16 sm:p-6 sm:pt-16 lg:ml-52 lg:p-8 lg:pt-8">
+			class="min-w-0 flex-1 overflow-x-hidden p-4 pt-16 sm:p-6 sm:pt-16 lg:ml-52 lg:p-8 lg:pt-8">
 			<slot />
 		</main>
 	</body>

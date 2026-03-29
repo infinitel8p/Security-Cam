@@ -1,26 +1,50 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
-  let dark = $state(true);
+  type ThemeMode = "system" | "light" | "dark";
+
+  let mode: ThemeMode = $state("system");
+
+  const order: ThemeMode[] = ["system", "light", "dark"];
 
   onMount(() => {
-    dark = !document.documentElement.classList.contains("light");
+    const saved = localStorage.getItem("theme") as ThemeMode | null;
+    mode = saved === "light" || saved === "dark" ? saved : "system";
   });
 
-  function toggle() {
-    dark = !dark;
-    document.documentElement.classList.toggle("light", !dark);
-    localStorage.setItem("theme", dark ? "dark" : "light");
+  function apply(m: ThemeMode) {
+    const isLight =
+      m === "light" ||
+      (m === "system" && window.matchMedia("(prefers-color-scheme: light)").matches);
+    document.documentElement.classList.toggle("light", isLight);
+  }
+
+  function cycle() {
+    const next = order[(order.indexOf(mode) + 1) % order.length];
+    mode = next;
+    if (next === "system") {
+      localStorage.removeItem("theme");
+    } else {
+      localStorage.setItem("theme", next);
+    }
+    apply(next);
   }
 </script>
 
 <button
-  onclick={toggle}
+  onclick={cycle}
   class="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors duration-150 hover:bg-surface-overlay hover:text-text-secondary"
-  title="Toggle theme"
-  aria-label="Toggle dark and light theme"
+  title="{mode === 'system' ? 'Theme: System' : mode === 'light' ? 'Theme: Light' : 'Theme: Dark'}"
+  aria-label="Cycle theme: system, light, dark"
 >
-  {#if dark}
+  {#if mode === "system"}
+    <!-- Monitor icon -->
+    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+      <line x1="8" y1="21" x2="16" y2="21" />
+      <line x1="12" y1="17" x2="12" y2="21" />
+    </svg>
+  {:else if mode === "light"}
     <!-- Sun icon -->
     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="12" r="5" />

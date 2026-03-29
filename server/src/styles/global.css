@@ -5,8 +5,7 @@
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
-  src: url("https://fonts.gstatic.com/s/inter/v18/UcCo3FwrK3iLTcviYwY.woff2")
-    format("woff2");
+  src: url("/fonts/inter-latin.woff2") format("woff2");
 }
 
 @theme {
@@ -14,70 +13,70 @@
 
   /* ── Dark theme (default) ─────────────────────────────────────────────── */
 
-  /* Surfaces — inspired by UniFi Protect's layered dark panels */
-  --color-surface-base: #0b0a10;
-  --color-surface-raised: #141320;
-  --color-surface-overlay: #1c1b2e;
-  --color-surface-elevated: #24223a;
-  --color-surface-glass: rgba(20, 19, 32, 0.7);
+  /* Surfaces — near-black with subtle blue-steel undertone */
+  --color-surface-base: #08090c;
+  --color-surface-raised: #101218;
+  --color-surface-overlay: #171a22;
+  --color-surface-elevated: #1e212b;
+  --color-surface-glass: rgba(16, 18, 24, 0.82);
 
-  /* Borders — subtle, almost invisible separators */
-  --color-border-subtle: rgba(255, 255, 255, 0.06);
-  --color-border-default: rgba(255, 255, 255, 0.1);
-  --color-border-strong: rgba(255, 255, 255, 0.16);
+  /* Borders — cool-tinted separators */
+  --color-border-subtle: rgba(148, 163, 194, 0.06);
+  --color-border-default: rgba(148, 163, 194, 0.1);
+  --color-border-strong: rgba(148, 163, 194, 0.16);
 
-  /* Text — high contrast primary, soft secondary */
-  --color-text-primary: #f0eef5;
-  --color-text-secondary: #9694a8;
-  --color-text-muted: #5c5a6e;
+  /* Text */
+  --color-text-primary: #e0e4ed;
+  --color-text-secondary: #7b83a0;
+  --color-text-muted: #434b64;
 
-  /* Accent (UniFi-style blue) */
-  --color-accent: #006fff;
-  --color-accent-hover: #338fff;
-  --color-accent-muted: rgba(0, 111, 255, 0.12);
-  --color-accent-strong: rgba(0, 111, 255, 0.2);
+  /* Accent — vivid blue with punch */
+  --color-accent: #4f8ff7;
+  --color-accent-hover: #6da3fa;
+  --color-accent-muted: rgba(79, 143, 247, 0.1);
+  --color-accent-strong: rgba(79, 143, 247, 0.18);
 
-  /* Status */
-  --color-status-ok: #00e676;
-  --color-status-warning: #ffab00;
-  --color-status-critical: #ff3d57;
+  /* Status — slightly desaturated for sophistication */
+  --color-status-ok: #2dd4a8;
+  --color-status-warning: #f0b93a;
+  --color-status-critical: #f06868;
 
-  /* Shadows — layered depth like Protect's floating panels */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.15);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4), 0 1px 4px rgba(0, 0, 0, 0.2);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.25);
-  --shadow-glow: 0 0 20px rgba(0, 111, 255, 0.15);
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5), 0 0 1px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.55), 0 1px 4px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.65), 0 2px 8px rgba(0, 0, 0, 0.35);
+  --shadow-glow: 0 0 30px rgba(79, 143, 247, 0.08);
 }
 
 /* ── Light theme overrides ──────────────────────────────────────────────── */
 :root.light {
-  --color-surface-base: #f4f5f7;
+  --color-surface-base: #f3f4f6;
   --color-surface-raised: #ffffff;
-  --color-surface-overlay: #f9f9fb;
-  --color-surface-elevated: #eeeef2;
-  --color-surface-glass: rgba(255, 255, 255, 0.8);
+  --color-surface-overlay: #f8f9fb;
+  --color-surface-elevated: #eceef2;
+  --color-surface-glass: rgba(255, 255, 255, 0.82);
 
-  --color-border-subtle: rgba(0, 0, 0, 0.06);
-  --color-border-default: rgba(0, 0, 0, 0.1);
-  --color-border-strong: rgba(0, 0, 0, 0.16);
+  --color-border-subtle: rgba(0, 0, 0, 0.05);
+  --color-border-default: rgba(0, 0, 0, 0.09);
+  --color-border-strong: rgba(0, 0, 0, 0.14);
 
-  --color-text-primary: #1a1a2e;
-  --color-text-secondary: #5c5c72;
-  --color-text-muted: #9494a8;
+  --color-text-primary: #111827;
+  --color-text-secondary: #4b5563;
+  --color-text-muted: #9ca3af;
 
-  --color-accent: #006fff;
-  --color-accent-hover: #0058cc;
-  --color-accent-muted: rgba(0, 111, 255, 0.08);
-  --color-accent-strong: rgba(0, 111, 255, 0.14);
+  --color-accent: #2563eb;
+  --color-accent-hover: #1d4ed8;
+  --color-accent-muted: rgba(37, 99, 235, 0.07);
+  --color-accent-strong: rgba(37, 99, 235, 0.13);
 
-  --color-status-ok: #00b862;
-  --color-status-warning: #e09600;
-  --color-status-critical: #e02b44;
+  --color-status-ok: #059669;
+  --color-status-warning: #d97706;
+  --color-status-critical: #dc2626;
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
-  --shadow-glow: 0 0 20px rgba(0, 111, 255, 0.08);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.07), 0 1px 4px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-glow: 0 0 20px rgba(37, 99, 235, 0.06);
 }
 
 /* ── Base styles ────────────────────────────────────────────────────────── */
@@ -89,28 +88,42 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Utility: UniFi-style card */
+/* Utility: card */
 .card {
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border-subtle);
-  border-radius: 1rem;
+  border-radius: 0.75rem;
   box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
-.card:hover {
-  box-shadow: var(--shadow-md);
+
+/* Interactive card variant — GPU-friendly hover (transform + border only) */
+.card-interactive {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.card-interactive:hover {
   border-color: var(--color-border-default);
+  transform: translateY(-1px);
 }
 
 /* Utility: glass panel (navbar, overlays) */
 .glass {
   background: var(--color-surface-glass);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+}
+
+/* Skip rendering for off-screen archive cards (Pi perf) */
+.card-interactive {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 240px;
 }
 
 /* Scrollbar styling (dark) */
-:root:not(.light) ::-webkit-scrollbar { width: 6px; }
+:root:not(.light) ::-webkit-scrollbar { width: 5px; }
 :root:not(.light) ::-webkit-scrollbar-track { background: transparent; }
-:root:not(.light) ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 3px; }
-:root:not(.light) ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+:root:not(.light) ::-webkit-scrollbar-thumb { background: rgba(148, 163, 194, 0.1); border-radius: 3px; }
+:root:not(.light) ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 194, 0.2); }

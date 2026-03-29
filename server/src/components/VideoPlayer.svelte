@@ -34,7 +34,6 @@
         connected = false;
         error = "Stream disconnected";
         cleanup();
-        // Retry after a short delay
         setTimeout(startWebRTC, 3000);
       }
     };
@@ -115,7 +114,7 @@
 
 <div bind:this={containerEl} class="card overflow-hidden" class:fullscreen={isFullscreen}>
   <!-- Feed -->
-  <div class="relative w-full bg-black {isFullscreen ? 'h-full' : 'aspect-[4/3]'}">
+  <div class="relative w-full bg-black/80 {isFullscreen ? 'h-full' : 'aspect-video'}">
     <video
       bind:this={videoEl}
       autoplay
@@ -126,72 +125,81 @@
     ></video>
 
     {#if !connected}
-      <div class="absolute inset-0 flex h-full items-center justify-center text-text-muted">
+      <div class="absolute inset-0 flex items-center justify-center">
         {#if error}
-          <div class="flex flex-col items-center gap-2">
-            <svg class="h-5 w-5 text-status-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
-            <span class="text-sm">{error}</span>
+          <div class="flex flex-col items-center gap-2.5">
+            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-status-warning/10">
+              <svg class="h-5 w-5 text-status-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+            </div>
+            <span class="text-sm text-text-secondary">{error}</span>
             <span class="text-xs text-text-muted">Reconnecting...</span>
           </div>
         {:else}
-          <div class="flex items-center">
-            <svg class="mr-2 h-5 w-5 animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-              <circle cx="12" cy="13" r="4" />
-            </svg>
-            Connecting...
+          <div class="flex flex-col items-center gap-2.5">
+            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10">
+              <svg class="h-5 w-5 animate-pulse text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                <circle cx="12" cy="13" r="4" />
+              </svg>
+            </div>
+            <span class="text-sm text-text-secondary">Connecting to camera...</span>
           </div>
         {/if}
       </div>
     {/if}
 
-    <!-- Recording indicator -->
-    {#if recording}
-      <div class="absolute right-3 top-3 flex items-center gap-2 rounded-lg bg-black/60 px-3 py-1.5 backdrop-blur-md">
-        <span class="h-2 w-2 animate-pulse rounded-full bg-status-critical shadow-[0_0_8px_rgba(255,61,87,0.6)]"></span>
-        <span class="text-xs font-semibold tracking-wide text-status-critical">REC</span>
-      </div>
-    {/if}
+    <!-- Overlays -->
+    <div class="absolute left-0 right-0 top-0 flex items-start justify-between p-3">
+      <!-- Left: timestamp area (empty for now) -->
+      <div></div>
 
-    <!-- Live badge -->
-    {#if connected && !recording}
-      <div class="absolute right-3 top-3 flex items-center gap-1.5 rounded-lg bg-black/60 px-2.5 py-1 backdrop-blur-md">
-        <span class="h-1.5 w-1.5 rounded-full bg-status-ok shadow-[0_0_6px_rgba(0,230,118,0.5)]"></span>
-        <span class="text-[11px] font-semibold tracking-wide text-white/80">LIVE</span>
+      <!-- Right: status badges -->
+      <div>
+        {#if recording}
+          <div class="flex items-center gap-2 rounded-lg bg-black/50 px-2.5 py-1.5 backdrop-blur-sm">
+            <span class="h-2 w-2 animate-pulse rounded-full bg-status-critical shadow-[0_0_8px_rgba(240,104,104,0.6)]"></span>
+            <span class="text-[11px] font-semibold tracking-wide text-white/90">REC</span>
+          </div>
+        {:else if connected}
+          <div class="flex items-center gap-1.5 rounded-lg bg-black/50 px-2.5 py-1.5 backdrop-blur-sm">
+            <span class="h-1.5 w-1.5 rounded-full bg-status-ok shadow-[0_0_6px_rgba(45,212,168,0.5)]"></span>
+            <span class="text-[11px] font-medium tracking-wide text-white/80">LIVE</span>
+          </div>
+        {/if}
       </div>
-    {/if}
+    </div>
   </div>
 
   <!-- Controls -->
-  <div class="flex items-center justify-between border-t border-border-subtle px-3 py-2.5 sm:px-5 sm:py-3.5">
+  <div class="flex items-center justify-between border-t border-border-subtle px-3 py-2 sm:px-4 sm:py-2.5">
     <div class="flex items-center gap-2">
       <svg class="h-4 w-4 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
         <circle cx="12" cy="13" r="4" />
       </svg>
-      <span class="text-sm font-medium text-text-secondary">Live Feed</span>
+      <span class="text-[13px] font-medium text-text-secondary">Live Feed</span>
     </div>
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-1.5">
       <button
         onclick={toggleRecording}
         disabled={toggling}
-        class="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200
+        class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] font-medium transition-colors duration-150
           {recording
-            ? 'bg-status-critical/12 text-status-critical shadow-[inset_0_0_0_1px_rgba(255,61,87,0.2)] hover:bg-status-critical/20'
-            : 'bg-accent/12 text-accent shadow-[inset_0_0_0_1px_rgba(0,111,255,0.2)] hover:bg-accent/20'}
-          disabled:opacity-50"
+            ? 'bg-status-critical/10 text-status-critical hover:bg-status-critical/15'
+            : 'bg-accent/10 text-accent hover:bg-accent/15'}
+          disabled:opacity-40"
       >
         {#if recording}
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
             <rect x="6" y="6" width="12" height="12" rx="2" />
           </svg>
           Stop
         {:else}
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
             <circle cx="12" cy="12" r="6" />
           </svg>
           Record
@@ -200,7 +208,7 @@
 
       <button
         onclick={toggleFullscreen}
-        class="flex items-center justify-center rounded-xl p-2 text-text-muted transition-all duration-200 hover:bg-white/5 hover:text-text-primary"
+        class="flex items-center justify-center rounded-lg p-1.5 text-text-muted transition-colors duration-150 hover:bg-surface-overlay hover:text-text-secondary"
         title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
       >
         {#if isFullscreen}

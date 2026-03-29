@@ -5,28 +5,38 @@ import SystemMonitor from "../components/SystemMonitor.svelte";
 ---
 
 <Layout title="Dashboard — Security Cam">
-	<div class="mx-auto max-w-6xl space-y-5 sm:space-y-6">
+	<div class="mx-auto max-w-6xl space-y-4 sm:space-y-5">
 		<!-- Header -->
 		<div class="flex items-center justify-between">
-			<h1 class="text-base font-bold text-text-primary sm:text-lg">
+			<h1 class="text-base font-semibold text-text-primary sm:text-lg">
 				Dashboard
 			</h1>
-			<span
-				class="rounded-full bg-status-ok/10 px-2.5 py-1 text-[10px] font-semibold text-status-ok sm:text-[11px]">
-				System Online
-			</span>
+			<div
+				class="flex items-center gap-2 rounded-full border border-status-ok/20 bg-status-ok/8 px-3 py-1">
+				<span
+					class="h-1.5 w-1.5 rounded-full bg-status-ok shadow-[0_0_6px_rgba(45,212,168,0.5)]"
+				></span>
+				<span
+					class="text-[11px] font-medium text-status-ok">
+					Online
+				</span>
+			</div>
 		</div>
 
-		<div class="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
+		<div class="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-3">
 			<!-- Live Feed (takes 2 cols on desktop) -->
-			<div class="lg:col-span-2">
+			<div class="min-w-0 lg:col-span-2">
+				<h2
+					class="mb-2 text-[11px] font-semibold uppercase tracking-wider text-text-muted">
+					Live Feed
+				</h2>
 				<VideoPlayer client:load />
 			</div>
 
 			<!-- System Monitor -->
-			<div>
+			<div class="min-w-0">
 				<h2
-					class="mb-3 text-[11px] font-semibold uppercase tracking-wider text-text-muted">
+					class="mb-2 text-[11px] font-semibold uppercase tracking-wider text-text-muted">
 					System Health
 				</h2>
 				<SystemMonitor client:load />
@@ -35,17 +45,21 @@ import SystemMonitor from "../components/SystemMonitor.svelte";
 
 		<!-- Access Log -->
 		<section>
-			<h2
-				class="mb-3 text-[11px] font-semibold uppercase tracking-wider text-text-muted">
-				Access Log
-			</h2>
+			<div class="flex items-center justify-between mb-3">
+				<h2
+					class="text-[11px] font-semibold uppercase tracking-wider text-text-muted">
+					Access Log
+				</h2>
+				<span class="text-[11px] text-text-muted">Last 24h</span>
+			</div>
 			<div class="card overflow-hidden">
-					<table class="w-full text-left text-sm overflow-x-auto">
+				<div class="overflow-x-auto">
+					<table class="w-full text-left text-sm">
 						<thead>
 							<tr
-								class="border-b border-border-subtle bg-surface-overlay/50 text-[11px] font-semibold uppercase tracking-wider text-text-muted">
+								class="border-b border-border-default text-[11px] font-medium uppercase tracking-wider text-text-muted">
 								<th class="whitespace-nowrap px-4 py-3 sm:px-5"
-									>Name</th
+									>Device</th
 								>
 								<th class="whitespace-nowrap px-4 py-3 sm:px-5"
 									>Date</th
@@ -54,17 +68,17 @@ import SystemMonitor from "../components/SystemMonitor.svelte";
 									>Time</th
 								>
 								<th class="whitespace-nowrap px-4 py-3 sm:px-5"
-									>State</th
+									>Status</th
 								>
 								<th
 									class="hidden whitespace-nowrap px-4 py-3 sm:table-cell sm:px-5"
-									>Action</th
+									>Event</th
 								>
 							</tr>
 						</thead>
 						<tbody class="divide-y divide-border-subtle">
 							<tr
-								class="transition-colors hover:bg-surface-overlay/30">
+								class="transition-colors hover:bg-surface-overlay/40">
 								<td
 									class="whitespace-nowrap px-4 py-3 font-medium text-text-primary sm:px-5"
 									>iPhone (John)</td
@@ -81,7 +95,7 @@ import SystemMonitor from "../components/SystemMonitor.svelte";
 									><span
 										class="inline-flex items-center gap-1.5 text-status-ok"
 										><span
-											class="h-1.5 w-1.5 rounded-full bg-current shadow-[0_0_6px_rgba(0,230,118,0.4)]"
+											class="h-1.5 w-1.5 rounded-full bg-current"
 										></span>Connected</span
 									></td
 								>
@@ -91,7 +105,7 @@ import SystemMonitor from "../components/SystemMonitor.svelte";
 								>
 							</tr>
 							<tr
-								class="transition-colors hover:bg-surface-overlay/30">
+								class="transition-colors hover:bg-surface-overlay/40">
 								<td
 									class="whitespace-nowrap px-4 py-3 font-medium text-text-primary sm:px-5"
 									>iPhone (John)</td
@@ -118,7 +132,7 @@ import SystemMonitor from "../components/SystemMonitor.svelte";
 								>
 							</tr>
 							<tr
-								class="transition-colors hover:bg-surface-overlay/30">
+								class="transition-colors hover:bg-surface-overlay/40">
 								<td
 									class="whitespace-nowrap px-4 py-3 font-medium text-text-primary sm:px-5"
 									>Galaxy (Jane)</td
@@ -135,7 +149,7 @@ import SystemMonitor from "../components/SystemMonitor.svelte";
 									><span
 										class="inline-flex items-center gap-1.5 text-status-ok"
 										><span
-											class="h-1.5 w-1.5 rounded-full bg-current shadow-[0_0_6px_rgba(0,230,118,0.4)]"
+											class="h-1.5 w-1.5 rounded-full bg-current"
 										></span>Connected</span
 									></td
 								>
@@ -145,7 +159,7 @@ import SystemMonitor from "../components/SystemMonitor.svelte";
 								>
 							</tr>
 							<tr
-								class="transition-colors hover:bg-surface-overlay/30">
+								class="transition-colors hover:bg-surface-overlay/40">
 								<td
 									class="whitespace-nowrap px-4 py-3 font-medium text-text-primary sm:px-5"
 									>Galaxy (Jane)</td
@@ -172,7 +186,7 @@ import SystemMonitor from "../components/SystemMonitor.svelte";
 								>
 							</tr>
 							<tr
-								class="transition-colors hover:bg-surface-overlay/30">
+								class="transition-colors hover:bg-surface-overlay/40">
 								<td
 									class="whitespace-nowrap px-4 py-3 font-medium text-text-primary sm:px-5"
 									>iPad (Office)</td
@@ -189,7 +203,7 @@ import SystemMonitor from "../components/SystemMonitor.svelte";
 									><span
 										class="inline-flex items-center gap-1.5 text-status-ok"
 										><span
-											class="h-1.5 w-1.5 rounded-full bg-current shadow-[0_0_6px_rgba(0,230,118,0.4)]"
+											class="h-1.5 w-1.5 rounded-full bg-current"
 										></span>Connected</span
 									></td
 								>
@@ -200,18 +214,19 @@ import SystemMonitor from "../components/SystemMonitor.svelte";
 							</tr>
 						</tbody>
 					</table>
+				</div>
 			</div>
 		</section>
 
-		<!-- Activity Timeline (placeholder) -->
+		<!-- Activity Timeline -->
 		<section>
 			<h2
 				class="mb-3 text-[11px] font-semibold uppercase tracking-wider text-text-muted">
 				Activity Timeline
 			</h2>
-			<div class="card px-6 py-12 text-center">
+			<div class="card px-6 py-10 text-center">
 				<svg
-					class="mx-auto h-10 w-10 text-text-muted/30"
+					class="mx-auto h-8 w-8 text-text-muted/20"
 					viewBox="0 0 24 24"
 					fill="none"
 					stroke="currentColor"
@@ -219,7 +234,7 @@ import SystemMonitor from "../components/SystemMonitor.svelte";
 					<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"
 					></polyline>
 				</svg>
-				<p class="mt-3 text-sm text-text-muted">
+				<p class="mt-2.5 text-[13px] text-text-muted">
 					Activity timeline coming soon
 				</p>
 			</div>

@@ -11,12 +11,12 @@ const links = [
 ---
 
 <nav
-	class="glass fixed left-0 top-0 z-40 hidden h-screen w-52 flex-col border-r border-border-subtle lg:flex">
+	class="fixed left-0 top-0 z-40 hidden h-screen w-52 flex-col border-r border-border-subtle bg-surface-raised lg:flex">
 	<!-- Logo -->
 	<div class="flex items-center gap-3 px-5 py-6">
 		<div
 			class="flex h-9 w-9 items-center justify-center">
-			<img src="icon.png" alt="icon">
+			<img src="icon.png" alt="icon" width="36" height="36" loading="eager">
 		</div>
 		<div>
 			<span class="text-sm font-bold tracking-tight text-text-primary"
@@ -40,7 +40,7 @@ const links = [
 					<a
 						href={href}
 						class:list={[
-							"group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all duration-200",
+							"group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-colors duration-200",
 							isActive
 								? "bg-accent/12 text-accent shadow-[inset_0_0_0_1px_rgba(0,111,255,0.15)]"
 								: "text-text-secondary hover:bg-surface-overlay hover:text-text-primary",

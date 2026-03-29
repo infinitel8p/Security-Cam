@@ -4,8 +4,10 @@ import ArchiveGrid from "../components/ArchiveGrid.svelte";
 ---
 
 <Layout title="Archive — Security Cam">
-  <div class="mx-auto max-w-6xl space-y-5 sm:space-y-6">
-    <h1 class="text-base font-bold text-text-primary sm:text-lg">Archive</h1>
+  <div class="mx-auto max-w-6xl space-y-4 sm:space-y-5">
+    <div class="flex items-center justify-between">
+      <h1 class="text-base font-semibold text-text-primary sm:text-lg">Archive</h1>
+    </div>
     <ArchiveGrid client:load />
   </div>
 </Layout>
