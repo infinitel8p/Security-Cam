@@ -8,15 +8,41 @@ last_update:
 
 # WiFi Setup
 
-This guide will help you set up a WiFi Access Point on your Raspberry Pi while keeping it connected to your home WiFi network. The Pi will use a single WiFi chip to run both connections simultaneously using NetworkManager.
+This guide will help you set up a WiFi Access Point on your Raspberry Pi while keeping it connected to your home WiFi network. The Pi will use a single WiFi chip to run both connections simultaneously — `wlan0` for your home WiFi and a virtual `ap0` interface for the AP.
+
+The Access Point is used for device presence detection (phones connecting to it trigger smart recording).
 
 :::note
-Both the Access Point and the home WiFi connection must operate on the **same channel** since the Pi only has one WiFi radio. The AP will use the same channel as your home WiFi.
+Both the Access Point and the home WiFi connection must operate on the **same channel** since the Pi only has one WiFi radio.
 :::
 
-## Find your WiFi channel
+## Automated setup
 
-Run the following command to check your current WiFi connection and its channel:
+The easiest way to set up the AP is with the provided script:
+
+```bash
+cd /opt/security-cam
+sudo ./setup/setup_ap.sh
+```
+
+The script will prompt you for:
+- **SSID** — the AP network name (default: `SecurityCam`)
+- **Password** — minimum 8 characters
+- **Channel** — auto-detected from your current WiFi connection
+
+You can also run it non-interactively:
+
+```bash
+sudo ./setup/setup_ap.sh --ssid SecurityCam --password YourPasswordHere --channel 6
+```
+
+If the script completes successfully, skip ahead to [Verify the setup](#verify-the-setup).
+
+## Manual setup
+
+If you prefer to set things up manually, follow the steps below.
+
+### Find your WiFi channel
 
 ```bash
 iw dev
@@ -44,95 +70,135 @@ phy#0
 
 Note the **channel number** (`channel 6` in this case) — you will need it later.
 
-## Create the virtual AP interface
+### Create the virtual AP interface
 
-The Pi's WiFi chip supports running a second virtual interface for the Access Point. We create a systemd service so this interface is automatically set up on every boot before NetworkManager starts.
+The Pi's WiFi chip supports running a second virtual interface for the Access Point. We create a systemd service so this interface is automatically set up on every boot before other services start.
 
-1. Create the service file:
-
-   ```bash
-   sudo nano /etc/systemd/system/create-ap0.service
-   ```
-
-2. Paste the following content:
-
-   ```ini title="/etc/systemd/system/create-ap0.service"
-   [Unit]
-   Description=Create Virtual WiFi Interface ap0
-   Requires=sys-subsystem-net-devices-wlan0.device
-   After=sys-subsystem-net-devices-wlan0.device
-   Before=NetworkManager.service
-
-   [Service]
-   Type=oneshot
-   ExecStart=/sbin/iw dev wlan0 interface add ap0 type __ap
-   RemainAfterExit=yes
-
-   [Install]
-   WantedBy=multi-user.target
-   ```
-
-3. Save and exit, then enable and start the service:
+1. Copy the service file:
 
    ```bash
+   sudo cp /opt/security-cam/client/data/create-ap0.service /etc/systemd/system/
+   ```
+
+2. Enable and start it:
+
+   ```bash
+   sudo systemctl daemon-reload
    sudo systemctl enable create-ap0.service
    sudo systemctl start create-ap0.service
    ```
 
-## Create the Access Point
+3. Verify the `ap0` interface exists:
 
-Use NetworkManager to create the AP connection. Replace the values as needed:
+   ```bash
+   iw dev | grep ap0
+   ```
+
+### Tell NetworkManager to ignore ap0
+
+NetworkManager must not manage `ap0` — hostapd will handle it directly.
+
+```bash
+sudo tee /etc/NetworkManager/conf.d/ignore-ap0.conf > /dev/null << 'EOF'
+[keyfile]
+unmanaged-devices=interface-name:ap0
+EOF
+sudo systemctl reload NetworkManager
+```
+
+### Install hostapd and dnsmasq
+
+```bash
+sudo apt install hostapd dnsmasq -y
+```
+
+### Configure hostapd
+
+Create the hostapd configuration. Replace the values as needed:
 
 - `SecurityCam` — your desired network name (SSID)
-- `YourPasswordHere` — your desired WiFi password
+- `YourPasswordHere` — your desired WiFi password (min 8 characters)
 - `channel 6` — the channel from the first step
 
 ```bash
-sudo nmcli connection add type wifi ifname ap0 con-name SecurityCamAP \
-  autoconnect yes \
-  802-11-wireless.mode ap \
-  802-11-wireless.band bg \
-  ipv4.method shared \
-  wifi-sec.key-mgmt wpa-psk \
-  wifi-sec.pairwise ccmp \
-  wifi-sec.group ccmp \
-  wifi-sec.proto rsn \
-  ssid "SecurityCam" \
-  ipv4.addresses 192.168.4.1/24 \
-  802-11-wireless.channel 6 \
-  wifi-sec.psk "YourPasswordHere"
+sudo tee /etc/hostapd/hostapd.conf > /dev/null << 'EOF'
+interface=ap0
+driver=nl80211
+ssid=SecurityCam
+hw_mode=g
+channel=6
+wmm_enabled=0
+auth_algs=1
+wpa=2
+wpa_passphrase=YourPasswordHere
+wpa_key_mgmt=WPA-PSK
+rsn_pairwise=CCMP
+EOF
 ```
 
-:::info
-The `ipv4.method shared` setting is the key here — NetworkManager automatically handles DHCP, DNS, NAT, and IP forwarding for you. No need for separate `dnsmasq`, `hostapd`, or `nftables` configuration.
-:::
-
-Bring the AP up:
+Point the hostapd daemon to this config:
 
 ```bash
-sudo nmcli connection up SecurityCamAP
+sudo tee /etc/default/hostapd > /dev/null << 'EOF'
+DAEMON_CONF="/etc/hostapd/hostapd.conf"
+EOF
+```
+
+### Configure dnsmasq
+
+Set up DHCP for devices connecting to the AP:
+
+```bash
+sudo cp /opt/security-cam/client/data/dnsmasq-ap0.conf /etc/dnsmasq.d/ap0.conf
+```
+
+### Set a static IP on ap0
+
+```bash
+sudo tee /etc/systemd/network/10-ap0.network > /dev/null << 'EOF'
+[Match]
+Name=ap0
+
+[Network]
+Address=192.168.4.1/24
+EOF
+sudo systemctl enable systemd-networkd
+```
+
+### Start the services
+
+```bash
+sudo ip addr add 192.168.4.1/24 dev ap0
+sudo ip link set ap0 up
+sudo systemctl unmask hostapd
+sudo systemctl enable hostapd
+sudo systemctl enable dnsmasq
+sudo systemctl start hostapd
+sudo systemctl restart dnsmasq
 ```
 
 ## Verify the setup
 
-Check that both interfaces are connected:
+Check that hostapd is running:
 
 ```bash
-nmcli device status
+sudo systemctl status hostapd
 ```
 
-You should see both `wlan0` and `ap0` as connected:
+Check that both interfaces are up:
 
-```bash title="Example Output:"
-DEVICE         TYPE      STATE                   CONNECTION
-ap0            wifi      connected               SecurityCamAP
-wlan0          wifi      connected               netplan-wlan0-FRITZ!Box 6690
-lo             loopback  connected (externally)  lo
-p2p-dev-ap0    wifi-p2p  disconnected            --
-p2p-dev-wlan0  wifi-p2p  disconnected            --
+```bash
+ip addr show wlan0 | head -3
+ip addr show ap0 | head -3
 ```
 
-Try connecting a device (e.g. your phone) to the Access Point. You should be able to access the internet through it.
+You should see `wlan0` connected to your home WiFi and `ap0` with IP `192.168.4.1`.
+
+Try connecting a device (e.g. your phone) to the `SecurityCam` network. You should be able to SSH into the Pi through the AP:
+
+```bash
+ssh pi@192.168.4.1
+```
 
 ## Reboot and confirm persistence
 
@@ -140,13 +206,39 @@ Try connecting a device (e.g. your phone) to the Access Point. You should be abl
 sudo reboot
 ```
 
-After reconnecting via SSH, run `nmcli device status` again to confirm both connections survived the reboot.
-
-You can also SSH into the Pi through the Access Point:
+After reconnecting via SSH, verify everything survived the reboot:
 
 ```bash
-ssh pi@192.168.4.1
+sudo systemctl status hostapd --no-pager
+sudo systemctl status dnsmasq --no-pager
+ip addr show ap0
 ```
+
+## Troubleshooting
+
+### hostapd fails to start
+
+Check the logs:
+
+```bash
+journalctl -u hostapd --no-pager -l | tail -20
+```
+
+Common causes:
+- **Channel mismatch** — `ap0` must use the same channel as `wlan0`. Check with `iw dev` and update `/etc/hostapd/hostapd.conf`.
+- **ap0 doesn't exist** — check `create-ap0.service`: `sudo systemctl status create-ap0.service`
+- **Interface busy** — make sure NetworkManager isn't managing `ap0`: `nmcli device status` should show `ap0` as `unmanaged`.
+
+### No IP address on connected devices
+
+Check dnsmasq:
+
+```bash
+sudo systemctl status dnsmasq --no-pager
+journalctl -u dnsmasq --no-pager -l | tail -20
+```
+
+Make sure `ap0` has its static IP: `ip addr show ap0`
 
 :::note
 These instructions were tested on Raspberry Pi OS Trixie with a Raspberry Pi Zero 2 W.

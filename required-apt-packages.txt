@@ -11,3 +11,5 @@ nodejs
 npm
 nftables
 ffmpeg
+hostapd
+dnsmasq
