@@ -1,0 +1,99 @@
+---
+sidebar_position: 4
+description: "Step 4: Setup MediaMTX for camera streaming"
+last_update:
+  date: 2026-03-29
+  author: Ludo
+---
+
+# MediaMTX Setup
+
+MediaMTX handles the camera stream using the Pi's hardware H.264 encoder. It talks directly to the camera — no extra processes needed — and serves the stream over WebRTC (for the dashboard) and RTSP (for recording).
+
+## Install MediaMTX
+
+Run the included installer script:
+
+```bash
+/opt/security-cam/setup/install_mediamtx.sh
+```
+
+This will:
+- Download the MediaMTX binary (v1.17.0, verified with SHA256 checksum)
+- Install it to `/usr/local/bin/mediamtx`
+- Set up a systemd service that starts on boot
+
+:::info
+The script auto-detects your Pi's architecture. If you ever need the latest version instead of the tested one, run:
+
+```bash
+/opt/security-cam/setup/install_mediamtx.sh --latest
+```
+:::
+
+## Start the service
+
+```bash
+sudo systemctl start mediamtx
+```
+
+Check that it's running:
+
+```bash
+sudo systemctl status mediamtx
+```
+
+You should see `active (running)` in the output. If something went wrong, check the logs:
+
+```bash
+journalctl -u mediamtx -f
+```
+
+## Verify the stream
+
+Open a browser on any device connected to the same network and go to:
+
+```
+http://<raspberry-pi-ip>:8889/cam
+```
+
+You should see a live video feed from the camera. The stream uses WebRTC with hardware H.264 encoding at 1296x972 @ 30fps.
+
+:::tip
+If you're connected to the Pi's Access Point, use:
+
+```
+http://192.168.4.1:8889/cam
+```
+:::
+
+## Configuration
+
+The MediaMTX config lives at `/opt/security-cam/client/data/mediamtx.yml`. The default settings should work out of the box, but here are the key parameters you can adjust:
+
+| Setting | Default | Description |
+| --- | --- | --- |
+| `rpiCameraWidth` | 1296 | Frame width in pixels |
+| `rpiCameraHeight` | 972 | Frame height in pixels |
+| `rpiCameraFPS` | 30 | Frames per second |
+| `rpiCameraBitrate` | 1000000 | H.264 bitrate (1 Mbps) |
+| `rpiCameraTextOverlayEnable` | true | Timestamp overlay on video |
+| `rpiCameraHFlip` / `rpiCameraVFlip` | false | Mirror the image |
+
+After editing the config, restart the service:
+
+```bash
+sudo systemctl restart mediamtx
+```
+
+:::caution
+The available resolutions depend on your camera sensor. Check what your camera supports with:
+
+```bash
+rpicam-hello --list-cameras
+```
+
+Using a resolution not listed there will cause MediaMTX to fail to start.
+:::
+
+Continue to [start.mdx](../basics/start) to start the Security-Cam system.
