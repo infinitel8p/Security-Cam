@@ -50,10 +50,10 @@ def toggle_recording():
         print("Recording stopped")
         return jsonify({"message": "Recording stopped"})
     else:
-        if activity_helpers.is_device_connected_to_bt():
-            print("Cannot record while connected to Bluetooth")
-            return jsonify({"message": "Cannot record while connected to Bluetooth"}), 400
-
+        # TODO: When sensor-triggered recording is added, gate it with:
+        #   activity_helpers.is_device_connected_to_bt()
+        #   activity_helpers.is_device_connected_to_ap()
+        # Manual recording should always be allowed.
         stream_helpers.start_recording()
         event_logger.log_event("recording_started")
         print("Recording started")
@@ -110,6 +110,11 @@ def wifi_stations():
     if not ap_mode:
         result["message"] = "Not in AP mode"
     return jsonify(result)
+
+
+@app.route('/devices/status', methods=['GET'])
+def device_status():
+    return jsonify(activity_helpers.get_device_statuses())
 
 
 @app.route('/devices/bt/add', methods=['POST'])

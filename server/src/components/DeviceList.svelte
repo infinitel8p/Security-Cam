@@ -14,9 +14,15 @@
     onRemove: (address: string) => Promise<void>;
     scanEndpoint: string;
     scanResultKey: string;
+    statuses?: Record<string, boolean>;
   }
 
-  let { title, icon, devices, onAdd, onRemove, scanEndpoint, scanResultKey }: Props = $props();
+  let { title, icon, devices, onAdd, onRemove, scanEndpoint, scanResultKey, statuses = {} }: Props = $props();
+
+  function isOnline(address: string): boolean | undefined {
+    const key = address.toUpperCase();
+    return key in statuses ? statuses[key] : undefined;
+  }
 
   let scanning = $state(false);
   let scanResults = $state<Device[]>([]);
@@ -149,8 +155,15 @@
   {:else if devices.length > 0}
     <ul class="divide-y divide-border-subtle">
       {#each devices as device (device.address)}
+        {@const online = isOnline(device.address)}
         <li class="group flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-surface-overlay/50 sm:px-5 sm:py-3">
-          <span class="h-2 w-2 shrink-0 rounded-full bg-status-ok shadow-[0_0_6px_rgba(0,230,118,0.4)]"></span>
+          {#if online === undefined}
+            <span class="h-2 w-2 shrink-0 rounded-full bg-text-muted/40"></span>
+          {:else if online}
+            <span class="h-2 w-2 shrink-0 rounded-full bg-status-ok shadow-[0_0_6px_rgba(0,230,118,0.4)]"></span>
+          {:else}
+            <span class="h-2 w-2 shrink-0 rounded-full bg-text-muted/30"></span>
+          {/if}
           <div class="flex min-w-0 flex-1 flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-3">
             <span class="truncate text-sm font-medium text-text-primary">{device.name}</span>
             <code class="shrink-0 text-[0.6875rem] font-medium text-text-muted">{device.address}</code>

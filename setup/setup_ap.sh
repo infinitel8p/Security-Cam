@@ -187,6 +187,34 @@ sleep 2
 echo "Starting dnsmasq..."
 systemctl restart dnsmasq
 
+# --- Enable IP forwarding and NAT for internet passthrough ---
+echo "Enabling IP forwarding and NAT (ap0 → wlan0)..."
+sysctl -w net.ipv4.ip_forward=1
+
+# Persist across reboots
+if ! grep -q "^net.ipv4.ip_forward=1" /etc/sysctl.conf; then
+    echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
+fi
+
+# NAT: masquerade traffic from AP clients going out through wlan0
+iptables -t nat -C POSTROUTING -o wlan0 -j MASQUERADE 2>/dev/null || \
+    iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
+
+# Allow forwarding between interfaces
+iptables -C FORWARD -i "$AP_INTERFACE" -o wlan0 -j ACCEPT 2>/dev/null || \
+    iptables -A FORWARD -i "$AP_INTERFACE" -o wlan0 -j ACCEPT
+iptables -C FORWARD -i wlan0 -o "$AP_INTERFACE" -m state --state RELATED,ESTABLISHED -j ACCEPT 2>/dev/null || \
+    iptables -A FORWARD -i wlan0 -o "$AP_INTERFACE" -m state --state RELATED,ESTABLISHED -j ACCEPT
+
+# Persist iptables rules across reboots
+if command -v netfilter-persistent &>/dev/null; then
+    netfilter-persistent save
+else
+    echo "Installing iptables-persistent for rule persistence..."
+    DEBIAN_FRONTEND=noninteractive apt-get install -y iptables-persistent
+    netfilter-persistent save
+fi
+
 # --- Verify ---
 echo ""
 if systemctl is-active --quiet hostapd; then

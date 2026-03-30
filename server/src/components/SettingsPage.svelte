@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
   import DeviceList from "./DeviceList.svelte";
   import CameraSettings from "./CameraSettings.svelte";
@@ -20,6 +20,23 @@
   let saveLocation = $state("");
   let loading = $state(true);
   let error = $state(false);
+
+  // Device online/offline status: { bt: { "AA:BB:...": true }, wifi: { "AA:BB:...": false } }
+  let deviceStatuses = $state<{ bt: Record<string, boolean>; wifi: Record<string, boolean> }>({ bt: {}, wifi: {} });
+  let statusInterval: ReturnType<typeof setInterval> | null = null;
+
+  async function fetchDeviceStatuses() {
+    try {
+      const res = await fetch(`${getBackendUrl()}/devices/status`);
+      if (res.ok) deviceStatuses = await res.json();
+    } catch {
+      // Silent fail — status is supplementary
+    }
+  }
+
+  onDestroy(() => {
+    if (statusInterval) clearInterval(statusInterval);
+  });
 
   type ThemeMode = "system" | "light" | "dark";
   let theme: ThemeMode = $state("system");
@@ -56,6 +73,10 @@
     } finally {
       loading = false;
     }
+
+    // Poll device statuses every 15 seconds (BT lookup takes ~3s per device)
+    fetchDeviceStatuses();
+    statusInterval = setInterval(fetchDeviceStatuses, 15_000);
   });
 
   async function addBtDevice(device: Device) {
@@ -134,6 +155,7 @@
           onRemove={removeBtDevice}
           scanEndpoint="/bt/scan"
           scanResultKey="devices"
+          statuses={deviceStatuses.bt}
         />
         <DeviceList
           title="WiFi Devices"
@@ -143,6 +165,7 @@
           onRemove={removeWifiDevice}
           scanEndpoint="/wifi/stations"
           scanResultKey="stations"
+          statuses={deviceStatuses.wifi}
         />
       </div>
     </div>
