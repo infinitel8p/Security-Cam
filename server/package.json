@@ -1,28 +1,26 @@
 {
   "name": "server",
-  "version": "0.1.0",
-  "private": true,
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
-    "dev": "next dev -H 0.0.0.0",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "start": "serve dist -l 3000",
+    "astro": "astro"
   },
   "dependencies": {
-    "next": "16.1.5",
-    "react": "^18",
-    "react-dom": "^18",
-    "react-player": "^2.16.0",
-    "server": "file:"
-  },
-  "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "eslint": "^8",
-    "eslint-config-next": "16.0.3",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "@astrojs/svelte": "^8.0.4",
+    "@tabler/icons": "^3.41.1",
+    "@tailwindcss/vite": "^4.2.2",
+    "astro": "^6.1.1",
+    "serve": "^14.2.6",
+    "svelte": "^5.55.1",
+    "svelte-5-french-toast": "^2.0.6",
+    "tailwindcss": "^4.2.2",
+    "typescript": "^5.9.3"
   }
 }

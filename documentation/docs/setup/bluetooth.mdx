@@ -1,43 +1,54 @@
 ---
 sidebar_position: 3
 description: "Step 3: Setup Bluetooth"
+last_update:
+  date: 2026-03-29
+  author: Ludo
 ---
 
 # Bluetooth Setup
 
+## Finding your device's Bluetooth MAC address
+
+You'll need your device's Bluetooth MAC address to identify it in the scan results and for the security camera's presence detection. Here's where to find it:
+
+- **Android**: Settings → About phone → Status information → Bluetooth address
+- **iPhone**: Settings → General → About → Bluetooth
+
+:::tip
+If you've already paired, you can list paired devices and their MAC addresses anytime with:
+
+```bash
+bluetoothctl devices Paired
+```
+:::
+
 ## Pairing
 
-Ensure your Bluetooth device's visibility is turned on.
-On the Raspberry Pi, enter the following command:
+Run the included pairing script:
 
 ```bash
-bluetoothctl
+/opt/security-cam/setup/pair_bluetooth.sh
 ```
 
-In the bluetoothctl prompt, enter the following commands:
+The script offers two modes:
 
-```bash
-agent on
-```
+- **Mode 1 - Scan for devices**: The Pi scans for nearby Bluetooth devices (30 seconds). You pick your device from the list after the scan is done and the script handles pairing and trusting. Make sure your device's Bluetooth visibility is turned on. On iPhone, keep Settings → Bluetooth open during the scan.
+- **Mode 2 - Wait for incoming pairing**: The Pi makes itself discoverable as `securitycam` and waits for your device to initiate pairing (120 seconds). On your device, open Bluetooth settings and tap `securitycam`.
 
-```bash
-default-agent
-```
+If one mode doesn't find your device, you can try the other without restarting the script. A confirmation prompt will appear on your device during pairing - make sure to accept it.
 
-```bash
-scan on
-```
+:::info
+If you prefer to do it manually or the script fails, you can use `bluetoothctl` directly.
+Enter `bluetoothctl` to open the prompt, then run the following commands **one at a time**:
 
-Once you see the MAC address of your device, pair with it using (replace `XX:XX:XX:XX:XX:XX` with the **Bluetooth** MAC address of your target device):
+1. `agent on`
+2. `default-agent`
+3. `scan on`
+4. Wait for your device to appear, then:
+5. `pair XX:XX:XX:XX:XX:XX` (replace with your device's MAC address)
+6. `trust XX:XX:XX:XX:XX:XX`
+7. `exit`
+:::
 
-```bash
-pair XX:XX:XX:XX:XX:XX
-```
-
-Then trust the device:
-
-```bash
-trust XX:XX:XX:XX:XX:XX
-```
-
-Now type `exit` to exit the bluetoothctl prompt.
+Continue to [mediamtx.mdx](./mediamtx) to set up the camera stream.

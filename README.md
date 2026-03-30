@@ -1,16 +1,18 @@
 # Security Camera
-A security camera script for the Raspberry Pi Zero 2 W using the Waveshare RPi Camera (F).  
+A security camera system for the Raspberry Pi Zero 2 W using the Waveshare RPi Camera (F).
 
-**Currently WIP ⚠**
+**Currently WIP**
 
-The script will start recording a video when the magnetic reed switch is triggered (the door is opened) and the smartphone is not connected to the Raspberry Pi (bluetooth and/or WiFi). The recording will stop when the magnetic reed switch is triggered again (the door is closed).
+The system automatically records video when a trigger sensor is activated (e.g. door opened, motion detected) and no tracked device is connected via Bluetooth or WiFi. Recording stops when the sensor resets. The trigger sensor is modular - swap between a magnetic reed switch, PIR motion sensor, push button, or software mock without changing any code.
 
 Integrations:
-- **Magnetic Reed Switch**: Integration with a magnetic reed switch to detect door open/close events and trigger recording accordingly.
-- **WIFI Detection**: Integration with WiFi Access Point to allow user to use bluetooth or WiFi to not trigger recording. Allows user to view recorded videos in the web interface when outside of the home network.
-- **Bluetooth Detection**: Integration with Bluetooth to allow user to use bluetooth to not trigger recording.
-- **Real Time Clock**: Integration with a Real Time Clock to keep track of the time when the Raspberry Pi is powered off.
-- **Web Dashboard**: A web dashboard to view the status of the Raspberry Pi and the recorded videos.
+- **Modular Trigger Sensors**: Pluggable sensor system supporting magnetic reed switches, PIR motion sensors, Hall-effect sensors, vibration/knock sensors, tilt switches, touch sensors, push buttons, and a software mock. Swap hardware without code changes - configure via the dashboard or REST API.
+- **Presence-Gated Recording**: Sensor triggers are gated by Bluetooth and WiFi presence detection. If a tracked device (e.g. your phone) is nearby, the trigger is ignored. Manual recording is always allowed.
+- **WiFi Detection**: WiFi Access Point integration for device presence detection. Also allows viewing recorded videos from outside the home network.
+- **Bluetooth Detection**: Bluetooth integration for device presence detection.
+- **Real Time Clock**: DS3231 RTC module keeps accurate time when the Raspberry Pi is powered off.
+- **Web Dashboard**: Live camera feed via WebRTC, video archive, system health monitoring, event timeline, device management, and sensor configuration.
+- **MediaMTX Streaming**: Hardware-accelerated H.264 camera streaming via WebRTC and RTSP.
 
 ## Table of Contents
 
@@ -30,7 +32,7 @@ Integrations:
 - [Waveshare RPi Camera (F)](https://www.berrybase.de/en/noir-kamera-fuer-raspberry-pi-mit-einstellbarem-fokus-und-infrarot-leds) or another compatible camera module
 - [Flexcable adapter](https://www.berrybase.de/en/flexkabel-fuer-raspberry-pi-zero-und-kameramodul?number=RPIZ-FLEX-15) for the camera module
 - Bluetooth-enabled device (e.g., a smartphone) to pair with the Raspberry Pi
-- [KY-025 module](https://amzn.eu/d/grjoopD) (Magnetic reed switch)
+- A trigger sensor - any of the [supported modules](https://dev.infinitel8p.com/Security-Cam/basics/sensors) (e.g. KY-025 reed switch, HC-SR501 PIR, or just use the software mock for testing)
 - a bunch of [Dupont Jumper Wires](https://amzn.eu/d/6ZgE4N6)
 - Breadboard (optional)
 - [DS3231 Real Time Clock Module](https://amzn.eu/d/ikNTko8)
@@ -39,9 +41,6 @@ Integrations:
 Follow the instructions in our [documentation](https://dev.infinitel8p.com/Security-Cam/) to set up the hardware and find out how to use it.
 
 ## Future Enhancements
-- **Web Interface**: A user-friendly interface to view recorded videos. **_WIP_**.
-- **Captive Portal**: Captive portal to open Web Interface when connecting to the Raspberry Pi's WiFi.
-- **System Monitor**: A system monitor to view the status of the Raspberry Pi (e.g., CPU temperature, CPU usage, RAM usage, etc.). **_WIP (included in the dashboard)_**.
 - **Improved Error Handling**: Improved error handling to prevent the script from crashing, server from freezing, etc.
 
 ## Troubleshooting

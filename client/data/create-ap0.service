@@ -1,0 +1,14 @@
+[Unit]
+Description=Create Virtual WiFi Interface ap0
+Requires=sys-subsystem-net-devices-wlan0.device
+After=sys-subsystem-net-devices-wlan0.device
+Before=NetworkManager.service hostapd.service
+
+[Service]
+Type=oneshot
+ExecStartPre=-/sbin/iw dev ap0 del
+ExecStart=/sbin/iw dev wlan0 interface add ap0 type __ap
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

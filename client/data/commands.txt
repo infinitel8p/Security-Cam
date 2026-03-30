@@ -1,0 +1,7 @@
+systemctl status security-cam
+systemctl status mediamtx
+systemctl cat security-cam
+systemctl cat mediamtx
+cat /opt/security-cam/client/data/mediamtx.yml
+journalctl -u security-cam --no-pager -n 50
+journalctl -u mediamtx --no-pager -n 50

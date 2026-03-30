@@ -11,6 +11,6 @@ In my previous setup, I used `picamera` for recording and streaming video on the
 
 <!--truncate-->
 
-To address this, I decided to explore an alternative approach using `OpenCV`. I wrote a small test script that streams frames to a `Flask` endpoint. After modifying the `ClientVideoPlayer` component in our placeholder dashboard, I successfully established a stable video stream. The next step was to test whether the video could be recorded while maintaining a continuous and stable feed to the dashboard—and I'm happy to report that this was a success.
+To address this, I decided to explore an alternative approach using `OpenCV`. I wrote a small test script that streams frames to a `Flask` endpoint. After modifying the `ClientVideoPlayer` component in our placeholder dashboard, I successfully established a stable video stream. The next step was to test whether the video could be recorded while maintaining a continuous and stable feed to the dashboard-and I'm happy to report that this was a success.
 
 As a result, we're transitioning from using `picamera` and `WebSockets` for streaming to using `Flask` and `OpenCV`. While I still have a few more tests to conduct before finalizing this decision, resolving the most frustrating issue from the old code feels like a significant step forward.

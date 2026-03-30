@@ -1,5 +1,5 @@
 flask
 flask-cors
-opencv-python
 psutil
+pyyaml
 git+https://github.com/pybluez/pybluez.git#egg=pybluez

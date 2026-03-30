@@ -1,0 +1,13 @@
+[Unit]
+Description=MediaMTX RTSP/WebRTC Server
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/mediamtx /opt/security-cam/client/data/mediamtx.yml
+Restart=always
+RestartSec=5
+User=pi
+WorkingDirectory=/opt/security-cam/client/data
+
+[Install]
+WantedBy=multi-user.target

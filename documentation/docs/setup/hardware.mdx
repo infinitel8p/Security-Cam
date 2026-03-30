@@ -1,6 +1,9 @@
 ---
 sidebar_position: 1
 description: "Step 1: Setup the hardware components"
+last_update:
+  date: 2026-03-29
+  author: Ludo
 ---
 
 # Hardware Setup
@@ -45,8 +48,7 @@ After the installation is complete install all required Python, Node.js and syst
 
 ```bash
 cd /opt/security-cam
-sudo chmod +x install_requirements.sh
-sudo ./install_requirements.sh
+./install_requirements.sh
 ```
 
 ## Camera
@@ -59,58 +61,56 @@ If connected properly you should see a faint red glow from the camera's infrared
 
 ### Camera Setup
 
-Edit the `/boot/firmware/config.txt` file:
-
-```bash
-sudo sh -c 'echo "start_x=1" >> /boot/firmware/config.txt'
-sudo sed -i 's/camera_auto_detect=1/camera_auto_detect=0/' /boot/firmware/config.txt
-sudo reboot
-```
-
-This will enable the camera interface and disable the camera auto-detection feature. The Raspberry Pi will then reboot.
+On Raspberry Pi OS Trixie, the camera should work out of the box via `libcamera` - no `/boot/firmware/config.txt` changes are needed.
 
 :::info
-If you use `OV9281`, `IMX290`, `IMX378` or non-Raspberry Pi official `IMX219` and `IMX477` cameras, you need to configure the config.txt file separately:
+If your camera is not auto-detected, you need to manually add a device tree overlay to `/boot/firmware/config.txt`. Find your camera's sensor model in the table below and run the command, replacing `<your_overlay>` with the matching setting statement:
 
-```bash title="/boot/firmware/config.txt"
-sudo sh -c 'echo "start_x=1" >> /boot/firmware/config.txt'
-sudo nano /boot/firmware/config.txt
-```
-
-Find `camera_auto_detect=1` and modify it to `camera_auto_detect=0`.
-At the end of the file, add the following setting statements according to the camera model:
 | Camera Model | Setting Statement |
 | ------------- | ------------------------------------------ |
+| OV5647 | `dtoverlay=ov5647` |
 | OV9281 | `dtoverlay=ov9281` |
 | IMX290/IMX327 | `dtoverlay=imx290, clock-frequency=37125000` |
 | IMX477 | `dtoverlay=imx477` |
 | IMX378 | `dtoverlay=imx378` |
 | IMX219 | `dtoverlay=imx219` |
+
+For example, if you are using the Waveshare RPi Camera (F) with the OV5647 sensor:
+
+```bash
+sudo sh -c 'echo "dtoverlay=ov5647" >> /boot/firmware/config.txt'
+sudo reboot
+```
 :::
 
 ### Test the Camera
 
-The WaveShare RPi Camera (F) has a OV5647 sensor which should be supported by `libcamera` and `Raspicam` (Raspbian Buster).  
 Check if the camera is detected by the Raspberry Pi with the following command:
 
 ```bash
-vcgencmd get_camera
+rpicam-hello --list-cameras
 ```
 
 This should return something like:
 
 ```bash title="Example Output:"
-pi@securitycam:~ $ vcgencmd get_camera
-supported=1 detected=1, libcamera interfaces=0
+pi@securitycam:~ $ rpicam-hello --list-cameras
+Available cameras
+-----------------
+0 : ov5647 [2592x1944 10-bit GBRG] (/base/soc/i2c0mux/i2c@1/ov5647@36)
+    Modes: 'SGBRG10_CSI2P' : 640x480 [58.92 fps - (16, 0)/2560x1920 crop]
+                             1296x972 [46.34 fps - (0, 0)/2592x1944 crop]
+                             1920x1080 [32.81 fps - (348, 434)/1928x1080 crop]
+                             2592x1944 [15.63 fps - (0, 0)/2592x1944 crop]
 ```
 
-Now test the camera with the following command:
+Now test the camera by capturing a still image:
 
 ```bash
-python3 -c "import cv2; cap=cv2.VideoCapture(0, cv2.CAP_V4L2); cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640); cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480); cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG')); ret,frame=cap.read(); cv2.imwrite('opencv_test.jpg', frame) if ret else print('Error: Could not read frame'); cap.release()"
+rpicam-still -o test.jpg
 ```
 
-This should take a picture and save it as `opencv_test.jpg` in the current directory. You can now either view the image on the Raspberry Pi or transfer it to your computer to view it there.
+This should take a picture and save it as `test.jpg` in the current directory. You can now either view the image on the Raspberry Pi or transfer it to your computer to view it there.
 
 ## Magnet Reed Switch
 
@@ -166,46 +166,14 @@ The pinout on the Raspberry Pi with the already connected jumper wires is shown 
 
 ### Test the Magnet Reed Switch
 
-If connected properly in the previous step, the red LED on the KY-025 module should be lit up when the Raspberry Pi is turned on.  
-To test the magnet reed switch, create the following python script on the Raspberry Pi:
+If connected properly in the previous step, the red LED on the KY-025 module should be lit up when the Raspberry Pi is turned on.
+To test the magnet reed switch, run the included test script:
 
 ```bash
-nano test.py
+python3 /opt/security-cam/setup/test_reed_switch.py
 ```
 
-Paste the following code into the file:
-
-```python title="test.py"
-import RPi.GPIO as GPIO
-from time import sleep
-
-GPIO.setmode(GPIO.BCM)
-GPIO.setwarnings(False)
-
-Digital_Pin = 22
-GPIO.setup(Digital_Pin, GPIO.IN)
-
-try:
-    while True:
-        if GPIO.input(Digital_Pin):
-            print("Magnet Detected!")
-        else:
-            print("No Magnet")
-        sleep(1)
-except KeyboardInterrupt:
-    print("\nScript closed!")
-
-finally:
-    GPIO.cleanup()
-```
-
-Save the file and exit the editor. Run the script with the following command:
-
-```bash
-python3 test.py
-```
-
-Now test the switch. When you come near the sensor with a magnet the script should print `Magnet Detected!` if the magnet reed switch is triggered and `No Magnet` if it is not.
+Now test the switch. When you come near the sensor with a magnet the script should print `Magnet Detected!` if the magnet reed switch is triggered and `No Magnet` if it is not. Press `Ctrl+C` to stop the script.
 
 ## Real Time Clock Module
 
@@ -283,23 +251,21 @@ This is the connection layout using a breadboard. The clock can also just be con
 
 ![61JfhAHWeKL _AC_SX679_](https://github.com/infinitel8p/Security-Cam/assets/50703696/40ddedeb-509f-41e2-b50f-63aa0e9d1f3e)
 
-### Enable I2C Interface
+### RTC Setup
 
-1. #### To enable the I2C interface, run the following command on the Raspberry Pi:
+1. #### Enable the I2C interface:
 
    ```bash
    sudo raspi-config nonint do_i2c 0
    ```
 
-2. #### Test the DS3231 RTC module:
-
-   You can use the following command to see if your Raspberry Pi detects the DS3231 RTC:
+2. #### Verify the DS3231 RTC module is detected:
 
    ```bash
    sudo i2cdetect -y 1
    ```
 
-   You should see a number (usually 68 or 0x68) in the grid that corresponds to the module's address:
+   You should see `68` in the grid, which is the module's address:
 
    ```bash title="Example Output:"
    pi@securitycam:~ $ sudo i2cdetect -y 1
@@ -314,47 +280,41 @@ This is the connection layout using a breadboard. The clock can also just be con
    70: -- -- -- -- -- -- -- --
    ```
 
-3. #### Configure the I2C-Bus for the x68 address:
+3. #### Add the RTC device tree overlay:
+
+   This tells the kernel to automatically handle the DS3231 RTC on boot:
 
    ```bash
-   echo ds3231 0x68 | sudo tee /sys/class/i2c-adapter/i2c-1/new_device
+   sudo sh -c 'echo "dtoverlay=i2c-rtc,ds3231" >> /boot/firmware/config.txt'
    ```
 
-   The command `sudo hwclock` should now return the time from the RTC.
+4. #### Disable fake-hwclock (if present):
 
-4. #### Set the System Time:
-
-   Synchronize the RTC time:
+   If `fake-hwclock` is installed, disable it so it doesn't conflict with the real hardware clock. It's safe to run this even if it's not installed - the commands will simply report that the services don't exist.
 
    ```bash
-   sudo hwclock -w
+   sudo systemctl disable fake-hwclock fake-hwclock-load fake-hwclock-save 2>/dev/null
+   sudo systemctl stop fake-hwclock fake-hwclock-load fake-hwclock-save 2>/dev/null
    ```
 
-   This will set the hardware clock to the current system time.
+5. #### Reboot the Raspberry Pi:
 
-5. #### Enable automatic bus configuration:
-
-   ```bash
-   echo -e "[Unit]\nDescription=Load DS3231 RTC on boot\nAfter=multi-user.target\n\n[Service]\nType=oneshot\nExecStart=/bin/sh -c 'echo ds3231 0x68 > /sys/class/i2c-adapter/i2c-1/new_device'\nRemainAfterExit=yes\n\n[Install]\nWantedBy=multi-user.target" | sudo tee /etc/systemd/system/ds3231.service && sudo systemctl enable ds3231.service
-   ```
-
-6. #### Disable the fake-hwclock:
-
-   ```bash
-   sudo systemctl disable fake-hwclock
-   sudo systemctl stop fake-hwclock
-   ```
-
-   This will prevent the fake-hwclock from overwriting the hardware clock at boot.
-   If you have internet and want to sync the RTC time with the time servers, you can manually run this command again:
-
-   ```bash
-   sudo hwclock -w
-   ```
-
-7. #### Reboot the Raspberry Pi:
    ```bash
    sudo reboot
+   ```
+
+6. #### Verify the RTC is working:
+
+   After reboot, read the hardware clock time:
+
+   ```bash
+   sudo hwclock -r
+   ```
+
+   If you have internet and want to sync the RTC time with the time servers, run:
+
+   ```bash
+   sudo hwclock -w
    ```
 
 With the RTC module connected and configured, the Raspberry Pi will now use the RTC module to keep track of the time even when it is turned off.

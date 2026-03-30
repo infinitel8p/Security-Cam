@@ -1,0 +1,340 @@
+<script lang="ts">
+  import { onMount, onDestroy } from "svelte";
+  import { getBackendUrl, getMediaMtxUrl } from "../lib/api";
+  import toast from "svelte-5-french-toast";
+  import { initLocale, t } from "../i18n";
+  import Icon from "./Icon.svelte";
+  import cameraIcon from "../icons/camera.svg?raw";
+  import alertCircleIcon from "../icons/alert-circle.svg?raw";
+  import maximizeIcon from "../icons/maximize.svg?raw";
+  import minimizeIcon from "../icons/minimize.svg?raw";
+
+  let containerEl: HTMLDivElement;
+  let videoEl: HTMLVideoElement;
+  let pc: RTCPeerConnection | null = null;
+  let connected = $state(false);
+  let error = $state("");
+  let recording = $state(false);
+  let toggling = $state(false);
+  let isFullscreen = $state(false);
+  let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
+  let recordingPollInterval: ReturnType<typeof setInterval> | undefined;
+  let destroyed = false;
+
+  let rotationAngle = $state(0);
+  let rotationMode = $state("display");
+  let scanLines = $state(true);
+  let cssRotation = $derived(
+    rotationMode === "display" && rotationAngle !== 0 ? rotationAngle : 0
+  );
+  let isSideways = $derived(cssRotation === 90 || cssRotation === 270);
+
+  const STREAM_PATH = "cam";
+
+  async function startWebRTC() {
+    if (destroyed) return;
+    error = "";
+
+    const whepUrl = `${getMediaMtxUrl()}/${STREAM_PATH}/whep`;
+
+    pc = new RTCPeerConnection({
+      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+    });
+
+    pc.addTransceiver("video", { direction: "recvonly" });
+
+    pc.ontrack = (ev) => {
+      videoEl.srcObject = ev.streams[0];
+      connected = true;
+    };
+
+    pc.onconnectionstatechange = () => {
+      if (pc?.connectionState === "failed" || pc?.connectionState === "disconnected") {
+        connected = false;
+        error = t("error.streamDisconnected");
+        cleanup();
+        clearTimeout(reconnectTimer);
+        reconnectTimer = setTimeout(startWebRTC, 3000);
+      }
+    };
+
+    try {
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+
+      const res = await fetch(whepUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/sdp" },
+        body: offer.sdp,
+      });
+
+      if (!res.ok) {
+        throw new Error(`WHEP request failed: ${res.status}`);
+      }
+
+      const answerSdp = await res.text();
+      await pc.setRemoteDescription({
+        type: "answer",
+        sdp: answerSdp,
+      });
+    } catch (e) {
+      console.error("WebRTC connection failed:", e);
+      error = t("error.connectFailed");
+      cleanup();
+      clearTimeout(reconnectTimer);
+      reconnectTimer = setTimeout(startWebRTC, 5000);
+    }
+  }
+
+  function cleanup() {
+    if (pc) {
+      pc.close();
+      pc = null;
+    }
+  }
+
+  async function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      await containerEl.requestFullscreen();
+      isFullscreen = true;
+    } else {
+      await document.exitFullscreen();
+      isFullscreen = false;
+    }
+  }
+
+  function onFullscreenChange() {
+    isFullscreen = !!document.fullscreenElement;
+  }
+
+  async function toggleRecording() {
+    toggling = true;
+    try {
+      const res = await fetch(`${getBackendUrl()}/toggle_recording`, {
+        method: "POST",
+      });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      recording = data.message?.toLowerCase().includes("started") ?? false;
+      toast.success(recording ? t("toast.recordingStarted") : t("toast.recordingStopped"));
+    } catch {
+      toast.error(t("toast.toggleRecordingFailed"));
+    } finally {
+      toggling = false;
+    }
+  }
+
+  async function fetchRecordingStatus() {
+    try {
+      const res = await fetch(`${getBackendUrl()}/recording_status`);
+      if (!res.ok) return;
+      const data = await res.json();
+      recording = data.recording ?? false;
+    } catch {
+      // Keep default
+    }
+  }
+
+  async function fetchRotation() {
+    try {
+      const res = await fetch(`${getBackendUrl()}/settings`);
+      if (!res.ok) return;
+      const settings = await res.json();
+      rotationAngle = Number(settings.RotationAngle) || 0;
+      rotationMode = settings.RotationMode || "display";
+      scanLines = settings.ScanLines !== false;
+    } catch {
+      // Keep defaults
+    }
+  }
+
+  function manualReconnect() {
+    error = "";
+    connected = false;
+    clearTimeout(reconnectTimer);
+    cleanup();
+    startWebRTC();
+  }
+
+  onMount(() => {
+    initLocale();
+    startWebRTC();
+    fetchRotation();
+    fetchRecordingStatus();
+    recordingPollInterval = setInterval(fetchRecordingStatus, 5_000);
+  });
+
+  onDestroy(() => {
+    destroyed = true;
+    clearTimeout(reconnectTimer);
+    clearInterval(recordingPollInterval);
+    cleanup();
+  });
+</script>
+
+<svelte:document on:fullscreenchange={onFullscreenChange} />
+
+<div bind:this={containerEl} class="card overflow-hidden transition-shadow duration-700 {connected ? 'shadow-glow-breathe' : ''} {recording ? 'recording-halo' : ''}" class:fullscreen={isFullscreen}>
+  <!-- Feed -->
+  <div class="relative w-full bg-black/80 {isFullscreen ? 'h-full' : 'aspect-video'}">
+    <video
+      bind:this={videoEl}
+      autoplay
+      playsinline
+      muted
+      class="h-full w-full object-cover {connected ? 'animate-video-reveal' : ''}"
+      class:hidden={!connected}
+      style:transform={cssRotation ? `rotate(${cssRotation}deg)` : undefined}
+      style:transform-origin={cssRotation ? "center center" : undefined}
+      style:width={isSideways ? "100%" : undefined}
+      style:height={isSideways ? "100%" : undefined}
+      style:object-fit={isSideways ? "contain" : undefined}
+    ></video>
+
+    <!-- Scan line overlay -->
+    {#if connected && scanLines}
+      <div class="scan-lines pointer-events-none absolute inset-0 z-10" class:scan-lines-rec={recording}></div>
+    {/if}
+
+    {#if !connected}
+      <div class="absolute inset-0 flex items-center justify-center">
+        {#if error}
+          <div class="flex flex-col items-center gap-2.5">
+            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-status-warning/10">
+              <Icon icon={alertCircleIcon} class="h-5 w-5 text-status-warning" stroke={2} />
+            </div>
+            <span class="text-sm text-text-secondary">{error}</span>
+            <div class="flex items-center gap-3">
+              <span class="text-xs text-text-muted">{t("status.reconnecting")}</span>
+              <button onclick={manualReconnect} class="text-xs font-medium text-accent hover:text-accent-hover">{t("btn.retryNow")}</button>
+            </div>
+          </div>
+        {:else}
+          <div class="flex flex-col items-center gap-2.5">
+            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10">
+              <Icon icon={cameraIcon} class="h-5 w-5 animate-pulse text-accent" stroke={2} />
+            </div>
+            <span class="text-sm text-text-secondary">{t("status.connectingToCamera")}</span>
+          </div>
+        {/if}
+      </div>
+    {/if}
+
+    <!-- Overlays -->
+    <div class="absolute left-0 right-0 top-0 flex items-start justify-between p-3">
+      <!-- Left: timestamp area (empty for now) -->
+      <div></div>
+
+      <!-- Right: status badges -->
+      <div>
+        {#if recording}
+          <div class="animate-pop flex items-center gap-2 rounded-lg bg-black/60 px-2.5 py-1.5 backdrop-blur-md">
+            <span class="h-2 w-2 animate-pulse rounded-full bg-status-critical shadow-[0_0_8px_rgba(240,104,104,0.6)]"></span>
+            <span class="text-[0.6875rem] font-semibold tracking-wide text-white/90">{t("badge.rec")}</span>
+          </div>
+        {:else if connected}
+          <div class="animate-fade-in flex items-center gap-1.5 rounded-lg bg-black/60 px-2.5 py-1.5 backdrop-blur-md">
+            <span class="h-1.5 w-1.5 rounded-full bg-status-ok shadow-[0_0_6px_rgba(52,217,172,0.5)]"></span>
+            <span class="text-[0.6875rem] font-medium tracking-wide text-white/80">{t("badge.live")}</span>
+          </div>
+        {/if}
+      </div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls-bar relative flex items-center justify-between border-t border-border-subtle px-3 py-2 sm:px-4 sm:py-2.5" class:controls-bar-rec={recording}>
+    <div class="flex items-center gap-2">
+      <Icon icon={cameraIcon} class="h-4 w-4 text-text-muted" stroke={2} />
+      <span class="hidden text-[0.8125rem] font-medium text-text-secondary sm:inline">{t("label.liveFeed")}</span>
+    </div>
+    <div class="flex items-center gap-1">
+      <button
+        onclick={toggleRecording}
+        disabled={toggling}
+        class="btn-press flex min-h-[2.75rem] items-center gap-1.5 rounded-lg px-3.5 text-[0.8125rem] font-medium transition-colors duration-150 sm:min-h-0 sm:py-1.5
+          {recording
+            ? 'bg-status-critical/10 text-status-critical hover:bg-status-critical/15'
+            : 'bg-accent/10 text-accent hover:bg-accent/15'}
+          disabled:opacity-40"
+      >
+        {#if recording}
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="6" y="6" width="12" height="12" rx="2" />
+          </svg>
+          {t("btn.stop")}
+        {:else}
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="12" cy="12" r="6" />
+          </svg>
+          {t("btn.record")}
+        {/if}
+      </button>
+
+      <button
+        onclick={toggleFullscreen}
+        class="flex min-h-[2.75rem] min-w-[2.75rem] items-center justify-center rounded-lg text-text-muted transition-colors duration-150 hover:bg-surface-overlay hover:text-text-secondary sm:min-h-0 sm:min-w-0 sm:p-1.5"
+        title={isFullscreen ? t("btn.exitFullscreen") : t("btn.fullscreen")}
+      >
+        {#if isFullscreen}
+          <Icon icon={minimizeIcon} class="h-4 w-4" stroke={2} />
+        {:else}
+          <Icon icon={maximizeIcon} class="h-4 w-4" stroke={2} />
+        {/if}
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .fullscreen {
+    display: flex;
+    flex-direction: column;
+    background: black;
+  }
+  .fullscreen video {
+    object-fit: contain;
+  }
+
+  /* ── Scan line overlay ─────────────────────────────────────────────── */
+  .scan-lines {
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 2px,
+      rgba(0, 0, 0, 0.06) 2px,
+      rgba(0, 0, 0, 0.06) 4px
+    );
+    mix-blend-mode: multiply;
+  }
+
+  /* When recording, scan lines get a red tint */
+  .scan-lines-rec {
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 2px,
+      rgba(240, 104, 104, 0.07) 2px,
+      rgba(240, 104, 104, 0.07) 4px
+    );
+  }
+
+  /* ── Control bar recording sweep ───────────────────────────────────── */
+  .controls-bar {
+    background: var(--color-surface-raised);
+    transition: background 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  .controls-bar-rec {
+    background: linear-gradient(
+      to right,
+      color-mix(in srgb, var(--color-surface-raised) 92%, #f06868),
+      var(--color-surface-raised)
+    );
+  }
+
+  /* ── Reduced motion ────────────────────────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .controls-bar { transition: none; }
+  }
+</style>

@@ -1,0 +1,19 @@
+---
+import Layout from "../layouts/Layout.astro";
+import ArchiveGrid from "../components/ArchiveGrid.svelte";
+import Icon from "../components/Icon.svelte";
+import I18nText from "../components/I18nText.svelte";
+import videoIcon from "../icons/video.svg?raw";
+---
+
+<Layout title="Archive - Security Cam">
+  <div class="mx-auto max-w-6xl space-y-5 sm:space-y-6">
+    <div class="animate-in flex items-center gap-3">
+      <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-accent/10">
+        <Icon icon={videoIcon} class="size-4.5 text-accent" />
+      </div>
+      <h1 class="text-xl font-bold tracking-tight text-text-primary sm:text-2xl"><I18nText key="page.archive" fallback="Archive" client:load /></h1>
+    </div>
+    <ArchiveGrid client:load />
+  </div>
+</Layout>

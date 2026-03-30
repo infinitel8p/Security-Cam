@@ -1,0 +1,16 @@
+[Unit]
+Description=Security-Cam (Flask API + Astro frontend)
+After=network.target hostapd.service mediamtx.service
+
+[Service]
+Type=forking
+User=root
+WorkingDirectory=/opt/security-cam
+ExecStartPre=/opt/security-cam/setup/update.sh
+ExecStart=/opt/security-cam/start.sh
+TimeoutStartSec=300
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

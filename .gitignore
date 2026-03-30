@@ -2,4 +2,11 @@
 .env
 dev
 node_modules
-__pycache__ 
+__pycache__
+dump/
+
+# Runtime data (written by the app)
+client/settings/settings.json
+client/data/health_log.json
+client/data/event_log.json
+client/data/security-cam.log

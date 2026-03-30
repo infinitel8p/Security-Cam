@@ -1,0 +1,52 @@
+---
+import "../styles/global.css";
+import Navbar from "../components/Navbar.astro";
+import MobileNav from "../components/MobileNav.svelte";
+import ToastProvider from "../components/ToastProvider.svelte";
+
+interface Props {
+	title?: string;
+}
+
+const { title = "Security Cam" } = Astro.props;
+---
+
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="icon" href="/icon.png" />
+		<link rel="manifest" href="/manifest.json" />
+		<meta name="theme-color" content="#060810" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<link rel="apple-touch-icon" href="/icon.png" />
+<title>{title}</title>
+		<!-- Prevent flash: apply saved theme + detect locale before paint -->
+		<script is:inline>
+			(function () {
+				var saved = localStorage.getItem("theme");
+				var isLight = saved === "light" || (saved !== "dark" && window.matchMedia("(prefers-color-scheme: light)").matches);
+				if (isLight) document.documentElement.classList.add("light");
+
+				var locale = localStorage.getItem("locale");
+				if (!locale) locale = navigator.language.startsWith("de") ? "de" : "en";
+				document.documentElement.lang = locale;
+			})();
+		</script>
+	</head>
+	<body class="flex min-h-screen">
+		<Navbar />
+		<MobileNav client:load />
+		<ToastProvider client:load />
+		<main
+			class="min-w-0 flex-1 overflow-x-hidden p-4 pb-20 landscape:pb-4 sm:p-6 sm:pb-20 landscape:sm:pb-6 lg:ml-52 lg:p-8 lg:pb-8">
+			<slot />
+		</main>
+	</body>
+	<script is:inline>
+		if ("serviceWorker" in navigator) {
+			navigator.serviceWorker.register("/sw.js");
+		}
+	</script>
+</html>

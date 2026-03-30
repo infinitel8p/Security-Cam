@@ -1,84 +1,102 @@
 ---
 sidebar_position: 1
+last_update:
+  date: 2026-03-30
+  author: Ludo
 ---
 
-# Start with Security-Cam
+# Using the Dashboard
 
-Now that you have set up your Raspberry Pi, you can start with the Security-Cam project.
+After completing the setup, open the dashboard in your browser:
 
-Run:
-
-```bash
-cd /opt/security-cam
-sudo chmod +x start.sh
-sudo ./start.sh
+```
+http://<raspberry-pi-ip>:3000
 ```
 
-## Setup
+If you're connected to the Pi's Access Point, you can use any of these:
 
-:::warning
-⚠️ DONT FOLLOW THESE STEPS YET. ⚠️
-The following steps are subject to change. They are based on the current state of the project and may be outdated.
-Since the project is still in development, the setup process may change in the future.
+| URL | Note |
+| --- | --- |
+| `http://dashboard.cam` | Custom hostname, redirected via captive portal (no port needed) |
+| `http://192.168.4.1:3000` | Direct IP access |
+| `http://dashboard.cam:3000` | Custom hostname with explicit port |
+
+:::tip
+`http://dashboard.cam` (without port) works because the captive portal redirects port 80 to 3000. This is the easiest to remember but may be slightly slower due to the redirect.
 :::
 
-Allow pi to Run chmod Without Password:
+:::note
+The frontend auto-detects the backend and MediaMTX URLs from the hostname you're visiting. No `.env` configuration is needed on the Pi. Only set `PUBLIC_BACKEND_URL` and `PUBLIC_MEDIAMTX_URL` in `server/.env` if you're running the frontend dev server on a separate machine.
+:::
+
+The dashboard is organized into three pages.
+
+## Dashboard (home page)
+
+The main page shows everything at a glance:
+
+- **Live Feed** - real-time camera view via WebRTC, with manual recording controls (start/stop)
+- **Sensor Status** - current sensor type, armed/triggered state, and GPIO pin
+- **Connection Status** - how many tracked Bluetooth and WiFi devices are online
+- **System Health** - CPU temperature, load, RAM usage, and storage
+- **Event Timeline** - recent activity: sensor triggers, recording events, device arrivals/departures
+- **Health Tracker** - historical system metrics over the last 24-72 hours
+
+## Archive
+
+Browse and manage recorded videos:
+
+- Videos are grouped by date and can be filtered or sorted
+- Click a video to stream it directly in the browser
+- Delete individual recordings
+
+## Settings
+
+Configure the system without touching config files:
+
+- **Devices** - add or remove tracked Bluetooth and WiFi devices. Scan for nearby devices or enter MAC addresses manually. Tracked devices are used for presence detection - if any are nearby, sensor triggers are ignored.
+- **Camera** - adjust resolution, framerate, and rotation. Changes are applied to MediaMTX and take effect after a stream restart.
+- **Save Location** - choose where recorded videos are stored on the Pi
+- **Appearance** - switch between dark, light, and system theme
+- **Trigger Sensors** - select and configure the active sensor type, set the GPIO pin and hold timeout, test wiring with live GPIO readout, and enable/disable auto-recording. See the [trigger sensors guide](./sensors) for supported sensors, wiring, and configuration details.
+
+## How auto-recording works
+
+When a trigger sensor is enabled:
+
+1. The sensor fires (door opens, motion detected, vibration felt, etc.)
+2. The system checks if any tracked Bluetooth or WiFi device is nearby
+3. If nobody is home, recording starts automatically
+4. When the sensor releases, recording continues for the configured hold timeout (default 10 seconds) to prevent gaps from brief interruptions
+5. After the hold timeout, recording stops
+
+Manual recording from the dashboard is always allowed, regardless of sensor state or presence detection.
+
+## Troubleshooting
+
+### Dashboard loads but no video feed
+
+- Check MediaMTX is running: `sudo systemctl status mediamtx`
+- Verify the stream directly: open `http://<pi-ip>:8889/cam` in a browser
+
+### Cannot reach the dashboard
+
+- Check the service is running: `sudo systemctl status security-cam`
+- Make sure you're using port `3000`
+- Check firewall: `sudo nft list ruleset`
+
+### API errors in the dashboard
+
+- Check Flask is running: `curl http://localhost:5005/system_info`
+
+### Service fails on boot
+
+Check the logs:
 
 ```bash
-sudo visudo
+journalctl -u security-cam --no-pager -n 30
 ```
 
-Add the following line:
-
-```bash
-pi ALL=(ALL) NOPASSWD: /bin/chmod +x /opt/security-cam/start.sh
-```
-
-Create the Service File
-
-```bash
-sudo bash -c 'cat <<EOF > /etc/systemd/system/security-cam.service
-[Unit]
-Description=Security Cam Flask and Node.js Servers
-After=network.target
-
-[Service]
-Type=simple
-User=pi
-WorkingDirectory=/opt/security-cam
-ExecStartPre=/usr/bin/sudo /bin/chmod +x /opt/security-cam/start.sh
-ExecStart=/opt/security-cam/start.sh
-Restart=on-failure
-
-[Install]
-WantedBy=multi-user.target
-EOF'
-```
-
-Reload the systemd manager configuration
-
-```bash
-sudo systemctl daemon-reload
-```
-
-Enable the service to start on boot
-
-```bash
-sudo systemctl enable security-cam.service
-```
-
-Start the service
-
-```bash
-sudo systemctl start security-cam.service
-```
-
-Check the status of the service
-
-```bash
-sudo systemctl status security-cam.service
-```
-
-You should now be able to access the Security-Cam web interface by navigating to `http://<raspberry-pi-ip>:5000` in your web browser.
-
-The ip address of your Raspberry Pi can vary. If you are connected to the Raspberry Pi's AP and you have followed the instructions on how to set it up, you can access the web interface by navigating to `http://192.168.10.1:5000` in your web browser. If you are connected to the same network as the Raspberry Pi, you can find the ip address by running `hostname -I` on the Raspberry Pi.
+Common causes:
+- **No internet** - `git pull` fails. The service continues with the current code, but if this is the first run and deps aren't installed, it will fail. Run `install_requirements.sh` manually once.
+- **Build fails** - check Node.js is installed: `node --version`

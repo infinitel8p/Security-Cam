@@ -32,6 +32,8 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl: 'https://github.com/infinitel8p/Security-Cam/edit/main/documentation/',
+          showLastUpdateTime: true,
+          showLastUpdateAuthor: true,
         },
         blog: {
           showReadingTime: true,
@@ -82,6 +84,10 @@ const config: Config = {
         },
       ],
     },
+    colorMode: {
+      defaultMode: 'dark',
+      respectPrefersColorScheme: true,
+    },
     footer: {
       style: 'dark',
       links: [
@@ -100,10 +106,6 @@ const config: Config = {
             {
               label: 'Ludo - GitHub',
               href: 'https://github.com/infinitel8p',
-            },
-            {
-              label: 'Lenni - GitHub',
-              href: 'https://github.com/KrokoNinja',
             },
           ],
         },
