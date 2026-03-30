@@ -1,17 +1,27 @@
-const CACHE_NAME = "seccam-v1";
+const CACHE_NAME = "seccam-v2";
 
-const SHELL_ASSETS = [
+const PRECACHE = [
   "/",
   "/archive",
   "/settings",
   "/manifest.json",
   "/icon.png",
-  "/fonts/inter-latin.woff2",
 ];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(SHELL_ASSETS))
+    caches.open(CACHE_NAME).then((cache) =>
+      // Use individual puts so one failure doesn't kill the whole install
+      Promise.allSettled(
+        PRECACHE.map((url) =>
+          fetch(url)
+            .then((res) => {
+              if (res.ok) return cache.put(url, res);
+            })
+            .catch(() => {})
+        )
+      )
+    )
   );
   self.skipWaiting();
 });
@@ -33,23 +43,34 @@ self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Dont cache MediaMTX WebRTC traffic (port 8889) or Flask API calls (port 5005)
+  // Don't cache MediaMTX WebRTC traffic or Flask API calls
   if (url.port === "8889" || url.port === "5005") {
-    return; // network only, no interception
-  }
-
-  if (request.mode === "navigate" || url.origin === self.location.origin) {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          if (response.ok) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          }
-          return response;
-        })
-        .catch(() => caches.match(request))
-    );
     return;
   }
+
+  // Only handle same-origin requests
+  if (url.origin !== self.location.origin) {
+    return;
+  }
+
+  event.respondWith(
+    fetch(request)
+      .then((response) => {
+        if (response.ok) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+        }
+        return response;
+      })
+      .catch(() =>
+        caches.match(request).then((cached) => {
+          if (cached) return cached;
+          // For navigation requests, fall back to cached index
+          if (request.mode === "navigate") {
+            return caches.match("/");
+          }
+          return new Response("Offline", { status: 503 });
+        })
+      )
+  );
 });

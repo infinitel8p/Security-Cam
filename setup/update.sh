@@ -22,10 +22,13 @@ if [ "$1" = "--force" ]; then
     FORCE=true
 fi
 
-# --- Pull latest code (skip if no internet) ---
+# --- Fix ownership so both root (service) and pi (ssh) can use the repo ---
+chown -R pi:pi "$PROJECT_DIR/.git" 2>/dev/null || true
+
+# --- Pull latest code as pi user (skip if no internet) ---
 echo "=== Pulling latest code ==="
 BEFORE=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
-timeout 15 git pull --ff-only 2>/dev/null || {
+sudo -u pi timeout 15 git pull --ff-only 2>/dev/null || {
     echo "Warning: git pull failed (no internet or dirty tree). Continuing with current code."
 }
 AFTER=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
