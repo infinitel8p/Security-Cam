@@ -39,6 +39,13 @@
     <button onclick={fetchConnections} class="text-[0.75rem] font-medium text-accent hover:text-accent-hover">Retry</button>
   </div>
 {:else if data}
+  {@const noDevices = data.bluetooth.total === 0 && data.wifi.total === 0}
+  {#if noDevices}
+    <a href="/settings" class="card-interactive block px-4 py-3 text-center">
+      <p class="text-[0.8125rem] font-medium text-text-secondary">No devices tracked</p>
+      <p class="mt-0.5 text-[0.6875rem] text-text-muted">Add a phone or laptop in <span class="text-accent">Settings</span> for presence detection</p>
+    </a>
+  {:else}
   <div class="card">
     <div class="grid grid-cols-3 divide-x divide-border-subtle">
       <!-- Bluetooth -->
@@ -87,14 +94,15 @@
       </div>
     </div>
   </div>
+  {/if}
 {:else}
   <!-- Skeleton -->
-  <div class="card animate-pulse">
+  <div class="card">
     <div class="grid grid-cols-3 divide-x divide-border-subtle">
       {#each Array(3) as _}
         <div class="px-4 py-3 text-center">
-          <div class="mx-auto h-2.5 w-8 rounded bg-surface-elevated"></div>
-          <div class="mx-auto mt-2 h-5 w-10 rounded bg-surface-elevated"></div>
+          <div class="skeleton mx-auto h-2.5 w-8"></div>
+          <div class="skeleton mx-auto mt-2 h-5 w-10"></div>
         </div>
       {/each}
     </div>

@@ -3,6 +3,8 @@
   import { getBackendUrl } from "../lib/api";
   import toast from "svelte-5-french-toast";
 
+  let deleteButtonEl: HTMLButtonElement | null = null;
+
   interface Video {
     path: string;
     filename: string;
@@ -136,6 +138,32 @@
     }
   }
 
+  function openDeleteDialog(video: Video, btnEl: HTMLButtonElement) {
+    if (document.startViewTransition) {
+      // Tag the button as the morph source
+      btnEl.style.viewTransitionName = "delete-morph";
+      const transition = document.startViewTransition(() => {
+        btnEl.style.viewTransitionName = "";
+        deleteTarget = video;
+      });
+      transition.finished.then(() => {
+        btnEl.style.viewTransitionName = "";
+      });
+    } else {
+      deleteTarget = video;
+    }
+  }
+
+  function closeDeleteDialog() {
+    if (document.startViewTransition) {
+      document.startViewTransition(() => {
+        deleteTarget = null;
+      });
+    } else {
+      deleteTarget = null;
+    }
+  }
+
   function formatDateHeading(dateStr: string): string {
     try {
       const d = new Date(dateStr + "T00:00:00");
@@ -205,27 +233,27 @@
 <svelte:window on:click={handleGlobalClick} />
 
 {#if loading}
-  <div class="space-y-4">
+  <div class="space-y-4 animate-in">
     <!-- Skeleton toolbar -->
     <div class="flex gap-2">
       {#each Array(3) as _}
-        <div class="h-9 w-24 animate-pulse rounded-lg bg-surface-elevated"></div>
+        <div class="skeleton h-9 w-24 rounded-lg"></div>
       {/each}
     </div>
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {#each Array(6) as _}
-        <div class="card animate-pulse overflow-hidden">
-          <div class="aspect-video bg-surface-elevated"></div>
+      {#each Array(6) as _, i}
+        <div class="card overflow-hidden animate-in" style="animation-delay: {60 + i * 50}ms">
+          <div class="skeleton aspect-video rounded-none"></div>
           <div class="p-3.5">
-            <div class="h-4 w-28 rounded bg-surface-elevated"></div>
-            <div class="mt-2 h-3 w-16 rounded bg-surface-elevated"></div>
+            <div class="skeleton h-4 w-28"></div>
+            <div class="skeleton mt-2 h-3 w-16"></div>
           </div>
         </div>
       {/each}
     </div>
   </div>
 {:else if error}
-  <div class="card px-6 py-14 text-center">
+  <div class="card px-6 py-16 text-center">
     <div class="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-status-critical/8">
       <svg class="h-5 w-5 text-status-critical" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
         <circle cx="12" cy="12" r="10" />
@@ -238,14 +266,14 @@
     <button onclick={fetchArchive} class="mt-3 text-[0.8125rem] font-medium text-accent hover:text-accent-hover">Retry</button>
   </div>
 {:else if allVideos.length === 0}
-  <div class="card px-6 py-20 text-center">
-    <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-surface-overlay">
+  <div class="card px-6 py-16 text-center">
+    <div class="animate-float mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-surface-overlay">
       <svg class="h-6 w-6 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="m22 8-6 4 6 4V8Z" />
         <rect width="14" height="12" x="2" y="6" rx="2" ry="2" />
       </svg>
     </div>
-    <p class="mt-4 text-sm font-medium text-text-secondary">No recordings yet</p>
+    <p class="mt-4 text-sm font-medium text-text-secondary">All quiet on the home front</p>
     <p class="mt-1 text-[0.8125rem] text-text-muted">Recordings will appear here once you start capturing</p>
   </div>
 {:else}
@@ -266,7 +294,8 @@
       {#if search}
         <button
           onclick={() => (search = "")}
-          class="absolute right-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-text-muted hover:text-text-secondary"
+          class="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1.5 text-text-muted hover:text-text-secondary"
+          aria-label="Clear search"
         >
           <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
@@ -289,7 +318,7 @@
           <svg class="h-3 w-3 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9" /></svg>
         </button>
         {#if showFilterMenu}
-          <div class="absolute left-0 top-full z-20 mt-1.5 w-40 overflow-hidden rounded-xl border border-border-subtle bg-surface-raised shadow-[var(--shadow-md)]">
+          <div class="animate-dropdown absolute left-0 top-full z-20 mt-1.5 w-40 overflow-hidden rounded-xl border border-border-subtle bg-surface-raised shadow-[var(--shadow-md)]">
             {#each filterOptions as mode}
               <button
                 onclick={() => { filterMode = mode; showFilterMenu = false; }}
@@ -325,7 +354,7 @@
           <svg class="h-3 w-3 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9" /></svg>
         </button>
         {#if showSortMenu}
-          <div class="absolute right-0 top-full z-20 mt-1.5 w-40 overflow-hidden rounded-xl border border-border-subtle bg-surface-raised shadow-[var(--shadow-md)]">
+          <div class="animate-dropdown absolute right-0 top-full z-20 mt-1.5 w-40 overflow-hidden rounded-xl border border-border-subtle bg-surface-raised shadow-[var(--shadow-md)]">
             {#each sortOptions as mode}
               <button
                 onclick={() => { sortMode = mode; showSortMenu = false; }}
@@ -394,7 +423,7 @@
 
   <!-- No results after filter -->
   {#if filteredVideos.length === 0}
-    <div class="card px-6 py-14 text-center">
+    <div class="card px-6 py-16 text-center">
       <div class="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-surface-overlay">
         <svg class="h-5 w-5 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -459,7 +488,7 @@
                       </svg>
                     </button>
                     <button
-                      onclick={() => (deleteTarget = video)}
+                      onclick={(e) => openDeleteDialog(video, e.currentTarget as HTMLButtonElement)}
                       class="flex h-10 w-10 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-status-critical/8 hover:text-status-critical sm:h-auto sm:w-auto sm:p-2"
                       title="Delete"
                     >
@@ -521,8 +550,9 @@
                 <div class="flex shrink-0 gap-1 sm:opacity-0 sm:transition-opacity sm:duration-150 sm:group-hover:opacity-100">
                   <button
                     onclick={() => downloadVideo(video)}
-                    class="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-accent-muted hover:text-accent"
+                    class="flex h-10 w-10 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-accent-muted hover:text-accent sm:h-8 sm:w-8"
                     title="Download"
+                    aria-label="Download recording"
                   >
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -531,9 +561,10 @@
                     </svg>
                   </button>
                   <button
-                    onclick={() => (deleteTarget = video)}
-                    class="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-status-critical/8 hover:text-status-critical"
+                    onclick={(e) => openDeleteDialog(video, e.currentTarget as HTMLButtonElement)}
+                    class="flex h-10 w-10 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-status-critical/8 hover:text-status-critical sm:h-8 sm:w-8"
                     title="Delete"
+                    aria-label="Delete recording"
                   >
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <polyline points="3 6 5 6 21 6" />
@@ -554,15 +585,15 @@
 {#if deleteTarget}
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+    class="animate-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
     role="dialog"
     aria-modal="true"
     tabindex="-1"
-    onkeydown={(e) => e.key === "Escape" && (deleteTarget = null)}
+    onkeydown={(e) => e.key === "Escape" && closeDeleteDialog()}
   >
     <!-- svelte-ignore a11y_click_events_have_key_events -->
-    <div class="absolute inset-0" onclick={() => (deleteTarget = null)}></div>
-    <div class="relative w-full max-w-sm rounded-2xl border border-border-subtle bg-surface-raised p-5 shadow-[var(--shadow-lg)]">
+    <div class="absolute inset-0" onclick={closeDeleteDialog}></div>
+    <div class="animate-dialog relative w-full max-w-sm rounded-2xl border border-border-subtle bg-surface-raised p-5 shadow-[var(--shadow-lg)]" style="view-transition-name: delete-morph;">
       <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-status-critical/8">
         <svg class="h-4.5 w-4.5 text-status-critical" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="3 6 5 6 21 6" />
@@ -575,7 +606,7 @@
       </p>
       <div class="mt-5 flex justify-end gap-2.5">
         <button
-          onclick={() => (deleteTarget = null)}
+          onclick={closeDeleteDialog}
           class="rounded-lg px-4 py-2.5 text-[0.8125rem] font-medium text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary"
         >
           Cancel

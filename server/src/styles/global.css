@@ -81,18 +81,27 @@
   --shadow-glow: 0 0 0 1px rgba(37, 99, 235, 0.15), 0 0 20px rgba(37, 99, 235, 0.05);
 }
 
+/* ── Type scale tokens ──────────────────────────────────────────────────── */
+/*
+  Scale roles:
+    caption   0.625rem  (10px) — metadata, micro labels, time labels
+    label     0.6875rem (11px) — table headers, section labels, timestamps
+    ui        0.75rem   (12px) — buttons, form helpers, action text
+    body-sm   0.8125rem (13px) — secondary body, card text, descriptions
+    body      0.875rem  (14px) — primary body, form inputs, device names
+    heading   1.25rem   (20px) — page titles, data display values
+*/
+
 /* ── Base styles ────────────────────────────────────────────────────────── */
 body {
   font-family: var(--font-sans);
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   background-color: var(--color-surface-base);
   color: var(--color-text-primary);
-  line-height: 1.55;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-
-:root:not(.light) body { line-height: 1.6; }
 
 /* ── Card system ────────────────────────────────────────────────────────── */
 .card {
@@ -162,21 +171,27 @@ body {
   border-radius: 0.5rem;
 }
 
+/* ── Easing tokens ─────────────────────────────────────────────────────── */
+:root {
+  --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 /* ── Entrance animations (CSS-only, GPU-friendly for Pi) ───────────────── */
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-in {
-  animation: fade-up 0.35s ease-out both;
+  animation: fade-up 0.4s var(--ease-out) both;
 }
 
-.stagger-1 { animation-delay: 40ms; }
-.stagger-2 { animation-delay: 80ms; }
-.stagger-3 { animation-delay: 120ms; }
-.stagger-4 { animation-delay: 160ms; }
-.stagger-5 { animation-delay: 200ms; }
+.stagger-1 { animation-delay: 60ms; }
+.stagger-2 { animation-delay: 120ms; }
+.stagger-3 { animation-delay: 180ms; }
+.stagger-4 { animation-delay: 240ms; }
+.stagger-5 { animation-delay: 300ms; }
 
 /* Status pulse */
 @keyframes status-pulse {
@@ -188,11 +203,179 @@ body {
   animation: status-pulse 2.5s ease-in-out infinite;
 }
 
+/* ── Skeleton shimmer ──────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-elevated) 25%,
+    var(--color-surface-overlay) 50%,
+    var(--color-surface-elevated) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+  border-radius: 0.375rem;
+}
+
+/* ── Bar fill animation ────────────────────────────────────────────────── */
+@keyframes bar-fill {
+  from { transform: scaleX(0); }
+}
+
+.animate-bar {
+  transform-origin: left center;
+  animation: bar-fill 0.8s var(--ease-out-expo) both;
+}
+
+/* ── Histogram bar grow ────────────────────────────────────────────────── */
+@keyframes bar-grow {
+  from { transform: scaleY(0); opacity: 0.3; }
+  to { transform: scaleY(1); opacity: 1; }
+}
+
+.animate-bar-grow {
+  transform-origin: bottom center;
+  animation: bar-grow 0.5s var(--ease-out) both;
+}
+
+/* ── Modal / overlay entrance ──────────────────────────────────────────── */
+@keyframes overlay-in {
+  from { opacity: 0; }
+}
+
+@keyframes dialog-in {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.animate-overlay {
+  animation: overlay-in 0.2s ease-out both;
+}
+
+.animate-dialog {
+  animation: dialog-in 0.3s var(--ease-out) both;
+}
+
+/* ── Dropdown entrance ─────────────────────────────────────────────────── */
+@keyframes dropdown-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.animate-dropdown {
+  animation: dropdown-in 0.2s var(--ease-out) both;
+}
+
+/* ── Collapse / expand ─────────────────────────────────────────────────── */
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-down {
+  animation: slide-down 0.25s var(--ease-out) both;
+}
+
+/* ── Fade in (generic) ─────────────────────────────────────────────────── */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out both;
+}
+
+/* ── Scale pop (for success / confirmation) ────────────────────────────── */
+@keyframes scale-pop {
+  0% { transform: scale(0.8); opacity: 0; }
+  60% { transform: scale(1.03); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.animate-pop {
+  animation: scale-pop 0.35s var(--ease-out) both;
+}
+
+/* ── Connection glow pulse ─────────────────────────────────────────────── */
+@keyframes glow-breathe {
+  0%, 100% { box-shadow: var(--shadow-sm), 0 0 0 0 rgba(52, 217, 172, 0); }
+  50% { box-shadow: var(--shadow-sm), 0 0 20px -4px rgba(52, 217, 172, 0.12); }
+}
+
+.shadow-glow-breathe {
+  animation: glow-breathe 3s ease-in-out infinite;
+}
+
+/* ── Button press feedback ──────────────────────────────────────────────── */
+.btn-press {
+  transition: transform 0.1s var(--ease-out), box-shadow 0.1s var(--ease-out);
+}
+.btn-press:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* ── Video reveal ──────────────────────────────────────────────────────── */
+@keyframes video-reveal {
+  from { opacity: 0; filter: brightness(1.3) saturate(0.5); }
+  40% { opacity: 1; filter: brightness(1.1) saturate(0.8); }
+  to { opacity: 1; filter: brightness(1) saturate(1); }
+}
+
+.animate-video-reveal {
+  animation: video-reveal 0.8s var(--ease-out) both;
+}
+
+/* ── Recording pulse halo ──────────────────────────────────────────────── */
+@keyframes rec-halo {
+  0%, 100% { box-shadow: inset 0 0 0 0 transparent; }
+  50% { box-shadow: inset 0 0 0 2px rgba(240, 104, 104, 0.15); }
+}
+
+.recording-halo {
+  animation: rec-halo 2s ease-in-out infinite;
+}
+
+/* ── Subtle float for empty state icons ────────────────────────────────── */
+@keyframes gentle-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+.animate-float {
+  animation: gentle-float 3s ease-in-out infinite;
+}
+
+/* ── Checkmark draw ────────────────────────────────────────────────────── */
+@keyframes draw-check {
+  from { stroke-dashoffset: 24; }
+  to { stroke-dashoffset: 0; }
+}
+
+.animate-check {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  animation: draw-check 0.3s var(--ease-out) 0.1s forwards;
+}
+
 /* ── Reduced motion ────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  .animate-in { animation: none; opacity: 1; }
+  .animate-in, .animate-bar, .animate-bar-grow,
+  .animate-dialog, .animate-overlay, .animate-dropdown,
+  .animate-slide-down, .animate-fade-in, .animate-pop,
+  .animate-video-reveal, .animate-float, .animate-check {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
   .stagger-1, .stagger-2, .stagger-3, .stagger-4, .stagger-5 { animation-delay: 0ms; }
-  .status-live { animation: none; }
+  .status-live, .shadow-glow-breathe, .recording-halo { animation: none; }
+  .skeleton { animation: none; }
+  .btn-press:active:not(:disabled) { transform: none; }
 
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -211,6 +394,25 @@ body {
 :root.light ::-webkit-scrollbar-track { background: transparent; }
 :root.light ::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.08); border-radius: 3px; }
 :root.light ::-webkit-scrollbar-thumb:hover { background: rgba(15, 23, 42, 0.15); }
+
+/* ── View Transitions (morphing dialogs) ───────────────────────────────── */
+::view-transition-old(delete-morph) {
+  animation: 0.25s cubic-bezier(0.25, 1, 0.5, 1) both morph-out;
+  mix-blend-mode: normal;
+}
+
+::view-transition-new(delete-morph) {
+  animation: 0.3s cubic-bezier(0.25, 1, 0.5, 1) both morph-in;
+  mix-blend-mode: normal;
+}
+
+@keyframes morph-out {
+  to { opacity: 0; transform: scale(0.9); }
+}
+
+@keyframes morph-in {
+  from { opacity: 0; transform: scale(0.9); }
+}
 
 /* ── Selection ──────────────────────────────────────────────────────────── */
 ::selection {

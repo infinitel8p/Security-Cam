@@ -12,10 +12,12 @@
   let toggling = $state(false);
   let isFullscreen = $state(false);
   let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
+  let recordingPollInterval: ReturnType<typeof setInterval> | undefined;
   let destroyed = false;
 
   let rotationAngle = $state(0);
   let rotationMode = $state("display");
+  let scanLines = $state(true);
   let cssRotation = $derived(
     rotationMode === "display" && rotationAngle !== 0 ? rotationAngle : 0
   );
@@ -134,6 +136,7 @@
       const settings = await res.json();
       rotationAngle = Number(settings.RotationAngle) || 0;
       rotationMode = settings.RotationMode || "display";
+      scanLines = settings.ScanLines !== false;
     } catch {
       // Keep defaults
     }
@@ -151,18 +154,20 @@
     startWebRTC();
     fetchRotation();
     fetchRecordingStatus();
+    recordingPollInterval = setInterval(fetchRecordingStatus, 5_000);
   });
 
   onDestroy(() => {
     destroyed = true;
     clearTimeout(reconnectTimer);
+    clearInterval(recordingPollInterval);
     cleanup();
   });
 </script>
 
 <svelte:document on:fullscreenchange={onFullscreenChange} />
 
-<div bind:this={containerEl} class="card overflow-hidden transition-shadow duration-700 {connected ? 'shadow-glow' : ''}" class:fullscreen={isFullscreen}>
+<div bind:this={containerEl} class="card overflow-hidden transition-shadow duration-700 {connected ? 'shadow-glow-breathe' : ''} {recording ? 'recording-halo' : ''}" class:fullscreen={isFullscreen}>
   <!-- Feed -->
   <div class="relative w-full bg-black/80 {isFullscreen ? 'h-full' : 'aspect-video'}">
     <video
@@ -170,7 +175,7 @@
       autoplay
       playsinline
       muted
-      class="h-full w-full object-cover"
+      class="h-full w-full object-cover {connected ? 'animate-video-reveal' : ''}"
       class:hidden={!connected}
       style:transform={cssRotation ? `rotate(${cssRotation}deg)` : undefined}
       style:transform-origin={cssRotation ? "center center" : undefined}
@@ -178,6 +183,11 @@
       style:height={isSideways ? "100%" : undefined}
       style:object-fit={isSideways ? "contain" : undefined}
     ></video>
+
+    <!-- Scan line overlay -->
+    {#if connected && scanLines}
+      <div class="scan-lines pointer-events-none absolute inset-0 z-10" class:scan-lines-rec={recording}></div>
+    {/if}
 
     {#if !connected}
       <div class="absolute inset-0 flex items-center justify-center">
@@ -218,12 +228,12 @@
       <!-- Right: status badges -->
       <div>
         {#if recording}
-          <div class="flex items-center gap-2 rounded-lg bg-black/60 px-2.5 py-1.5 backdrop-blur-md">
+          <div class="animate-pop flex items-center gap-2 rounded-lg bg-black/60 px-2.5 py-1.5 backdrop-blur-md">
             <span class="h-2 w-2 animate-pulse rounded-full bg-status-critical shadow-[0_0_8px_rgba(240,104,104,0.6)]"></span>
             <span class="text-[0.6875rem] font-semibold tracking-wide text-white/90">REC</span>
           </div>
         {:else if connected}
-          <div class="flex items-center gap-1.5 rounded-lg bg-black/60 px-2.5 py-1.5 backdrop-blur-md">
+          <div class="animate-fade-in flex items-center gap-1.5 rounded-lg bg-black/60 px-2.5 py-1.5 backdrop-blur-md">
             <span class="h-1.5 w-1.5 rounded-full bg-status-ok shadow-[0_0_6px_rgba(52,217,172,0.5)]"></span>
             <span class="text-[0.6875rem] font-medium tracking-wide text-white/80">LIVE</span>
           </div>
@@ -233,7 +243,7 @@
   </div>
 
   <!-- Controls -->
-  <div class="flex items-center justify-between border-t border-border-subtle bg-surface-raised px-3 py-2 sm:px-4 sm:py-2.5">
+  <div class="controls-bar relative flex items-center justify-between border-t border-border-subtle px-3 py-2 sm:px-4 sm:py-2.5" class:controls-bar-rec={recording}>
     <div class="flex items-center gap-2">
       <svg class="h-4 w-4 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
@@ -245,7 +255,7 @@
       <button
         onclick={toggleRecording}
         disabled={toggling}
-        class="flex min-h-[2.75rem] items-center gap-1.5 rounded-lg px-3.5 text-[0.8125rem] font-medium transition-colors duration-150 sm:min-h-0 sm:py-1.5
+        class="btn-press flex min-h-[2.75rem] items-center gap-1.5 rounded-lg px-3.5 text-[0.8125rem] font-medium transition-colors duration-150 sm:min-h-0 sm:py-1.5
           {recording
             ? 'bg-status-critical/10 text-status-critical hover:bg-status-critical/15'
             : 'bg-accent/10 text-accent hover:bg-accent/15'}
@@ -291,5 +301,47 @@
   }
   .fullscreen video {
     object-fit: contain;
+  }
+
+  /* ── Scan line overlay ─────────────────────────────────────────────── */
+  .scan-lines {
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 2px,
+      rgba(0, 0, 0, 0.06) 2px,
+      rgba(0, 0, 0, 0.06) 4px
+    );
+    mix-blend-mode: multiply;
+  }
+
+  /* When recording, scan lines get a red tint */
+  .scan-lines-rec {
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 2px,
+      rgba(240, 104, 104, 0.07) 2px,
+      rgba(240, 104, 104, 0.07) 4px
+    );
+  }
+
+  /* ── Control bar recording sweep ───────────────────────────────────── */
+  .controls-bar {
+    background: var(--color-surface-raised);
+    transition: background 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  .controls-bar-rec {
+    background: linear-gradient(
+      to right,
+      color-mix(in srgb, var(--color-surface-raised) 92%, #f06868),
+      var(--color-surface-raised)
+    );
+  }
+
+  /* ── Reduced motion ────────────────────────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .controls-bar { transition: none; }
   }
 </style>

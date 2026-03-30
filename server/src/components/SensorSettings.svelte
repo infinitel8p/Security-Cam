@@ -22,6 +22,7 @@
     gpio: number;
     enabled: boolean;
     hold_seconds: number;
+    invert_logic?: boolean;
   }
 
   interface SensorStatusData {
@@ -65,6 +66,7 @@
   let selectedType = $state("reed_switch");
   let gpio = $state(22);
   let holdSeconds = $state(10);
+  let invertLogic = $state(false);
 
   async function fetchAll() {
     loading = true;
@@ -82,6 +84,7 @@
         selectedType = status.config.type || "reed_switch";
         gpio = status.config.gpio ?? 22;
         holdSeconds = status.config.hold_seconds ?? 10;
+        invertLogic = status.config.invert_logic ?? false;
       }
     } catch {
       loadError = true;
@@ -128,6 +131,7 @@
           gpio: selectedType === "mock" ? null : gpio,
           enabled: status?.enabled ?? false,
           hold_seconds: holdSeconds,
+          invert_logic: invertLogic,
         }),
       });
       if (res.ok) {
@@ -249,9 +253,9 @@
   </div>
 
   {#if loading}
-    <div class="animate-pulse px-4 py-6 sm:px-5">
-      <div class="h-4 w-32 rounded bg-surface-elevated"></div>
-      <div class="mt-4 h-8 w-48 rounded bg-surface-elevated"></div>
+    <div class="px-4 py-6 sm:px-5">
+      <div class="skeleton h-4 w-32"></div>
+      <div class="skeleton mt-4 h-8 w-48"></div>
     </div>
   {:else if loadError}
     <div class="flex flex-col items-center justify-center gap-2 px-6 py-12 text-center">
@@ -269,12 +273,13 @@
         <button
           onclick={toggleEnabled}
           disabled={toggling}
-          class="relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200
-            {status?.enabled ? 'bg-accent' : 'bg-surface-elevated'}"
+          class="btn-press relative h-6 w-11 shrink-0 rounded-full transition-colors duration-300
+            {status?.enabled ? 'bg-accent shadow-[0_0_8px_rgba(77,148,255,0.25)]' : 'bg-surface-elevated'}"
         >
           <span
-            class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-200
+            class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-300
               {status?.enabled ? 'translate-x-5' : 'translate-x-0'}"
+            style="transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1);"
           ></span>
         </button>
       </div>
@@ -354,7 +359,7 @@
             </button>
 
             {#if showWiring}
-              <div class="mt-3 -mx-3.5 -mb-3 rounded-b-lg border-t border-border-subtle bg-surface-base/50 px-3.5 pb-3.5 pt-3.5">
+              <div class="animate-slide-down mt-3 -mx-3.5 -mb-3 rounded-b-lg border-t border-border-subtle bg-surface-base/50 px-3.5 pb-3.5 pt-3.5">
                 <!-- Wiring diagram -->
                 <WiringDiagram
                   wiring={currentMeta.wiring}
@@ -432,7 +437,7 @@
           </div>
 
           {#if testMode}
-            <div class="mt-3 space-y-2.5">
+            <div class="animate-slide-down mt-3 space-y-2.5">
               {#if testError}
                 <p class="text-xs text-status-critical">{testError}</p>
               {:else}
@@ -495,6 +500,31 @@
         <p class="mt-1 text-[0.6875rem] text-text-muted">Keep recording for this long after sensor releases (prevents gaps from brief interruptions)</p>
       </div>
 
+      <!-- Invert trigger logic -->
+      {#if !isMock}
+        <div class="mt-5 flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-text-primary">Invert trigger</p>
+            <p class="mt-0.5 text-xs text-text-muted">
+              {invertLogic
+                ? "Recording starts when sensor activates (e.g. magnet detected)"
+                : "Recording starts when sensor deactivates (e.g. magnet removed)"}
+            </p>
+          </div>
+          <button
+            onclick={() => { invertLogic = !invertLogic; }}
+            class="btn-press relative h-6 w-11 shrink-0 rounded-full transition-colors duration-300
+              {invertLogic ? 'bg-accent shadow-[0_0_8px_rgba(77,148,255,0.25)]' : 'bg-surface-elevated'}"
+          >
+            <span
+              class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-300
+                {invertLogic ? 'translate-x-5' : 'translate-x-0'}"
+              style="transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1);"
+            ></span>
+          </button>
+        </div>
+      {/if}
+
       <!-- Info note -->
       <div class="mt-5">
         <Note variant="info">
@@ -530,7 +560,7 @@
         <button
           onclick={saveConfig}
           disabled={saving}
-          class="rounded-lg bg-accent px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-accent/90 disabled:opacity-50"
+          class="btn-press rounded-lg bg-accent px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-accent/90 disabled:opacity-50"
         >
           {saving ? "Saving..." : "Save Configuration"}
         </button>

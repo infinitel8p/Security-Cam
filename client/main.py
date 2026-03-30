@@ -281,9 +281,11 @@ def sensor_configure():
     gpio = data.get("gpio")
     enabled = data.get("enabled", True)
     hold_seconds = data.get("hold_seconds", 10)
+    invert_logic = data.get("invert_logic", False)
 
     cfg = sensor_manager.configure(sensor_type, gpio=gpio,
-                                   enabled=enabled, hold_seconds=hold_seconds)
+                                   enabled=enabled, hold_seconds=hold_seconds,
+                                   invert_logic=invert_logic)
     log.info("Sensor configured: %s", cfg)
     return jsonify({"message": "Sensor configured", "config": cfg})
 

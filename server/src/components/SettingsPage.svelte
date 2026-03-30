@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import toast from "svelte-5-french-toast";
   import DeviceList from "./DeviceList.svelte";
   import CameraSettings from "./CameraSettings.svelte";
   import DirectoryPicker from "./DirectoryPicker.svelte";
@@ -19,6 +20,7 @@
   let streamHeight = $state(972);
   let streamFPS = $state(30);
   let saveLocation = $state("");
+  let scanLinesEnabled = $state(true);
   let loading = $state(true);
   let error = $state(false);
 
@@ -70,6 +72,7 @@
       streamHeight = settings.StreamHeight ?? 972;
       streamFPS = settings.StreamFPS ?? 30;
       saveLocation = settings.VideoSaveLocation ?? "/home/pi/Videos";
+      scanLinesEnabled = settings.ScanLines !== false;
     } catch {
       error = true;
     } finally {
@@ -126,6 +129,21 @@
     }
   }
 
+  async function toggleScanLines() {
+    scanLinesEnabled = !scanLinesEnabled;
+    try {
+      const res = await fetch(`${getBackendUrl()}/settings`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ScanLines: scanLinesEnabled }),
+      });
+      if (!res.ok) throw new Error();
+    } catch {
+      scanLinesEnabled = !scanLinesEnabled;
+      toast.error("Failed to save setting");
+    }
+  }
+
   async function removeWifiDevice(address: string) {
     await fetch(`${getBackendUrl()}/devices/wifi/remove`, {
       method: "POST",
@@ -138,10 +156,10 @@
 
 {#if loading}
   <div class="space-y-4">
-    {#each Array(4) as _}
-      <div class="card animate-pulse px-5 py-6">
-        <div class="h-4 w-32 rounded bg-surface-elevated"></div>
-        <div class="mt-4 h-8 w-48 rounded bg-surface-elevated"></div>
+    {#each Array(4) as _, i}
+      <div class="card px-5 py-6 animate-in" style="animation-delay: {i * 60}ms">
+        <div class="skeleton h-4 w-32"></div>
+        <div class="skeleton mt-4 h-8 w-48"></div>
       </div>
     {/each}
   </div>
@@ -201,7 +219,7 @@
         <div class="grid grid-cols-3 gap-2">
           <button
             onclick={() => setTheme("system")}
-            class="flex flex-col items-center gap-2 rounded-xl border px-3 py-3.5 transition-all duration-200
+            class="btn-press flex flex-col items-center gap-2 rounded-xl border px-3 py-3.5 transition-all duration-200
               {theme === 'system' ? 'border-accent/30 bg-accent-muted text-accent shadow-[var(--shadow-glow)]' : 'border-border-default bg-surface-base text-text-muted hover:border-border-strong hover:text-text-secondary'}"
           >
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -213,7 +231,7 @@
           </button>
           <button
             onclick={() => setTheme("light")}
-            class="flex flex-col items-center gap-2 rounded-xl border px-3 py-3.5 transition-all duration-200
+            class="btn-press flex flex-col items-center gap-2 rounded-xl border px-3 py-3.5 transition-all duration-200
               {theme === 'light' ? 'border-accent/30 bg-accent-muted text-accent shadow-[var(--shadow-glow)]' : 'border-border-default bg-surface-base text-text-muted hover:border-border-strong hover:text-text-secondary'}"
           >
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -231,13 +249,37 @@
           </button>
           <button
             onclick={() => setTheme("dark")}
-            class="flex flex-col items-center gap-2 rounded-xl border px-3 py-3.5 transition-all duration-200
+            class="btn-press flex flex-col items-center gap-2 rounded-xl border px-3 py-3.5 transition-all duration-200
               {theme === 'dark' ? 'border-accent/30 bg-accent-muted text-accent shadow-[var(--shadow-glow)]' : 'border-border-default bg-surface-base text-text-muted hover:border-border-strong hover:text-text-secondary'}"
           >
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
             </svg>
             <span class="text-[0.6875rem] font-medium">Dark</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feed -->
+    <div class="space-y-3">
+      <h2 class="section-label">Feed</h2>
+      <div class="card px-4 py-3.5 sm:px-5 sm:py-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-text-primary">Scan lines</p>
+            <p class="mt-0.5 text-xs text-text-muted">Subtle CRT-style overlay on the live camera feed</p>
+          </div>
+          <button
+            onclick={toggleScanLines}
+            class="btn-press relative h-6 w-11 shrink-0 rounded-full transition-colors duration-300
+              {scanLinesEnabled ? 'bg-accent shadow-[0_0_8px_rgba(77,148,255,0.25)]' : 'bg-surface-elevated'}"
+          >
+            <span
+              class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-300
+                {scanLinesEnabled ? 'translate-x-5' : 'translate-x-0'}"
+              style="transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1);"
+            ></span>
           </button>
         </div>
       </div>

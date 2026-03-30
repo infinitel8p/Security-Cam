@@ -144,12 +144,12 @@
   </div>
 {:else}
   <!-- Skeleton -->
-  <div class="card animate-pulse">
+  <div class="card">
     <div class="grid grid-cols-3 divide-x divide-border-subtle">
       {#each Array(3) as _}
         <div class="px-4 py-3 text-center">
-          <div class="mx-auto h-2.5 w-8 rounded bg-surface-elevated"></div>
-          <div class="mx-auto mt-2 h-5 w-10 rounded bg-surface-elevated"></div>
+          <div class="skeleton mx-auto h-2.5 w-8"></div>
+          <div class="skeleton mx-auto mt-2 h-5 w-10"></div>
         </div>
       {/each}
     </div>

@@ -12,4 +12,4 @@
   };
 </script>
 
-<Toaster position="bottom-right" {toastOptions} />
+<Toaster position="top-center" {toastOptions} />

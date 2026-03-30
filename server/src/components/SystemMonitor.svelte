@@ -123,7 +123,7 @@
           {loadPct}<span class="text-[0.625rem] font-medium">%</span>
         </p>
         <div class="mt-1.5 h-1 rounded-full {barTrackColor(loadPct)}">
-          <div class="h-full rounded-full {barColor(loadPct)} transition-[width] duration-500" style="width: {loadPct}%"></div>
+          <div class="h-full rounded-full {barColor(loadPct)} animate-bar" style="width: {loadPct}%"></div>
         </div>
       </div>
     </div>
@@ -147,7 +147,7 @@
           {storagePct}<span class="text-[0.625rem] font-medium">%</span>
         </p>
         <div class="mt-1.5 h-1 rounded-full {barTrackColor(storagePct)}">
-          <div class="h-full rounded-full {barColor(storagePct)} transition-[width] duration-500" style="width: {storagePct}%"></div>
+          <div class="h-full rounded-full {barColor(storagePct)} animate-bar" style="width: {storagePct}%"></div>
         </div>
       </div>
 
@@ -168,7 +168,7 @@
           {ramPct}<span class="text-[0.625rem] font-medium">%</span>
         </p>
         <div class="mt-1.5 h-1 rounded-full {barTrackColor(ramPct)}">
-          <div class="h-full rounded-full {barColor(ramPct)} transition-[width] duration-500" style="width: {ramPct}%"></div>
+          <div class="h-full rounded-full {barColor(ramPct)} animate-bar" style="width: {ramPct}%"></div>
         </div>
       </div>
     </div>
@@ -204,16 +204,16 @@
             <p class="mt-1 text-lg font-bold leading-none text-status-critical">Active</p>
             <div class="mt-1 flex flex-wrap gap-1">
               {#if info.throttle.under_voltage_now}
-                <span class="rounded bg-status-critical/10 px-1.5 py-0.5 text-[0.5625rem] font-medium text-status-critical">Low voltage</span>
+                <span class="rounded bg-status-critical/10 px-1.5 py-0.5 text-[0.625rem] font-medium text-status-critical">Low voltage</span>
               {/if}
               {#if info.throttle.throttled_now}
-                <span class="rounded bg-status-critical/10 px-1.5 py-0.5 text-[0.5625rem] font-medium text-status-critical">Throttled</span>
+                <span class="rounded bg-status-critical/10 px-1.5 py-0.5 text-[0.625rem] font-medium text-status-critical">Throttled</span>
               {/if}
               {#if info.throttle.freq_capped_now}
-                <span class="rounded bg-status-warning/10 px-1.5 py-0.5 text-[0.5625rem] font-medium text-status-warning">Freq cap</span>
+                <span class="rounded bg-status-warning/10 px-1.5 py-0.5 text-[0.625rem] font-medium text-status-warning">Freq cap</span>
               {/if}
               {#if info.throttle.soft_temp_limit_now}
-                <span class="rounded bg-status-warning/10 px-1.5 py-0.5 text-[0.5625rem] font-medium text-status-warning">Temp limit</span>
+                <span class="rounded bg-status-warning/10 px-1.5 py-0.5 text-[0.625rem] font-medium text-status-warning">Temp limit</span>
               {/if}
             </div>
           {:else if history}
@@ -230,16 +230,16 @@
   </div>
 {:else}
   <!-- Skeleton -->
-  <div class="card animate-pulse divide-y divide-border-subtle">
+  <div class="card divide-y divide-border-subtle">
     {#each Array(3) as _}
       <div class="grid grid-cols-2 divide-x divide-border-subtle">
         <div class="px-4 py-3">
-          <div class="h-2.5 w-10 rounded bg-surface-elevated"></div>
-          <div class="mt-2 h-5 w-12 rounded bg-surface-elevated"></div>
+          <div class="skeleton h-2.5 w-10"></div>
+          <div class="skeleton mt-2 h-5 w-12"></div>
         </div>
         <div class="px-4 py-3">
-          <div class="h-2.5 w-10 rounded bg-surface-elevated"></div>
-          <div class="mt-2 h-5 w-12 rounded bg-surface-elevated"></div>
+          <div class="skeleton h-2.5 w-10"></div>
+          <div class="skeleton mt-2 h-5 w-12"></div>
         </div>
       </div>
     {/each}

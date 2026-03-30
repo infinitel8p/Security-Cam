@@ -33,7 +33,7 @@
 
 <button
   onclick={cycle}
-  class="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors duration-150 hover:bg-surface-overlay hover:text-text-secondary"
+  class="btn-press flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors duration-150 hover:bg-surface-overlay hover:text-text-secondary"
   title="{mode === 'system' ? 'Theme: System' : mode === 'light' ? 'Theme: Light' : 'Theme: Dark'}"
   aria-label="Cycle theme: system, light, dark"
 >

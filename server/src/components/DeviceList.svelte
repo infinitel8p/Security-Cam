@@ -85,8 +85,8 @@
       scanResults = scanResults.filter(d => d.address !== device.address);
       delete editingNames[device.address];
       toast.success(`Added ${finalDevice.name}`);
-    } catch (e: any) {
-      toast.error(e?.message || "Failed to add device");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to add device");
     } finally {
       addingAddress = null;
     }
@@ -97,8 +97,8 @@
     try {
       await onRemove(address);
       toast.success("Device removed");
-    } catch (e: any) {
-      toast.error(e?.message || "Failed to remove device");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to remove device");
     } finally {
       removingAddress = null;
     }
@@ -115,8 +115,8 @@
       manualMac = "";
       manualName = "";
       showManualAdd = false;
-    } catch (e: any) {
-      toast.error(e?.message || "Failed to add device");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to add device");
     } finally {
       manualAdding = false;
     }
@@ -190,8 +190,9 @@
           <button
             onclick={() => handleRemove(device.address)}
             disabled={removingAddress === device.address}
-            class="shrink-0 rounded-md p-1 text-text-muted opacity-0 transition-all hover:bg-status-critical/10 hover:text-status-critical group-hover:opacity-100 disabled:opacity-50"
+            class="shrink-0 rounded-md p-2 text-text-muted opacity-0 transition-all hover:bg-status-critical/10 hover:text-status-critical group-hover:opacity-100 disabled:opacity-50"
             title="Remove device"
+            aria-label="Remove device"
           >
             {#if removingAddress === device.address}
               <svg class="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -225,7 +226,7 @@
 
   <!-- Scan / discovery panel -->
   {#if showScanPanel}
-    <div class="border-t border-border-subtle bg-surface-base/50">
+    <div class="animate-slide-down border-t border-border-subtle bg-surface-base/50">
       <!-- Panel header -->
       <div class="flex items-center justify-between px-4 py-2.5 sm:px-5">
         <span class="text-xs font-semibold text-text-secondary">

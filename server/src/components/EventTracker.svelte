@@ -95,15 +95,15 @@
 </script>
 
 <div class="card px-4 py-3 sm:px-5 sm:py-3.5">
-  <div class="flex items-center justify-between">
-    <div class="flex items-center gap-1.5">
+  <div class="flex min-h-[1.25rem] items-center justify-between gap-2">
+    <div class="flex shrink-0 items-center gap-1.5">
       <svg class="h-3 w-3 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
       </svg>
       <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">Events - Last 7 days</p>
     </div>
     {#if hoveredIndex >= 0 && slots[hoveredIndex]}
-      <span class="text-[0.625rem] tabular-nums text-text-muted">
+      <span class="truncate text-[0.625rem] tabular-nums text-text-muted">
         {slots[hoveredIndex].label} · <span class="{slots[hoveredIndex].severity === 'critical' ? 'text-status-critical' : slots[hoveredIndex].severity === 'warn' ? 'text-status-warning' : slots[hoveredIndex].severity === 'ok' ? 'text-status-ok' : 'text-text-muted'}">{hoveredSummary(slots[hoveredIndex])}</span>
       </span>
     {/if}
@@ -112,7 +112,7 @@
   {#if loading}
     <div class="mt-2.5 flex gap-[2px]">
       {#each Array(TOTAL_SLOTS) as _}
-        <div class="h-5 flex-1 animate-pulse rounded-[2px] bg-surface-elevated"></div>
+        <div class="skeleton h-5 flex-1 rounded-[2px]"></div>
       {/each}
     </div>
   {:else if error}
@@ -129,14 +129,15 @@
     >
       {#each slots as slot, i}
         <div
-          class="h-5 flex-1 rounded-[2px] transition-opacity duration-100 {severityColors[slot.severity]} {hoveredIndex >= 0 && hoveredIndex !== i ? 'opacity-40' : ''}"
+          class="h-5 flex-1 rounded-[2px] transition-opacity duration-100 animate-bar-grow {severityColors[slot.severity]} {hoveredIndex >= 0 && hoveredIndex !== i ? 'opacity-40' : ''}"
+          style="animation-delay: {i * 15}ms"
           role="presentation"
           onmouseenter={() => (hoveredIndex = i)}
         ></div>
       {/each}
     </div>
     <!-- Time labels -->
-    <div class="mt-1 flex justify-between text-[0.5625rem] tabular-nums text-text-muted">
+    <div class="mt-1 flex justify-between text-[0.625rem] tabular-nums text-text-muted">
       <span>{slots[0]?.label ?? ""}</span>
       <span>{slots[Math.floor(TOTAL_SLOTS / 2)]?.label ?? ""}</span>
       <span>Now</span>

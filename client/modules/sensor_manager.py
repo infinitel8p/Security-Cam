@@ -202,6 +202,7 @@ def start():
 
     sensor_type = sensor_cfg.get("type", "reed_switch")
     gpio = sensor_cfg.get("gpio")
+    invert = sensor_cfg.get("invert_logic", False)
 
     if sensor_type not in SENSOR_REGISTRY:
         log.error("Unknown sensor type '%s'", sensor_type)
@@ -209,10 +210,16 @@ def start():
 
     try:
         _sensor = create_sensor(sensor_type, gpio=gpio)
-        _sensor.start(on_trigger=_on_trigger, on_release=_on_release)
+        if invert:
+            # Swap trigger/release so sensor fires on opposite state
+            log.info("Trigger logic inverted")
+            _sensor.start(on_trigger=_on_release, on_release=_on_trigger)
+        else:
+            _sensor.start(on_trigger=_on_trigger, on_release=_on_release)
         _armed = True
         event_logger.log_event("sensor_armed", _sensor.name)
-        log.info("Sensor manager started: %s (GPIO %s)", _sensor.name, _sensor.gpio)
+        log.info("Sensor manager started: %s (GPIO %s, invert=%s)",
+                 _sensor.name, _sensor.gpio, invert)
     except Exception as e:
         log.error("Failed to start sensor '%s': %s", sensor_type, e)
         _armed = False
@@ -243,7 +250,8 @@ def restart():
 
 
 def configure(sensor_type: str, gpio: int | None = None,
-              enabled: bool = True, hold_seconds: int = 10):
+              enabled: bool = True, hold_seconds: int = 10,
+              invert_logic: bool = False):
     """Update sensor settings and restart.
 
     Returns the new sensor config dict.
@@ -252,6 +260,7 @@ def configure(sensor_type: str, gpio: int | None = None,
         "type": sensor_type,
         "enabled": enabled,
         "hold_seconds": hold_seconds,
+        "invert_logic": invert_logic,
     }
     if gpio is not None:
         cfg["gpio"] = gpio

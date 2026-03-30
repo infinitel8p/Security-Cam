@@ -257,9 +257,9 @@
         <span class="text-xs font-medium text-text-muted">Saving...</span>
       {/if}
       {#if rotationSaved}
-        <span class="flex items-center gap-1 text-xs font-medium text-status-ok">
+        <span class="flex items-center gap-1 text-xs font-medium text-status-ok animate-fade-in">
           <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-            <polyline points="20 6 9 17 4 12" />
+            <polyline class="animate-check" points="20 6 9 17 4 12" />
           </svg>
           Saved
         </span>
@@ -392,15 +392,15 @@
       <button
         onclick={saveStreamParams}
         disabled={streamSaving || !streamParamsChanged}
-        class="rounded-xl bg-accent/10 px-4 py-2 text-xs font-semibold text-accent transition-colors hover:bg-accent/15 disabled:opacity-40"
+        class="btn-press rounded-xl bg-accent/10 px-4 py-2 text-xs font-semibold text-accent transition-colors hover:bg-accent/15 disabled:opacity-40"
       >
         {streamSaving ? "Applying..." : "Apply"}
       </button>
 
       {#if streamSaved}
-        <span class="flex items-center gap-1 text-xs font-medium text-status-ok">
+        <span class="flex items-center gap-1 text-xs font-medium text-status-ok animate-fade-in">
           <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-            <polyline points="20 6 9 17 4 12" />
+            <polyline class="animate-check" points="20 6 9 17 4 12" />
           </svg>
           Applied
         </span>

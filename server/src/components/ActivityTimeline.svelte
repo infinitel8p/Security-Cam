@@ -133,14 +133,14 @@
 </script>
 
 {#if loading}
-  <div class="card animate-pulse px-5 py-8">
+  <div class="card px-5 py-8">
     <div class="space-y-4">
-      {#each Array(4) as _}
-        <div class="flex items-center gap-3">
-          <div class="h-7 w-7 rounded-full bg-surface-elevated"></div>
+      {#each Array(4) as _, i}
+        <div class="flex items-center gap-3 animate-in" style="animation-delay: {i * 60}ms">
+          <div class="skeleton h-7 w-7 rounded-full"></div>
           <div class="flex-1 space-y-1.5">
-            <div class="h-3 w-28 rounded bg-surface-elevated"></div>
-            <div class="h-2.5 w-20 rounded bg-surface-elevated"></div>
+            <div class="skeleton h-3 w-28"></div>
+            <div class="skeleton h-2.5 w-20"></div>
           </div>
         </div>
       {/each}
@@ -153,11 +153,11 @@
   </div>
 {:else if events.length === 0}
   <div class="card px-5 py-8 text-center">
-    <svg class="mx-auto h-8 w-8 text-text-muted/15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <svg class="animate-float mx-auto h-8 w-8 text-text-muted/20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
     </svg>
     <p class="mt-2.5 text-[0.8125rem] text-text-muted">
-      No system activity recorded yet
+      System is running smoothly — no events to report
     </p>
   </div>
 {:else}
