@@ -93,6 +93,99 @@ def list_directories():
         return jsonify({"error": "Invalid directory path"}), 400
 
 
+@app.route('/bt/scan', methods=['POST'])
+def bt_scan():
+    try:
+        devices = activity_helpers.scan_bt_devices()
+        return jsonify({"devices": devices})
+    except RuntimeError as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/wifi/stations', methods=['GET'])
+def wifi_stations():
+    stations = activity_helpers.get_ap_stations()
+    ap_mode = activity_helpers.is_in_ap_mode()
+    result = {"stations": stations}
+    if not ap_mode:
+        result["message"] = "Not in AP mode"
+    return jsonify(result)
+
+
+@app.route('/devices/bt/add', methods=['POST'])
+def add_bt_device():
+    data = request.json
+    address = data.get("address", "").strip()
+    name = data.get("name", "").strip() or address
+    if not address:
+        return jsonify({"error": "Address is required"}), 400
+
+    try:
+        settings_helpers.pair_bt_device(address)
+    except Exception as e:
+        return jsonify({"error": f"Pairing failed: {e}"}), 500
+
+    settings = settings_helpers.get_settings()
+    bt_list = settings.get("TARGET_BT_ADDRESSES", [])
+    if not any(d["address"].lower() == address.lower() for d in bt_list):
+        bt_list.append({"address": address, "name": name})
+        settings_helpers.update_settings({"TARGET_BT_ADDRESSES": bt_list})
+
+    return jsonify({"message": "Device added"})
+
+
+@app.route('/devices/bt/remove', methods=['POST'])
+def remove_bt_device():
+    data = request.json
+    address = data.get("address", "").strip()
+    if not address:
+        return jsonify({"error": "Address is required"}), 400
+
+    try:
+        settings_helpers.unpair_bt_device(address)
+    except Exception:
+        pass  # Best-effort unpair
+
+    settings = settings_helpers.get_settings()
+    bt_list = [d for d in settings.get("TARGET_BT_ADDRESSES", [])
+               if d["address"].lower() != address.lower()]
+    settings_helpers.update_settings({"TARGET_BT_ADDRESSES": bt_list})
+
+    return jsonify({"message": "Device removed"})
+
+
+@app.route('/devices/wifi/add', methods=['POST'])
+def add_wifi_device():
+    data = request.json
+    address = data.get("address", "").strip()
+    name = data.get("name", "").strip() or address
+    if not address:
+        return jsonify({"error": "Address is required"}), 400
+
+    settings = settings_helpers.get_settings()
+    wifi_list = settings.get("TARGET_AP_MAC_ADDRESSES", [])
+    if not any(d["address"].lower() == address.lower() for d in wifi_list):
+        wifi_list.append({"address": address, "name": name})
+        settings_helpers.update_settings({"TARGET_AP_MAC_ADDRESSES": wifi_list})
+
+    return jsonify({"message": "Device added"})
+
+
+@app.route('/devices/wifi/remove', methods=['POST'])
+def remove_wifi_device():
+    data = request.json
+    address = data.get("address", "").strip()
+    if not address:
+        return jsonify({"error": "Address is required"}), 400
+
+    settings = settings_helpers.get_settings()
+    wifi_list = [d for d in settings.get("TARGET_AP_MAC_ADDRESSES", [])
+                 if d["address"].lower() != address.lower()]
+    settings_helpers.update_settings({"TARGET_AP_MAC_ADDRESSES": wifi_list})
+
+    return jsonify({"message": "Device removed"})
+
+
 @app.route('/archive', methods=['GET'])
 def archive():
     video_list = archive_helpers.get_videos()

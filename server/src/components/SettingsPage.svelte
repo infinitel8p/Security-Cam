@@ -10,8 +10,8 @@
     address: string;
   }
 
-  let btDevices: Device[] = $state([]);
-  let wifiDevices: Device[] = $state([]);
+  let btDevices = $state<Device[]>([]);
+  let wifiDevices = $state<Device[]>([]);
   let rotation = $state(0);
   let rotationMode = $state("display");
   let streamWidth = $state(1296);
@@ -57,6 +57,54 @@
       loading = false;
     }
   });
+
+  async function addBtDevice(device: Device) {
+    const res = await fetch(`${getBackendUrl()}/devices/bt/add`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(device),
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || "Failed to add device");
+    }
+    if (!btDevices.some(d => d.address.toLowerCase() === device.address.toLowerCase())) {
+      btDevices = [...btDevices, device];
+    }
+  }
+
+  async function removeBtDevice(address: string) {
+    await fetch(`${getBackendUrl()}/devices/bt/remove`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ address }),
+    });
+    btDevices = btDevices.filter(d => d.address.toLowerCase() !== address.toLowerCase());
+  }
+
+  async function addWifiDevice(device: Device) {
+    const res = await fetch(`${getBackendUrl()}/devices/wifi/add`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(device),
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || "Failed to add device");
+    }
+    if (!wifiDevices.some(d => d.address.toLowerCase() === device.address.toLowerCase())) {
+      wifiDevices = [...wifiDevices, device];
+    }
+  }
+
+  async function removeWifiDevice(address: string) {
+    await fetch(`${getBackendUrl()}/devices/wifi/remove`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ address }),
+    });
+    wifiDevices = wifiDevices.filter(d => d.address.toLowerCase() !== address.toLowerCase());
+  }
 </script>
 
 {#if loading}
@@ -78,8 +126,24 @@
     <div class="space-y-3">
       <h2 class="text-[0.6875rem] font-semibold uppercase tracking-wider text-text-muted">Devices</h2>
       <div class="space-y-3">
-        <DeviceList title="Bluetooth Devices" icon="bluetooth" devices={btDevices} />
-        <DeviceList title="WiFi Devices" icon="wifi" devices={wifiDevices} />
+        <DeviceList
+          title="Bluetooth Devices"
+          icon="bluetooth"
+          devices={btDevices}
+          onAdd={addBtDevice}
+          onRemove={removeBtDevice}
+          scanEndpoint="/bt/scan"
+          scanResultKey="devices"
+        />
+        <DeviceList
+          title="WiFi Devices"
+          icon="wifi"
+          devices={wifiDevices}
+          onAdd={addWifiDevice}
+          onRemove={removeWifiDevice}
+          scanEndpoint="/wifi/stations"
+          scanResultKey="stations"
+        />
       </div>
     </div>
 
