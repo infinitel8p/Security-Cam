@@ -11,3 +11,5 @@ nftables
 ffmpeg
 hostapd
 dnsmasq
+iptables
+iptables-persistent

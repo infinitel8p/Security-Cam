@@ -17,7 +17,7 @@ fi
 
 # --- System packages ---
 echo "=== Installing system packages ==="
-sudo apt-get install -y $(grep -v '^\s*#' "$SCRIPT_DIR/required-apt-packages.txt" | grep -v '^\s*$')
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y $(grep -v '^\s*#' "$SCRIPT_DIR/required-apt-packages.txt" | grep -v '^\s*$')
 
 # --- Python virtual environment ---
 echo "=== Setting up Python virtual environment ==="

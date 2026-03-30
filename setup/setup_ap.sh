@@ -81,9 +81,9 @@ echo "  IP:        $AP_IP/$AP_NETMASK"
 echo ""
 
 # --- Install dependencies ---
-echo "Installing hostapd and dnsmasq..."
+echo "Installing hostapd, dnsmasq, and iptables..."
 apt-get update -qq
-apt-get install -y hostapd dnsmasq
+apt-get install -y hostapd dnsmasq iptables
 
 # --- Remove any conflicting NetworkManager AP connection ---
 if nmcli connection show SecurityCamAP &>/dev/null; then
