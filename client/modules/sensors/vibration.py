@@ -27,11 +27,11 @@ class VibrationSensor(BaseSensor):
     description = "Spring-contact shock sensor - brief pulse on impact"
     use_case = "Door slam, forced entry, impact detection"
     icon = "zap"
-    wiring = [
+    wiring = (
         {"pin": "+ (VCC)", "connect": "3V3 [pin 17]"},
         {"pin": "GND", "connect": "GND [pin 14]"},
         {"pin": "DO", "connect": "GPIO 5 [pin 29]"},
-    ]
+    )
 
     def __init__(self, gpio: int | None = None, **kwargs):
         super().__init__(gpio, **kwargs)

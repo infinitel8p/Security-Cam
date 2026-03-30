@@ -25,11 +25,11 @@ class TouchSensor(BaseSensor):
     description = "Capacitive metal touch sensor - triggers on skin contact"
     use_case = "Detect touching of camera housing or door handle"
     icon = "hand"
-    wiring = [
+    wiring = (
         {"pin": "+ (VCC)", "connect": "3V3 [pin 17]"},
         {"pin": "GND", "connect": "GND [pin 14]"},
         {"pin": "DO", "connect": "GPIO 16 [pin 36]"},
-    ]
+    )
 
     def __init__(self, gpio: int | None = None, **kwargs):
         super().__init__(gpio, **kwargs)

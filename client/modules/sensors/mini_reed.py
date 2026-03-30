@@ -28,10 +28,10 @@ class MiniReedSensor(BaseSensor):
     description = "Compact reed switch - same function as KY-025, smaller form factor"
     use_case = "Door / window open detection (tight spaces)"
     icon = "magnet"
-    wiring = [
+    wiring = (
         {"pin": "GND", "connect": "GND [pin 14]"},
         {"pin": "S (Signal)", "connect": "GPIO 20 [pin 38]"},
-    ]
+    )
     wiring_note = "Only 2 pins - the internal GPIO pull-up provides the logic reference. No VCC needed."
 
     def __init__(self, gpio: int | None = None, **kwargs):

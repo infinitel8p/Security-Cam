@@ -19,6 +19,7 @@ MAX_ENTRIES = 864
 INTERVAL_SECONDS = 300  # 5 minutes
 
 _thread = None
+_lock = threading.Lock()
 
 
 def _classify(info):
@@ -89,12 +90,12 @@ def _log_loop():
     while True:
         try:
             entry = _snapshot()
-            entries = _load_log()
-            entries.append(entry)
-            # Trim to max entries
-            if len(entries) > MAX_ENTRIES:
-                entries = entries[-MAX_ENTRIES:]
-            _save_log(entries)
+            with _lock:
+                entries = _load_log()
+                entries.append(entry)
+                if len(entries) > MAX_ENTRIES:
+                    entries = entries[-MAX_ENTRIES:]
+                _save_log(entries)
         except Exception as e:
             log.error("Health logger error: %s", e)
         time.sleep(INTERVAL_SECONDS)
@@ -112,7 +113,8 @@ def start():
 
 def get_history(hours=24):
     """Get health history for the last N hours."""
-    entries = _load_log()
+    with _lock:
+        entries = _load_log()
     if not entries:
         return []
 

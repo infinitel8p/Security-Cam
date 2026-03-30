@@ -29,11 +29,11 @@ class HallDigitalSensor(BaseSensor):
     description = "Digital Hall-effect sensor - detects magnetic field, no moving parts"
     use_case = "Door / window detection (longer lifespan than reed)"
     icon = "magnet"
-    wiring = [
+    wiring = (
         {"pin": "+ (VCC)", "connect": "3V3 [pin 17]"},
         {"pin": "GND", "connect": "GND [pin 14]"},
         {"pin": "DO", "connect": "GPIO 13 [pin 33]"},
-    ]
+    )
 
     def __init__(self, gpio: int | None = None, **kwargs):
         super().__init__(gpio, **kwargs)

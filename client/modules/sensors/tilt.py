@@ -26,11 +26,11 @@ class TiltSensor(BaseSensor):
     description = "Mercury tilt switch - triggers on orientation change"
     use_case = "Camera tamper detection (someone moves the camera)"
     icon = "rotate"
-    wiring = [
+    wiring = (
         {"pin": "+ (VCC)", "connect": "3V3 [pin 17]"},
         {"pin": "GND", "connect": "GND [pin 14]"},
         {"pin": "DO (S)", "connect": "GPIO 26 [pin 37]"},
-    ]
+    )
 
     def __init__(self, gpio: int | None = None, **kwargs):
         super().__init__(gpio, **kwargs)

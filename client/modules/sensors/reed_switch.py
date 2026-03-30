@@ -20,11 +20,11 @@ class ReedSwitchSensor(BaseSensor):
     description = "Magnetic reed switch - triggers when magnet is removed"
     use_case = "Door / window open detection"
     icon = "magnet"
-    wiring = [
+    wiring = (
         {"pin": "+ (VCC)", "connect": "3V3 [pin 17]"},
         {"pin": "GND", "connect": "GND [pin 14]"},
         {"pin": "DO", "connect": "GPIO 22 [pin 15]"},
-    ]
+    )
     wiring_note = "The AO (analog output) pin is not used."
 
     def __init__(self, gpio: int | None = None, **kwargs):

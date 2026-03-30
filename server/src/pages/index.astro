@@ -11,15 +11,28 @@ import SensorStatus from "../components/SensorStatus.svelte";
 import LiveClock from "../components/LiveClock.svelte";
 import SetupChecklist from "../components/SetupChecklist.svelte";
 import I18nText from "../components/I18nText.svelte";
+import Icon from "../components/Icon.svelte";
+import videoIcon from "../icons/device-tv-old.svg?raw";
 ---
 
 <Layout title="Dashboard - Security Cam">
 	<div class="mx-auto max-w-6xl">
 		<!-- Header -->
 		<div class="animate-in flex items-center justify-between">
-			<h1 class="text-xl font-bold tracking-tight text-text-primary sm:text-2xl">
-				<I18nText key="page.dashboard" fallback="Dashboard" client:load />
-			</h1>
+			<div class="animate-in flex items-center gap-3">
+				<div
+					class="flex h-9 w-9 items-center justify-center rounded-xl bg-accent/10">
+					<Icon icon={videoIcon} class="size-4.5 text-accent" />
+				</div>
+				<h1
+					class="text-xl font-bold tracking-tight text-text-primary sm:text-2xl">
+					<I18nText
+						key="page.dashboard"
+						fallback="Dashboard"
+						client:load
+					/>
+				</h1>
+			</div>
 			<div class="flex items-center gap-3">
 				<LiveClock client:load />
 				<div
@@ -27,9 +40,12 @@ import I18nText from "../components/I18nText.svelte";
 					<span
 						class="status-live h-1.5 w-1.5 rounded-full bg-status-ok shadow-[0_0_6px_rgba(52,217,172,0.5)]"
 					></span>
-					<span
-						class="text-[0.75rem] font-semibold text-status-ok">
-						<I18nText key="status.online" fallback="Online" client:load />
+					<span class="text-[0.75rem] font-semibold text-status-ok">
+						<I18nText
+							key="status.online"
+							fallback="Online"
+							client:load
+						/>
 					</span>
 				</div>
 			</div>
@@ -39,11 +55,16 @@ import I18nText from "../components/I18nText.svelte";
 			<SetupChecklist client:load />
 		</div>
 
-		<div class="mt-4 grid grid-cols-1 items-start gap-4 sm:mt-5 sm:gap-5 lg:grid-cols-3">
+		<div
+			class="mt-4 grid grid-cols-1 items-start gap-4 sm:mt-5 sm:gap-5 lg:grid-cols-3">
 			<!-- Live Feed (takes 2 cols on desktop) -->
 			<div class="animate-in stagger-1 min-w-0 lg:col-span-2">
 				<h2 class="section-label mb-2.5">
-					<I18nText key="section.liveFeed" fallback="Live Feed" client:load />
+					<I18nText
+						key="section.liveFeed"
+						fallback="Live Feed"
+						client:load
+					/>
 				</h2>
 				<VideoPlayer client:load />
 			</div>
@@ -51,7 +72,11 @@ import I18nText from "../components/I18nText.svelte";
 			<!-- System Status (compact sidebar) -->
 			<div class="animate-in stagger-2 min-w-0 flex flex-col gap-2.5">
 				<h2 class="section-label">
-					<I18nText key="section.systemHealth" fallback="System Health" client:load />
+					<I18nText
+						key="section.systemHealth"
+						fallback="System Health"
+						client:load
+					/>
 				</h2>
 				<ConnectionStatus client:load />
 				<SensorStatus client:load />
@@ -60,7 +85,8 @@ import I18nText from "../components/I18nText.svelte";
 		</div>
 
 		<!-- Timelines row -->
-		<div class="animate-in stagger-3 mt-4 grid grid-cols-1 gap-4 sm:mt-5 sm:gap-5 lg:grid-cols-2">
+		<div
+			class="animate-in stagger-3 mt-4 grid grid-cols-1 gap-4 sm:mt-5 sm:gap-5 lg:grid-cols-2">
 			<EventTracker client:load />
 			<HealthTracker client:load />
 		</div>
@@ -68,8 +94,20 @@ import I18nText from "../components/I18nText.svelte";
 		<!-- Access Log -->
 		<section class="animate-in stagger-4 mt-4 sm:mt-5">
 			<div class="flex items-center justify-between mb-2.5">
-				<h2 class="section-label"><I18nText key="section.accessLog" fallback="Access Log" client:load /></h2>
-				<span class="text-[0.625rem] tabular-nums text-text-muted"><I18nText key="label.last72h" fallback="Last 72h" client:load /></span>
+				<h2 class="section-label">
+					<I18nText
+						key="section.accessLog"
+						fallback="Access Log"
+						client:load
+					/>
+				</h2>
+				<span class="text-[0.625rem] tabular-nums text-text-muted"
+					><I18nText
+						key="label.last72h"
+						fallback="Last 72h"
+						client:load
+					/></span
+				>
 			</div>
 			<AccessLog client:load />
 		</section>
@@ -77,8 +115,20 @@ import I18nText from "../components/I18nText.svelte";
 		<!-- Activity Timeline -->
 		<section class="animate-in stagger-5 mt-4 sm:mt-5">
 			<div class="flex items-center justify-between mb-2.5">
-				<h2 class="section-label"><I18nText key="section.activityTimeline" fallback="Activity Timeline" client:load /></h2>
-				<span class="text-[0.625rem] tabular-nums text-text-muted"><I18nText key="label.last7days" fallback="Last 7 days" client:load /></span>
+				<h2 class="section-label">
+					<I18nText
+						key="section.activityTimeline"
+						fallback="Activity Timeline"
+						client:load
+					/>
+				</h2>
+				<span class="text-[0.625rem] tabular-nums text-text-muted"
+					><I18nText
+						key="label.last7days"
+						fallback="Last 7 days"
+						client:load
+					/></span
+				>
 			</div>
 			<ActivityTimeline client:load />
 		</section>

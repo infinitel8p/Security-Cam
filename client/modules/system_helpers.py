@@ -43,7 +43,7 @@ def get_throttle_status():
             "throttled_occurred": bool(flags & 0x40000),
             "soft_temp_limit_occurred": bool(flags & 0x80000),
         }
-    except (FileNotFoundError, subprocess.TimeoutExpired):
+    except (FileNotFoundError, subprocess.TimeoutExpired, ValueError, IndexError):
         return None
 
 

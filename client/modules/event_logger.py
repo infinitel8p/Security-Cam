@@ -93,7 +93,8 @@ def log_event(event_type, detail=None):
 
 def get_events(hours=24):
     """Get events for the last N hours."""
-    entries = _load_log()
+    with _lock:
+        entries = _load_log()
     if not entries:
         return []
 

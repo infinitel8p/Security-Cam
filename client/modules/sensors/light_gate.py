@@ -26,11 +26,11 @@ class LightGateSensor(BaseSensor):
     description = "Photo interrupter - triggers when IR beam in ~5mm slot is blocked"
     use_case = "Alarm when pin/bolt is removed, rotation counting"
     icon = "gate"
-    wiring = [
+    wiring = (
         {"pin": "+ (VCC)", "connect": "3V3 [pin 17]"},
         {"pin": "GND", "connect": "GND [pin 14]"},
         {"pin": "DO", "connect": "GPIO 6 [pin 31]"},
-    ]
+    )
 
     def __init__(self, gpio: int | None = None, **kwargs):
         super().__init__(gpio, **kwargs)

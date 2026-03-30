@@ -26,11 +26,11 @@ class KnockSensor(BaseSensor):
     description = "Knock sensor - detects taps and deliberate knocks"
     use_case = "Detect knocking on door or tapping on window"
     icon = "zap"
-    wiring = [
+    wiring = (
         {"pin": "+ (VCC)", "connect": "3V3 [pin 17]"},
         {"pin": "GND", "connect": "GND [pin 14]"},
         {"pin": "DO (S)", "connect": "GPIO 19 [pin 35]"},
-    ]
+    )
 
     def __init__(self, gpio: int | None = None, **kwargs):
         super().__init__(gpio, **kwargs)

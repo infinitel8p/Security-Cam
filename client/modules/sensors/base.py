@@ -28,7 +28,7 @@ class BaseSensor(ABC):
     description: str = ""             # one-line description
     use_case: str = ""                # what it's good for
     icon: str = "wrench"              # icon key for the frontend
-    wiring: list[dict] = []           # [{"pin": "VCC", "connect": "3V3 [pin 17]"}, ...]
+    wiring: tuple[dict, ...] = ()      # ({"pin": "VCC", "connect": "3V3 [pin 17]"}, ...)
     wiring_note: str = ""             # optional note shown below the wiring table
 
     def __init__(self, gpio: int | None = None, **kwargs):

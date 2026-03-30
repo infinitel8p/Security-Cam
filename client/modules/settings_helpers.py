@@ -85,7 +85,7 @@ def pair_bt_device(device_mac: str) -> bool:
                    check=True, capture_output=True, text=True)
 
     result = subprocess.run(
-        f"{script_path} {device_mac}", capture_output=True, text=True, shell=True)
+        [script_path, device_mac], capture_output=True, text=True)
 
     output = result.stdout.strip()
     log.debug("pair.sh output: %s", output)
@@ -113,7 +113,7 @@ def unpair_bt_device(device_mac: str) -> bool:
                    check=True, capture_output=True, text=True)
 
     result = subprocess.run(
-        f"{script_path} {device_mac}", capture_output=True, text=True, shell=True)
+        [script_path, device_mac], capture_output=True, text=True)
 
     output = result.stdout.strip()
     log.debug("unpair.sh output: %s", output)

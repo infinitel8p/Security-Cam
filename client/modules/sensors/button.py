@@ -20,10 +20,10 @@ class ButtonSensor(BaseSensor):
     description = "Simple push button - triggers on press, releases on release"
     use_case = "Manual hardware trigger or testing"
     icon = "circle"
-    wiring = [
+    wiring = (
         {"pin": "Pin 1", "connect": "GPIO 27 [pin 13]"},
         {"pin": "Pin 2", "connect": "GND [pin 14]"},
-    ]
+    )
     wiring_note = "No external resistor needed - the software enables an internal pull-up. Wire between GPIO and GND."
 
     def __init__(self, gpio: int | None = None, **kwargs):

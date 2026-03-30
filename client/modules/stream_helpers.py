@@ -2,6 +2,7 @@ import logging
 import os
 import subprocess
 import threading
+import time
 from datetime import datetime
 from . import settings_helpers
 
@@ -51,6 +52,12 @@ def start_recording() -> None:
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
+        # Verify FFmpeg is actually running before reporting success
+        time.sleep(0.5)
+        if _ffmpeg_process.poll() is not None:
+            log.error("FFmpeg exited immediately (code=%d)", _ffmpeg_process.returncode)
+            _ffmpeg_process = None
+            return
         is_recording = True
         log.info("Recording started: %s (pid=%d)", recorded_filename, _ffmpeg_process.pid)
 
@@ -99,7 +106,7 @@ def _fix_faststart(file_path: str) -> None:
     try:
         subprocess.run(
             ["ffmpeg", "-y", "-i", file_path, "-c", "copy", "-movflags", "+faststart", tmp_path],
-            check=True, capture_output=True,
+            check=True, capture_output=True, timeout=60,
         )
         os.replace(tmp_path, file_path)
         log.info("Faststart applied: %s", file_path)

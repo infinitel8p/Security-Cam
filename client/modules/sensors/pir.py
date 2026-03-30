@@ -21,11 +21,11 @@ class PIRSensor(BaseSensor):
     description = "Passive infrared motion sensor - triggers on heat/movement"
     use_case = "Motion detection in a room or hallway"
     icon = "eye"
-    wiring = [
+    wiring = (
         {"pin": "VCC", "connect": "5V [pin 2]"},
         {"pin": "GND", "connect": "GND [pin 6]"},
         {"pin": "OUT", "connect": "GPIO 17 [pin 11]"},
-    ]
+    )
     wiring_note = "PIR modules need 5V power. Adjust the onboard potentiometers for sensitivity and hold time."
 
     def __init__(self, gpio: int | None = None, **kwargs):
