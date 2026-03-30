@@ -12,6 +12,7 @@ LOG_PATH = os.path.join(
 )
 
 MAX_ENTRIES = 5000
+MIN_DUPLICATE_INTERVAL = 120  # seconds — suppress identical events within this window
 _lock = threading.Lock()
 
 # Event types and their severity for the tracker
@@ -55,18 +56,31 @@ def log_event(event_type, detail=None):
         detail: Optional string with extra context (e.g. device name).
     """
     severity = EVENT_TYPES.get(event_type, "ok")
+    now = datetime.now(timezone.utc)
     entry = {
-        "ts": datetime.now(timezone.utc).isoformat(),
+        "ts": now.isoformat(),
         "type": event_type,
         "severity": severity,
     }
     if detail:
         entry["detail"] = detail
 
-    log.info("Event: %s [%s]%s", event_type, severity, f" — {detail}" if detail else "")
-
     with _lock:
         entries = _load_log()
+
+        # Suppress duplicate: same type+detail within MIN_DUPLICATE_INTERVAL
+        if entries:
+            last = entries[-1]
+            if last["type"] == event_type and last.get("detail") == detail:
+                try:
+                    last_ts = datetime.fromisoformat(last["ts"]).timestamp()
+                    if now.timestamp() - last_ts < MIN_DUPLICATE_INTERVAL:
+                        log.debug("Suppressed duplicate event: %s", event_type)
+                        return
+                except (ValueError, KeyError):
+                    pass
+
+        log.info("Event: %s [%s]%s", event_type, severity, f" — {detail}" if detail else "")
         entries.append(entry)
         if len(entries) > MAX_ENTRIES:
             entries = entries[-MAX_ENTRIES:]

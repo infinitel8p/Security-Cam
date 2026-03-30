@@ -6,6 +6,7 @@ import SystemMonitor from "../components/SystemMonitor.svelte";
 import HealthTracker from "../components/HealthTracker.svelte";
 import EventTracker from "../components/EventTracker.svelte";
 import AccessLog from "../components/AccessLog.svelte";
+import ActivityTimeline from "../components/ActivityTimeline.svelte";
 ---
 
 <Layout title="Dashboard — Security Cam">
@@ -59,23 +60,11 @@ import AccessLog from "../components/AccessLog.svelte";
 
 		<!-- Activity Timeline -->
 		<section class="animate-in stagger-4 mt-6 sm:mt-8">
-			<h2 class="section-label mb-3">
-				Activity Timeline
-			</h2>
-			<div class="card px-6 py-10 text-center">
-				<svg
-					class="mx-auto h-8 w-8 text-text-muted/15"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="1.5">
-					<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"
-					></polyline>
-				</svg>
-				<p class="mt-2.5 text-[0.8125rem] text-text-muted">
-					Activity timeline coming soon
-				</p>
+			<div class="flex items-center justify-between mb-3">
+				<h2 class="section-label">Activity Timeline</h2>
+				<span class="text-[0.625rem] tabular-nums text-text-muted">Last 7 days</span>
 			</div>
+			<ActivityTimeline client:load />
 		</section>
 	</div>
 </Layout>
