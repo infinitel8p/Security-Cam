@@ -28,9 +28,17 @@ chown -R pi:pi "$PROJECT_DIR/.git" 2>/dev/null || true
 # --- Pull latest code as pi user (skip if no internet) ---
 echo "=== Pulling latest code ==="
 BEFORE=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
+
+# Stash any local changes (e.g. runtime-modified files not yet in .gitignore)
+sudo -u pi git stash -q 2>/dev/null || true
+
 sudo -u pi timeout 15 git pull --ff-only 2>/dev/null || {
     echo "Warning: git pull failed (no internet or dirty tree). Continuing with current code."
 }
+
+# Restore stashed changes (local settings take priority over repo)
+sudo -u pi git stash pop -q 2>/dev/null || true
+
 AFTER=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
 
 # --- Check if rebuild is needed ---

@@ -1,0 +1,10 @@
+{
+    "TARGET_BT_ADDRESSES": [],
+    "TARGET_AP_MAC_ADDRESSES": [],
+    "VideoSaveLocation": "./recordings",
+    "RotationAngle": 0,
+    "RotationMode": "display",
+    "StreamWidth": 1296,
+    "StreamHeight": 972,
+    "StreamFPS": 30
+}

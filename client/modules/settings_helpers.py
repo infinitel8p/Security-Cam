@@ -2,21 +2,49 @@ import os
 import json
 import subprocess
 
-SETTINGS_FILE = os.path.join(os.path.dirname(os.path.dirname(
-    os.path.realpath(__file__))), "settings/settings.json")
+_SETTINGS_DIR = os.path.join(os.path.dirname(os.path.dirname(
+    os.path.realpath(__file__))), "settings")
+SETTINGS_FILE = os.path.join(_SETTINGS_DIR, "settings.json")
+DEFAULTS_FILE = os.path.join(_SETTINGS_DIR, "settings.defaults.json")
+
+
+def _ensure_settings():
+    """Create settings.json from defaults if missing, and merge any new keys."""
+    with open(DEFAULTS_FILE, 'r') as f:
+        defaults = json.load(f)
+
+    if not os.path.exists(SETTINGS_FILE):
+        os.makedirs(_SETTINGS_DIR, exist_ok=True)
+        with open(SETTINGS_FILE, 'w') as f:
+            json.dump(defaults, f, indent=4)
+        return defaults
+
+    with open(SETTINGS_FILE, 'r') as f:
+        settings = json.load(f)
+
+    # Add any new keys from defaults that don't exist yet
+    updated = False
+    for key, value in defaults.items():
+        if key not in settings:
+            settings[key] = value
+            updated = True
+
+    if updated:
+        with open(SETTINGS_FILE, 'w') as f:
+            json.dump(settings, f, indent=4)
+
+    return settings
 
 
 def get_settings():
     """
     Load and return the settings from the settings file.
+    Creates from defaults if missing, merges new default keys.
 
     Returns:
         Dict[str, Any]: The settings as a dictionary.
     """
-
-    with open(SETTINGS_FILE, 'r') as f:
-        settings = json.load(f)
-    return settings
+    return _ensure_settings()
 
 
 def update_settings(new_settings) -> None:
