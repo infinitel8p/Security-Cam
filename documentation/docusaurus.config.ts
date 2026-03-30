@@ -84,6 +84,10 @@ const config: Config = {
         },
       ],
     },
+    colorMode: {
+      defaultMode: 'dark',
+      respectPrefersColorScheme: true,
+    },
     footer: {
       style: 'dark',
       links: [
@@ -102,10 +106,6 @@ const config: Config = {
             {
               label: 'Ludo - GitHub',
               href: 'https://github.com/infinitel8p',
-            },
-            {
-              label: 'Lenni - GitHub',
-              href: 'https://github.com/KrokoNinja',
             },
           ],
         },

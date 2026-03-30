@@ -1,47 +1,112 @@
 /**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
+ * Custom theme — matched to the Security-Cam dashboard.
+ *
+ * Dashboard tokens (server/src/styles/global.css):
+ *   Dark  accent: #4d94ff  |  bg: #060810  |  text: #e2e6f0 / #8490ad / #4a5370
+ *   Light accent: #2563eb  |  bg: #f0f2f5  |  text: #0f172a / #475569 / #94a3b8
  */
 
-/* You can override the default Infima variables here. */
+/* ---------- Light mode ---------- */
 :root {
-	--ifm-color-primary: #0041a3;
-	--ifm-color-primary-dark: #003b93;
-	--ifm-color-primary-darker: #00378b;
-	--ifm-color-primary-darkest: #002e72;
-	--ifm-color-primary-light: #0048b3;
-	--ifm-color-primary-lighter: #004bbb;
-	--ifm-color-primary-lightest: #0055d4;
-	--ifm-code-font-size: 95%;
-	--docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
-  	--ifm-background-color: #eeeeee;
+  --ifm-color-primary: #2563eb;
+  --ifm-color-primary-dark: #1d4ed8;
+  --ifm-color-primary-darker: #1e40af;
+  --ifm-color-primary-darkest: #1a3590;
+  --ifm-color-primary-light: #3b82f6;
+  --ifm-color-primary-lighter: #60a5fa;
+  --ifm-color-primary-lightest: #93c5fd;
+
+  --ifm-background-color: #f0f2f5;
+  --ifm-background-surface-color: #ffffff;
+  --ifm-font-color-base: #0f172a;
+  --ifm-font-color-secondary: #475569;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(37, 99, 235, 0.08);
+
+  --ifm-navbar-background-color: #ffffff;
+  --ifm-navbar-shadow: 0 1px 0 0 rgba(15, 23, 42, 0.06);
+  --ifm-toc-border-color: rgba(15, 23, 42, 0.08);
+  --ifm-hr-border-color: rgba(15, 23, 42, 0.08);
+
+  --ifm-footer-background-color: #2563eb;
+  --ifm-footer-color: #ffffff;
+  --ifm-footer-link-color: #ffffff;
+  --ifm-footer-link-hover-color: #dbeafe;
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
+/* ---------- Dark mode ---------- */
 [data-theme="dark"] {
-	--ifm-color-primary: #4d94ff;
-	--ifm-color-primary-dark: #2c80ff;
-	--ifm-color-primary-darker: #1b76ff;
-	--ifm-color-primary-darkest: #005de8;
-	--ifm-color-primary-light: #6ea8ff;
-	--ifm-color-primary-lighter: #7fb2ff;
-	--ifm-color-primary-lightest: #b1d0ff;
-	--docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  --ifm-color-primary: #4d94ff;
+  --ifm-color-primary-dark: #2c80ff;
+  --ifm-color-primary-darker: #1b76ff;
+  --ifm-color-primary-darkest: #005ae6;
+  --ifm-color-primary-light: #6ea8ff;
+  --ifm-color-primary-lighter: #7fb2ff;
+  --ifm-color-primary-lightest: #b1d0ff;
+
+  --ifm-background-color: #060810;
+  --ifm-background-surface-color: #0c0f18;
+  --ifm-font-color-base: #e2e6f0;
+  --ifm-font-color-secondary: #8490ad;
+  --docusaurus-highlighted-code-line-bg: rgba(77, 148, 255, 0.12);
+
+  --ifm-navbar-background-color: #0c0f18;
+  --ifm-navbar-shadow: 0 1px 0 0 rgba(136, 155, 195, 0.07);
+  --ifm-toc-border-color: rgba(136, 155, 195, 0.07);
+  --ifm-hr-border-color: rgba(136, 155, 195, 0.07);
+  --ifm-card-background-color: #131722;
+
+  --ifm-footer-background-color: #4d94ff;
+  --ifm-footer-color: #ffffff;
+  --ifm-footer-link-color: #ffffff;
+  --ifm-footer-link-hover-color: #060810;
 }
 
+/* ---------- Layout ---------- */
 article {
-	max-width: 700px;
-	margin-left: auto;
-	margin-right: auto;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-/* Adjust footer link colors */
-#__docusaurus > footer {
-	background-color: var(--ifm-color-primary);
-	text-align: center;
+/* ---------- Footer ---------- */
+/* Infima's style="dark" forces its own bg; override it explicitly */
+.footer--dark {
+  --ifm-footer-background-color: #2563eb;
+  background-color: #2563eb;
+  color: #ffffff;
+  text-align: center;
+}
 
-	a {
-		color: white;
-	}
+[data-theme="dark"] .footer--dark {
+  --ifm-footer-background-color: #4d94ff;
+  background-color: #4d94ff;
+  color: #ffffff;
+}
+
+.footer--dark a {
+  color: #ffffff;
+}
+
+.footer--dark a:hover {
+  color: #dbeafe;
+}
+
+[data-theme="dark"] .footer--dark a:hover {
+  color: #060810;
+}
+
+/* ---------- Admonitions — use dashboard status colors ---------- */
+:root {
+  --ifm-color-success: #059669;
+  --ifm-color-info: #2563eb;
+  --ifm-color-warning: #d97706;
+  --ifm-color-danger: #dc2626;
+}
+
+[data-theme="dark"] {
+  --ifm-color-success: #34d9ac;
+  --ifm-color-info: #4d94ff;
+  --ifm-color-warning: #f0b93a;
+  --ifm-color-danger: #f06868;
 }
