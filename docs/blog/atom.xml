@@ -59,7 +59,7 @@
 Before that we talked about how to integrate the video stream and found out about the ability of the HTML5 video tag to stream a video via RTSP.</p>
 <p>Now the decision was easy as Lenni is used to coding with NextJS.
 So we began installing the necessary packages and setting up the project.</p>
-<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">npx create-next-app@latest</span><br></span></code></pre></div></div>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#F8F8F2;--prism-background-color:#282A36"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#F8F8F2;background-color:#282A36"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#F8F8F2"><span class="token plain">npx create-next-app@latest</span><br></span></code></pre></div></div>
 <p>First step was made and we started to delete the boilerplate code and build our first component.
 Design isnt necessary at this point. We just want to have something running to try out streaming as soon as possible.</p>
 <p>First steps are done and more to come.</p>]]></content>
@@ -85,7 +85,7 @@ Design isnt necessary at this point. We just want to have something running to t
 <!-- -->After a long time of inactivity, we decided to start from scratch and rebuild most of the stuff we already did.
 We are excited to see where this journey will take us.<br>
 <!-- -->This blog will be the place where we share our progress and thoughts (In case we become some famous dudes in the future).</p>
-<div class="language-py codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-py codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token keyword" style="color:#00009f">print</span><span class="token punctuation" style="color:#393A34">(</span><span class="token string" style="color:#e3116c">"Hello World"</span><span class="token punctuation" style="color:#393A34">)</span><br></span></code></pre></div></div>
+<div class="language-py codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#F8F8F2;--prism-background-color:#282A36"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-py codeBlock_bY9V thin-scrollbar" style="color:#F8F8F2;background-color:#282A36"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#F8F8F2"><span class="token keyword" style="color:rgb(189, 147, 249);font-style:italic">print</span><span class="token punctuation" style="color:rgb(248, 248, 242)">(</span><span class="token string" style="color:rgb(255, 121, 198)">"Hello World"</span><span class="token punctuation" style="color:rgb(248, 248, 242)">)</span><br></span></code></pre></div></div>
 <button>Click me!</button>]]></content>
         <author>
             <name>Ludovico Ferrara</name>
