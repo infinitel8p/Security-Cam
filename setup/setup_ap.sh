@@ -206,6 +206,10 @@ iptables -C FORWARD -i "$AP_INTERFACE" -o wlan0 -j ACCEPT 2>/dev/null || \
 iptables -C FORWARD -i wlan0 -o "$AP_INTERFACE" -m state --state RELATED,ESTABLISHED -j ACCEPT 2>/dev/null || \
     iptables -A FORWARD -i wlan0 -o "$AP_INTERFACE" -m state --state RELATED,ESTABLISHED -j ACCEPT
 
+# Captive portal: redirect HTTP (port 80) on AP to the dashboard (port 3000)
+iptables -t nat -C PREROUTING -i "$AP_INTERFACE" -p tcp --dport 80 -j REDIRECT --to-port 3000 2>/dev/null || \
+    iptables -t nat -A PREROUTING -i "$AP_INTERFACE" -p tcp --dport 80 -j REDIRECT --to-port 3000
+
 # Persist iptables rules across reboots
 if command -v netfilter-persistent &>/dev/null; then
     netfilter-persistent save
@@ -219,9 +223,13 @@ fi
 echo ""
 if systemctl is-active --quiet hostapd; then
     echo "=== Access Point is running ==="
-    echo "  SSID:     $AP_SSID"
-    echo "  IP:       $AP_IP"
-    echo "  SSH:      ssh pi@$AP_IP"
+    echo "  SSID:        $AP_SSID"
+    echo "  IP:          $AP_IP"
+    echo "  Dashboard:   http://dashboard.cam  (or http://$AP_IP:3000)"
+    echo "  SSH:         ssh pi@$AP_IP"
+    echo ""
+    echo "  Captive portal enabled — devices auto-open the dashboard on connect."
+    echo "  Internet passthrough enabled — AP clients share the Pi's WiFi."
     echo ""
     echo "Commands:"
     echo "  sudo systemctl status hostapd    # Check AP status"

@@ -40,7 +40,7 @@ Follow the instructions in our [documentation](https://dev.infinitel8p.com/Secur
 
 ## Future Enhancements
 - **Web Interface**: A user-friendly interface to view recorded videos. **_WIP_**.
-- **Captive Portal**: Captive portal to open Web Interface when connecting to the Raspberry Pi's WiFi.
+- **Captive Portal**: Captive portal to open Web Interface when connecting to the Raspberry Pi's WiFi. **_Done_**.
 - **System Monitor**: A system monitor to view the status of the Raspberry Pi (e.g., CPU temperature, CPU usage, RAM usage, etc.). **_WIP (included in the dashboard)_**.
 - **Improved Error Handling**: Improved error handling to prevent the script from crashing, server from freezing, etc.
 

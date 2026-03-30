@@ -173,9 +173,11 @@
           {:else}
             <span class="h-2 w-2 shrink-0 rounded-full bg-text-muted/30"></span>
           {/if}
-          <div class="flex min-w-0 flex-1 flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-3">
+          <div class="flex min-w-0 flex-1 items-center gap-3">
             <span class="truncate text-sm font-medium text-text-primary">{device.name}</span>
-            <code class="shrink-0 text-[0.6875rem] font-medium text-text-muted">{device.address}</code>
+            {#if device.name.toLowerCase() !== device.address.toLowerCase()}
+              <code class="shrink-0 text-[0.6875rem] font-medium text-text-muted">{device.address}</code>
+            {/if}
           </div>
           <button
             onclick={() => handleRemove(device.address)}
@@ -303,20 +305,23 @@
         <ul class="divide-y divide-border-subtle">
           {#each scanResults as device (device.address)}
             {@const alreadyAdded = isAlreadyAdded(device.address)}
-            <li class="flex items-center gap-3 px-4 py-2 sm:px-5">
-              <div class="flex min-w-0 flex-1 flex-col gap-0.5">
-                {#if device.name}
-                  <span class="truncate text-sm font-medium text-text-primary">{device.name}</span>
-                {:else}
+            <li class="flex items-center gap-3 px-4 py-2.5 sm:px-5">
+              <div class="flex min-w-0 flex-1 items-center gap-3">
+                <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+                  {#if device.name}
+                    <span class="truncate text-sm font-medium text-text-primary">{device.name}</span>
+                  {/if}
+                  <code class="shrink-0 text-[0.6875rem] font-medium text-text-muted">{device.address}</code>
+                </div>
+                {#if !device.name}
                   <input
                     type="text"
-                    placeholder="Name this device"
+                    placeholder="Name (optional)"
                     value={editingNames[device.address] ?? ""}
                     oninput={(e) => { editingNames[device.address] = e.currentTarget.value; }}
-                    class="w-full rounded border border-border-default bg-surface-elevated px-2 py-0.5 text-sm font-medium text-text-primary placeholder:text-text-muted/50 outline-none focus:border-accent"
+                    class="w-28 shrink-0 rounded-lg border border-border-default bg-surface-elevated px-2.5 py-1 text-xs font-medium text-text-primary placeholder:text-text-muted/50 outline-none focus:border-accent"
                   />
                 {/if}
-                <code class="shrink-0 text-[0.6875rem] font-medium text-text-muted">{device.address}</code>
               </div>
               {#if alreadyAdded}
                 <span class="shrink-0 text-[0.6875rem] font-medium text-status-ok">Added</span>
