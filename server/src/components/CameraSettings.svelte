@@ -37,28 +37,60 @@
   let streamTimer: ReturnType<typeof setTimeout> | undefined;
 
   // Quality presets (Pi Camera v2 sensor modes, tuned for Pi Zero 2 W)
-  const presets = [
-    { label: "Low — 648x486 @ 30fps", w: 648, h: 486, fps: 30, note: "Minimal CPU load" },
-    { label: "Medium — 1296x972 @ 30fps", w: 1296, h: 972, fps: 30, note: "Recommended for Pi Zero 2 W" },
-    { label: "HD — 1920x1080 @ 15fps", w: 1920, h: 1080, fps: 15, note: "Higher res, lower framerate" },
-    { label: "Full — 1920x1080 @ 30fps", w: 1920, h: 1080, fps: 30, note: "May strain Pi Zero 2 W" },
-  ] as const;
+  interface Preset {
+    label: string;
+    w: number;
+    h: number;
+    fps: number;
+    note: string;
+    recommended?: boolean;
+  }
+
+  interface PresetGroup {
+    label: string;
+    presets: Preset[];
+  }
+
+  const presetGroups: PresetGroup[] = [
+    {
+      label: "4:3 — Full field of view",
+      presets: [
+        { label: "SD 640×480 · 30 fps", w: 640, h: 480, fps: 30, note: "Minimal CPU load, great for monitoring" },
+        { label: "SD 640×480 · 15 fps", w: 640, h: 480, fps: 15, note: "Lowest resource usage" },
+        { label: "HD 1296×972 · 30 fps", w: 1296, h: 972, fps: 30, note: "Best balance for Pi Zero 2 W", recommended: true },
+        { label: "HD 1296×972 · 15 fps", w: 1296, h: 972, fps: 15, note: "Sharp image, relaxed CPU" },
+        { label: "Full 1640×1232 · 15 fps", w: 1640, h: 1232, fps: 15, note: "Max 4:3 resolution — may strain Pi Zero 2 W" },
+      ],
+    },
+    {
+      label: "16:9 — Wide",
+      presets: [
+        { label: "SD 640×360 · 30 fps", w: 640, h: 360, fps: 30, note: "Lightweight widescreen" },
+        { label: "HD 1280×720 · 30 fps", w: 1280, h: 720, fps: 30, note: "720p, smooth playback" },
+        { label: "HD 1280×720 · 15 fps", w: 1280, h: 720, fps: 15, note: "720p, lower CPU" },
+        { label: "Full HD 1920×1080 · 15 fps", w: 1920, h: 1080, fps: 15, note: "1080p at comfortable framerate" },
+        { label: "Full HD 1920×1080 · 30 fps", w: 1920, h: 1080, fps: 30, note: "Max quality — will strain Pi Zero 2 W" },
+      ],
+    },
+  ];
+
+  // Flat list for index-based lookup
+  const allPresets = presetGroups.flatMap(g => g.presets);
 
   let selectedPreset = $state(-1); // -1 = custom
-  let showCustom = $derived(selectedPreset === -1);
 
   // Sync preset selection on mount
   $effect(() => {
-    const idx = presets.findIndex(p => p.w === width && p.h === height && p.fps === fps);
+    const idx = allPresets.findIndex(p => p.w === width && p.h === height && p.fps === fps);
     selectedPreset = idx;
   });
 
   function applyPreset(idx: number) {
     selectedPreset = idx;
     if (idx >= 0) {
-      width = presets[idx].w;
-      height = presets[idx].h;
-      fps = presets[idx].fps;
+      width = allPresets[idx].w;
+      height = allPresets[idx].h;
+      fps = allPresets[idx].fps;
     }
   }
 
@@ -67,7 +99,8 @@
   let streamParamsChanged = $derived(
     width !== streamWidth || height !== streamHeight || fps !== streamFPS
   );
-  let presetNote = $derived(selectedPreset >= 0 ? presets[selectedPreset].note : null);
+  let presetNote = $derived(selectedPreset >= 0 ? allPresets[selectedPreset].note : null);
+  let presetRecommended = $derived(selectedPreset >= 0 ? allPresets[selectedPreset].recommended : false);
 
   function clearFeedback(which: "rotation" | "stream") {
     if (which === "rotation") {
@@ -283,15 +316,25 @@
         disabled={streamSaving}
         class="w-full rounded-xl border border-border-default bg-surface-elevated px-3.5 py-2 text-sm font-medium text-text-primary outline-none transition-all duration-200 focus:border-accent focus:shadow-[var(--shadow-glow)] disabled:opacity-50"
       >
-        {#each presets as preset, i}
-          <option value={i}>{preset.label}</option>
+        {#each presetGroups as group}
+          {@const groupStartIdx = allPresets.indexOf(group.presets[0])}
+          <optgroup label={group.label}>
+            {#each group.presets as preset, i}
+              <option value={groupStartIdx + i}>{preset.label}</option>
+            {/each}
+          </optgroup>
         {/each}
         <option value={-1}>Custom</option>
       </select>
     </div>
 
     {#if presetNote}
-      <p class="text-xs leading-relaxed text-text-muted">{presetNote}</p>
+      <p class="text-xs leading-relaxed text-text-muted">
+        {presetNote}
+        {#if presetRecommended}
+          <span class="ml-1 inline-flex items-center rounded-md bg-accent/10 px-1.5 py-0.5 text-[0.625rem] font-semibold text-accent">Recommended</span>
+        {/if}
+      </p>
     {/if}
 
     <!-- Custom fields (always visible but muted when a preset is active) -->

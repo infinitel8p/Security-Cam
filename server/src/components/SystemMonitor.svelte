@@ -23,7 +23,7 @@
     throttle: ThrottleInfo | null;
   }
 
-  let info: SystemInfo | null = $state(null);
+  let info = $state<SystemInfo | null>(null);
   let error = $state(false);
 
   onMount(async () => {
