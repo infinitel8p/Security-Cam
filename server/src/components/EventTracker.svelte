@@ -12,6 +12,7 @@
   let events: EventEntry[] = $state([]);
   let slots: { severity: string; label: string; events: EventEntry[] }[] = $state([]);
   let loading = $state(true);
+  let error = $state(false);
   let hoveredIndex = $state(-1);
 
   const HOURS = 168; // 7 days
@@ -80,9 +81,9 @@
       const res = await fetch(`${getBackendUrl()}/event_history?hours=${HOURS}`);
       events = await res.json();
     } catch {
-      // No events
+      error = true;
     } finally {
-      slots = buildSlots(events);
+      if (!error) slots = buildSlots(events);
       loading = false;
     }
   });
@@ -109,6 +110,8 @@
         <div class="h-5 flex-1 animate-pulse rounded-[2px] bg-surface-elevated"></div>
       {/each}
     </div>
+  {:else if error}
+    <p class="mt-2.5 text-center text-[0.6875rem] text-text-muted">Unable to load event data</p>
   {:else}
     <div
       class="mt-2.5 flex gap-[2px]"

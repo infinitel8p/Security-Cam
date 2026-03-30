@@ -12,6 +12,7 @@
   let entries: HealthEntry[] = $state([]);
   let slots: { status: string; label: string }[] = $state([]);
   let loading = $state(true);
+  let error = $state(false);
   let hoveredIndex = $state(-1);
 
   const HOURS = 72; // 3 days
@@ -59,9 +60,9 @@
       const res = await fetch(`${getBackendUrl()}/health_history?hours=${HOURS}`);
       entries = await res.json();
     } catch {
-      // No data yet — all slots will be "unknown"
+      error = true;
     } finally {
-      slots = buildSlots(entries);
+      if (!error) slots = buildSlots(entries);
       loading = false;
     }
   });
@@ -88,6 +89,8 @@
         <div class="h-5 flex-1 animate-pulse rounded-[2px] bg-surface-elevated"></div>
       {/each}
     </div>
+  {:else if error}
+    <p class="mt-2.5 text-center text-[0.6875rem] text-text-muted">Unable to load health data</p>
   {:else}
     <div
       class="mt-2.5 flex gap-[2px]"
