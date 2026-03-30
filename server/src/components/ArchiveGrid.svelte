@@ -280,7 +280,7 @@
           <svg class="h-3 w-3 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9" /></svg>
         </button>
         {#if showFilterMenu}
-          <div class="absolute right-0 top-full z-20 mt-1.5 w-40 overflow-hidden rounded-xl border border-border-subtle bg-surface-raised shadow-[var(--shadow-md)]">
+          <div class="absolute left-0 top-full z-20 mt-1.5 w-40 overflow-hidden rounded-xl border border-border-subtle bg-surface-raised shadow-[var(--shadow-md)]">
             {#each filterOptions as mode}
               <button
                 onclick={() => { filterMode = mode; showFilterMenu = false; }}
