@@ -11,6 +11,7 @@ from modules import activity_helpers
 from modules import mediamtx_helpers
 from modules import health_logger
 from modules import event_logger
+from modules import presence_monitor
 
 # --- Logging setup ---
 LOG_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data")
@@ -48,6 +49,7 @@ def log_response(response):
 
 
 health_logger.start()
+presence_monitor.start()
 event_logger.log_event("system_boot")
 log.info("Security Cam backend started")
 
@@ -150,6 +152,24 @@ def wifi_stations():
 @app.route('/devices/status', methods=['GET'])
 def device_status():
     return jsonify(activity_helpers.get_device_statuses())
+
+
+@app.route('/connections', methods=['GET'])
+def connections():
+    statuses = activity_helpers.get_device_statuses()
+    bt_online = sum(1 for v in statuses["bt"].values() if v)
+    bt_total = len(statuses["bt"])
+    wifi_online = sum(1 for v in statuses["wifi"].values() if v)
+    wifi_total = len(statuses["wifi"])
+
+    # Total AP clients (not just tracked ones)
+    ap_clients = len(activity_helpers.get_ap_stations()) if activity_helpers.is_in_ap_mode() else 0
+
+    return jsonify({
+        "bluetooth": {"online": bt_online, "total": bt_total},
+        "wifi": {"online": wifi_online, "total": wifi_total},
+        "ap_clients": ap_clients,
+    })
 
 
 @app.route('/devices/bt/add', methods=['POST'])

@@ -1,9 +1,11 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import VideoPlayer from "../components/VideoPlayer.svelte";
+import ConnectionStatus from "../components/ConnectionStatus.svelte";
 import SystemMonitor from "../components/SystemMonitor.svelte";
 import HealthTracker from "../components/HealthTracker.svelte";
 import EventTracker from "../components/EventTracker.svelte";
+import AccessLog from "../components/AccessLog.svelte";
 ---
 
 <Layout title="Dashboard — Security Cam">
@@ -39,6 +41,7 @@ import EventTracker from "../components/EventTracker.svelte";
 				<h2 class="section-label">
 					System Health
 				</h2>
+				<ConnectionStatus client:load />
 				<SystemMonitor client:load />
 				<EventTracker client:load />
 				<HealthTracker client:load />
@@ -49,221 +52,9 @@ import EventTracker from "../components/EventTracker.svelte";
 		<section class="animate-in stagger-3 mt-6 sm:mt-8">
 			<div class="flex items-center justify-between mb-3">
 				<h2 class="section-label">Access Log</h2>
-				<span class="text-[0.625rem] tabular-nums text-text-muted">Last 24h</span>
+				<span class="text-[0.625rem] tabular-nums text-text-muted">Last 72h</span>
 			</div>
-			<!-- Mobile: stacked cards -->
-			<div class="card divide-y divide-border-subtle sm:hidden">
-				<div class="flex items-center justify-between px-4 py-3">
-					<div class="min-w-0">
-						<p class="text-sm font-medium text-text-primary">iPhone (John)</p>
-						<p class="mt-0.5 text-[0.6875rem] tabular-nums text-text-secondary">2025-03-28 &middot; 08:32</p>
-					</div>
-					<span class="inline-flex items-center gap-1.5 text-[0.8125rem] text-status-ok">
-						<span class="h-1.5 w-1.5 rounded-full bg-current"></span>Arrived
-					</span>
-				</div>
-				<div class="flex items-center justify-between px-4 py-3">
-					<div class="min-w-0">
-						<p class="text-sm font-medium text-text-primary">iPhone (John)</p>
-						<p class="mt-0.5 text-[0.6875rem] tabular-nums text-text-secondary">2025-03-28 &middot; 17:45</p>
-					</div>
-					<span class="inline-flex items-center gap-1.5 text-[0.8125rem] text-text-muted">
-						<span class="h-1.5 w-1.5 rounded-full bg-current"></span>Left
-					</span>
-				</div>
-				<div class="flex items-center justify-between px-4 py-3">
-					<div class="min-w-0">
-						<p class="text-sm font-medium text-text-primary">Galaxy (Jane)</p>
-						<p class="mt-0.5 text-[0.6875rem] tabular-nums text-text-secondary">2025-03-27 &middot; 09:10</p>
-					</div>
-					<span class="inline-flex items-center gap-1.5 text-[0.8125rem] text-status-ok">
-						<span class="h-1.5 w-1.5 rounded-full bg-current"></span>Arrived
-					</span>
-				</div>
-				<div class="flex items-center justify-between px-4 py-3">
-					<div class="min-w-0">
-						<p class="text-sm font-medium text-text-primary">Galaxy (Jane)</p>
-						<p class="mt-0.5 text-[0.6875rem] tabular-nums text-text-secondary">2025-03-27 &middot; 18:20</p>
-					</div>
-					<span class="inline-flex items-center gap-1.5 text-[0.8125rem] text-text-muted">
-						<span class="h-1.5 w-1.5 rounded-full bg-current"></span>Left
-					</span>
-				</div>
-				<div class="flex items-center justify-between px-4 py-3">
-					<div class="min-w-0">
-						<p class="text-sm font-medium text-text-primary">iPad (Office)</p>
-						<p class="mt-0.5 text-[0.6875rem] tabular-nums text-text-secondary">2025-03-26 &middot; 07:00</p>
-					</div>
-					<span class="inline-flex items-center gap-1.5 text-[0.8125rem] text-status-ok">
-						<span class="h-1.5 w-1.5 rounded-full bg-current"></span>Arrived
-					</span>
-				</div>
-			</div>
-
-			<!-- Desktop: table -->
-			<div class="card hidden overflow-hidden sm:block">
-				<div class="overflow-x-auto">
-					<table class="w-full text-left text-sm">
-						<thead>
-							<tr
-								class="border-b border-border-default text-[0.6875rem] font-medium uppercase tracking-wider text-text-muted">
-								<th class="whitespace-nowrap px-5 py-3"
-									>Device</th
-								>
-								<th class="whitespace-nowrap px-5 py-3"
-									>Date</th
-								>
-								<th class="whitespace-nowrap px-5 py-3"
-									>Time</th
-								>
-								<th class="whitespace-nowrap px-5 py-3"
-									>Status</th
-								>
-								<th class="whitespace-nowrap px-5 py-3"
-									>Event</th
-								>
-							</tr>
-						</thead>
-						<tbody class="divide-y divide-border-subtle">
-							<tr
-								class="transition-colors hover:bg-surface-overlay/40">
-								<td
-									class="whitespace-nowrap px-5 py-3 font-medium text-text-primary"
-									>iPhone (John)</td
-								>
-								<td
-									class="whitespace-nowrap px-5 py-3 tabular-nums text-text-secondary"
-									>2025-03-28</td
-								>
-								<td
-									class="whitespace-nowrap px-5 py-3 tabular-nums text-text-secondary"
-									>08:32</td
-								>
-								<td class="whitespace-nowrap px-5 py-3"
-									><span
-										class="inline-flex items-center gap-1.5 text-status-ok"
-										><span
-											class="h-1.5 w-1.5 rounded-full bg-current"
-										></span>Connected</span
-									></td
-								>
-								<td
-									class="whitespace-nowrap px-5 py-3 text-text-secondary"
-									>Arrived</td
-								>
-							</tr>
-							<tr
-								class="transition-colors hover:bg-surface-overlay/40">
-								<td
-									class="whitespace-nowrap px-5 py-3 font-medium text-text-primary"
-									>iPhone (John)</td
-								>
-								<td
-									class="whitespace-nowrap px-5 py-3 tabular-nums text-text-secondary"
-									>2025-03-28</td
-								>
-								<td
-									class="whitespace-nowrap px-5 py-3 tabular-nums text-text-secondary"
-									>17:45</td
-								>
-								<td class="whitespace-nowrap px-5 py-3"
-									><span
-										class="inline-flex items-center gap-1.5 text-text-muted"
-										><span
-											class="h-1.5 w-1.5 rounded-full bg-current"
-										></span>Disconnected</span
-									></td
-								>
-								<td
-									class="whitespace-nowrap px-5 py-3 text-text-secondary"
-									>Left</td
-								>
-							</tr>
-							<tr
-								class="transition-colors hover:bg-surface-overlay/40">
-								<td
-									class="whitespace-nowrap px-5 py-3 font-medium text-text-primary"
-									>Galaxy (Jane)</td
-								>
-								<td
-									class="whitespace-nowrap px-5 py-3 tabular-nums text-text-secondary"
-									>2025-03-27</td
-								>
-								<td
-									class="whitespace-nowrap px-5 py-3 tabular-nums text-text-secondary"
-									>09:10</td
-								>
-								<td class="whitespace-nowrap px-5 py-3"
-									><span
-										class="inline-flex items-center gap-1.5 text-status-ok"
-										><span
-											class="h-1.5 w-1.5 rounded-full bg-current"
-										></span>Connected</span
-									></td
-								>
-								<td
-									class="whitespace-nowrap px-5 py-3 text-text-secondary"
-									>Arrived</td
-								>
-							</tr>
-							<tr
-								class="transition-colors hover:bg-surface-overlay/40">
-								<td
-									class="whitespace-nowrap px-5 py-3 font-medium text-text-primary"
-									>Galaxy (Jane)</td
-								>
-								<td
-									class="whitespace-nowrap px-5 py-3 tabular-nums text-text-secondary"
-									>2025-03-27</td
-								>
-								<td
-									class="whitespace-nowrap px-5 py-3 tabular-nums text-text-secondary"
-									>18:20</td
-								>
-								<td class="whitespace-nowrap px-5 py-3"
-									><span
-										class="inline-flex items-center gap-1.5 text-text-muted"
-										><span
-											class="h-1.5 w-1.5 rounded-full bg-current"
-										></span>Disconnected</span
-									></td
-								>
-								<td
-									class="whitespace-nowrap px-5 py-3 text-text-secondary"
-									>Left</td
-								>
-							</tr>
-							<tr
-								class="transition-colors hover:bg-surface-overlay/40">
-								<td
-									class="whitespace-nowrap px-5 py-3 font-medium text-text-primary"
-									>iPad (Office)</td
-								>
-								<td
-									class="whitespace-nowrap px-5 py-3 tabular-nums text-text-secondary"
-									>2025-03-26</td
-								>
-								<td
-									class="whitespace-nowrap px-5 py-3 tabular-nums text-text-secondary"
-									>07:00</td
-								>
-								<td class="whitespace-nowrap px-5 py-3"
-									><span
-										class="inline-flex items-center gap-1.5 text-status-ok"
-										><span
-											class="h-1.5 w-1.5 rounded-full bg-current"
-										></span>Connected</span
-									></td
-								>
-								<td
-									class="whitespace-nowrap px-5 py-3 text-text-secondary"
-									>Arrived</td
-								>
-							</tr>
-						</tbody>
-					</table>
-				</div>
-			</div>
+			<AccessLog client:load />
 		</section>
 
 		<!-- Activity Timeline -->
