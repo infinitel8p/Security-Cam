@@ -5,7 +5,13 @@ import ArchiveGrid from "../components/ArchiveGrid.svelte";
 
 <Layout title="Archive — Security Cam">
   <div class="mx-auto max-w-6xl space-y-5 sm:space-y-6">
-    <div class="animate-in flex items-center justify-between">
+    <div class="animate-in flex items-center gap-3">
+      <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-accent/10">
+        <svg class="h-[1.125rem] w-[1.125rem] text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m22 8-6 4 6 4V8Z" />
+          <rect width="14" height="12" x="2" y="6" rx="2" ry="2" />
+        </svg>
+      </div>
       <h1 class="text-xl font-bold tracking-tight text-text-primary sm:text-2xl">Archive</h1>
     </div>
     <ArchiveGrid client:load />
