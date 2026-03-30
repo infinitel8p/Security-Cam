@@ -2,6 +2,7 @@
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
   import Note from "./Note.svelte";
+  import WiringDiagram from "./WiringDiagram.svelte";
 
   interface SensorType {
     type: string;
@@ -251,7 +252,7 @@
       Unable to load sensor configuration
     </div>
   {:else}
-    <div class="space-y-4 px-4 py-4 sm:px-5 sm:py-5">
+    <div class="px-4 py-4 sm:px-5 sm:py-5">
       <!-- Enable/disable toggle -->
       <div class="flex items-center justify-between">
         <div>
@@ -271,10 +272,10 @@
         </button>
       </div>
 
-      <!-- Sensor type selector -->
-      <div>
-        <label class="mb-1.5 block text-xs font-medium text-text-secondary" for="sensor-type">Sensor Type</label>
-        <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <!-- ── Sensor Selection ── -->
+      <div class="mt-5">
+        <label class="mb-2 block text-xs font-medium text-text-secondary" for="sensor-type">Sensor Type</label>
+        <div class="grid grid-cols-3 gap-1.5 sm:grid-cols-4">
           {#each sensorTypes as st (st.type)}
             <button
               onclick={() => onTypeChange(st.type)}
@@ -315,9 +316,9 @@
         </div>
       </div>
 
-      <!-- Selected sensor info card -->
+      <!-- ── Selected Sensor Details ── -->
       {#if currentMeta}
-        <div class="rounded-lg border border-border-default bg-surface-base px-3 py-3">
+        <div class="mt-4 rounded-lg border border-border-default bg-surface-base px-3.5 py-3">
           <div class="flex items-start justify-between">
             <div>
               <p class="text-xs font-semibold text-text-primary">{currentMeta.name}
@@ -346,35 +347,45 @@
             </button>
 
             {#if showWiring}
-              <div class="mt-2 overflow-hidden rounded-md border border-border-subtle">
-                <table class="w-full text-[0.6875rem]">
-                  <thead>
-                    <tr class="bg-surface-elevated/50">
-                      <th class="px-3 py-1.5 text-left font-semibold text-text-secondary">Sensor Pin</th>
-                      <th class="px-3 py-1.5 text-left font-semibold text-text-secondary">Raspberry Pi</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-border-subtle">
-                    {#each currentMeta.wiring as row}
-                      <tr>
-                        <td class="px-3 py-1.5 font-medium text-text-primary">{row.pin}</td>
-                        <td class="px-3 py-1.5 font-mono text-text-secondary">{row.connect}</td>
+              <div class="mt-3 -mx-3.5 -mb-3 rounded-b-lg border-t border-border-subtle bg-surface-base/50 px-3.5 pb-3.5 pt-3.5">
+                <!-- Wiring diagram -->
+                <WiringDiagram
+                  wiring={currentMeta.wiring}
+                  sensorName={currentMeta.name}
+                  module={currentMeta.module}
+                />
+
+                <!-- Wiring table (compact reference) -->
+                <div class="mt-3 overflow-hidden rounded-md border border-border-subtle">
+                  <table class="w-full text-[0.6875rem]">
+                    <thead>
+                      <tr class="bg-surface-elevated/50">
+                        <th class="px-3 py-1.5 text-left font-semibold text-text-secondary">Sensor Pin</th>
+                        <th class="px-3 py-1.5 text-left font-semibold text-text-secondary">Raspberry Pi</th>
                       </tr>
-                    {/each}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody class="divide-y divide-border-subtle">
+                      {#each currentMeta.wiring as row}
+                        <tr>
+                          <td class="px-3 py-1.5 font-medium text-text-primary">{row.pin}</td>
+                          <td class="px-3 py-1.5 font-mono text-text-secondary">{row.connect}</td>
+                        </tr>
+                      {/each}
+                    </tbody>
+                  </table>
+                </div>
+                {#if currentMeta.wiring_note}
+                  <p class="mt-2 text-[0.6875rem] text-text-muted">{currentMeta.wiring_note}</p>
+                {/if}
               </div>
-              {#if currentMeta.wiring_note}
-                <p class="mt-1.5 text-[0.6875rem] text-text-muted">{currentMeta.wiring_note}</p>
-              {/if}
             {/if}
           {/if}
         </div>
       {/if}
 
-      <!-- GPIO pin (not shown for mock) -->
+      <!-- ── Configuration Controls ── -->
       {#if !isMock}
-        <div>
+        <div class="mt-5">
           <label class="mb-1.5 block text-xs font-medium text-text-secondary" for="gpio-pin">GPIO Pin</label>
           <input
             id="gpio-pin"
@@ -388,7 +399,7 @@
         </div>
 
         <!-- Wiring test panel -->
-        <div class="rounded-lg border border-border-default bg-surface-base px-3 py-3">
+        <div class="mt-3 rounded-lg border border-border-default bg-surface-base px-3 py-3">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-xs font-semibold text-text-secondary">Test Wiring</p>
@@ -461,7 +472,7 @@
       {/if}
 
       <!-- Hold timeout -->
-      <div>
+      <div class="mt-5">
         <label class="mb-1.5 block text-xs font-medium text-text-secondary" for="hold-seconds">Hold Timeout</label>
         <div class="flex items-center gap-2">
           <input
@@ -478,13 +489,15 @@
       </div>
 
       <!-- Info note -->
-      <Note variant="info">
-        Sensor-triggered recording is gated by presence detection. If any tracked Bluetooth or WiFi device is connected, the sensor trigger is ignored. Manual recording from the dashboard is always allowed regardless of sensor or presence state.
-      </Note>
+      <div class="mt-5">
+        <Note variant="info">
+          Sensor-triggered recording is gated by presence detection. If any tracked Bluetooth or WiFi device is connected, the sensor trigger is ignored. Manual recording from the dashboard is always allowed regardless of sensor or presence state.
+        </Note>
+      </div>
 
       <!-- Mock sensor testing controls -->
       {#if isMockActive}
-        <div class="rounded-lg border border-border-default bg-surface-base px-3 py-3">
+        <div class="mt-4 rounded-lg border border-border-default bg-surface-base px-3 py-3">
           <p class="mb-2 text-xs font-semibold text-text-secondary">Mock Sensor Controls</p>
           <div class="flex gap-2">
             <button
@@ -506,7 +519,7 @@
       {/if}
 
       <!-- Save button + message -->
-      <div class="flex items-center gap-3 border-t border-border-subtle pt-4">
+      <div class="mt-6 flex items-center gap-3 border-t border-border-subtle pt-4">
         <button
           onclick={saveConfig}
           disabled={saving}
