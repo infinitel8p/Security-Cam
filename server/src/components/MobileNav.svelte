@@ -11,12 +11,12 @@
 
 <!-- Bottom tab bar — visible only below lg -->
 <nav
-  class="fixed bottom-0 left-0 right-0 z-40 flex items-stretch border-t border-border-subtle bg-surface-raised/95 backdrop-blur-md landscape:hidden lg:hidden"
+  class="fixed bottom-0 left-0 right-0 z-40 flex items-stretch border-t border-border-subtle bg-surface-glass backdrop-blur-xl landscape:hidden lg:hidden"
   style="padding-bottom: env(safe-area-inset-bottom, 0px);"
 >
   <a
     href="/"
-    class="group relative flex flex-1 flex-col items-center gap-1 py-3 transition-colors
+    class="group relative flex min-h-[3rem] flex-1 flex-col items-center justify-center gap-1 py-2.5 transition-colors
       {isActive('/') ? 'text-accent' : 'text-text-muted'}"
   >
     {#if isActive("/")}
@@ -30,7 +30,7 @@
 
   <a
     href="/archive"
-    class="group relative flex flex-1 flex-col items-center gap-1 py-3 transition-colors
+    class="group relative flex min-h-[3rem] flex-1 flex-col items-center justify-center gap-1 py-2.5 transition-colors
       {isActive('/archive') ? 'text-accent' : 'text-text-muted'}"
   >
     {#if isActive("/archive")}
@@ -45,7 +45,7 @@
 
   <a
     href="/settings"
-    class="group relative flex flex-1 flex-col items-center gap-1 py-3 transition-colors
+    class="group relative flex min-h-[3rem] flex-1 flex-col items-center justify-center gap-1 py-2.5 transition-colors
       {isActive('/settings') ? 'text-accent' : 'text-text-muted'}"
   >
     {#if isActive("/settings")}

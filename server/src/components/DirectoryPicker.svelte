@@ -97,6 +97,7 @@
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
     role="dialog"
     aria-modal="true"
+    tabindex="-1"
     onkeydown={(e) => e.key === "Escape" && (open = false)}
   >
     <div class="mx-4 w-full max-w-md overflow-hidden rounded-2xl border border-border-subtle bg-surface-raised shadow-[var(--shadow-lg)]">

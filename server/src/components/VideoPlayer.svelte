@@ -149,7 +149,7 @@
 
 <svelte:document on:fullscreenchange={onFullscreenChange} />
 
-<div bind:this={containerEl} class="card overflow-hidden transition-shadow duration-700 {connected ? 'shadow-[0_0_30px_rgba(79,143,247,0.08),var(--shadow-sm)]' : ''}" class:fullscreen={isFullscreen}>
+<div bind:this={containerEl} class="card overflow-hidden transition-shadow duration-700 {connected ? 'shadow-glow' : ''}" class:fullscreen={isFullscreen}>
   <!-- Feed -->
   <div class="relative w-full bg-black/80 {isFullscreen ? 'h-full' : 'aspect-video'}">
     <video
@@ -202,13 +202,13 @@
       <!-- Right: status badges -->
       <div>
         {#if recording}
-          <div class="flex items-center gap-2 rounded-lg bg-black/50 px-2.5 py-1.5 backdrop-blur-sm">
+          <div class="flex items-center gap-2 rounded-lg bg-black/60 px-2.5 py-1.5 backdrop-blur-md">
             <span class="h-2 w-2 animate-pulse rounded-full bg-status-critical shadow-[0_0_8px_rgba(240,104,104,0.6)]"></span>
             <span class="text-[0.6875rem] font-semibold tracking-wide text-white/90">REC</span>
           </div>
         {:else if connected}
-          <div class="flex items-center gap-1.5 rounded-lg bg-black/50 px-2.5 py-1.5 backdrop-blur-sm">
-            <span class="h-1.5 w-1.5 rounded-full bg-status-ok shadow-[0_0_6px_rgba(45,212,168,0.5)]"></span>
+          <div class="flex items-center gap-1.5 rounded-lg bg-black/60 px-2.5 py-1.5 backdrop-blur-md">
+            <span class="h-1.5 w-1.5 rounded-full bg-status-ok shadow-[0_0_6px_rgba(52,217,172,0.5)]"></span>
             <span class="text-[0.6875rem] font-medium tracking-wide text-white/80">LIVE</span>
           </div>
         {/if}
@@ -217,7 +217,7 @@
   </div>
 
   <!-- Controls -->
-  <div class="flex items-center justify-between border-t border-border-subtle px-3 py-2 sm:px-4 sm:py-2.5">
+  <div class="flex items-center justify-between border-t border-border-subtle bg-surface-raised px-3 py-2 sm:px-4 sm:py-2.5">
     <div class="flex items-center gap-2">
       <svg class="h-4 w-4 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />

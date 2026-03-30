@@ -548,11 +548,12 @@
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
     role="dialog"
     aria-modal="true"
+    tabindex="-1"
     onkeydown={(e) => e.key === "Escape" && (deleteTarget = null)}
   >
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <div class="absolute inset-0" onclick={() => (deleteTarget = null)}></div>
-    <div class="relative w-full max-w-sm rounded-xl border border-border-subtle bg-surface-raised p-5 shadow-[var(--shadow-lg)]">
+    <div class="relative w-full max-w-sm rounded-2xl border border-border-subtle bg-surface-raised p-5 shadow-[var(--shadow-lg)]">
       <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-status-critical/8">
         <svg class="h-4.5 w-4.5 text-status-critical" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="3 6 5 6 21 6" />

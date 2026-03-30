@@ -124,7 +124,7 @@
   <div class="space-y-8">
     <!-- Device tracking -->
     <div class="space-y-3">
-      <h2 class="text-[0.6875rem] font-semibold uppercase tracking-wider text-text-muted">Devices</h2>
+      <h2 class="section-label">Devices</h2>
       <div class="space-y-3">
         <DeviceList
           title="Bluetooth Devices"
@@ -149,7 +149,7 @@
 
     <!-- Camera & storage -->
     <div class="space-y-3">
-      <h2 class="text-[0.6875rem] font-semibold uppercase tracking-wider text-text-muted">Camera</h2>
+      <h2 class="section-label">Camera</h2>
       <div class="space-y-3">
         <CameraSettings
           currentAngle={rotation}
@@ -164,13 +164,13 @@
 
     <!-- Appearance -->
     <div class="space-y-3">
-      <h2 class="text-[0.6875rem] font-semibold uppercase tracking-wider text-text-muted">Appearance</h2>
+      <h2 class="section-label">Appearance</h2>
       <div class="card px-4 py-3.5 sm:px-5 sm:py-4">
         <div class="grid grid-cols-3 gap-2">
           <button
             onclick={() => setTheme("system")}
-            class="flex flex-col items-center gap-1.5 rounded-xl border px-3 py-3 transition-colors
-              {theme === 'system' ? 'border-accent bg-accent/8 text-accent' : 'border-border-default bg-surface-base text-text-muted hover:border-border-strong hover:text-text-secondary'}"
+            class="flex flex-col items-center gap-2 rounded-xl border px-3 py-3.5 transition-all duration-200
+              {theme === 'system' ? 'border-accent/30 bg-accent-muted text-accent shadow-[var(--shadow-glow)]' : 'border-border-default bg-surface-base text-text-muted hover:border-border-strong hover:text-text-secondary'}"
           >
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
@@ -181,8 +181,8 @@
           </button>
           <button
             onclick={() => setTheme("light")}
-            class="flex flex-col items-center gap-1.5 rounded-xl border px-3 py-3 transition-colors
-              {theme === 'light' ? 'border-accent bg-accent/8 text-accent' : 'border-border-default bg-surface-base text-text-muted hover:border-border-strong hover:text-text-secondary'}"
+            class="flex flex-col items-center gap-2 rounded-xl border px-3 py-3.5 transition-all duration-200
+              {theme === 'light' ? 'border-accent/30 bg-accent-muted text-accent shadow-[var(--shadow-glow)]' : 'border-border-default bg-surface-base text-text-muted hover:border-border-strong hover:text-text-secondary'}"
           >
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="5" />
@@ -199,8 +199,8 @@
           </button>
           <button
             onclick={() => setTheme("dark")}
-            class="flex flex-col items-center gap-1.5 rounded-xl border px-3 py-3 transition-colors
-              {theme === 'dark' ? 'border-accent bg-accent/8 text-accent' : 'border-border-default bg-surface-base text-text-muted hover:border-border-strong hover:text-text-secondary'}"
+            class="flex flex-col items-center gap-2 rounded-xl border px-3 py-3.5 transition-all duration-200
+              {theme === 'dark' ? 'border-accent/30 bg-accent-muted text-accent shadow-[var(--shadow-glow)]' : 'border-border-default bg-surface-base text-text-muted hover:border-border-strong hover:text-text-secondary'}"
           >
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
@@ -213,7 +213,7 @@
 
     <!-- Advanced -->
     <div class="space-y-3">
-      <h2 class="text-[0.6875rem] font-semibold uppercase tracking-wider text-text-muted">Advanced</h2>
+      <h2 class="section-label">Advanced</h2>
       <div class="card px-4 py-3.5 sm:px-5 sm:py-4">
         <div class="flex items-center gap-2.5">
           <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-accent/10">

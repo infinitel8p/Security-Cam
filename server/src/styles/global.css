@@ -15,76 +15,76 @@
 
   /* ── Dark theme (default) ─────────────────────────────────────────────── */
 
-  /* Surfaces — near-black with subtle blue-steel undertone */
-  --color-surface-base: #08090c;
-  --color-surface-raised: #101218;
-  --color-surface-overlay: #171a22;
-  --color-surface-elevated: #1e212b;
-  --color-surface-glass: rgba(16, 18, 24, 0.82);
+  /* Surfaces — deep blue-black with layered depth */
+  --color-surface-base: #060810;
+  --color-surface-raised: #0c0f18;
+  --color-surface-overlay: #131722;
+  --color-surface-elevated: #1a1e2c;
+  --color-surface-glass: rgba(12, 15, 24, 0.85);
 
-  /* Borders — cool-tinted separators */
-  --color-border-subtle: rgba(148, 163, 194, 0.06);
-  --color-border-default: rgba(148, 163, 194, 0.1);
-  --color-border-strong: rgba(148, 163, 194, 0.16);
+  /* Borders — cool blue-tinted */
+  --color-border-subtle: rgba(136, 155, 195, 0.07);
+  --color-border-default: rgba(136, 155, 195, 0.12);
+  --color-border-strong: rgba(136, 155, 195, 0.18);
 
-  /* Text */
-  --color-text-primary: #e0e4ed;
-  --color-text-secondary: #7b83a0;
-  --color-text-muted: #434b64;
+  /* Text — blue-tinted neutrals for cohesion */
+  --color-text-primary: #e2e6f0;
+  --color-text-secondary: #8490ad;
+  --color-text-muted: #4a5370;
 
-  /* Accent — vivid blue with punch */
+  /* Accent — vivid blue */
   --color-accent: #4f8ff7;
   --color-accent-hover: #6da3fa;
-  --color-accent-muted: rgba(79, 143, 247, 0.1);
+  --color-accent-muted: rgba(79, 143, 247, 0.10);
   --color-accent-strong: rgba(79, 143, 247, 0.18);
 
-  /* Status — slightly desaturated for sophistication */
-  --color-status-ok: #2dd4a8;
+  /* Status — tuned for dark backgrounds */
+  --color-status-ok: #34d9ac;
   --color-status-warning: #f0b93a;
   --color-status-critical: #f06868;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5), 0 0 1px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.55), 0 1px 4px rgba(0, 0, 0, 0.35);
-  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.65), 0 2px 8px rgba(0, 0, 0, 0.35);
-  --shadow-glow: 0 0 30px rgba(79, 143, 247, 0.08);
+  /* Shadows — layered for realism */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(136, 155, 195, 0.04);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(136, 155, 195, 0.04);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(136, 155, 195, 0.04);
+  --shadow-glow: 0 0 0 1px rgba(79, 143, 247, 0.15), 0 0 24px rgba(79, 143, 247, 0.06);
 }
 
 /* ── Light theme overrides ──────────────────────────────────────────────── */
 :root.light {
-  --color-surface-base: #f3f4f6;
+  --color-surface-base: #f0f2f5;
   --color-surface-raised: #ffffff;
-  --color-surface-overlay: #f8f9fb;
-  --color-surface-elevated: #eceef2;
-  --color-surface-glass: rgba(255, 255, 255, 0.82);
+  --color-surface-overlay: #f7f8fa;
+  --color-surface-elevated: #ebeef3;
+  --color-surface-glass: rgba(255, 255, 255, 0.88);
 
-  --color-border-subtle: rgba(0, 0, 0, 0.05);
-  --color-border-default: rgba(0, 0, 0, 0.09);
-  --color-border-strong: rgba(0, 0, 0, 0.14);
+  --color-border-subtle: rgba(15, 23, 42, 0.05);
+  --color-border-default: rgba(15, 23, 42, 0.08);
+  --color-border-strong: rgba(15, 23, 42, 0.13);
 
-  --color-text-primary: #111827;
-  --color-text-secondary: #4b5563;
-  --color-text-muted: #9ca3af;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94a3b8;
 
   --color-accent: #2563eb;
   --color-accent-hover: #1d4ed8;
-  --color-accent-muted: rgba(37, 99, 235, 0.07);
-  --color-accent-strong: rgba(37, 99, 235, 0.13);
+  --color-accent-muted: rgba(37, 99, 235, 0.06);
+  --color-accent-strong: rgba(37, 99, 235, 0.12);
 
   --color-status-ok: #059669;
   --color-status-warning: #d97706;
   --color-status-critical: #dc2626;
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.07), 0 1px 4px rgba(0, 0, 0, 0.03);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05);
-  --shadow-glow: 0 0 20px rgba(37, 99, 235, 0.06);
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.04), 0 0 0 1px rgba(15, 23, 42, 0.03);
+  --shadow-md: 0 4px 16px rgba(15, 23, 42, 0.06), 0 0 0 1px rgba(15, 23, 42, 0.03);
+  --shadow-lg: 0 12px 40px rgba(15, 23, 42, 0.1), 0 0 0 1px rgba(15, 23, 42, 0.04);
+  --shadow-glow: 0 0 0 1px rgba(37, 99, 235, 0.15), 0 0 20px rgba(37, 99, 235, 0.05);
 }
 
 /* ── Base styles ────────────────────────────────────────────────────────── */
 body {
   font-family: var(--font-sans);
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11"; /* Inter stylistic alternates */
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   background-color: var(--color-surface-base);
   color: var(--color-text-primary);
   line-height: 1.55;
@@ -92,61 +92,93 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Slightly looser leading for light-on-dark readability */
 :root:not(.light) body { line-height: 1.6; }
 
-/* Utility: card */
+/* ── Card system ────────────────────────────────────────────────────────── */
 .card {
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border-subtle);
-  border-radius: 0.75rem;
+  border-radius: 1rem;
   box-shadow: var(--shadow-sm);
 }
 
-/* Interactive card variant — GPU-friendly hover (transform + border only) */
+/* Subtle top highlight for depth on dark */
+:root:not(.light) .card {
+  background: linear-gradient(
+    to bottom,
+    rgba(136, 155, 195, 0.03) 0%,
+    var(--color-surface-raised) 2px
+  );
+}
+
+/* Interactive card — lift on hover */
 .card-interactive {
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border-subtle);
-  border-radius: 0.75rem;
+  border-radius: 1rem;
   box-shadow: var(--shadow-sm);
-  transition: border-color 0.2s ease, transform 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 .card-interactive:hover {
   border-color: var(--color-border-default);
+  box-shadow: var(--shadow-md);
   transform: translateY(-1px);
 }
 
-/* Utility: glass panel (navbar, overlays) */
+:root:not(.light) .card-interactive {
+  background: linear-gradient(
+    to bottom,
+    rgba(136, 155, 195, 0.03) 0%,
+    var(--color-surface-raised) 2px
+  );
+}
+
+/* Off-screen perf for archive grids */
+.card-interactive {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 240px;
+}
+
+/* ── Glass panel ────────────────────────────────────────────────────────── */
 .glass {
   background: var(--color-surface-glass);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
 }
 
-/* Skip rendering for off-screen archive cards (Pi perf) */
-.card-interactive {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 240px;
+/* ── Section headers ────────────────────────────────────────────────────── */
+.section-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+}
+
+/* ── Focus ring ─────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 0.5rem;
 }
 
 /* ── Entrance animations (CSS-only, GPU-friendly for Pi) ───────────────── */
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-in {
-  animation: fade-up 0.4s ease-out both;
+  animation: fade-up 0.35s ease-out both;
 }
 
-/* Stagger delays — apply via style="--delay: N" or utility classes */
-.stagger-1 { animation-delay: 50ms; }
-.stagger-2 { animation-delay: 100ms; }
-.stagger-3 { animation-delay: 150ms; }
-.stagger-4 { animation-delay: 200ms; }
-.stagger-5 { animation-delay: 250ms; }
+.stagger-1 { animation-delay: 40ms; }
+.stagger-2 { animation-delay: 80ms; }
+.stagger-3 { animation-delay: 120ms; }
+.stagger-4 { animation-delay: 160ms; }
+.stagger-5 { animation-delay: 200ms; }
 
-/* Status pulse — living indicator */
+/* Status pulse */
 @keyframes status-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
@@ -169,8 +201,19 @@ body {
   }
 }
 
-/* Scrollbar styling (dark) */
+/* ── Scrollbar ──────────────────────────────────────────────────────────── */
 :root:not(.light) ::-webkit-scrollbar { width: 5px; }
 :root:not(.light) ::-webkit-scrollbar-track { background: transparent; }
-:root:not(.light) ::-webkit-scrollbar-thumb { background: rgba(148, 163, 194, 0.1); border-radius: 3px; }
-:root:not(.light) ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 194, 0.2); }
+:root:not(.light) ::-webkit-scrollbar-thumb { background: rgba(136, 155, 195, 0.12); border-radius: 3px; }
+:root:not(.light) ::-webkit-scrollbar-thumb:hover { background: rgba(136, 155, 195, 0.22); }
+
+:root.light ::-webkit-scrollbar { width: 5px; }
+:root.light ::-webkit-scrollbar-track { background: transparent; }
+:root.light ::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.08); border-radius: 3px; }
+:root.light ::-webkit-scrollbar-thumb:hover { background: rgba(15, 23, 42, 0.15); }
+
+/* ── Selection ──────────────────────────────────────────────────────────── */
+::selection {
+  background: rgba(79, 143, 247, 0.25);
+  color: var(--color-text-primary);
+}
