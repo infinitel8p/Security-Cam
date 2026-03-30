@@ -37,6 +37,11 @@ def system_info():
     })
 
 
+@app.route('/recording_status', methods=['GET'])
+def recording_status():
+    return jsonify({"recording": stream_helpers.is_recording})
+
+
 @app.route('/toggle_recording', methods=['POST'])
 def toggle_recording():
     if stream_helpers.is_recording:

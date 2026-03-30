@@ -113,6 +113,16 @@
     }
   }
 
+  async function fetchRecordingStatus() {
+    try {
+      const res = await fetch(`${getBackendUrl()}/recording_status`);
+      const data = await res.json();
+      recording = data.recording ?? false;
+    } catch {
+      // Keep default
+    }
+  }
+
   async function fetchRotation() {
     try {
       const res = await fetch(`${getBackendUrl()}/settings`);
@@ -127,6 +137,7 @@
   onMount(() => {
     startWebRTC();
     fetchRotation();
+    fetchRecordingStatus();
   });
 
   onDestroy(() => {
