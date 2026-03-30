@@ -1,5 +1,6 @@
 <script lang="ts">
   import { getBackendUrl } from "../lib/api";
+  import toast from "svelte-5-french-toast";
 
   interface Props {
     current: string;
@@ -54,15 +55,17 @@
   async function selectPath() {
     saving = true;
     try {
-      await fetch(`${getBackendUrl()}/settings`, {
+      const res = await fetch(`${getBackendUrl()}/settings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ VideoSaveLocation: browsePath }),
       });
+      if (!res.ok) throw new Error();
       current = browsePath;
       open = false;
-    } catch (e) {
-      console.error("Failed to save location:", e);
+      toast.success("Save location updated");
+    } catch {
+      toast.error("Failed to save location");
     } finally {
       saving = false;
     }

@@ -15,6 +15,7 @@
   async function fetchConnections() {
     try {
       const res = await fetch(`${getBackendUrl()}/connections`);
+      if (!res.ok) throw new Error();
       data = await res.json();
       error = false;
     } catch {
@@ -33,8 +34,9 @@
 </script>
 
 {#if error}
-  <div class="card flex items-center justify-center px-4 py-6 text-center text-[0.8125rem] text-text-muted">
-    Unable to reach connection status
+  <div class="card flex flex-col items-center justify-center gap-2 px-4 py-6 text-center">
+    <p class="text-[0.8125rem] text-text-muted">Unable to reach connection status</p>
+    <button onclick={fetchConnections} class="text-[0.75rem] font-medium text-accent hover:text-accent-hover">Retry</button>
   </div>
 {:else if data}
   <div class="card">

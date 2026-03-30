@@ -1,5 +1,6 @@
 <script lang="ts">
   import { getBackendUrl } from "../lib/api";
+  import toast from "svelte-5-french-toast";
 
   interface Device {
     name: string;
@@ -76,15 +77,16 @@
   async function handleAdd(device: Device) {
     addingAddress = device.address;
     try {
-      // Use the edited name if one was entered, otherwise use what we have
       const customName = editingNames[device.address]?.trim();
       const finalDevice = customName
         ? { ...device, name: customName }
         : { ...device, name: device.name || device.address };
       await onAdd(finalDevice);
-      // Remove from scan results after adding
       scanResults = scanResults.filter(d => d.address !== device.address);
       delete editingNames[device.address];
+      toast.success(`Added ${finalDevice.name}`);
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to add device");
     } finally {
       addingAddress = null;
     }
@@ -94,6 +96,9 @@
     removingAddress = address;
     try {
       await onRemove(address);
+      toast.success("Device removed");
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to remove device");
     } finally {
       removingAddress = null;
     }
@@ -106,9 +111,12 @@
     manualAdding = true;
     try {
       await onAdd({ address, name: manualName.trim() || address });
+      toast.success(`Added ${manualName.trim() || address}`);
       manualMac = "";
       manualName = "";
       showManualAdd = false;
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to add device");
     } finally {
       manualAdding = false;
     }

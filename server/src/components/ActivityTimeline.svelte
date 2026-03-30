@@ -74,6 +74,7 @@
   async function fetchEvents() {
     try {
       const res = await fetch(`${getBackendUrl()}/event_history?hours=168`);
+      if (!res.ok) throw new Error();
       const all: TimelineEvent[] = await res.json();
       events = all
         .filter(e => !EXCLUDED_TYPES.has(e.type))
@@ -146,8 +147,9 @@
     </div>
   </div>
 {:else if error}
-  <div class="card px-5 py-8 text-center text-[0.8125rem] text-text-muted">
-    Unable to load activity timeline
+  <div class="card flex flex-col items-center justify-center gap-2 px-5 py-8 text-center">
+    <p class="text-[0.8125rem] text-text-muted">Unable to load activity timeline</p>
+    <button onclick={fetchEvents} class="text-[0.75rem] font-medium text-accent hover:text-accent-hover">Retry</button>
   </div>
 {:else if events.length === 0}
   <div class="card px-5 py-8 text-center">

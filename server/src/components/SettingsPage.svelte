@@ -55,11 +55,12 @@
     document.documentElement.classList.toggle("light", isLight);
   }
 
-  onMount(async () => {
-    const saved = localStorage.getItem("theme") as ThemeMode | null;
-    theme = saved === "light" || saved === "dark" ? saved : "system";
+  async function fetchSettings() {
+    loading = true;
+    error = false;
     try {
       const res = await fetch(`${getBackendUrl()}/settings`);
+      if (!res.ok) throw new Error();
       const settings = await res.json();
       btDevices = settings.TARGET_BT_ADDRESSES ?? [];
       wifiDevices = settings.TARGET_AP_MAC_ADDRESSES ?? [];
@@ -74,6 +75,12 @@
     } finally {
       loading = false;
     }
+  }
+
+  onMount(async () => {
+    const saved = localStorage.getItem("theme") as ThemeMode | null;
+    theme = saved === "light" || saved === "dark" ? saved : "system";
+    await fetchSettings();
 
     // Poll device statuses every 15 seconds (BT lookup takes ~3s per device)
     fetchDeviceStatuses();
@@ -139,8 +146,9 @@
     {/each}
   </div>
 {:else if error}
-  <div class="card px-6 py-12 text-center text-sm text-text-muted">
-    Unable to load settings
+  <div class="card flex flex-col items-center justify-center gap-2 px-6 py-12 text-center">
+    <p class="text-sm text-text-muted">Unable to load settings</p>
+    <button onclick={fetchSettings} class="text-[0.8125rem] font-medium text-accent hover:text-accent-hover">Retry</button>
   </div>
 {:else}
   <div class="space-y-8">

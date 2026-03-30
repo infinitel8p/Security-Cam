@@ -26,14 +26,18 @@
   let info = $state<SystemInfo | null>(null);
   let error = $state(false);
 
-  onMount(async () => {
+  async function fetchInfo() {
     try {
       const res = await fetch(`${getBackendUrl()}/system_info`);
+      if (!res.ok) throw new Error();
       info = await res.json();
+      error = false;
     } catch {
       error = true;
     }
-  });
+  }
+
+  onMount(fetchInfo);
 
   function tempColor(temp: number): string {
     if (temp >= 70) return "text-status-critical";
@@ -81,8 +85,9 @@
 </script>
 
 {#if error}
-  <div class="card flex items-center justify-center px-4 py-8 text-center text-[0.8125rem] text-text-muted">
-    Unable to reach system monitor
+  <div class="card flex flex-col items-center justify-center gap-2 px-4 py-8 text-center">
+    <p class="text-[0.8125rem] text-text-muted">Unable to reach system monitor</p>
+    <button onclick={fetchInfo} class="text-[0.75rem] font-medium text-accent hover:text-accent-hover">Retry</button>
   </div>
 {:else if info}
   <div class="card divide-y divide-border-subtle">

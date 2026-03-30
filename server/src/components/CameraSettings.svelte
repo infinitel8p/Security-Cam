@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import toast from "svelte-5-french-toast";
   import Note from "./Note.svelte";
 
   interface Props {
@@ -146,6 +147,7 @@
       rotationTimer = setTimeout(() => (rotationSaved = false), 2000);
     } catch {
       rotationError = "Failed to save rotation settings";
+      toast.error("Failed to save rotation settings");
       angle = currentAngle;
       mode = currentMode;
     } finally {
@@ -179,6 +181,7 @@
       if (!res.ok) {
         const data = await res.json();
         streamError = data.message || "Failed to apply stream settings";
+        toast.error(streamError);
         return;
       }
 
@@ -186,10 +189,12 @@
       streamHeight = height;
       streamFPS = fps;
       streamSaved = true;
+      toast.success("Stream settings applied");
       clearTimeout(streamTimer);
       streamTimer = setTimeout(() => (streamSaved = false), 2000);
     } catch {
       streamError = "Failed to save stream settings";
+      toast.error("Failed to save stream settings");
       width = streamWidth;
       height = streamHeight;
       fps = streamFPS;

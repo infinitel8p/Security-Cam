@@ -17,6 +17,7 @@
   async function fetchEvents() {
     try {
       const res = await fetch(`${getBackendUrl()}/event_history?hours=72`);
+      if (!res.ok) throw new Error();
       const all: AccessEvent[] = await res.json();
       events = all
         .filter(e => e.type === "device_arrived" || e.type === "device_left")
@@ -71,8 +72,9 @@
     </div>
   </div>
 {:else if error}
-  <div class="card px-5 py-8 text-center text-[0.8125rem] text-text-muted">
-    Unable to load access log
+  <div class="card flex flex-col items-center justify-center gap-2 px-5 py-8 text-center">
+    <p class="text-[0.8125rem] text-text-muted">Unable to load access log</p>
+    <button onclick={fetchEvents} class="text-[0.75rem] font-medium text-accent hover:text-accent-hover">Retry</button>
   </div>
 {:else if events.length === 0}
   <div class="card px-5 py-8 text-center">
@@ -125,7 +127,7 @@
         <tbody class="divide-y divide-border-subtle">
           {#each events.slice(0, 50) as event (event.ts + event.type + event.detail)}
             <tr class="transition-colors hover:bg-surface-overlay/40">
-              <td class="whitespace-nowrap px-5 py-3 font-medium text-text-primary">
+              <td class="max-w-[12rem] truncate px-5 py-3 font-medium text-text-primary" title={deviceName(event.detail)}>
                 {deviceName(event.detail)}
               </td>
               <td class="whitespace-nowrap px-5 py-3 tabular-nums text-text-secondary">

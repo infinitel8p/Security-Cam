@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import toast from "svelte-5-french-toast";
   import Note from "./Note.svelte";
   import WiringDiagram from "./WiringDiagram.svelte";
 
@@ -66,11 +67,14 @@
   let holdSeconds = $state(10);
 
   async function fetchAll() {
+    loading = true;
+    loadError = false;
     try {
       const [typesRes, statusRes] = await Promise.all([
         fetch(`${getBackendUrl()}/sensor/types`),
         fetch(`${getBackendUrl()}/sensor/status`),
       ]);
+      if (!typesRes.ok || !statusRes.ok) throw new Error();
       sensorTypes = await typesRes.json();
       status = await statusRes.json();
 
@@ -108,6 +112,8 @@
     message = text;
     messageIsError = isError;
     setTimeout(() => (message = ""), 3000);
+    if (isError) toast.error(text);
+    else toast.success(text);
   }
 
   async function saveConfig() {
@@ -248,8 +254,9 @@
       <div class="mt-4 h-8 w-48 rounded bg-surface-elevated"></div>
     </div>
   {:else if loadError}
-    <div class="px-6 py-12 text-center text-sm text-text-muted">
-      Unable to load sensor configuration
+    <div class="flex flex-col items-center justify-center gap-2 px-6 py-12 text-center">
+      <p class="text-sm text-text-muted">Unable to load sensor configuration</p>
+      <button onclick={fetchAll} class="text-[0.8125rem] font-medium text-accent hover:text-accent-hover">Retry</button>
     </div>
   {:else}
     <div class="px-4 py-4 sm:px-5 sm:py-5">

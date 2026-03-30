@@ -55,17 +55,22 @@
     return result;
   }
 
-  onMount(async () => {
+  async function fetchHealth() {
+    loading = true;
+    error = false;
     try {
       const res = await fetch(`${getBackendUrl()}/health_history?hours=${HOURS}`);
+      if (!res.ok) throw new Error();
       entries = await res.json();
+      slots = buildSlots(entries);
     } catch {
       error = true;
     } finally {
-      if (!error) slots = buildSlots(entries);
       loading = false;
     }
-  });
+  }
+
+  onMount(fetchHealth);
 </script>
 
 <div class="card px-4 py-3 sm:px-5 sm:py-3.5">
@@ -90,7 +95,10 @@
       {/each}
     </div>
   {:else if error}
-    <p class="mt-2.5 text-center text-[0.6875rem] text-text-muted">Unable to load health data</p>
+    <div class="mt-2.5 flex items-center justify-center gap-2">
+      <p class="text-[0.6875rem] text-text-muted">Unable to load health data</p>
+      <button onclick={fetchHealth} class="text-[0.6875rem] font-medium text-accent hover:text-accent-hover">Retry</button>
+    </div>
   {:else}
     <div
       class="mt-2.5 flex gap-[2px]"

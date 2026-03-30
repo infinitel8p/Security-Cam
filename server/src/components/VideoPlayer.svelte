@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl, getMediaMtxUrl } from "../lib/api";
+  import toast from "svelte-5-french-toast";
 
   let containerEl: HTMLDivElement;
   let videoEl: HTMLVideoElement;
@@ -104,10 +105,12 @@
       const res = await fetch(`${getBackendUrl()}/toggle_recording`, {
         method: "POST",
       });
+      if (!res.ok) throw new Error();
       const data = await res.json();
       recording = data.message?.toLowerCase().includes("started") ?? false;
-    } catch (e) {
-      console.error("Failed to toggle recording:", e);
+      toast.success(recording ? "Recording started" : "Recording stopped");
+    } catch {
+      toast.error("Failed to toggle recording");
     } finally {
       toggling = false;
     }
@@ -116,6 +119,7 @@
   async function fetchRecordingStatus() {
     try {
       const res = await fetch(`${getBackendUrl()}/recording_status`);
+      if (!res.ok) return;
       const data = await res.json();
       recording = data.recording ?? false;
     } catch {
@@ -126,12 +130,21 @@
   async function fetchRotation() {
     try {
       const res = await fetch(`${getBackendUrl()}/settings`);
+      if (!res.ok) return;
       const settings = await res.json();
       rotationAngle = Number(settings.RotationAngle) || 0;
       rotationMode = settings.RotationMode || "display";
     } catch {
       // Keep defaults
     }
+  }
+
+  function manualReconnect() {
+    error = "";
+    connected = false;
+    clearTimeout(reconnectTimer);
+    cleanup();
+    startWebRTC();
   }
 
   onMount(() => {
@@ -178,7 +191,10 @@
               </svg>
             </div>
             <span class="text-sm text-text-secondary">{error}</span>
-            <span class="text-xs text-text-muted">Reconnecting...</span>
+            <div class="flex items-center gap-3">
+              <span class="text-xs text-text-muted">Reconnecting...</span>
+              <button onclick={manualReconnect} class="text-xs font-medium text-accent hover:text-accent-hover">Retry now</button>
+            </div>
           </div>
         {:else}
           <div class="flex flex-col items-center gap-2.5">

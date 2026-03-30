@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import toast from "svelte-5-french-toast";
 
   interface Video {
     path: string;
@@ -87,9 +88,12 @@
     return groups;
   });
 
-  onMount(async () => {
+  async function fetchArchive() {
+    loading = true;
+    error = false;
     try {
       const res = await fetch(`${getBackendUrl()}/archive`);
+      if (!res.ok) throw new Error();
       const paths: string[] = await res.json();
       allVideos = paths.map(parseFilename);
     } catch {
@@ -97,7 +101,9 @@
     } finally {
       loading = false;
     }
-  });
+  }
+
+  onMount(fetchArchive);
 
   function streamUrl(path: string): string {
     return `${getBackendUrl()}/stream_video?video_path=${encodeURIComponent(path)}&cache_buster=${Date.now()}`;
@@ -114,15 +120,17 @@
     if (!deleteTarget) return;
     deleting = true;
     try {
-      await fetch(`${getBackendUrl()}/delete_video`, {
+      const res = await fetch(`${getBackendUrl()}/delete_video`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ video_path: deleteTarget.path }),
       });
+      if (!res.ok) throw new Error("Server returned an error");
       allVideos = allVideos.filter((v) => v.path !== deleteTarget!.path);
+      toast.success("Recording deleted");
       deleteTarget = null;
-    } catch (e) {
-      console.error("Failed to delete video:", e);
+    } catch {
+      toast.error("Failed to delete recording");
     } finally {
       deleting = false;
     }
@@ -227,6 +235,7 @@
     </div>
     <p class="mt-3 text-[0.8125rem] text-text-secondary">Unable to load archive</p>
     <p class="mt-1 text-[0.8125rem] text-text-muted">Check that the backend is running</p>
+    <button onclick={fetchArchive} class="mt-3 text-[0.8125rem] font-medium text-accent hover:text-accent-hover">Retry</button>
   </div>
 {:else if allVideos.length === 0}
   <div class="card px-6 py-20 text-center">
