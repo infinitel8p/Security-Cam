@@ -13,6 +13,13 @@
   let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
   let destroyed = false;
 
+  let rotationAngle = $state(0);
+  let rotationMode = $state("display");
+  let cssRotation = $derived(
+    rotationMode === "display" && rotationAngle !== 0 ? rotationAngle : 0
+  );
+  let isSideways = $derived(cssRotation === 90 || cssRotation === 270);
+
   const STREAM_PATH = "cam";
 
   async function startWebRTC() {
@@ -106,8 +113,20 @@
     }
   }
 
+  async function fetchRotation() {
+    try {
+      const res = await fetch(`${getBackendUrl()}/settings`);
+      const settings = await res.json();
+      rotationAngle = Number(settings.RotationAngle) || 0;
+      rotationMode = settings.RotationMode || "display";
+    } catch {
+      // Keep defaults
+    }
+  }
+
   onMount(() => {
     startWebRTC();
+    fetchRotation();
   });
 
   onDestroy(() => {
@@ -129,6 +148,11 @@
       muted
       class="h-full w-full object-cover"
       class:hidden={!connected}
+      style:transform={cssRotation ? `rotate(${cssRotation}deg)` : undefined}
+      style:transform-origin={cssRotation ? "center center" : undefined}
+      style:width={isSideways ? "100%" : undefined}
+      style:height={isSideways ? "100%" : undefined}
+      style:object-fit={isSideways ? "contain" : undefined}
     ></video>
 
     {#if !connected}

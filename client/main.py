@@ -6,6 +6,7 @@ from modules import stream_helpers
 from modules import settings_helpers
 from modules import archive_helpers
 from modules import activity_helpers
+from modules import mediamtx_helpers
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -99,20 +100,34 @@ def delete_video_route():
     return jsonify(response), status_code
 
 
-@app.route('/get_rotation', methods=['GET'])
-def get_rotation():
-    rotation_angle = settings_helpers.get_rotation_angle()
-    return jsonify({"RotationAngle": rotation_angle})
+@app.route('/stream_settings', methods=['GET', 'POST'])
+def stream_settings():
+    if request.method == 'GET':
+        try:
+            params = mediamtx_helpers.read_config()
+            return jsonify(params)
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
 
+    data = request.json or {}
+    params = {}
 
-@app.route('/update_rotation', methods=['POST'])
-def update_rotation():
-    rotation_angle = request.json.get('RotationAngle')
-    if rotation_angle not in [0, 90, 180, 270]:
-        return jsonify({"message": "Invalid rotation angle"}), 400
+    for key in ('width', 'height', 'fps'):
+        if key in data:
+            params[key] = data[key]
 
-    settings_helpers.update_rotation_angle(rotation_angle)
-    return jsonify({"message": "Rotation angle updated"})
+    # If rotation is in stream mode, apply it to MediaMTX
+    if 'rotation_angle' in data:
+        params['rotation_angle'] = data['rotation_angle']
+
+    if not params:
+        return jsonify({"message": "No parameters provided"}), 400
+
+    success, error = mediamtx_helpers.update_stream_params(params)
+    if success:
+        return jsonify({"message": "Stream settings updated, MediaMTX restarted"})
+    else:
+        return jsonify({"message": error}), 400
 
 
 if __name__ == "__main__":

@@ -152,16 +152,6 @@ def unpair_bt_device(device_mac: str):
         print(f"An error occurred: {e}")
 
 
-##### Video helper functions ######
-
-def update_rotation_angle(angle):
-    settings = get_settings()
-    settings['RotationAngle'] = angle
-    with open(SETTINGS_FILE, 'w') as f:
-        json.dump(settings, f, indent=4)
-    return True
-
-
 ##### Directory helper functions #####
 
 

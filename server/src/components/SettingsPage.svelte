@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { getBackendUrl } from "../lib/api";
   import DeviceList from "./DeviceList.svelte";
-  import CameraRotation from "./CameraRotation.svelte";
+  import CameraSettings from "./CameraSettings.svelte";
   import DirectoryPicker from "./DirectoryPicker.svelte";
 
   interface Device {
@@ -13,6 +13,10 @@
   let btDevices: Device[] = $state([]);
   let wifiDevices: Device[] = $state([]);
   let rotation = $state(0);
+  let rotationMode = $state("display");
+  let streamWidth = $state(1296);
+  let streamHeight = $state(972);
+  let streamFPS = $state(30);
   let saveLocation = $state("");
   let loading = $state(true);
   let error = $state(false);
@@ -41,7 +45,11 @@
       const settings = await res.json();
       btDevices = settings.TARGET_BT_ADDRESSES ?? [];
       wifiDevices = settings.TARGET_AP_MAC_ADDRESSES ?? [];
-      rotation = settings.RotationAngle ?? 0;
+      rotation = Number(settings.RotationAngle) || 0;
+      rotationMode = settings.RotationMode ?? "display";
+      streamWidth = settings.StreamWidth ?? 1296;
+      streamHeight = settings.StreamHeight ?? 972;
+      streamFPS = settings.StreamFPS ?? 30;
       saveLocation = settings.VideoSaveLocation ?? "/home/pi/Videos";
     } catch {
       error = true;
@@ -79,7 +87,13 @@
     <div class="space-y-3">
       <h2 class="text-[0.6875rem] font-semibold uppercase tracking-wider text-text-muted">Camera</h2>
       <div class="space-y-3">
-        <CameraRotation current={rotation} />
+        <CameraSettings
+          currentAngle={rotation}
+          currentMode={rotationMode}
+          {streamWidth}
+          {streamHeight}
+          {streamFPS}
+        />
         <DirectoryPicker current={saveLocation} />
       </div>
     </div>

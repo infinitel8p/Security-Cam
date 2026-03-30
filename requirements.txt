@@ -1,4 +1,5 @@
 flask
 flask-cors
 psutil
+pyyaml
 git+https://github.com/pybluez/pybluez.git#egg=pybluez
