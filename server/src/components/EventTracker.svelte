@@ -1,6 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import Icon from "./Icon.svelte";
+  import shieldIcon from "../icons/shield.svg?raw";
 
   interface EventEntry {
     ts: string;
@@ -97,9 +99,7 @@
 <div class="card px-4 py-3 sm:px-5 sm:py-3.5">
   <div class="flex min-h-[1.25rem] items-center justify-between gap-2">
     <div class="flex shrink-0 items-center gap-1.5">
-      <svg class="h-3 w-3 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-      </svg>
+      <Icon icon={shieldIcon} class="h-3 w-3 text-text-muted" />
       <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">Events - Last 7 days</p>
     </div>
     {#if hoveredIndex >= 0 && slots[hoveredIndex]}

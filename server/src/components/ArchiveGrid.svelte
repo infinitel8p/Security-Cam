@@ -2,6 +2,19 @@
   import { onMount } from "svelte";
   import { getBackendUrl } from "../lib/api";
   import toast from "svelte-5-french-toast";
+  import Icon from "./Icon.svelte";
+  import searchIcon from "../icons/search.svg?raw";
+  import xIcon from "../icons/x.svg?raw";
+  import filterIcon from "../icons/filter.svg?raw";
+  import arrowDownIcon from "../icons/arrow-down.svg?raw";
+  import layoutGridIcon from "../icons/layout-grid.svg?raw";
+  import listIcon from "../icons/list.svg?raw";
+  import downloadIcon from "../icons/download.svg?raw";
+  import trashIcon from "../icons/trash.svg?raw";
+  import videoIcon from "../icons/video.svg?raw";
+  import alertCircleIcon from "../icons/alert-circle.svg?raw";
+  import checkIcon from "../icons/check.svg?raw";
+  import chevronDownIcon from "../icons/chevron-down.svg?raw";
 
   let deleteButtonEl: HTMLButtonElement | null = null;
 
@@ -255,11 +268,7 @@
 {:else if error}
   <div class="card px-6 py-16 text-center">
     <div class="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-status-critical/8">
-      <svg class="h-5 w-5 text-status-critical" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <circle cx="12" cy="12" r="10" />
-        <line x1="12" y1="8" x2="12" y2="12" />
-        <line x1="12" y1="16" x2="12.01" y2="16" />
-      </svg>
+      <Icon icon={alertCircleIcon} class="h-5 w-5 text-status-critical" stroke={1.5} />
     </div>
     <p class="mt-3 text-[0.8125rem] text-text-secondary">Unable to load archive</p>
     <p class="mt-1 text-[0.8125rem] text-text-muted">Check that the backend is running</p>
@@ -268,10 +277,7 @@
 {:else if allVideos.length === 0}
   <div class="card px-6 py-16 text-center">
     <div class="animate-float mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-surface-overlay">
-      <svg class="h-6 w-6 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="m22 8-6 4 6 4V8Z" />
-        <rect width="14" height="12" x="2" y="6" rx="2" ry="2" />
-      </svg>
+      <Icon icon={videoIcon} class="h-6 w-6 text-text-muted" stroke={1.5} />
     </div>
     <p class="mt-4 text-sm font-medium text-text-secondary">All quiet on the home front</p>
     <p class="mt-1 text-[0.8125rem] text-text-muted">Recordings will appear here once you start capturing</p>
@@ -281,10 +287,7 @@
   <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
     <!-- Search -->
     <div class="relative max-w-xs flex-1">
-      <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8" />
-        <line x1="21" y1="21" x2="16.65" y2="16.65" />
-      </svg>
+      <Icon icon={searchIcon} class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
       <input
         type="text"
         bind:value={search}
@@ -297,9 +300,7 @@
           class="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1.5 text-text-muted hover:text-text-secondary"
           aria-label="Clear search"
         >
-          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
+          <Icon icon={xIcon} class="h-3.5 w-3.5" />
         </button>
       {/if}
     </div>
@@ -311,11 +312,9 @@
           onclick={(e) => { e.stopPropagation(); showFilterMenu = !showFilterMenu; showSortMenu = false; }}
           class="flex h-9 items-center gap-1.5 rounded-lg border bg-surface-raised px-3 text-[0.8125rem] transition-colors hover:border-border-default hover:text-text-primary {filterMode !== 'all' ? 'border-accent/30 text-accent' : 'border-border-subtle text-text-secondary'}"
         >
-          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-          </svg>
+          <Icon icon={filterIcon} class="h-3.5 w-3.5" />
           {filterLabels[filterMode]}
-          <svg class="h-3 w-3 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9" /></svg>
+          <Icon icon={chevronDownIcon} class="h-3 w-3 opacity-50" />
         </button>
         {#if showFilterMenu}
           <div class="animate-dropdown absolute left-0 top-full z-20 mt-1.5 w-40 overflow-hidden rounded-xl border border-border-subtle bg-surface-raised shadow-[var(--shadow-md)]">
@@ -328,9 +327,7 @@
                 class:text-text-secondary={filterMode !== mode}
               >
                 {#if filterMode === mode}
-                  <svg class="h-3.5 w-3.5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
+                  <Icon icon={checkIcon} class="h-3.5 w-3.5 text-accent" />
                 {:else}
                   <span class="h-3.5 w-3.5"></span>
                 {/if}
@@ -347,11 +344,9 @@
           onclick={(e) => { e.stopPropagation(); showSortMenu = !showSortMenu; showFilterMenu = false; }}
           class="flex h-9 items-center gap-1.5 rounded-lg border border-border-subtle bg-surface-raised px-3 text-[0.8125rem] text-text-secondary transition-colors hover:border-border-default hover:text-text-primary"
         >
-          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19" /><polyline points="19 12 12 19 5 12" />
-          </svg>
+          <Icon icon={arrowDownIcon} class="h-3.5 w-3.5" />
           {sortLabels[sortMode]}
-          <svg class="h-3 w-3 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9" /></svg>
+          <Icon icon={chevronDownIcon} class="h-3 w-3 opacity-50" />
         </button>
         {#if showSortMenu}
           <div class="animate-dropdown absolute right-0 top-full z-20 mt-1.5 w-40 overflow-hidden rounded-xl border border-border-subtle bg-surface-raised shadow-[var(--shadow-md)]">
@@ -364,9 +359,7 @@
                 class:text-text-secondary={sortMode !== mode}
               >
                 {#if sortMode === mode}
-                  <svg class="h-3.5 w-3.5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
+                  <Icon icon={checkIcon} class="h-3.5 w-3.5 text-accent" />
                 {:else}
                   <span class="h-3.5 w-3.5"></span>
                 {/if}
@@ -384,10 +377,7 @@
           class="flex items-center justify-center px-2.5 transition-colors {viewMode === 'grid' ? 'bg-accent/10 text-accent' : 'text-text-muted'}"
           title="Grid view"
         >
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
-            <rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
-          </svg>
+          <Icon icon={layoutGridIcon} class="h-4 w-4" />
         </button>
         <div class="w-px bg-border-subtle"></div>
         <button
@@ -395,10 +385,7 @@
           class="flex items-center justify-center px-2.5 transition-colors {viewMode === 'list' ? 'bg-accent/10 text-accent' : 'text-text-muted'}"
           title="List view"
         >
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" />
-            <line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" />
-          </svg>
+          <Icon icon={listIcon} class="h-4 w-4" />
         </button>
       </div>
     </div>
@@ -481,21 +468,14 @@
                       class="flex h-10 w-10 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-accent-muted hover:text-accent sm:h-auto sm:w-auto sm:p-2"
                       title="Download"
                     >
-                      <svg class="h-[1.125rem] w-[1.125rem] sm:h-4 sm:w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                        <polyline points="7 10 12 15 17 10" />
-                        <line x1="12" y1="15" x2="12" y2="3" />
-                      </svg>
+                      <Icon icon={downloadIcon} class="h-[1.125rem] w-[1.125rem] sm:h-4 sm:w-4" />
                     </button>
                     <button
                       onclick={(e) => openDeleteDialog(video, e.currentTarget as HTMLButtonElement)}
                       class="flex h-10 w-10 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-status-critical/8 hover:text-status-critical sm:h-auto sm:w-auto sm:p-2"
                       title="Delete"
                     >
-                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="3 6 5 6 21 6" />
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                      </svg>
+                      <Icon icon={trashIcon} class="h-4 w-4" />
                     </button>
                   </div>
                 </div>
@@ -554,11 +534,7 @@
                     title="Download"
                     aria-label="Download recording"
                   >
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                      <polyline points="7 10 12 15 17 10" />
-                      <line x1="12" y1="15" x2="12" y2="3" />
-                    </svg>
+                    <Icon icon={downloadIcon} class="h-4 w-4" />
                   </button>
                   <button
                     onclick={(e) => openDeleteDialog(video, e.currentTarget as HTMLButtonElement)}
@@ -566,10 +542,7 @@
                     title="Delete"
                     aria-label="Delete recording"
                   >
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <polyline points="3 6 5 6 21 6" />
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                    </svg>
+                    <Icon icon={trashIcon} class="h-4 w-4" />
                   </button>
                 </div>
               </div>
@@ -595,10 +568,7 @@
     <div class="absolute inset-0" onclick={closeDeleteDialog}></div>
     <div class="animate-dialog relative w-full max-w-sm rounded-2xl border border-border-subtle bg-surface-raised p-5 shadow-[var(--shadow-lg)]" style="view-transition-name: delete-morph;">
       <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-status-critical/8">
-        <svg class="h-4.5 w-4.5 text-status-critical" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="3 6 5 6 21 6" />
-          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-        </svg>
+        <Icon icon={trashIcon} class="h-4.5 w-4.5 text-status-critical" />
       </div>
       <h3 class="mt-3 text-sm font-semibold text-text-primary">Delete recording?</h3>
       <p class="mt-1 text-[0.8125rem] leading-relaxed text-text-secondary">

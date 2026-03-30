@@ -1,6 +1,12 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import Icon from "./Icon.svelte";
+  import usersIcon from "../icons/users.svg?raw";
+  import chevronDownIcon from "../icons/chevron-down.svg?raw";
+  import chevronUpIcon from "../icons/chevron-up.svg?raw";
+  import chevronLeftIcon from "../icons/chevron-left.svg?raw";
+  import chevronRightIcon from "../icons/chevron-right.svg?raw";
 
   interface AccessEvent {
     ts: string;
@@ -90,12 +96,7 @@
   </div>
 {:else if events.length === 0}
   <div class="card px-5 py-8 text-center">
-    <svg class="animate-float mx-auto h-8 w-8 text-text-muted/20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </svg>
+    <Icon icon={usersIcon} class="animate-float mx-auto h-8 w-8 text-text-muted/20" stroke={1.5} />
     <p class="mt-2.5 text-[0.8125rem] text-text-muted">
       No devices have come or gone — all quiet
     </p>
@@ -130,7 +131,7 @@
         class="flex w-full items-center justify-center gap-1.5 px-4 py-2.5 text-[0.75rem] font-medium text-accent transition-colors hover:bg-surface-overlay/40"
       >
         Show more ({events.length - COLLAPSED_COUNT} more)
-        <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
+        <Icon icon={chevronDownIcon} class="h-3 w-3" />
       </button>
     {/if}
 
@@ -143,7 +144,7 @@
             disabled={page === 0}
             class="flex items-center gap-1 text-[0.75rem] font-medium transition-colors {page === 0 ? 'text-text-muted/30 cursor-not-allowed' : 'text-accent hover:text-accent-hover'}"
           >
-            <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+            <Icon icon={chevronLeftIcon} class="h-3 w-3" />
             Newer
           </button>
           <span class="text-[0.6875rem] tabular-nums text-text-muted">{page + 1} / {totalPages}</span>
@@ -153,7 +154,7 @@
             class="flex items-center gap-1 text-[0.75rem] font-medium transition-colors {page >= totalPages - 1 ? 'text-text-muted/30 cursor-not-allowed' : 'text-accent hover:text-accent-hover'}"
           >
             Older
-            <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+            <Icon icon={chevronRightIcon} class="h-3 w-3" />
           </button>
         {:else}
           <span></span><span></span><span></span>
@@ -164,7 +165,7 @@
         class="flex w-full items-center justify-center gap-1.5 px-4 py-2.5 text-[0.75rem] font-medium text-accent transition-colors hover:bg-surface-overlay/40"
       >
         Show less
-        <svg class="h-3 w-3 rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
+        <Icon icon={chevronUpIcon} class="h-3 w-3" />
       </button>
     {/if}
   </div>

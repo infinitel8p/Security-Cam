@@ -2,6 +2,11 @@
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl, getMediaMtxUrl } from "../lib/api";
   import toast from "svelte-5-french-toast";
+  import Icon from "./Icon.svelte";
+  import cameraIcon from "../icons/camera.svg?raw";
+  import alertCircleIcon from "../icons/alert-circle.svg?raw";
+  import maximizeIcon from "../icons/maximize.svg?raw";
+  import minimizeIcon from "../icons/minimize.svg?raw";
 
   let containerEl: HTMLDivElement;
   let videoEl: HTMLVideoElement;
@@ -194,11 +199,7 @@
         {#if error}
           <div class="flex flex-col items-center gap-2.5">
             <div class="flex h-10 w-10 items-center justify-center rounded-full bg-status-warning/10">
-              <svg class="h-5 w-5 text-status-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="12" />
-                <line x1="12" y1="16" x2="12.01" y2="16" />
-              </svg>
+              <Icon icon={alertCircleIcon} class="h-5 w-5 text-status-warning" stroke={2} />
             </div>
             <span class="text-sm text-text-secondary">{error}</span>
             <div class="flex items-center gap-3">
@@ -209,10 +210,7 @@
         {:else}
           <div class="flex flex-col items-center gap-2.5">
             <div class="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10">
-              <svg class="h-5 w-5 animate-pulse text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-                <circle cx="12" cy="13" r="4" />
-              </svg>
+              <Icon icon={cameraIcon} class="h-5 w-5 animate-pulse text-accent" stroke={2} />
             </div>
             <span class="text-sm text-text-secondary">Connecting to camera...</span>
           </div>
@@ -245,10 +243,7 @@
   <!-- Controls -->
   <div class="controls-bar relative flex items-center justify-between border-t border-border-subtle px-3 py-2 sm:px-4 sm:py-2.5" class:controls-bar-rec={recording}>
     <div class="flex items-center gap-2">
-      <svg class="h-4 w-4 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-        <circle cx="12" cy="13" r="4" />
-      </svg>
+      <Icon icon={cameraIcon} class="h-4 w-4 text-text-muted" stroke={2} />
       <span class="hidden text-[0.8125rem] font-medium text-text-secondary sm:inline">Live Feed</span>
     </div>
     <div class="flex items-center gap-1">
@@ -280,13 +275,9 @@
         title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
       >
         {#if isFullscreen}
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
-          </svg>
+          <Icon icon={minimizeIcon} class="h-4 w-4" stroke={2} />
         {:else}
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
-          </svg>
+          <Icon icon={maximizeIcon} class="h-4 w-4" stroke={2} />
         {/if}
       </button>
     </div>

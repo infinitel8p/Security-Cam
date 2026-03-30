@@ -1,6 +1,13 @@
 <script lang="ts">
   import { getBackendUrl } from "../lib/api";
   import toast from "svelte-5-french-toast";
+  import Icon from "./Icon.svelte";
+  import bluetoothIcon from "../icons/bluetooth.svg?raw";
+  import wifiIcon from "../icons/wifi.svg?raw";
+  import searchIcon from "../icons/search.svg?raw";
+  import plusIcon from "../icons/plus.svg?raw";
+  import xIcon from "../icons/x.svg?raw";
+  import loader2Icon from "../icons/loader-2.svg?raw";
 
   interface Device {
     name: string;
@@ -135,18 +142,11 @@
   <div class="flex items-center gap-2.5 border-b border-border-subtle px-4 py-3 sm:px-5 sm:py-3.5">
     {#if icon === "bluetooth"}
       <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-accent/10">
-        <svg class="h-3.5 w-3.5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5" />
-        </svg>
+        <Icon icon={bluetoothIcon} class="h-3.5 w-3.5 text-accent" stroke={2.5} />
       </div>
     {:else}
       <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-accent/10">
-        <svg class="h-3.5 w-3.5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M5 12.55a11 11 0 0 1 14.08 0" />
-          <path d="M1.42 9a16 16 0 0 1 21.16 0" />
-          <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
-          <line x1="12" y1="20" x2="12.01" y2="20" />
-        </svg>
+        <Icon icon={wifiIcon} class="h-3.5 w-3.5 text-accent" stroke={2.5} />
       </div>
     {/if}
     <h3 class="text-sm font-semibold text-text-primary">{title}</h3>
@@ -163,9 +163,7 @@
         onclick={startScan}
         class="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent transition-colors hover:bg-accent/15"
       >
-        <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-        </svg>
+        <Icon icon={searchIcon} class="h-3 w-3" />
         Scan for devices
       </button>
     </div>
@@ -195,13 +193,9 @@
             aria-label="Remove device"
           >
             {#if removingAddress === device.address}
-              <svg class="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M12 2a10 10 0 0 1 10 10" />
-              </svg>
+              <Icon icon={loader2Icon} class="h-3.5 w-3.5 animate-spin" />
             {:else}
-              <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
+              <Icon icon={xIcon} class="h-3.5 w-3.5" />
             {/if}
           </button>
         </li>
@@ -216,9 +210,7 @@
         onclick={startScan}
         class="inline-flex items-center gap-1.5 rounded-lg text-xs font-medium text-text-muted transition-colors hover:text-accent"
       >
-        <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-        </svg>
+        <Icon icon={plusIcon} class="h-3 w-3" />
         Add device
       </button>
     </div>
@@ -266,14 +258,9 @@
             <div class="absolute inset-0 animate-ping rounded-full bg-accent/20"></div>
             <div class="absolute inset-1 animate-ping rounded-full bg-accent/15" style="animation-delay: 0.3s;"></div>
             {#if icon === "bluetooth"}
-              <svg class="relative h-5 w-5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5" />
-              </svg>
+              <Icon icon={bluetoothIcon} class="relative h-5 w-5 text-accent" />
             {:else}
-              <svg class="relative h-5 w-5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M5 12.55a11 11 0 0 1 14.08 0" /><path d="M1.42 9a16 16 0 0 1 21.16 0" />
-                <path d="M8.53 16.11a6 6 0 0 1 6.95 0" /><line x1="12" y1="20" x2="12.01" y2="20" />
-              </svg>
+              <Icon icon={wifiIcon} class="relative h-5 w-5 text-accent" />
             {/if}
           </div>
           <p class="text-xs text-text-muted">

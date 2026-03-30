@@ -3,6 +3,9 @@
   import { getBackendUrl } from "../lib/api";
   import toast from "svelte-5-french-toast";
   import Note from "./Note.svelte";
+  import Icon from "./Icon.svelte";
+  import rotateIcon from "../icons/rotate.svg?raw";
+  import deviceDesktopIcon from "../icons/device-desktop.svg?raw";
 
   interface Props {
     currentAngle: number;
@@ -213,10 +216,7 @@
 <div class="card px-4 py-3.5 sm:px-5 sm:py-4">
   <div class="flex items-center gap-2.5">
     <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-accent/10">
-      <svg class="h-3.5 w-3.5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="1 4 1 10 7 10" />
-        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
-      </svg>
+      <Icon icon={rotateIcon} class="h-3.5 w-3.5 text-accent" stroke={2.5} />
     </div>
     <h3 class="text-sm font-semibold text-text-primary">Camera Rotation</h3>
   </div>
@@ -301,11 +301,7 @@
 <div class="card px-4 py-3.5 sm:px-5 sm:py-4">
   <div class="flex items-center gap-2.5">
     <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-accent/10">
-      <svg class="h-3.5 w-3.5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-        <line x1="8" y1="21" x2="16" y2="21" />
-        <line x1="12" y1="17" x2="12" y2="21" />
-      </svg>
+      <Icon icon={deviceDesktopIcon} class="h-3.5 w-3.5 text-accent" stroke={2.5} />
     </div>
     <h3 class="text-sm font-semibold text-text-primary">Stream Quality</h3>
   </div>

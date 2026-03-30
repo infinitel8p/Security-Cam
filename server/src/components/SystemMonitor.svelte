@@ -1,6 +1,13 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import Icon from "./Icon.svelte";
+  import temperatureIcon from "../icons/temperature.svg?raw";
+  import cpuIcon from "../icons/cpu.svg?raw";
+  import databaseIcon from "../icons/database.svg?raw";
+  import deviceDesktopIcon from "../icons/device-desktop.svg?raw";
+  import clockIcon from "../icons/clock.svg?raw";
+  import boltIcon from "../icons/bolt.svg?raw";
 
   interface ThrottleInfo {
     raw: string;
@@ -96,9 +103,7 @@
       <!-- CPU Temp -->
       <div class="px-4 py-3">
         <div class="flex items-center gap-1.5">
-          <svg class="h-3 w-3 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" />
-          </svg>
+          <Icon icon={temperatureIcon} class="h-3 w-3 text-text-muted" stroke={2} />
           <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">Temp</p>
         </div>
         <p class="mt-1 text-xl font-bold tabular-nums leading-none {tempColor(info.cpu_temp_celsius)}">
@@ -109,14 +114,7 @@
       <!-- CPU Load -->
       <div class="px-4 py-3">
         <div class="flex items-center gap-1.5">
-          <svg class="h-3 w-3 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="4" y="4" width="16" height="16" rx="2" />
-            <rect x="9" y="9" width="6" height="6" />
-            <line x1="9" y1="1" x2="9" y2="4" /><line x1="15" y1="1" x2="15" y2="4" />
-            <line x1="9" y1="20" x2="9" y2="23" /><line x1="15" y1="20" x2="15" y2="23" />
-            <line x1="20" y1="9" x2="23" y2="9" /><line x1="20" y1="14" x2="23" y2="14" />
-            <line x1="1" y1="9" x2="4" y2="9" /><line x1="1" y1="14" x2="4" y2="14" />
-          </svg>
+          <Icon icon={cpuIcon} class="h-3 w-3 text-text-muted" stroke={2} />
           <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">CPU</p>
         </div>
         <p class="mt-1 text-xl font-bold tabular-nums leading-none text-text-primary">
@@ -134,11 +132,7 @@
       <div class="px-4 py-3">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-1.5">
-            <svg class="h-3 w-3 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="22" y1="12" x2="2" y2="12" />
-              <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
-              <line x1="6" y1="16" x2="6.01" y2="16" /><line x1="10" y1="16" x2="10.01" y2="16" />
-            </svg>
+            <Icon icon={databaseIcon} class="h-3 w-3 text-text-muted" stroke={2} />
             <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">Disk</p>
           </div>
           <p class="text-[0.625rem] tabular-nums text-text-muted">{info.storage_info_gb.used_gb.toFixed(1)}/{info.storage_info_gb.total_gb.toFixed(0)}GB</p>
@@ -155,11 +149,7 @@
       <div class="px-4 py-3">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-1.5">
-            <svg class="h-3 w-3 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="6" width="20" height="12" rx="2" />
-              <line x1="6" y1="10" x2="6" y2="14" /><line x1="10" y1="10" x2="10" y2="14" />
-              <line x1="14" y1="10" x2="14" y2="14" /><line x1="18" y1="10" x2="18" y2="14" />
-            </svg>
+            <Icon icon={deviceDesktopIcon} class="h-3 w-3 text-text-muted" stroke={2} />
             <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">RAM</p>
           </div>
           <p class="text-[0.625rem] tabular-nums text-text-muted">{info.ram_usage_mb.used_mb.toFixed(0)}/{info.ram_usage_mb.total_mb.toFixed(0)}MB</p>
@@ -178,10 +168,7 @@
       <!-- Uptime -->
       <div class="px-4 py-3">
         <div class="flex items-center gap-1.5">
-          <svg class="h-3 w-3 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10" />
-            <polyline points="12 6 12 12 16 14" />
-          </svg>
+          <Icon icon={clockIcon} class="h-3 w-3 text-text-muted" stroke={2} />
           <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">Uptime</p>
         </div>
         <p class="mt-1 text-xl font-bold tabular-nums leading-none {info.uptime_seconds ? 'text-text-primary' : 'text-text-muted'}">
@@ -192,9 +179,7 @@
       <!-- Throttle -->
       <div class="px-4 py-3">
         <div class="flex items-center gap-1.5">
-          <svg class="h-3 w-3 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-          </svg>
+          <Icon icon={boltIcon} class="h-3 w-3 text-text-muted" stroke={2} />
           <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">Throttle</p>
         </div>
         {#if info.throttle}

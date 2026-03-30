@@ -1,6 +1,9 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import Icon from "./Icon.svelte";
+  import boltIcon from "../icons/bolt.svg?raw";
+  import cpuIcon from "../icons/cpu.svg?raw";
 
   interface SensorInfo {
     type: string;
@@ -89,9 +92,7 @@
       <!-- Sensor Type -->
       <div class="px-4 py-3 text-center">
         <div class="flex items-center justify-center gap-1.5">
-          <svg class="h-3 w-3 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-          </svg>
+          <Icon icon={boltIcon} class="h-3 w-3 text-text-muted" stroke={2.5} />
           <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">Sensor</p>
         </div>
         <p class="mt-1 truncate text-[0.8125rem] font-bold leading-none {data.enabled ? 'text-text-primary' : 'text-text-muted'}">
@@ -122,18 +123,7 @@
       <!-- GPIO -->
       <div class="px-4 py-3 text-center">
         <div class="flex items-center justify-center gap-1.5">
-          <svg class="h-3 w-3 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="4" y="4" width="16" height="16" rx="2" ry="2" />
-            <rect x="9" y="9" width="6" height="6" />
-            <line x1="9" y1="1" x2="9" y2="4" />
-            <line x1="15" y1="1" x2="15" y2="4" />
-            <line x1="9" y1="20" x2="9" y2="23" />
-            <line x1="15" y1="20" x2="15" y2="23" />
-            <line x1="20" y1="9" x2="23" y2="9" />
-            <line x1="20" y1="14" x2="23" y2="14" />
-            <line x1="1" y1="9" x2="4" y2="9" />
-            <line x1="1" y1="14" x2="4" y2="14" />
-          </svg>
+          <Icon icon={cpuIcon} class="h-3 w-3 text-text-muted" stroke={2.5} />
           <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">GPIO</p>
         </div>
         <p class="mt-1 text-xl font-bold tabular-nums leading-none {data.enabled ? 'text-accent' : 'text-text-muted'}">

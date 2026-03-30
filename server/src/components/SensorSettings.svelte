@@ -4,6 +4,9 @@
   import toast from "svelte-5-french-toast";
   import Note from "./Note.svelte";
   import WiringDiagram from "./WiringDiagram.svelte";
+  import Icon from "./Icon.svelte";
+  import boltIcon from "../icons/bolt.svg?raw";
+  import chevronRightIcon from "../icons/chevron-right.svg?raw";
 
   interface SensorType {
     type: string;
@@ -233,9 +236,7 @@
   <!-- Header -->
   <div class="flex items-center gap-2.5 border-b border-border-subtle px-4 py-3 sm:px-5 sm:py-3.5">
     <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-accent/10">
-      <svg class="h-3.5 w-3.5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-      </svg>
+      <Icon icon={boltIcon} class="h-3.5 w-3.5 text-accent" stroke={2.5} />
     </div>
     <h3 class="text-sm font-semibold text-text-primary">Trigger Sensors</h3>
     <div class="ml-auto flex items-center gap-2">
@@ -349,12 +350,9 @@
               onclick={() => showWiring = !showWiring}
               class="mt-2.5 flex items-center gap-1 text-[0.6875rem] font-medium text-accent transition-colors hover:text-accent/80"
             >
-              <svg
+              <Icon icon={chevronRightIcon}
                 class="h-3 w-3 transition-transform duration-200 {showWiring ? 'rotate-90' : ''}"
-                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
-              >
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
+              />
               {showWiring ? "Hide" : "Show"} wiring guide
             </button>
 

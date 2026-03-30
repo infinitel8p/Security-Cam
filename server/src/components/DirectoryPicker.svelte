@@ -1,6 +1,10 @@
 <script lang="ts">
   import { getBackendUrl } from "../lib/api";
   import toast from "svelte-5-french-toast";
+  import Icon from "./Icon.svelte";
+  import folderIcon from "../icons/folder.svg?raw";
+  import xIcon from "../icons/x.svg?raw";
+  import chevronLeftIcon from "../icons/chevron-left.svg?raw";
 
   interface Props {
     current: string;
@@ -75,9 +79,7 @@
 <div class="card px-4 py-3.5 sm:px-5 sm:py-4">
   <div class="flex items-center gap-2.5">
     <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-accent/10">
-      <svg class="h-3.5 w-3.5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-      </svg>
+      <Icon icon={folderIcon} class="h-3.5 w-3.5 text-accent" stroke={2.5} />
     </div>
     <label class="text-sm font-semibold text-text-primary">Video Save Location</label>
   </div>
@@ -111,9 +113,7 @@
           onclick={() => (open = false)}
           class="flex h-7 w-7 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-surface-overlay hover:text-text-secondary"
         >
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
+          <Icon icon={xIcon} class="h-4 w-4" />
         </button>
       </div>
 
@@ -136,9 +136,7 @@
             onclick={goUp}
             class="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-text-secondary transition-colors hover:bg-surface-overlay"
           >
-            <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
+            <Icon icon={chevronLeftIcon} class="h-4 w-4 shrink-0" />
             ..
           </button>
           {#each directories as dir (dir.path)}
@@ -146,9 +144,7 @@
               onclick={() => navigateTo(dir)}
               class="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-text-primary transition-colors hover:bg-surface-overlay"
             >
-              <svg class="h-4 w-4 shrink-0 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-              </svg>
+              <Icon icon={folderIcon} class="h-4 w-4 shrink-0 text-text-muted" />
               {dir.name}
             </button>
           {/each}

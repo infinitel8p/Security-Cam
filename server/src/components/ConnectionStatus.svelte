@@ -1,6 +1,10 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import Icon from "./Icon.svelte";
+  import bluetoothIcon from "../icons/bluetooth.svg?raw";
+  import wifiIcon from "../icons/wifi.svg?raw";
+  import usersIcon from "../icons/users.svg?raw";
 
   interface Connections {
     bluetooth: { online: number; total: number };
@@ -51,9 +55,7 @@
       <!-- Bluetooth -->
       <div class="px-4 py-3 text-center">
         <div class="flex items-center justify-center gap-1.5">
-          <svg class="h-3 w-3 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5" />
-          </svg>
+          <Icon icon={bluetoothIcon} class="h-3 w-3 text-text-muted" stroke={2.5} />
           <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">BT</p>
         </div>
         <p class="mt-1 text-xl font-bold tabular-nums leading-none {data.bluetooth.online > 0 ? 'text-status-ok' : 'text-text-muted'}">
@@ -64,12 +66,7 @@
       <!-- WiFi -->
       <div class="px-4 py-3 text-center">
         <div class="flex items-center justify-center gap-1.5">
-          <svg class="h-3 w-3 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M5 12.55a11 11 0 0 1 14.08 0" />
-            <path d="M1.42 9a16 16 0 0 1 21.16 0" />
-            <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
-            <line x1="12" y1="20" x2="12.01" y2="20" />
-          </svg>
+          <Icon icon={wifiIcon} class="h-3 w-3 text-text-muted" stroke={2.5} />
           <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">WiFi</p>
         </div>
         <p class="mt-1 text-xl font-bold tabular-nums leading-none {data.wifi.online > 0 ? 'text-status-ok' : 'text-text-muted'}">
@@ -80,12 +77,7 @@
       <!-- AP Clients -->
       <div class="px-4 py-3 text-center">
         <div class="flex items-center justify-center gap-1.5">
-          <svg class="h-3 w-3 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-            <circle cx="9" cy="7" r="4" />
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-          </svg>
+          <Icon icon={usersIcon} class="h-3 w-3 text-text-muted" />
           <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">AP</p>
         </div>
         <p class="mt-1 text-xl font-bold tabular-nums leading-none {data.ap_clients > 0 ? 'text-accent' : 'text-text-muted'}">

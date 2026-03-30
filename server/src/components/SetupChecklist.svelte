@@ -1,6 +1,10 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import Icon from "./Icon.svelte";
+  import shieldIcon from "../icons/shield.svg?raw";
+  import xIcon from "../icons/x.svg?raw";
+  import chevronRightIcon from "../icons/chevron-right.svg?raw";
 
   interface SetupState {
     hasDevices: boolean;
@@ -60,9 +64,7 @@
     <div class="flex items-center justify-between border-b border-border-subtle px-4 py-3 sm:px-5">
       <div class="flex items-center gap-2.5">
         <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-accent/10">
-          <svg class="h-3.5 w-3.5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-          </svg>
+          <Icon icon={shieldIcon} class="h-3.5 w-3.5 text-accent" stroke={2.5} />
         </div>
         <div>
           <h3 class="text-sm font-semibold text-text-primary">Get your camera ready</h3>
@@ -74,9 +76,7 @@
         class="rounded-md p-1 text-text-muted transition-colors hover:bg-surface-overlay hover:text-text-secondary"
         title="Dismiss"
       >
-        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-        </svg>
+        <Icon icon={xIcon} class="h-4 w-4" />
       </button>
     </div>
 
@@ -113,9 +113,7 @@
           </p>
         </div>
         {#if !setup.hasDevices}
-          <svg class="h-4 w-4 shrink-0 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
+          <Icon icon={chevronRightIcon} class="h-4 w-4 shrink-0 text-text-muted" />
         {/if}
       </a>
 
@@ -142,9 +140,7 @@
           </p>
         </div>
         {#if !setup.hasSensor}
-          <svg class="h-4 w-4 shrink-0 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
+          <Icon icon={chevronRightIcon} class="h-4 w-4 shrink-0 text-text-muted" />
         {/if}
       </a>
     </div>
