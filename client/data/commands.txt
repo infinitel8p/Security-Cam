@@ -1,4 +1,7 @@
-cat camera-stream.sh
-cat /etc/systemd/system/camera-stream.service
-cat /etc/systemd/system/mediamtx.service
-cat /home/pi/mediamtx.yml
+systemctl status security-cam
+systemctl status mediamtx
+systemctl cat security-cam
+systemctl cat mediamtx
+cat /opt/security-cam/client/data/mediamtx.yml
+journalctl -u security-cam --no-pager -n 50
+journalctl -u mediamtx --no-pager -n 50

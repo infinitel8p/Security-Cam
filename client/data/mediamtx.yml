@@ -56,7 +56,9 @@ webrtcLocalUDPAddress: :8189
 webrtcLocalTCPAddress: :8190
 webrtcIPsFromInterfaces: yes
 webrtcIPsFromInterfacesList: []
-webrtcAdditionalHosts: [192.168.178.22]
+# Set this to your Pi's IP if WebRTC connectivity issues occur:
+# webrtcAdditionalHosts: [192.168.x.x]
+webrtcAdditionalHosts: []
 webrtcHandshakeTimeout: 10s
 webrtcTrackGatherTimeout: 2s
 webrtcSTUNGatherTimeout: 5s

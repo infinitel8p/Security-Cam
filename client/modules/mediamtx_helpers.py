@@ -72,7 +72,7 @@ def restart_service():
     """Restart the mediamtx systemd service. Returns (success, error)."""
     try:
         subprocess.run(
-            ["sudo", "systemctl", "restart", "mediamtx"],
+            ["systemctl", "restart", "mediamtx"],
             check=True, capture_output=True, timeout=10,
         )
         log.info("MediaMTX service restarted successfully")
