@@ -2,6 +2,8 @@
 import Layout from "../layouts/Layout.astro";
 import VideoPlayer from "../components/VideoPlayer.svelte";
 import SystemMonitor from "../components/SystemMonitor.svelte";
+import HealthTracker from "../components/HealthTracker.svelte";
+import EventTracker from "../components/EventTracker.svelte";
 ---
 
 <Layout title="Dashboard — Security Cam">
@@ -34,12 +36,14 @@ import SystemMonitor from "../components/SystemMonitor.svelte";
 			</div>
 
 			<!-- System Monitor -->
-			<div class="animate-in stagger-2 min-w-0">
+			<div class="animate-in stagger-2 min-w-0 space-y-2.5 flex flex-col gap-2">
 				<h2
-					class="mb-2.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-text-muted">
+					class="text-[0.6875rem] font-semibold uppercase tracking-wider text-text-muted">
 					System Health
 				</h2>
 				<SystemMonitor client:load />
+				<EventTracker client:load />
+				<HealthTracker client:load />
 			</div>
 		</div>
 

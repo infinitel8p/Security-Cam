@@ -2,11 +2,25 @@
   import { onMount } from "svelte";
   import { getBackendUrl } from "../lib/api";
 
+  interface ThrottleInfo {
+    raw: string;
+    under_voltage_now: boolean;
+    freq_capped_now: boolean;
+    throttled_now: boolean;
+    soft_temp_limit_now: boolean;
+    under_voltage_occurred: boolean;
+    freq_capped_occurred: boolean;
+    throttled_occurred: boolean;
+    soft_temp_limit_occurred: boolean;
+  }
+
   interface SystemInfo {
     cpu_temp_celsius: number;
     cpu_load_percent: number;
     storage_info_gb: { total_gb: number; used_gb: number };
     ram_usage_mb: { total_mb: number; used_mb: number };
+    uptime_seconds: number;
+    throttle: ThrottleInfo | null;
   }
 
   let info: SystemInfo | null = $state(null);
@@ -42,108 +56,187 @@
   function usagePct(used: number, total: number): number {
     return total > 0 ? Math.round((used / total) * 100) : 0;
   }
+
+  function formatUptime(seconds: number | undefined | null): string {
+    if (seconds == null || isNaN(seconds)) return "—";
+    const d = Math.floor(seconds / 86400);
+    const h = Math.floor((seconds % 86400) / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    if (d > 0) return `${d}d ${h}h`;
+    if (h > 0) return `${h}h ${m}m`;
+    return `${m}m`;
+  }
+
+  function throttleActive(t: ThrottleInfo): boolean {
+    return t.under_voltage_now || t.freq_capped_now || t.throttled_now || t.soft_temp_limit_now;
+  }
+
+  function throttleHistory(t: ThrottleInfo): boolean {
+    return t.under_voltage_occurred || t.freq_capped_occurred || t.throttled_occurred || t.soft_temp_limit_occurred;
+  }
+
+  let loadPct = $derived(info ? Math.round(info.cpu_load_percent) : 0);
+  let storagePct = $derived(info ? usagePct(info.storage_info_gb.used_gb, info.storage_info_gb.total_gb) : 0);
+  let ramPct = $derived(info ? usagePct(info.ram_usage_mb.used_mb, info.ram_usage_mb.total_mb) : 0);
 </script>
 
-<div class="grid grid-cols-2 gap-2 lg:grid-cols-1 lg:gap-2.5">
-  {#if error}
-    <div class="card col-span-2 row-span-4 flex items-center justify-center px-4 py-8 text-center text-[0.8125rem] text-text-muted lg:col-span-1">
-      Unable to reach system monitor
-    </div>
-  {:else if info}
-    <!-- CPU Temperature -->
-    <div class="card flex flex-col justify-center px-4 py-3 lg:px-5 lg:py-3.5">
-      <div class="flex items-center gap-1.5">
-        <svg class="h-3.5 w-3.5 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" />
-        </svg>
-        <p class="text-[0.6875rem] font-medium uppercase tracking-wider text-text-muted">CPU Temp</p>
+{#if error}
+  <div class="card flex items-center justify-center px-4 py-8 text-center text-[0.8125rem] text-text-muted">
+    Unable to reach system monitor
+  </div>
+{:else if info}
+  <div class="card divide-y divide-border-subtle">
+    <!-- Row 1: Temp + CPU side by side -->
+    <div class="grid grid-cols-2 divide-x divide-border-subtle">
+      <!-- CPU Temp -->
+      <div class="px-4 py-3">
+        <div class="flex items-center gap-1.5">
+          <svg class="h-3 w-3 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" />
+          </svg>
+          <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">Temp</p>
+        </div>
+        <p class="mt-1 text-xl font-bold tabular-nums leading-none {tempColor(info.cpu_temp_celsius)}">
+          {info.cpu_temp_celsius.toFixed(0)}<span class="text-[0.625rem] font-medium">&deg;C</span>
+        </p>
       </div>
-      <p class="mt-1.5 text-2xl font-bold tabular-nums leading-none {tempColor(info.cpu_temp_celsius)}">
-        {info.cpu_temp_celsius.toFixed(1)}<span class="text-xs font-medium">&deg;C</span>
-      </p>
+
+      <!-- CPU Load -->
+      <div class="px-4 py-3">
+        <div class="flex items-center gap-1.5">
+          <svg class="h-3 w-3 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="4" width="16" height="16" rx="2" />
+            <rect x="9" y="9" width="6" height="6" />
+            <line x1="9" y1="1" x2="9" y2="4" /><line x1="15" y1="1" x2="15" y2="4" />
+            <line x1="9" y1="20" x2="9" y2="23" /><line x1="15" y1="20" x2="15" y2="23" />
+            <line x1="20" y1="9" x2="23" y2="9" /><line x1="20" y1="14" x2="23" y2="14" />
+            <line x1="1" y1="9" x2="4" y2="9" /><line x1="1" y1="14" x2="4" y2="14" />
+          </svg>
+          <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">CPU</p>
+        </div>
+        <p class="mt-1 text-xl font-bold tabular-nums leading-none text-text-primary">
+          {loadPct}<span class="text-[0.625rem] font-medium">%</span>
+        </p>
+        <div class="mt-1.5 h-1 rounded-full {barTrackColor(loadPct)}">
+          <div class="h-full rounded-full {barColor(loadPct)} transition-[width] duration-500" style="width: {loadPct}%"></div>
+        </div>
+      </div>
     </div>
 
-    <!-- CPU Load -->
-    {@const loadPct = Math.round(info.cpu_load_percent)}
-    <div class="card flex flex-col justify-center px-4 py-3 lg:px-5 lg:py-3.5">
-      <div class="flex items-center gap-1.5">
-        <svg class="h-3.5 w-3.5 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="4" y="4" width="16" height="16" rx="2" />
-          <rect x="9" y="9" width="6" height="6" />
-          <line x1="9" y1="1" x2="9" y2="4" /><line x1="15" y1="1" x2="15" y2="4" />
-          <line x1="9" y1="20" x2="9" y2="23" /><line x1="15" y1="20" x2="15" y2="23" />
-          <line x1="20" y1="9" x2="23" y2="9" /><line x1="20" y1="14" x2="23" y2="14" />
-          <line x1="1" y1="9" x2="4" y2="9" /><line x1="1" y1="14" x2="4" y2="14" />
-        </svg>
-        <p class="text-[0.6875rem] font-medium uppercase tracking-wider text-text-muted">CPU Load</p>
+    <!-- Row 2: Storage + RAM side by side -->
+    <div class="grid grid-cols-2 divide-x divide-border-subtle">
+      <!-- Storage -->
+      <div class="px-4 py-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-1.5">
+            <svg class="h-3 w-3 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="12" x2="2" y2="12" />
+              <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+              <line x1="6" y1="16" x2="6.01" y2="16" /><line x1="10" y1="16" x2="10.01" y2="16" />
+            </svg>
+            <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">Disk</p>
+          </div>
+          <p class="text-[0.625rem] tabular-nums text-text-muted">{info.storage_info_gb.used_gb.toFixed(1)}/{info.storage_info_gb.total_gb.toFixed(0)}GB</p>
+        </div>
+        <p class="mt-1 text-xl font-bold tabular-nums leading-none text-text-primary">
+          {storagePct}<span class="text-[0.625rem] font-medium">%</span>
+        </p>
+        <div class="mt-1.5 h-1 rounded-full {barTrackColor(storagePct)}">
+          <div class="h-full rounded-full {barColor(storagePct)} transition-[width] duration-500" style="width: {storagePct}%"></div>
+        </div>
       </div>
-      <p class="mt-1.5 text-2xl font-bold tabular-nums leading-none text-text-primary">
-        {loadPct}<span class="text-xs font-medium">%</span>
-      </p>
-      <div class="mt-2 h-1.5 rounded-full {barTrackColor(loadPct)}">
-        <div
-          class="h-full rounded-full {barColor(loadPct)} transition-[width] duration-500"
-          style="width: {loadPct}%"
-        ></div>
+
+      <!-- RAM -->
+      <div class="px-4 py-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-1.5">
+            <svg class="h-3 w-3 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="6" width="20" height="12" rx="2" />
+              <line x1="6" y1="10" x2="6" y2="14" /><line x1="10" y1="10" x2="10" y2="14" />
+              <line x1="14" y1="10" x2="14" y2="14" /><line x1="18" y1="10" x2="18" y2="14" />
+            </svg>
+            <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">RAM</p>
+          </div>
+          <p class="text-[0.625rem] tabular-nums text-text-muted">{info.ram_usage_mb.used_mb.toFixed(0)}/{info.ram_usage_mb.total_mb.toFixed(0)}MB</p>
+        </div>
+        <p class="mt-1 text-xl font-bold tabular-nums leading-none text-text-primary">
+          {ramPct}<span class="text-[0.625rem] font-medium">%</span>
+        </p>
+        <div class="mt-1.5 h-1 rounded-full {barTrackColor(ramPct)}">
+          <div class="h-full rounded-full {barColor(ramPct)} transition-[width] duration-500" style="width: {ramPct}%"></div>
+        </div>
       </div>
     </div>
 
-    <!-- Storage -->
-    {@const storagePct = usagePct(info.storage_info_gb.used_gb, info.storage_info_gb.total_gb)}
-    <div class="card flex flex-col justify-center px-4 py-3 lg:px-5 lg:py-3.5">
-      <div class="flex items-center gap-1.5">
-        <svg class="h-3.5 w-3.5 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="22" y1="12" x2="2" y2="12" />
-          <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
-          <line x1="6" y1="16" x2="6.01" y2="16" /><line x1="10" y1="16" x2="10.01" y2="16" />
-        </svg>
-        <p class="text-[0.6875rem] font-medium uppercase tracking-wider text-text-muted">Storage</p>
+    <!-- Row 3: Uptime + Throttle -->
+    <div class="grid grid-cols-2 divide-x divide-border-subtle">
+      <!-- Uptime -->
+      <div class="px-4 py-3">
+        <div class="flex items-center gap-1.5">
+          <svg class="h-3 w-3 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">Uptime</p>
+        </div>
+        <p class="mt-1 text-xl font-bold tabular-nums leading-none {info.uptime_seconds ? 'text-text-primary' : 'text-text-muted'}">
+          {formatUptime(info.uptime_seconds)}
+        </p>
       </div>
-      <p class="mt-1.5 text-2xl font-bold tabular-nums leading-none text-text-primary">
-        {storagePct}<span class="text-xs font-medium">%</span>
-      </p>
-      <div class="mt-2 h-1.5 rounded-full {barTrackColor(storagePct)}">
-        <div
-          class="h-full rounded-full {barColor(storagePct)} transition-[width] duration-500"
-          style="width: {storagePct}%"
-        ></div>
-      </div>
-      <p class="mt-1 text-[0.6875rem] text-text-muted">
-        {info.storage_info_gb.used_gb.toFixed(1)} / {info.storage_info_gb.total_gb.toFixed(1)} GB
-      </p>
-    </div>
 
-    <!-- RAM -->
-    {@const ramPct = usagePct(info.ram_usage_mb.used_mb, info.ram_usage_mb.total_mb)}
-    <div class="card flex flex-col justify-center px-4 py-3 lg:px-5 lg:py-3.5">
-      <div class="flex items-center gap-1.5">
-        <svg class="h-3.5 w-3.5 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="6" width="20" height="12" rx="2" />
-          <line x1="6" y1="10" x2="6" y2="14" /><line x1="10" y1="10" x2="10" y2="14" />
-          <line x1="14" y1="10" x2="14" y2="14" /><line x1="18" y1="10" x2="18" y2="14" />
-        </svg>
-        <p class="text-[0.6875rem] font-medium uppercase tracking-wider text-text-muted">RAM</p>
+      <!-- Throttle -->
+      <div class="px-4 py-3">
+        <div class="flex items-center gap-1.5">
+          <svg class="h-3 w-3 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+          </svg>
+          <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">Throttle</p>
+        </div>
+        {#if info.throttle}
+          {@const active = throttleActive(info.throttle)}
+          {@const history = throttleHistory(info.throttle)}
+          {#if active}
+            <p class="mt-1 text-lg font-bold leading-none text-status-critical">Active</p>
+            <div class="mt-1 flex flex-wrap gap-1">
+              {#if info.throttle.under_voltage_now}
+                <span class="rounded bg-status-critical/10 px-1.5 py-0.5 text-[0.5625rem] font-medium text-status-critical">Low voltage</span>
+              {/if}
+              {#if info.throttle.throttled_now}
+                <span class="rounded bg-status-critical/10 px-1.5 py-0.5 text-[0.5625rem] font-medium text-status-critical">Throttled</span>
+              {/if}
+              {#if info.throttle.freq_capped_now}
+                <span class="rounded bg-status-warning/10 px-1.5 py-0.5 text-[0.5625rem] font-medium text-status-warning">Freq cap</span>
+              {/if}
+              {#if info.throttle.soft_temp_limit_now}
+                <span class="rounded bg-status-warning/10 px-1.5 py-0.5 text-[0.5625rem] font-medium text-status-warning">Temp limit</span>
+              {/if}
+            </div>
+          {:else if history}
+            <p class="mt-1 text-lg font-bold leading-none text-status-warning">Past</p>
+            <p class="mt-0.5 text-[0.625rem] text-text-muted">Since boot</p>
+          {:else}
+            <p class="mt-1 text-lg font-bold leading-none text-status-ok">OK</p>
+          {/if}
+        {:else}
+          <p class="mt-1 text-xl font-bold leading-none text-text-muted">—</p>
+        {/if}
       </div>
-      <p class="mt-1.5 text-2xl font-bold tabular-nums leading-none text-text-primary">
-        {ramPct}<span class="text-xs font-medium">%</span>
-      </p>
-      <div class="mt-2 h-1.5 rounded-full {barTrackColor(ramPct)}">
-        <div
-          class="h-full rounded-full {barColor(ramPct)} transition-[width] duration-500"
-          style="width: {ramPct}%"
-        ></div>
-      </div>
-      <p class="mt-1 text-[0.6875rem] text-text-muted">
-        {info.ram_usage_mb.used_mb.toFixed(0)} / {info.ram_usage_mb.total_mb.toFixed(0)} MB
-      </p>
     </div>
-  {:else}
-    {#each Array(4) as _}
-      <div class="card animate-pulse px-4 py-3">
-        <div class="h-3 w-14 rounded bg-surface-elevated"></div>
-        <div class="mt-2.5 h-5 w-16 rounded bg-surface-elevated"></div>
-        <div class="mt-2 h-1 rounded-full bg-surface-elevated"></div>
+  </div>
+{:else}
+  <!-- Skeleton -->
+  <div class="card animate-pulse divide-y divide-border-subtle">
+    {#each Array(3) as _}
+      <div class="grid grid-cols-2 divide-x divide-border-subtle">
+        <div class="px-4 py-3">
+          <div class="h-2.5 w-10 rounded bg-surface-elevated"></div>
+          <div class="mt-2 h-5 w-12 rounded bg-surface-elevated"></div>
+        </div>
+        <div class="px-4 py-3">
+          <div class="h-2.5 w-10 rounded bg-surface-elevated"></div>
+          <div class="mt-2 h-5 w-12 rounded bg-surface-elevated"></div>
+        </div>
       </div>
     {/each}
-  {/if}
-</div>
+  </div>
+{/if}

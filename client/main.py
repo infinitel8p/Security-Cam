@@ -7,9 +7,14 @@ from modules import settings_helpers
 from modules import archive_helpers
 from modules import activity_helpers
 from modules import mediamtx_helpers
+from modules import health_logger
+from modules import event_logger
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
+
+health_logger.start()
+event_logger.log_event("system_boot")
 
 
 @app.route('/system_info', methods=['GET'])
@@ -19,11 +24,16 @@ def system_info():
     storage_info = system_helpers.get_storage_info()
     ram_usage = system_helpers.get_ram_usage()
 
+    uptime = system_helpers.get_uptime()
+    throttle = system_helpers.get_throttle_status()
+
     return jsonify({
         "cpu_temp_celsius": cpu_temp,
         "cpu_load_percent": cpu_load,
         "storage_info_gb": storage_info,
-        "ram_usage_mb": ram_usage
+        "ram_usage_mb": ram_usage,
+        "uptime_seconds": uptime,
+        "throttle": throttle,
     })
 
 
@@ -31,6 +41,7 @@ def system_info():
 def toggle_recording():
     if stream_helpers.is_recording:
         stream_helpers.stop_recording()
+        event_logger.log_event("recording_stopped")
         print("Recording stopped")
         return jsonify({"message": "Recording stopped"})
     else:
@@ -39,6 +50,7 @@ def toggle_recording():
             return jsonify({"message": "Cannot record while connected to Bluetooth"}), 400
 
         stream_helpers.start_recording()
+        event_logger.log_event("recording_started")
         print("Recording started")
         return jsonify({"message": "Recording started"})
 
@@ -128,6 +140,20 @@ def stream_settings():
         return jsonify({"message": "Stream settings updated, MediaMTX restarted"})
     else:
         return jsonify({"message": error}), 400
+
+
+@app.route('/health_history', methods=['GET'])
+def health_history():
+    hours = request.args.get('hours', 24, type=int)
+    hours = min(hours, 72)
+    return jsonify(health_logger.get_history(hours))
+
+
+@app.route('/event_history', methods=['GET'])
+def event_history():
+    hours = request.args.get('hours', 168, type=int)
+    hours = min(hours, 168)
+    return jsonify(event_logger.get_events(hours))
 
 
 if __name__ == "__main__":
