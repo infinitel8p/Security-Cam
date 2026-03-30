@@ -6,5 +6,11 @@
     "RotationMode": "display",
     "StreamWidth": 1296,
     "StreamHeight": 972,
-    "StreamFPS": 30
+    "StreamFPS": 30,
+    "Sensor": {
+        "type": "reed_switch",
+        "gpio": 22,
+        "enabled": false,
+        "hold_seconds": 10
+    }
 }

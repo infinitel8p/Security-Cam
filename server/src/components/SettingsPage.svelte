@@ -4,6 +4,7 @@
   import DeviceList from "./DeviceList.svelte";
   import CameraSettings from "./CameraSettings.svelte";
   import DirectoryPicker from "./DirectoryPicker.svelte";
+  import SensorSettings from "./SensorSettings.svelte";
 
   interface Device {
     name: string;
@@ -234,20 +235,10 @@
       </div>
     </div>
 
-    <!-- Advanced -->
+    <!-- Trigger Sensors -->
     <div class="space-y-3">
-      <h2 class="section-label">Advanced</h2>
-      <div class="card px-4 py-3.5 sm:px-5 sm:py-4">
-        <div class="flex items-center gap-2.5">
-          <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-accent/10">
-            <svg class="h-3.5 w-3.5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-            </svg>
-          </div>
-          <h3 class="text-sm font-semibold text-text-primary">Modular Trigger Sensors</h3>
-        </div>
-        <p class="mt-3 text-sm text-text-muted">Coming soon</p>
-      </div>
+      <h2 class="section-label">Trigger Sensors</h2>
+      <SensorSettings />
     </div>
   </div>
 {/if}

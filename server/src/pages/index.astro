@@ -7,6 +7,7 @@ import HealthTracker from "../components/HealthTracker.svelte";
 import EventTracker from "../components/EventTracker.svelte";
 import AccessLog from "../components/AccessLog.svelte";
 import ActivityTimeline from "../components/ActivityTimeline.svelte";
+import SensorStatus from "../components/SensorStatus.svelte";
 ---
 
 <Layout title="Dashboard — Security Cam">
@@ -43,6 +44,7 @@ import ActivityTimeline from "../components/ActivityTimeline.svelte";
 					System Health
 				</h2>
 				<ConnectionStatus client:load />
+				<SensorStatus client:load />
 				<SystemMonitor client:load />
 				<EventTracker client:load />
 				<HealthTracker client:load />

@@ -12,6 +12,8 @@ from modules import mediamtx_helpers
 from modules import health_logger
 from modules import event_logger
 from modules import presence_monitor
+from modules import sensor_manager
+from modules.sensors import available_types as sensor_available_types
 
 # --- Logging setup ---
 LOG_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data")
@@ -50,6 +52,7 @@ def log_response(response):
 
 health_logger.start()
 presence_monitor.start()
+sensor_manager.start()
 event_logger.log_event("system_boot")
 log.info("Security Cam backend started")
 
@@ -83,14 +86,13 @@ def recording_status():
 def toggle_recording():
     if stream_helpers.is_recording:
         stream_helpers.stop_recording()
+        sensor_manager.notify_manual_recording_stopped()
         event_logger.log_event("recording_stopped")
         log.info("Recording stopped (manual)")
         return jsonify({"message": "Recording stopped"})
     else:
-        # TODO: When sensor-triggered recording is added, gate it with:
-        #   activity_helpers.is_device_connected_to_bt()
-        #   activity_helpers.is_device_connected_to_ap()
-        # Manual recording should always be allowed.
+        # Manual recording is always allowed — presence gating only
+        # applies to automatic sensor-triggered recording (sensor_manager).
         stream_helpers.start_recording()
         event_logger.log_event("recording_started")
         log.info("Recording started (manual)")
@@ -249,6 +251,121 @@ def remove_wifi_device():
 
     log.info("WiFi device removed: %s", address)
     return jsonify({"message": "Device removed"})
+
+
+# --- Sensor endpoints ---
+
+
+@app.route('/sensor/status', methods=['GET'])
+def sensor_status():
+    return jsonify(sensor_manager.get_status())
+
+
+@app.route('/sensor/types', methods=['GET'])
+def sensor_types():
+    return jsonify(sensor_available_types())
+
+
+@app.route('/sensor/configure', methods=['POST'])
+def sensor_configure():
+    data = request.json or {}
+    sensor_type = data.get("type")
+    if not sensor_type:
+        return jsonify({"error": "sensor type is required"}), 400
+
+    from modules.sensors import SENSOR_REGISTRY
+    if sensor_type not in SENSOR_REGISTRY:
+        return jsonify({"error": f"Unknown sensor type: {sensor_type}",
+                        "available": list(SENSOR_REGISTRY.keys())}), 400
+
+    gpio = data.get("gpio")
+    enabled = data.get("enabled", True)
+    hold_seconds = data.get("hold_seconds", 10)
+
+    cfg = sensor_manager.configure(sensor_type, gpio=gpio,
+                                   enabled=enabled, hold_seconds=hold_seconds)
+    log.info("Sensor configured: %s", cfg)
+    return jsonify({"message": "Sensor configured", "config": cfg})
+
+
+@app.route('/sensor/enable', methods=['POST'])
+def sensor_enable():
+    settings = settings_helpers.get_settings()
+    sensor_cfg = settings.get("Sensor", {})
+    sensor_cfg["enabled"] = True
+    settings_helpers.update_settings({"Sensor": sensor_cfg})
+    sensor_manager.restart()
+    log.info("Sensor enabled")
+    return jsonify({"message": "Sensor enabled"})
+
+
+@app.route('/sensor/disable', methods=['POST'])
+def sensor_disable():
+    sensor_manager.stop()
+    settings = settings_helpers.get_settings()
+    sensor_cfg = settings.get("Sensor", {})
+    sensor_cfg["enabled"] = False
+    settings_helpers.update_settings({"Sensor": sensor_cfg})
+    log.info("Sensor disabled")
+    return jsonify({"message": "Sensor disabled"})
+
+
+@app.route('/sensor/mock/trigger', methods=['POST'])
+def sensor_mock_trigger():
+    """Simulate a trigger event (only works when mock sensor is active)."""
+    sensor = sensor_manager.get_active_sensor()
+    if sensor is None or sensor.sensor_type != "mock":
+        return jsonify({"error": "Mock sensor is not active"}), 400
+    sensor.trigger()
+    return jsonify({"message": "Mock trigger fired"})
+
+
+@app.route('/sensor/mock/release', methods=['POST'])
+def sensor_mock_release():
+    """Simulate a release event (only works when mock sensor is active)."""
+    sensor = sensor_manager.get_active_sensor()
+    if sensor is None or sensor.sensor_type != "mock":
+        return jsonify({"error": "Mock sensor is not active"}), 400
+    sensor.release()
+    return jsonify({"message": "Mock release fired"})
+
+
+@app.route('/sensor/test', methods=['POST'])
+def sensor_test():
+    """Read the raw GPIO pin value for wiring verification.
+
+    Accepts {"type": "reed_switch", "gpio": 22} — creates a temporary
+    sensor instance, reads the pin, and returns the value.  Does not
+    interfere with the running sensor manager.
+    """
+    data = request.json or {}
+    sensor_type = data.get("type")
+    gpio = data.get("gpio")
+
+    if not sensor_type:
+        return jsonify({"error": "sensor type is required"}), 400
+
+    from modules.sensors import SENSOR_REGISTRY
+    if sensor_type not in SENSOR_REGISTRY:
+        return jsonify({"error": f"Unknown sensor type: {sensor_type}"}), 400
+
+    if sensor_type == "mock":
+        return jsonify({"value": None, "message": "Mock sensor has no GPIO to test"})
+
+    # If the requested sensor is already running with the same GPIO, read from it
+    active = sensor_manager.get_active_sensor()
+    if active and active.sensor_type == sensor_type and active.gpio == gpio:
+        val = active.read_value()
+        return jsonify({"value": val, "gpio": gpio, "type": sensor_type})
+
+    # Otherwise create a temporary instance just to read the pin
+    from modules.sensors import create_sensor
+    try:
+        tmp = create_sensor(sensor_type, gpio=gpio)
+        val = tmp.read_value()
+        return jsonify({"value": val, "gpio": gpio, "type": sensor_type})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route('/archive', methods=['GET'])

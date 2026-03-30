@@ -67,7 +67,7 @@
         scanError = "No devices found";
       }
     } catch {
-      scanError = "Could not reach the camera service";
+      scanError = "Unable to connect to the backend";
     } finally {
       scanning = false;
     }
