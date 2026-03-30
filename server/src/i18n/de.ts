@@ -225,6 +225,10 @@ export default {
     systemBoot: "Systemstart",
     deviceArrived: "Gerät erkannt",
     deviceLeft: "Gerät entfernt",
+    sensorTriggered: "Sensor ausgelöst",
+    sensorReleased: "Sensor freigegeben",
+    sensorArmed: "Sensor scharf geschaltet",
+    sensorDisarmed: "Sensor entschärft",
   },
 
   time: {

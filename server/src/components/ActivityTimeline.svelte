@@ -8,6 +8,15 @@
   import chevronLeftIcon from "../icons/chevron-left.svg?raw";
   import chevronRightIcon from "../icons/chevron-right.svg?raw";
   import chevronUpIcon from "../icons/chevron-up.svg?raw";
+  import playerRecordIcon from "../icons/player-record.svg?raw";
+  import playerStopIcon from "../icons/player-stop.svg?raw";
+  import boltIcon from "../icons/bolt.svg?raw";
+  import shieldIcon from "../icons/shield.svg?raw";
+  import wifiOffIcon from "../icons/wifi-off.svg?raw";
+  import wifiIcon from "../icons/wifi.svg?raw";
+  import alertTriangleIcon from "../icons/alert-triangle.svg?raw";
+  import powerIcon from "../icons/power.svg?raw";
+  import usersIcon from "../icons/users.svg?raw";
 
   interface TimelineEvent {
     ts: string;
@@ -20,72 +29,73 @@
   const EXPANDED_COUNT = 15;
   const PAGE_SIZE = 15;
 
-  let events = $state<TimelineEvent[]>([]);
+  let events = $state<DisplayEvent[]>([]);
   let expanded = $state(false);
   let page = $state(0);
   let loading = $state(true);
   let error = $state(false);
   let interval: ReturnType<typeof setInterval> | null = null;
 
-  const EVENT_META: Record<string, { label: string; icon: string; color: string }> = {
-    recording_started: {
-      label: "Recording started",
-      icon: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-1 14V8l6 4-6 4z",
-      color: "text-status-warning",
-    },
-    recording_stopped: {
-      label: "Recording stopped",
-      icon: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-2 14V8h1.5v8H10zm3.5 0V8H15v8h-1.5z",
-      color: "text-text-secondary",
-    },
-    motion_detected: {
-      label: "Motion detected",
-      icon: "M13 2L3 14h9l-1 8 10-12h-9l1-8z",
-      color: "text-status-warning",
-    },
-    stream_disconnected: {
-      label: "Stream disconnected",
-      icon: "M1 1l22 22M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39M10.71 5.05A16 16 0 0 1 22.56 9M1.42 9a15.91 15.91 0 0 1 4.7-2.88M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01",
-      color: "text-status-critical",
-    },
-    stream_reconnected: {
-      label: "Stream reconnected",
-      icon: "M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01",
-      color: "text-status-ok",
-    },
-    unauthorized_access: {
-      label: "Unauthorized access",
-      icon: "M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z",
-      color: "text-status-critical",
-    },
-    system_boot: {
-      label: "System boot",
-      icon: "M18.36 6.64a9 9 0 1 1-12.73 0M12 2v10",
-      color: "text-accent",
-    },
-    device_arrived: {
-      label: "Device arrived",
-      icon: "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
-      color: "text-status-ok",
-    },
-    device_left: {
-      label: "Device left",
-      icon: "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
-      color: "text-text-muted",
-    },
+  const EVENT_META: Record<string, { icon: string; color: string; bgColor: string }> = {
+    recording_started:   { icon: playerRecordIcon,   color: "text-status-critical", bgColor: "bg-status-critical/10" },
+    recording_stopped:   { icon: playerStopIcon,     color: "text-text-muted",      bgColor: "bg-surface-elevated" },
+    motion_detected:     { icon: boltIcon,           color: "text-status-warning",  bgColor: "bg-status-warning/10" },
+    sensor_triggered:    { icon: boltIcon,           color: "text-status-warning",  bgColor: "bg-status-warning/10" },
+    sensor_released:     { icon: boltIcon,           color: "text-text-muted",      bgColor: "bg-surface-elevated" },
+    sensor_armed:        { icon: shieldIcon,         color: "text-status-ok",       bgColor: "bg-status-ok/10" },
+    sensor_disarmed:     { icon: shieldIcon,         color: "text-text-muted",      bgColor: "bg-surface-elevated" },
+    stream_disconnected: { icon: wifiOffIcon,        color: "text-status-critical", bgColor: "bg-status-critical/10" },
+    stream_reconnected:  { icon: wifiIcon,           color: "text-status-ok",       bgColor: "bg-status-ok/10" },
+    unauthorized_access: { icon: alertTriangleIcon,  color: "text-status-critical", bgColor: "bg-status-critical/10" },
+    system_boot:         { icon: powerIcon,          color: "text-accent",          bgColor: "bg-accent/10" },
+    device_arrived:      { icon: usersIcon,          color: "text-status-ok",       bgColor: "bg-status-ok/10" },
+    device_left:         { icon: usersIcon,          color: "text-text-muted",      bgColor: "bg-surface-elevated" },
   };
 
-  // Exclude device events - those belong in Access Log
+  // Exclude device events (belong in Access Log) and sensor_released (noise — grouped with trigger)
   const EXCLUDED_TYPES = new Set(["device_arrived", "device_left"]);
+
+  // Types that are low-priority and should be collapsed when repeated
+  const COLLAPSIBLE_TYPES = new Set(["sensor_triggered", "sensor_released"]);
+
+  interface DisplayEvent extends TimelineEvent {
+    count?: number; // how many consecutive events were collapsed
+  }
+
+  /**
+   * Collapse rapid-fire sensor trigger/release pairs into single entries.
+   * Events within 5 minutes of the same type+detail get grouped.
+   */
+  function collapseEvents(raw: TimelineEvent[]): DisplayEvent[] {
+    const result: DisplayEvent[] = [];
+    for (const event of raw) {
+      const prev = result[result.length - 1];
+      if (
+        prev &&
+        COLLAPSIBLE_TYPES.has(event.type) &&
+        prev.type === event.type &&
+        prev.detail === event.detail
+      ) {
+        const gap = new Date(prev.ts).getTime() - new Date(event.ts).getTime();
+        if (gap < 5 * 60 * 1000) {
+          prev.count = (prev.count ?? 1) + 1;
+          continue;
+        }
+      }
+      result.push({ ...event });
+    }
+    return result;
+  }
 
   async function fetchEvents() {
     try {
       const res = await fetch(`${getBackendUrl()}/event_history?hours=168`);
       if (!res.ok) throw new Error();
       const all: TimelineEvent[] = await res.json();
-      events = all
+      const filtered = all
         .filter(e => !EXCLUDED_TYPES.has(e.type))
         .reverse(); // newest first
+      events = collapseEvents(filtered);
       error = false;
     } catch {
       error = true;
@@ -106,9 +116,9 @@
 
   function getMeta(type: string) {
     return EVENT_META[type] ?? {
-      label: type.replace(/_/g, " "),
-      icon: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z",
+      icon: activityIcon,
       color: "text-text-secondary",
+      bgColor: "bg-surface-elevated",
     };
   }
 
@@ -139,11 +149,6 @@
     return t("time.daysAgo", { n: days });
   }
 
-  function severityDot(severity: string): string {
-    if (severity === "critical") return "bg-status-critical shadow-[0_0_6px_rgba(240,104,104,0.4)]";
-    if (severity === "warn") return "bg-status-warning shadow-[0_0_6px_rgba(240,185,58,0.3)]";
-    return "bg-status-ok";
-  }
 </script>
 
 {#if loading}
@@ -182,17 +187,17 @@
       {@const meta = getMeta(event.type)}
       <div class="flex items-start gap-3 px-4 py-3">
         <!-- Icon -->
-        <div class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-surface-elevated">
-          <svg class="h-3.5 w-3.5 {meta.color}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d={meta.icon} />
-          </svg>
+        <div class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full {meta.bgColor}">
+          <Icon icon={meta.icon} class="h-3.5 w-3.5 {meta.color}" />
         </div>
 
         <!-- Content -->
         <div class="min-w-0 flex-1">
           <div class="flex items-center gap-2">
-            <span class="text-[0.8125rem] font-medium text-text-primary">{eventLabel(event.type)}</span>
-            <span class="h-1.5 w-1.5 shrink-0 rounded-full {severityDot(event.severity)}"></span>
+            <span class="text-[0.8125rem] font-medium {meta.color === 'text-status-critical' ? 'text-status-critical' : 'text-text-primary'}">{eventLabel(event.type)}</span>
+            {#if event.count && event.count > 1}
+              <span class="rounded-full bg-surface-elevated px-1.5 py-0.5 text-[0.625rem] tabular-nums font-medium text-text-muted">&times;{event.count}</span>
+            {/if}
           </div>
           {#if event.detail}
             <p class="mt-0.5 text-[0.75rem] text-text-secondary">{event.detail}</p>

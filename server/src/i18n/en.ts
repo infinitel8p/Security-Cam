@@ -238,6 +238,10 @@ export default {
     systemBoot: "System boot",
     deviceArrived: "Device arrived",
     deviceLeft: "Device left",
+    sensorTriggered: "Sensor triggered",
+    sensorReleased: "Sensor released",
+    sensorArmed: "Sensor armed",
+    sensorDisarmed: "Sensor disarmed",
   },
 
   // Relative time

@@ -225,6 +225,10 @@ export default {
     systemBoot: "Avvio del sistema",
     deviceArrived: "Dispositivo arrivato",
     deviceLeft: "Dispositivo partito",
+    sensorTriggered: "Sensore attivato",
+    sensorReleased: "Sensore rilasciato",
+    sensorArmed: "Sensore armato",
+    sensorDisarmed: "Sensore disarmato",
   },
 
   time: {
