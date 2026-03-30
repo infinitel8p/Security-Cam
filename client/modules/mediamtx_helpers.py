@@ -1,6 +1,9 @@
+import logging
 import os
 import subprocess
 import yaml
+
+log = logging.getLogger("mediamtx")
 
 CONFIG_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
@@ -44,6 +47,7 @@ def update_stream_params(params):
     for key, yml_key in STREAM_KEYS.items():
         if key in params:
             cam[yml_key] = int(params[key])
+            log.info("MediaMTX param %s → %s", yml_key, params[key])
 
     # Handle stream-mode rotation (hflip/vflip)
     if "rotation_angle" in params:
@@ -59,6 +63,7 @@ def update_stream_params(params):
 
     with open(CONFIG_PATH, "w") as f:
         yaml.dump(cfg, f, default_flow_style=False, sort_keys=False)
+    log.info("MediaMTX config written, restarting service...")
 
     return restart_service()
 
@@ -70,10 +75,15 @@ def restart_service():
             ["sudo", "systemctl", "restart", "mediamtx"],
             check=True, capture_output=True, timeout=10,
         )
+        log.info("MediaMTX service restarted successfully")
         return True, None
     except subprocess.CalledProcessError as e:
-        return False, f"Failed to restart MediaMTX: {e.stderr.decode().strip()}"
+        msg = f"Failed to restart MediaMTX: {e.stderr.decode().strip()}"
+        log.error(msg)
+        return False, msg
     except subprocess.TimeoutExpired:
+        log.error("MediaMTX restart timed out")
         return False, "MediaMTX restart timed out"
     except FileNotFoundError:
+        log.error("systemctl not found — not running on Pi?")
         return False, "systemctl not found (not running on the Pi?)"

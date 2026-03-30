@@ -37,6 +37,9 @@
   let manualName = $state("");
   let manualAdding = $state(false);
 
+  // Inline name editing for scan results
+  let editingNames = $state<Record<string, string>>({});
+
   function isAlreadyAdded(address: string): boolean {
     return devices.some(d => d.address.toLowerCase() === address.toLowerCase());
   }
@@ -73,9 +76,15 @@
   async function handleAdd(device: Device) {
     addingAddress = device.address;
     try {
-      await onAdd(device);
+      // Use the edited name if one was entered, otherwise use what we have
+      const customName = editingNames[device.address]?.trim();
+      const finalDevice = customName
+        ? { ...device, name: customName }
+        : { ...device, name: device.name || device.address };
+      await onAdd(finalDevice);
       // Remove from scan results after adding
       scanResults = scanResults.filter(d => d.address !== device.address);
+      delete editingNames[device.address];
     } finally {
       addingAddress = null;
     }
@@ -295,8 +304,18 @@
           {#each scanResults as device (device.address)}
             {@const alreadyAdded = isAlreadyAdded(device.address)}
             <li class="flex items-center gap-3 px-4 py-2 sm:px-5">
-              <div class="flex min-w-0 flex-1 flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-3">
-                <span class="truncate text-sm font-medium text-text-primary">{device.name || device.address}</span>
+              <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+                {#if device.name}
+                  <span class="truncate text-sm font-medium text-text-primary">{device.name}</span>
+                {:else}
+                  <input
+                    type="text"
+                    placeholder="Name this device"
+                    value={editingNames[device.address] ?? ""}
+                    oninput={(e) => { editingNames[device.address] = e.currentTarget.value; }}
+                    class="w-full rounded border border-border-default bg-surface-elevated px-2 py-0.5 text-sm font-medium text-text-primary placeholder:text-text-muted/50 outline-none focus:border-accent"
+                  />
+                {/if}
                 <code class="shrink-0 text-[0.6875rem] font-medium text-text-muted">{device.address}</code>
               </div>
               {#if alreadyAdded}

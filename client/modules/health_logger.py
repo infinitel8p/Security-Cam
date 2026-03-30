@@ -1,10 +1,13 @@
 import json
+import logging
 import os
 import threading
 import time
 from datetime import datetime, timezone
 
 from . import system_helpers
+
+log = logging.getLogger("health")
 
 LOG_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
@@ -93,7 +96,7 @@ def _log_loop():
                 entries = entries[-MAX_ENTRIES:]
             _save_log(entries)
         except Exception as e:
-            print(f"Health logger error: {e}")
+            log.error("Health logger error: %s", e)
         time.sleep(INTERVAL_SECONDS)
 
 
@@ -104,7 +107,7 @@ def start():
         return
     _thread = threading.Thread(target=_log_loop, daemon=True)
     _thread.start()
-    print("Health logger started (5-minute intervals)")
+    log.info("Health logger started (5-minute intervals)")
 
 
 def get_history(hours=24):

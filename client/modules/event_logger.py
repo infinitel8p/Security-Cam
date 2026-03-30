@@ -1,7 +1,10 @@
 import json
+import logging
 import os
 import threading
 from datetime import datetime, timezone
+
+log = logging.getLogger("events")
 
 LOG_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
@@ -59,6 +62,8 @@ def log_event(event_type, detail=None):
     }
     if detail:
         entry["detail"] = detail
+
+    log.info("Event: %s [%s]%s", event_type, severity, f" — {detail}" if detail else "")
 
     with _lock:
         entries = _load_log()

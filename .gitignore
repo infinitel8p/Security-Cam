@@ -9,3 +9,4 @@ dump/
 client/settings/settings.json
 client/data/health_log.json
 client/data/event_log.json
+client/data/security-cam.log

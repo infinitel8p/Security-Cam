@@ -1,3 +1,5 @@
+import logging
+import os
 from flask import Flask, jsonify, send_file, request, abort
 from flask_cors import CORS
 from urllib.parse import unquote
@@ -10,11 +12,44 @@ from modules import mediamtx_helpers
 from modules import health_logger
 from modules import event_logger
 
+# --- Logging setup ---
+LOG_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data")
+os.makedirs(LOG_DIR, exist_ok=True)
+LOG_FILE = os.path.join(LOG_DIR, "security-cam.log")
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    handlers=[
+        logging.FileHandler(LOG_FILE, encoding="utf-8"),
+        logging.StreamHandler(),
+    ],
+)
+# Quiet noisy libraries
+logging.getLogger("werkzeug").setLevel(logging.WARNING)
+
+log = logging.getLogger("main")
+
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
+
+@app.before_request
+def log_request():
+    log.info("%s %s (from %s)", request.method, request.path, request.remote_addr)
+
+
+@app.after_request
+def log_response(response):
+    if response.status_code >= 400:
+        log.warning("%s %s → %s", request.method, request.path, response.status)
+    return response
+
+
 health_logger.start()
 event_logger.log_event("system_boot")
+log.info("Security Cam backend started")
 
 
 @app.route('/system_info', methods=['GET'])
@@ -47,7 +82,7 @@ def toggle_recording():
     if stream_helpers.is_recording:
         stream_helpers.stop_recording()
         event_logger.log_event("recording_stopped")
-        print("Recording stopped")
+        log.info("Recording stopped (manual)")
         return jsonify({"message": "Recording stopped"})
     else:
         # TODO: When sensor-triggered recording is added, gate it with:
@@ -56,7 +91,7 @@ def toggle_recording():
         # Manual recording should always be allowed.
         stream_helpers.start_recording()
         event_logger.log_event("recording_started")
-        print("Recording started")
+        log.info("Recording started (manual)")
         return jsonify({"message": "Recording started"})
 
 
@@ -86,7 +121,7 @@ def list_directories():
     if settings_helpers.is_directory(decoded_path):
         directories, error = settings_helpers.list_directories(decoded_path)
         if error:
-            print(f"Error listing directories: {error}")
+            log.error("Error listing directories: %s", error)
             return jsonify({"error": error}), 500
         return jsonify(directories)
     else:
@@ -120,14 +155,15 @@ def device_status():
 @app.route('/devices/bt/add', methods=['POST'])
 def add_bt_device():
     data = request.json
-    address = data.get("address", "").strip()
-    name = data.get("name", "").strip() or address
+    address = (data.get("address") or "").strip()
+    name = (data.get("name") or "").strip() or address
     if not address:
         return jsonify({"error": "Address is required"}), 400
 
     try:
         settings_helpers.pair_bt_device(address)
     except Exception as e:
+        log.error("BT add failed for %s: %s", address, e)
         return jsonify({"error": f"Pairing failed: {e}"}), 500
 
     settings = settings_helpers.get_settings()
@@ -136,34 +172,36 @@ def add_bt_device():
         bt_list.append({"address": address, "name": name})
         settings_helpers.update_settings({"TARGET_BT_ADDRESSES": bt_list})
 
+    log.info("BT device added: %s (%s)", name, address)
     return jsonify({"message": "Device added"})
 
 
 @app.route('/devices/bt/remove', methods=['POST'])
 def remove_bt_device():
     data = request.json
-    address = data.get("address", "").strip()
+    address = (data.get("address") or "").strip()
     if not address:
         return jsonify({"error": "Address is required"}), 400
 
     try:
         settings_helpers.unpair_bt_device(address)
-    except Exception:
-        pass  # Best-effort unpair
+    except Exception as e:
+        log.warning("BT unpair best-effort failed for %s: %s", address, e)
 
     settings = settings_helpers.get_settings()
     bt_list = [d for d in settings.get("TARGET_BT_ADDRESSES", [])
                if d["address"].lower() != address.lower()]
     settings_helpers.update_settings({"TARGET_BT_ADDRESSES": bt_list})
 
+    log.info("BT device removed: %s", address)
     return jsonify({"message": "Device removed"})
 
 
 @app.route('/devices/wifi/add', methods=['POST'])
 def add_wifi_device():
     data = request.json
-    address = data.get("address", "").strip()
-    name = data.get("name", "").strip() or address
+    address = (data.get("address") or "").strip()
+    name = (data.get("name") or "").strip() or address
     if not address:
         return jsonify({"error": "Address is required"}), 400
 
@@ -173,13 +211,14 @@ def add_wifi_device():
         wifi_list.append({"address": address, "name": name})
         settings_helpers.update_settings({"TARGET_AP_MAC_ADDRESSES": wifi_list})
 
+    log.info("WiFi device added: %s (%s)", name, address)
     return jsonify({"message": "Device added"})
 
 
 @app.route('/devices/wifi/remove', methods=['POST'])
 def remove_wifi_device():
     data = request.json
-    address = data.get("address", "").strip()
+    address = (data.get("address") or "").strip()
     if not address:
         return jsonify({"error": "Address is required"}), 400
 
@@ -188,6 +227,7 @@ def remove_wifi_device():
                  if d["address"].lower() != address.lower()]
     settings_helpers.update_settings({"TARGET_AP_MAC_ADDRESSES": wifi_list})
 
+    log.info("WiFi device removed: %s", address)
     return jsonify({"message": "Device removed"})
 
 

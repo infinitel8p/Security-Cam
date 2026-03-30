@@ -1,9 +1,11 @@
+import logging
 import os
 import subprocess
 import threading
 from datetime import datetime
 from . import settings_helpers
 
+log = logging.getLogger("stream")
 settings = settings_helpers.get_settings()
 
 lock = threading.Lock()
@@ -32,8 +34,10 @@ def start_recording() -> None:
 
     with lock:
         if is_recording:
+            log.warning("start_recording called but already recording")
             return
 
+        log.info("Starting FFmpeg recording → %s", recorded_filename)
         _ffmpeg_process = subprocess.Popen(
             [
                 "ffmpeg", "-y",
@@ -48,7 +52,7 @@ def start_recording() -> None:
             stderr=subprocess.DEVNULL,
         )
         is_recording = True
-        print(f"Recording started: {recorded_filename}")
+        log.info("Recording started: %s (pid=%d)", recorded_filename, _ffmpeg_process.pid)
 
 
 def stop_recording() -> None:
@@ -56,14 +60,16 @@ def stop_recording() -> None:
 
     with lock:
         if _ffmpeg_process is None:
+            log.warning("stop_recording called but not recording")
             return
 
+        log.info("Stopping FFmpeg (pid=%d)...", _ffmpeg_process.pid)
         # Send 'q' to ffmpeg for a graceful stop (writes proper file trailer)
         try:
             _ffmpeg_process.stdin.write(b"q")
             _ffmpeg_process.stdin.flush()
         except BrokenPipeError:
-            pass
+            log.warning("FFmpeg stdin pipe already broken")
 
         proc = _ffmpeg_process
         filename = recorded_filename
@@ -73,15 +79,18 @@ def stop_recording() -> None:
     # Wait for ffmpeg to finish outside the lock
     try:
         proc.wait(timeout=10)
+        log.info("FFmpeg exited cleanly (code=%d)", proc.returncode)
     except subprocess.TimeoutExpired:
+        log.warning("FFmpeg did not exit in 10s, killing")
         proc.kill()
         proc.wait()
 
     # Re-mux with faststart for browser seeking support
     if filename and os.path.exists(filename) and os.path.getsize(filename) > 0:
+        log.info("Queuing faststart fix for %s", filename)
         threading.Thread(target=_fix_faststart, args=(filename,)).start()
 
-    print(f"Recording stopped: {filename}")
+    log.info("Recording stopped: %s", filename)
 
 
 def _fix_faststart(file_path: str) -> None:
@@ -93,8 +102,8 @@ def _fix_faststart(file_path: str) -> None:
             check=True, capture_output=True,
         )
         os.replace(tmp_path, file_path)
-        print(f"Faststart applied: {file_path}")
+        log.info("Faststart applied: %s", file_path)
     except Exception as e:
-        print(f"Failed to apply faststart: {e}")
+        log.error("Failed to apply faststart for %s: %s", file_path, e)
         if os.path.exists(tmp_path):
             os.remove(tmp_path)
