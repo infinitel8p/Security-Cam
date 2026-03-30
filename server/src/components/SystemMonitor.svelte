@@ -58,7 +58,7 @@
   }
 
   function formatUptime(seconds: number | undefined | null): string {
-    if (seconds == null || isNaN(seconds)) return "—";
+    if (seconds == null || isNaN(seconds)) return "-";
     const d = Math.floor(seconds / 86400);
     const h = Math.floor((seconds % 86400) / 3600);
     const m = Math.floor((seconds % 3600) / 60);
@@ -218,7 +218,7 @@
             <p class="mt-1 text-lg font-bold leading-none text-status-ok">OK</p>
           {/if}
         {:else}
-          <p class="mt-1 text-xl font-bold leading-none text-text-muted">—</p>
+          <p class="mt-1 text-xl font-bold leading-none text-text-muted">-</p>
         {/if}
       </div>
     </div>

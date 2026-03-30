@@ -1,8 +1,9 @@
 """KY-010 photo interrupter (light gate) sensor.
 
-A slotted optical sensor — triggers when the infrared beam between
-the emitter and receiver is blocked (something passes through the
-slot).  Releases when the beam is restored.
+Small slotted optical sensor (~5mm gap) with an IR emitter and
+receiver.  Triggers when the beam is blocked by an object in the
+slot.  Useful as an alarm trigger when a pin or bolt is pulled
+from the slot.  Requires some mechanical effort to mount properly.
 
 Wiring (3 pins):
   + (VCC) → 3V3 [pin 17]
@@ -22,8 +23,8 @@ class LightGateSensor(BaseSensor):
     sensor_type = "light_gate"
     default_gpio = 6
     module = "KY-010"
-    description = "Photo interrupter — triggers when IR beam is blocked"
-    use_case = "Detect something passing through a doorway or slot"
+    description = "Photo interrupter - triggers when IR beam in ~5mm slot is blocked"
+    use_case = "Alarm when pin/bolt is removed, rotation counting"
     icon = "gate"
     wiring = [
         {"pin": "+ (VCC)", "connect": "3V3 [pin 17]"},

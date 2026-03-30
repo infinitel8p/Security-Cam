@@ -2,8 +2,8 @@
 
 Every sensor implementation must subclass BaseSensor and implement
 start() and stop().  The manager calls start() with two callbacks:
-  on_trigger  — called when the sensor fires  (door opened, motion, button press)
-  on_release  — called when the sensor resets (door closed, motion cleared, button released)
+  on_trigger  - called when the sensor fires  (door opened, motion, button press)
+  on_release  - called when the sensor resets (door closed, motion cleared, button released)
 
 Implementations that don't have a meaningful "release" (e.g. PIR with
 auto-reset) can simply never call on_release; the sensor manager handles
@@ -23,7 +23,7 @@ class BaseSensor(ABC):
     # Default GPIO pin (overridable via settings)
     default_gpio: int = 0
 
-    # Display metadata — override in subclasses
+    # Display metadata - override in subclasses
     module: str = ""                  # e.g. "KY-025"
     description: str = ""             # one-line description
     use_case: str = ""                # what it's good for

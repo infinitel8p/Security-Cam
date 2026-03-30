@@ -189,7 +189,7 @@
         testValue = null;
       }
     } catch {
-      testError = "Unable to connect to the backend — is the Pi running?";
+      testError = "Unable to connect to the backend - is the Pi running?";
       testValue = null;
     }
   }
@@ -303,7 +303,7 @@
                     <circle cx="12" cy="12" r="3" />
                   </svg>
                 {:else}
-                  <!-- magnet, zap, rotate, hand — all simple path icons -->
+                  <!-- magnet, zap, rotate, hand - all simple path icons -->
                   <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d={ICONS[st.icon] ?? ICONS.zap} />
                   </svg>
@@ -384,7 +384,7 @@
             bind:value={gpio}
             class="w-24 rounded-lg border border-border-default bg-surface-elevated px-3 py-1.5 text-sm font-medium tabular-nums text-text-primary outline-none focus:border-accent"
           />
-          <p class="mt-1 text-[0.6875rem] text-text-muted">BCM pin number (0-27). Default for this sensor: GPIO {currentMeta?.default_gpio ?? "—"}</p>
+          <p class="mt-1 text-[0.6875rem] text-text-muted">BCM pin number (0-27). Default for this sensor: GPIO {currentMeta?.default_gpio ?? "-"}</p>
         </div>
 
         <!-- Wiring test panel -->
@@ -452,7 +452,7 @@
                 </div>
 
                 <p class="text-[0.6875rem] text-text-muted">
-                  Activate the sensor now — you should see the value change. Polling every 500ms.
+                  Activate the sensor now - you should see the value change. Polling every 500ms.
                 </p>
               {/if}
             </div>

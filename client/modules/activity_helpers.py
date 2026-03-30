@@ -203,7 +203,7 @@ def is_device_connected_to_ap() -> bool:
     """Check if any target MAC addresses are connected to the AP."""
     settings = settings_helpers.get_settings()
     if not is_in_ap_mode():
-        log.debug("AP presence check skipped — not in AP mode")
+        log.debug("AP presence check skipped - not in AP mode")
         return False
 
     try:

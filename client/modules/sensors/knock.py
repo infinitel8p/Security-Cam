@@ -2,7 +2,7 @@
 
 Detects taps, knocks, or light impacts via a spring-contact switch.
 Similar to KY-002 vibration but tuned for deliberate taps rather
-than sustained vibration.  Produces brief pulses — the sensor
+than sustained vibration.  Produces brief pulses - the sensor
 manager's hold timeout keeps recording running through repeated knocks.
 
 Wiring (3 pins):
@@ -23,7 +23,7 @@ class KnockSensor(BaseSensor):
     sensor_type = "knock"
     default_gpio = 19
     module = "KY-031"
-    description = "Knock sensor — detects taps and deliberate knocks"
+    description = "Knock sensor - detects taps and deliberate knocks"
     use_case = "Detect knocking on door or tapping on window"
     icon = "zap"
     wiring = [

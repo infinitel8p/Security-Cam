@@ -1,10 +1,10 @@
 """KY-021 mini magnetic reed switch sensor.
 
-Compact reed switch — functionally identical to the KY-025 but in
+Compact reed switch - functionally identical to the KY-025 but in
 a smaller form factor.  Triggers when the magnet is removed (door
 opens), releases when the magnet returns (door closes).
 
-Wiring (2 pins — active-low, no VCC needed):
+Wiring (2 pins - active-low, no VCC needed):
   GND → GND  [pin 14]
   S   → GPIO [default pin 20]
 
@@ -25,14 +25,14 @@ class MiniReedSensor(BaseSensor):
     sensor_type = "mini_reed"
     default_gpio = 20
     module = "KY-021"
-    description = "Compact reed switch — same function as KY-025, smaller form factor"
+    description = "Compact reed switch - same function as KY-025, smaller form factor"
     use_case = "Door / window open detection (tight spaces)"
     icon = "magnet"
     wiring = [
         {"pin": "GND", "connect": "GND [pin 14]"},
         {"pin": "S (Signal)", "connect": "GPIO 20 [pin 38]"},
     ]
-    wiring_note = "Only 2 pins — the internal GPIO pull-up provides the logic reference. No VCC needed."
+    wiring_note = "Only 2 pins - the internal GPIO pull-up provides the logic reference. No VCC needed."
 
     def __init__(self, gpio: int | None = None, **kwargs):
         super().__init__(gpio, **kwargs)

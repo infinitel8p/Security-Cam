@@ -9,7 +9,7 @@ from . import settings_helpers
 log = logging.getLogger("presence")
 
 POLL_INTERVAL = 30  # seconds
-EVENT_COOLDOWN = 120  # seconds — suppress duplicate events for the same device+type
+EVENT_COOLDOWN = 120  # seconds - suppress duplicate events for the same device+type
 
 _thread = None
 # Track last-known state: {"AA:BB:CC:DD:EE:FF": True/False}
@@ -44,12 +44,12 @@ def _handle_transition(addr: str, online: bool, name: str, transport: str,
 
     Only updates the tracked state when the event is actually logged (or on
     first sight).  If the cooldown suppresses the log, the state stays at the
-    old value so the transition is re-evaluated on the next poll cycle — no
+    old value so the transition is re-evaluated on the next poll cycle - no
     events are silently lost.
     """
     was_online = state_dict.get(addr)
 
-    # First time seeing this device — just record state, don't log
+    # First time seeing this device - just record state, don't log
     if was_online is None:
         state_dict[addr] = online
         return

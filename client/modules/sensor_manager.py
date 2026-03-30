@@ -1,4 +1,4 @@
-"""Sensor manager — connects trigger sensors to recording via presence gating.
+"""Sensor manager - connects trigger sensors to recording via presence gating.
 
 Flow:
   sensor trigger → check presence → nobody home? → start recording
@@ -9,7 +9,7 @@ config from settings, instantiates the right sensor class, and wires
 up the callbacks.
 
 Manual recording (/toggle_recording) is never blocked by the sensor
-system — this module only controls *automatic* sensor-triggered recording.
+system - this module only controls *automatic* sensor-triggered recording.
 """
 
 import logging
@@ -91,12 +91,12 @@ def _on_trigger():
         event_logger.log_event("sensor_triggered", _sensor.name if _sensor else None)
 
         if _sensor_recording:
-            # Already recording from a prior trigger — just reset the hold timer
+            # Already recording from a prior trigger - just reset the hold timer
             return
 
     # Presence check runs outside the lock (can be slow / blocking)
     if _is_someone_home():
-        log.info("Sensor triggered but device present — skipping recording")
+        log.info("Sensor triggered but device present - skipping recording")
         return
 
     with _lock:
@@ -104,7 +104,7 @@ def _on_trigger():
             log.info("Sensor triggered but already recording (manual)")
             return
 
-        log.info("Sensor triggered, no presence detected — starting recording")
+        log.info("Sensor triggered, no presence detected - starting recording")
         stream_helpers.start_recording()
         _sensor_recording = True
         event_logger.log_event("recording_started", "sensor trigger")
@@ -127,7 +127,7 @@ def _on_release():
         hold = settings.get("Sensor", {}).get("hold_seconds", 10)
 
         if hold > 0:
-            log.info("Sensor released — holding recording for %ds", hold)
+            log.info("Sensor released - holding recording for %ds", hold)
             _start_hold_timer_locked(hold)
         else:
             _stop_sensor_recording_locked()
@@ -160,7 +160,7 @@ def _hold_expired():
         if not _triggered:
             _stop_sensor_recording_locked()
         else:
-            log.info("Hold expired but sensor still triggered — continuing recording")
+            log.info("Hold expired but sensor still triggered - continuing recording")
 
 
 def _cancel_hold_timer_locked():
@@ -184,7 +184,7 @@ def notify_manual_recording_stopped():
     global _sensor_recording
     with _lock:
         if _sensor_recording:
-            log.info("Manual stop overrode sensor recording — resetting sensor state")
+            log.info("Manual stop overrode sensor recording - resetting sensor state")
             _sensor_recording = False
             _cancel_hold_timer_locked()
 
@@ -197,7 +197,7 @@ def start():
     sensor_cfg = settings.get("Sensor", {})
 
     if not sensor_cfg.get("enabled", False):
-        log.info("Sensor disabled in settings — skipping start")
+        log.info("Sensor disabled in settings - skipping start")
         return
 
     sensor_type = sensor_cfg.get("type", "reed_switch")

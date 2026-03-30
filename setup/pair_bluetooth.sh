@@ -59,7 +59,7 @@ SCAN_EOF
 
     echo ""
     echo "Pairing with $name ($mac)..."
-    echo "A confirmation prompt may appear on your device — please accept it."
+    echo "A confirmation prompt may appear on your device - please accept it."
     echo ""
 
     # Use expect to pair and trust in an interactive session
@@ -107,7 +107,7 @@ run_wait_mode() {
     echo "The Pi is now discoverable."
     echo "On your device, open Bluetooth settings and pair with the Pi."
     echo "Waiting for incoming pairing request (120 seconds)..."
-    echo "A confirmation prompt may appear on your device — please accept it."
+    echo "A confirmation prompt may appear on your device - please accept it."
     echo ""
 
     # Use expect to make Pi discoverable and wait for pairing.

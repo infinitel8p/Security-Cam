@@ -74,7 +74,7 @@
       <svg class="h-3 w-3 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
       </svg>
-      <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">Health — Last 72h</p>
+      <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">Health - Last 72h</p>
     </div>
     {#if hoveredIndex >= 0 && slots[hoveredIndex]}
       <span class="text-[0.625rem] tabular-nums text-text-muted">

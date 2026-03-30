@@ -91,7 +91,7 @@ def toggle_recording():
         log.info("Recording stopped (manual)")
         return jsonify({"message": "Recording stopped"})
     else:
-        # Manual recording is always allowed — presence gating only
+        # Manual recording is always allowed - presence gating only
         # applies to automatic sensor-triggered recording (sensor_manager).
         stream_helpers.start_recording()
         event_logger.log_event("recording_started")
@@ -334,7 +334,7 @@ def sensor_mock_release():
 def sensor_test():
     """Read the raw GPIO pin value for wiring verification.
 
-    Accepts {"type": "reed_switch", "gpio": 22} — creates a temporary
+    Accepts {"type": "reed_switch", "gpio": 22} - creates a temporary
     sensor instance, reads the pin, and returns the value.  Does not
     interfere with the running sensor manager.
     """

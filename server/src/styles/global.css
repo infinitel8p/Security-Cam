@@ -15,35 +15,35 @@
 
   /* ── Dark theme (default) ─────────────────────────────────────────────── */
 
-  /* Surfaces — deep blue-black with layered depth */
+  /* Surfaces - deep blue-black with layered depth */
   --color-surface-base: #060810;
   --color-surface-raised: #0c0f18;
   --color-surface-overlay: #131722;
   --color-surface-elevated: #1a1e2c;
   --color-surface-glass: rgba(12, 15, 24, 0.85);
 
-  /* Borders — cool blue-tinted */
+  /* Borders - cool blue-tinted */
   --color-border-subtle: rgba(136, 155, 195, 0.07);
   --color-border-default: rgba(136, 155, 195, 0.12);
   --color-border-strong: rgba(136, 155, 195, 0.18);
 
-  /* Text — blue-tinted neutrals for cohesion */
+  /* Text - blue-tinted neutrals for cohesion */
   --color-text-primary: #e2e6f0;
   --color-text-secondary: #8490ad;
   --color-text-muted: #4a5370;
 
-  /* Accent — vivid blue */
+  /* Accent - vivid blue */
   --color-accent: #4f8ff7;
   --color-accent-hover: #6da3fa;
   --color-accent-muted: rgba(79, 143, 247, 0.10);
   --color-accent-strong: rgba(79, 143, 247, 0.18);
 
-  /* Status — tuned for dark backgrounds */
+  /* Status - tuned for dark backgrounds */
   --color-status-ok: #34d9ac;
   --color-status-warning: #f0b93a;
   --color-status-critical: #f06868;
 
-  /* Shadows — layered for realism */
+  /* Shadows - layered for realism */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(136, 155, 195, 0.04);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(136, 155, 195, 0.04);
   --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(136, 155, 195, 0.04);
@@ -111,7 +111,7 @@ body {
   );
 }
 
-/* Interactive card — lift on hover */
+/* Interactive card - lift on hover */
 .card-interactive {
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border-subtle);

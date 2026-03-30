@@ -2,7 +2,7 @@
 
 # Update Security-Cam from git and rebuild if needed.
 # Compares the current commit with the last-built commit to skip unnecessary rebuilds.
-# Designed to be safe as a systemd ExecStartPre — always exits 0 so the service starts
+# Designed to be safe as a systemd ExecStartPre - always exits 0 so the service starts
 # even if the update/build fails.
 #
 # Usage:

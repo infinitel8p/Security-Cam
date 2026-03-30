@@ -16,7 +16,7 @@ class MockSensor(BaseSensor):
     sensor_type = "mock"
     default_gpio = 0  # not used
     module = "Software only"
-    description = "No hardware needed — trigger and release via dashboard or API"
+    description = "No hardware needed - trigger and release via dashboard or API"
     use_case = "Testing and development without GPIO"
     icon = "wrench"
 

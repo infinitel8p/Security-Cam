@@ -9,7 +9,7 @@
   }
 </script>
 
-<!-- Bottom tab bar — visible only below lg -->
+<!-- Bottom tab bar - visible only below lg -->
 <nav
   class="fixed bottom-0 left-0 right-0 z-40 flex items-stretch border-t border-border-subtle bg-surface-glass backdrop-blur-xl landscape:hidden lg:hidden"
   style="padding-bottom: env(safe-area-inset-bottom, 0px);"

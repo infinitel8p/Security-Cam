@@ -1,4 +1,4 @@
-"""Sensor registry — maps type strings to sensor classes.
+"""Sensor registry - maps type strings to sensor classes.
 
 Usage:
     from modules.sensors import SENSOR_REGISTRY, create_sensor

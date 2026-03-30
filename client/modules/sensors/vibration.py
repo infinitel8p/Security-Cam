@@ -1,12 +1,12 @@
 """KY-002 vibration/shock sensor.
 
 Detects impact or vibration via a spring-contact switch on GPIO.
-Produces brief digital pulses on each vibration — there is no
+Produces brief digital pulses on each vibration - there is no
 sustained "triggered" state, so on_release is called immediately
 after on_trigger.  The sensor manager's hold timeout keeps the
 recording running through repeated vibrations.
 
-Wiring (3 pins — ignore AO if present):
+Wiring (3 pins - ignore AO if present):
   + (VCC) → 3V3 [pin 17]
   GND     → GND  [pin 14]
   DO      → GPIO [default pin 5]
@@ -24,7 +24,7 @@ class VibrationSensor(BaseSensor):
     sensor_type = "vibration"
     default_gpio = 5
     module = "KY-002"
-    description = "Spring-contact shock sensor — brief pulse on impact"
+    description = "Spring-contact shock sensor - brief pulse on impact"
     use_case = "Door slam, forced entry, impact detection"
     icon = "zap"
     wiring = [

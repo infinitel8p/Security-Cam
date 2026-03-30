@@ -2,7 +2,7 @@
 
 Detects orientation change via a mercury ball contact.  Triggers
 when the sensor is tilted beyond its threshold angle.  Useful for
-tamper detection — mount on the camera and it triggers if someone
+tamper detection - mount on the camera and it triggers if someone
 moves or repositions it.
 
 Wiring (3 pins):
@@ -23,7 +23,7 @@ class TiltSensor(BaseSensor):
     sensor_type = "tilt"
     default_gpio = 26
     module = "KY-017"
-    description = "Mercury tilt switch — triggers on orientation change"
+    description = "Mercury tilt switch - triggers on orientation change"
     use_case = "Camera tamper detection (someone moves the camera)"
     icon = "rotate"
     wiring = [

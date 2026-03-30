@@ -4,7 +4,7 @@ Capacitive touch sensor that triggers when a person touches the
 metal contact pad.  Useful for detecting if someone touches the
 camera housing or a conductive surface near it.
 
-Wiring (3 pins — ignore AO if present):
+Wiring (3 pins - ignore AO if present):
   + (VCC) → 3V3 [pin 17]
   GND     → GND  [pin 14]
   DO      → GPIO [default pin 16]
@@ -22,7 +22,7 @@ class TouchSensor(BaseSensor):
     sensor_type = "touch"
     default_gpio = 16
     module = "KY-036"
-    description = "Capacitive metal touch sensor — triggers on skin contact"
+    description = "Capacitive metal touch sensor - triggers on skin contact"
     use_case = "Detect touching of camera housing or door handle"
     icon = "hand"
     wiring = [

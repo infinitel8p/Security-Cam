@@ -53,23 +53,23 @@
 
   const presetGroups: PresetGroup[] = [
     {
-      label: "4:3 — Full field of view",
+      label: "4:3 - Full field of view",
       presets: [
         { label: "SD 640×480 · 30 fps", w: 640, h: 480, fps: 30, note: "Minimal CPU load, great for monitoring" },
         { label: "SD 640×480 · 15 fps", w: 640, h: 480, fps: 15, note: "Lowest resource usage" },
         { label: "HD 1296×972 · 30 fps", w: 1296, h: 972, fps: 30, note: "Best balance for Pi Zero 2 W", recommended: true },
         { label: "HD 1296×972 · 15 fps", w: 1296, h: 972, fps: 15, note: "Sharp image, relaxed CPU" },
-        { label: "Full 1640×1232 · 15 fps", w: 1640, h: 1232, fps: 15, note: "Max 4:3 resolution — may strain Pi Zero 2 W" },
+        { label: "Full 1640×1232 · 15 fps", w: 1640, h: 1232, fps: 15, note: "Max 4:3 resolution - may strain Pi Zero 2 W" },
       ],
     },
     {
-      label: "16:9 — Wide",
+      label: "16:9 - Wide",
       presets: [
         { label: "SD 640×360 · 30 fps", w: 640, h: 360, fps: 30, note: "Lightweight widescreen" },
         { label: "HD 1280×720 · 30 fps", w: 1280, h: 720, fps: 30, note: "720p, smooth playback" },
         { label: "HD 1280×720 · 15 fps", w: 1280, h: 720, fps: 15, note: "720p, lower CPU" },
         { label: "Full HD 1920×1080 · 15 fps", w: 1920, h: 1080, fps: 15, note: "1080p at comfortable framerate" },
-        { label: "Full HD 1920×1080 · 30 fps", w: 1920, h: 1080, fps: 30, note: "Max quality — will strain Pi Zero 2 W" },
+        { label: "Full HD 1920×1080 · 30 fps", w: 1920, h: 1080, fps: 30, note: "Max quality - will strain Pi Zero 2 W" },
       ],
     },
   ];
@@ -242,10 +242,10 @@
         disabled={rotationSaving}
         class="rounded-xl border border-border-default bg-surface-elevated px-3.5 py-2 text-sm font-medium text-text-primary outline-none transition-all duration-200 focus:border-accent focus:shadow-[var(--shadow-glow)] disabled:opacity-50"
       >
-        <option value={0}>0° — Default</option>
-        <option value={90}>90° — Clockwise</option>
-        <option value={180}>180° — Flipped</option>
-        <option value={270}>270° — Counter-clockwise</option>
+        <option value={0}>0° - Default</option>
+        <option value={90}>90° - Clockwise</option>
+        <option value={180}>180° - Flipped</option>
+        <option value={270}>270° - Counter-clockwise</option>
       </select>
 
       {#if rotationSaving}

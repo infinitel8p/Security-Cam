@@ -85,5 +85,5 @@ def restart_service():
         log.error("MediaMTX restart timed out")
         return False, "MediaMTX restart timed out"
     except FileNotFoundError:
-        log.error("systemctl not found — not running on Pi?")
+        log.error("systemctl not found - not running on Pi?")
         return False, "systemctl not found (not running on the Pi?)"

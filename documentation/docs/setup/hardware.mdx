@@ -61,7 +61,7 @@ If connected properly you should see a faint red glow from the camera's infrared
 
 ### Camera Setup
 
-On Raspberry Pi OS Trixie, the camera should work out of the box via `libcamera` — no `/boot/firmware/config.txt` changes are needed.
+On Raspberry Pi OS Trixie, the camera should work out of the box via `libcamera` - no `/boot/firmware/config.txt` changes are needed.
 
 :::info
 If your camera is not auto-detected, you need to manually add a device tree overlay to `/boot/firmware/config.txt`. Find your camera's sensor model in the table below and run the command, replacing `<your_overlay>` with the matching setting statement:
@@ -290,7 +290,7 @@ This is the connection layout using a breadboard. The clock can also just be con
 
 4. #### Disable fake-hwclock (if present):
 
-   If `fake-hwclock` is installed, disable it so it doesn't conflict with the real hardware clock. It's safe to run this even if it's not installed — the commands will simply report that the services don't exist.
+   If `fake-hwclock` is installed, disable it so it doesn't conflict with the real hardware clock. It's safe to run this even if it's not installed - the commands will simply report that the services don't exist.
 
    ```bash
    sudo systemctl disable fake-hwclock fake-hwclock-load fake-hwclock-save 2>/dev/null

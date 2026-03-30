@@ -17,7 +17,7 @@ class ReedSwitchSensor(BaseSensor):
     sensor_type = "reed_switch"
     default_gpio = 22
     module = "KY-025"
-    description = "Magnetic reed switch — triggers when magnet is removed"
+    description = "Magnetic reed switch - triggers when magnet is removed"
     use_case = "Door / window open detection"
     icon = "magnet"
     wiring = [

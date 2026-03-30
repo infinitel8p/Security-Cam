@@ -18,7 +18,7 @@ class PIRSensor(BaseSensor):
     sensor_type = "pir"
     default_gpio = 17
     module = "HC-SR501 or similar"
-    description = "Passive infrared motion sensor — triggers on heat/movement"
+    description = "Passive infrared motion sensor - triggers on heat/movement"
     use_case = "Motion detection in a room or hallway"
     icon = "eye"
     wiring = [

@@ -8,7 +8,7 @@ last_update:
 
 # WiFi Setup
 
-This guide will help you set up a WiFi Access Point on your Raspberry Pi while keeping it connected to your home WiFi network. The Pi will use a single WiFi chip to run both connections simultaneously — `wlan0` for your home WiFi and a virtual `ap0` interface for the AP.
+This guide will help you set up a WiFi Access Point on your Raspberry Pi while keeping it connected to your home WiFi network. The Pi will use a single WiFi chip to run both connections simultaneously - `wlan0` for your home WiFi and a virtual `ap0` interface for the AP.
 
 The Access Point is used for device presence detection (phones connecting to it trigger smart recording).
 
@@ -26,9 +26,9 @@ sudo ./setup/setup_ap.sh
 ```
 
 The script will prompt you for:
-- **SSID** — the AP network name (default: `SecurityCam`)
-- **Password** — minimum 8 characters
-- **Channel** — auto-detected from your current WiFi connection
+- **SSID** - the AP network name (default: `SecurityCam`)
+- **Password** - minimum 8 characters
+- **Channel** - auto-detected from your current WiFi connection
 
 You can also run it non-interactively:
 
@@ -68,7 +68,7 @@ phy#0
                 txpower 31.00 dBm
 ```
 
-Note the **channel number** (`channel 6` in this case) — you will need it later.
+Note the **channel number** (`channel 6` in this case) - you will need it later.
 
 ### Create the virtual AP interface
 
@@ -96,7 +96,7 @@ The Pi's WiFi chip supports running a second virtual interface for the Access Po
 
 ### Tell NetworkManager to ignore ap0
 
-NetworkManager must not manage `ap0` — hostapd will handle it directly.
+NetworkManager must not manage `ap0` - hostapd will handle it directly.
 
 ```bash
 sudo mkdir -p /etc/NetworkManager/conf.d
@@ -117,9 +117,9 @@ sudo apt install hostapd dnsmasq -y
 
 Create the hostapd configuration. Replace the values as needed:
 
-- `SecurityCam` — your desired network name (SSID)
-- `YourPasswordHere` — your desired WiFi password (min 8 characters)
-- `channel=6` — the channel from the first step
+- `SecurityCam` - your desired network name (SSID)
+- `YourPasswordHere` - your desired WiFi password (min 8 characters)
+- `channel=6` - the channel from the first step
 
 ```bash
 sudo tee /etc/hostapd/hostapd.conf > /dev/null << 'EOF'
@@ -205,7 +205,7 @@ sudo systemctl restart dnsmasq
 
 ## Internet passthrough
 
-By default, the AP setup enables internet passthrough — devices connected to the Pi's AP share the Pi's WiFi connection (`wlan0 → ap0`). This is done via IP forwarding and iptables NAT rules.
+By default, the AP setup enables internet passthrough - devices connected to the Pi's AP share the Pi's WiFi connection (`wlan0 → ap0`). This is done via IP forwarding and iptables NAT rules.
 
 If you ran `setup_ap.sh`, this is already configured. To set it up manually:
 
@@ -225,7 +225,7 @@ sudo netfilter-persistent save
 ```
 
 :::note
-If the Pi has no WiFi connection (e.g. at a remote location), devices can still connect to the AP to access the dashboard — they just won't have internet.
+If the Pi has no WiFi connection (e.g. at a remote location), devices can still connect to the AP to access the dashboard - they just won't have internet.
 :::
 
 ## Captive portal and dashboard hostname
@@ -240,7 +240,7 @@ The AP is configured with a **captive portal** and a custom hostname so users ca
 The captive portal works by intercepting OS-specific connectivity check domains (e.g. `captive.apple.com` for iOS, `connectivitycheck.gstatic.com` for Android) via dnsmasq, and redirecting HTTP traffic on port 80 to the dashboard on port 3000.
 
 :::caution
-Because the captive portal intercepts connectivity checks, devices will show a "No Internet" indicator even when internet passthrough is working. This is cosmetic — internet access works normally for all other traffic.
+Because the captive portal intercepts connectivity checks, devices will show a "No Internet" indicator even when internet passthrough is working. This is cosmetic - internet access works normally for all other traffic.
 :::
 
 ### Configuration
@@ -318,9 +318,9 @@ journalctl -u hostapd --no-pager -l | tail -20
 
 Common causes:
 
-- **Channel mismatch** — `ap0` must use the same channel as `wlan0`. Check with `iw dev` and update `/etc/hostapd/hostapd.conf`.
-- **ap0 doesn't exist** — check `create-ap0.service`: `sudo systemctl status create-ap0.service`
-- **Interface held by wpa_supplicant** — if NetworkManager previously tried to manage `ap0` as an AP, `wpa_supplicant` may still be attached. Recreate the interface:
+- **Channel mismatch** - `ap0` must use the same channel as `wlan0`. Check with `iw dev` and update `/etc/hostapd/hostapd.conf`.
+- **ap0 doesn't exist** - check `create-ap0.service`: `sudo systemctl status create-ap0.service`
+- **Interface held by wpa_supplicant** - if NetworkManager previously tried to manage `ap0` as an AP, `wpa_supplicant` may still be attached. Recreate the interface:
   ```bash
   sudo iw dev ap0 del
   sudo iw dev wlan0 interface add ap0 type __ap
@@ -328,7 +328,7 @@ Common causes:
   sudo ip link set ap0 up
   sudo systemctl restart hostapd
   ```
-- **Interface managed by NM** — `nmcli device status` should show `ap0` as `unmanaged`. If not, check `/etc/NetworkManager/conf.d/ignore-ap0.conf` exists and reload NM.
+- **Interface managed by NM** - `nmcli device status` should show `ap0` as `unmanaged`. If not, check `/etc/NetworkManager/conf.d/ignore-ap0.conf` exists and reload NM.
 
 ### No IP address on connected devices
 

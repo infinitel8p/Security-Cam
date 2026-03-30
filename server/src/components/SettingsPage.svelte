@@ -31,7 +31,7 @@
       const res = await fetch(`${getBackendUrl()}/devices/status`);
       if (res.ok) deviceStatuses = await res.json();
     } catch {
-      // Silent fail — status is supplementary
+      // Silent fail - status is supplementary
     }
   }
 

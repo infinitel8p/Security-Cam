@@ -12,7 +12,7 @@ LOG_PATH = os.path.join(
 )
 
 MAX_ENTRIES = 5000
-MIN_DUPLICATE_INTERVAL = 120  # seconds — suppress identical events within this window
+MIN_DUPLICATE_INTERVAL = 120  # seconds - suppress identical events within this window
 _lock = threading.Lock()
 
 # Event types and their severity for the tracker
@@ -84,7 +84,7 @@ def log_event(event_type, detail=None):
                 except (ValueError, KeyError):
                     pass
 
-        log.info("Event: %s [%s]%s", event_type, severity, f" — {detail}" if detail else "")
+        log.info("Event: %s [%s]%s", event_type, severity, f" - {detail}" if detail else "")
         entries.append(entry)
         if len(entries) > MAX_ENTRIES:
             entries = entries[-MAX_ENTRIES:]

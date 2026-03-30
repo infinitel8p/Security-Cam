@@ -3,24 +3,24 @@ sidebar_position: 1
 ---
 
 # Intro
-A security camera script for the Raspberry Pi Zero 2 W using the Waveshare RPi Camera (F).  
-The script will start recording a video when the magnetic reed switch is triggered (the door is opened) and the smartphone is not connected to the Raspberry Pi (bluetooth and/or WiFi). The recording will stop when the magnetic reed switch is triggered again (the door is closed).
+A security camera system for the Raspberry Pi Zero 2 W using the Waveshare RPi Camera (F).
+The system automatically records video when a trigger sensor is activated (e.g. door opened, motion detected) and no tracked device is connected via Bluetooth or WiFi. Recording stops when the sensor resets. The trigger sensor is modular - swap between a magnetic reed switch, PIR motion sensor, vibration sensor, or any of the supported modules without changing any code.
 
 Integrations:
-- **Magnetic Reed Switch**: Integration with a magnetic reed switch to detect door open/close events and trigger recording accordingly.
-- **WIFI Detection**: Integration with WiFi Access Point to allow user to use WiFi to not trigger recording. Allows user to view recorded videos in the web interface when outside of the home network.
-- **Bluetooth Detection**: Integration with Bluetooth to allow user to use bluetooth to not trigger recording.
-- **Real Time Clock**: Integration with a Real Time Clock to keep track of the time when the Raspberry Pi is powered off.
-- **Web Dashboard**: A web dashboard to view the status of the Raspberry Pi and the recorded videos.
+- **Modular Trigger Sensors**: Pluggable sensor system supporting magnetic reed switches, PIR motion sensors, Hall-effect sensors, vibration/knock sensors, light gates, tilt switches, touch sensors, push buttons, and a software mock. Swap hardware without code changes - configure via the dashboard or REST API.
+- **Presence-Gated Recording**: Sensor triggers are gated by Bluetooth and WiFi presence detection. If a tracked device (e.g. your phone) is nearby, the trigger is ignored. Manual recording is always allowed.
+- **WiFi Detection**: WiFi Access Point integration for device presence detection. Also allows viewing recorded videos from outside the home network.
+- **Bluetooth Detection**: Bluetooth integration for device presence detection.
+- **Real Time Clock**: DS3231 RTC module keeps accurate time when the Raspberry Pi is powered off.
+- **Web Dashboard**: Live camera feed via WebRTC, video archive, system health monitoring, event timeline, device management, and sensor configuration - all from a single page.
+- **MediaMTX Streaming**: Hardware-accelerated H.264 camera streaming via WebRTC and RTSP using MediaMTX.
 
 ## Usage
-Once the script is running, the Raspberry Pi will start recording a video when the magnetic reed switch is triggered (the door is opened) and the smartphone is not connected to the Raspberry Pi (bluetooth and/or WiFi). The recording will stop when the magnetic reed switch is triggered again (the door is closed). 
-Find out more about the usage [here](./basics/start).
+Once set up, the system runs automatically. The dashboard gives you a live camera feed, recording controls, system health, sensor status, and a video archive. Sensor-triggered recording works in the background - the sensor fires, presence is checked, and if nobody is home, recording starts. Configure everything from the dashboard Settings page: sensor type, GPIO pin, hold timeout, tracked devices, camera settings, and video save location.
+
+Find out more about usage [here](./basics/start).
 
 ## Future Enhancements
-- **Web Interface**: A user-friendly interface to view recorded videos. **_WIP_**.
-- **Captive Portal**: Captive portal to open Web Interface when connecting to the Raspberry Pi's WiFi.
-- **System Monitor**: A system monitor to view the status of the Raspberry Pi (e.g., CPU temperature, CPU usage, RAM usage, etc.). **_WIP (included in the dashboard)_**.
 - **Improved Error Handling**: Improved error handling to prevent the script from crashing, server from freezing, etc.
 
 ## Troubleshooting

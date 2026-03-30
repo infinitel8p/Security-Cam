@@ -68,7 +68,7 @@
     },
   };
 
-  // Exclude device events — those belong in Access Log
+  // Exclude device events - those belong in Access Log
   const EXCLUDED_TYPES = new Set(["device_arrived", "device_left"]);
 
   async function fetchEvents() {

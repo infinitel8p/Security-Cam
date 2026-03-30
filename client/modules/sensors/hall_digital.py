@@ -2,7 +2,7 @@
 
 Detects the presence of a magnetic field.  Works like the KY-025
 reed switch but uses a Hall-effect IC instead of a mechanical
-contact — no moving parts, longer lifespan.
+contact - no moving parts, longer lifespan.
 
 Triggers when a magnet is removed (field lost), releases when a
 magnet is brought near (field detected).  Ideal for door/window
@@ -26,7 +26,7 @@ class HallDigitalSensor(BaseSensor):
     sensor_type = "hall_digital"
     default_gpio = 13
     module = "KY-003"
-    description = "Digital Hall-effect sensor — detects magnetic field, no moving parts"
+    description = "Digital Hall-effect sensor - detects magnetic field, no moving parts"
     use_case = "Door / window detection (longer lifespan than reed)"
     icon = "magnet"
     wiring = [
