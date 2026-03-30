@@ -1,5 +1,5 @@
 /**
- * Custom theme — matched to the Security-Cam dashboard.
+ * Custom theme - matched to the Security-Cam dashboard.
  *
  * Dashboard tokens (server/src/styles/global.css):
  *   Dark  accent: #4d94ff  |  bg: #060810  |  text: #e2e6f0 / #8490ad / #4a5370
@@ -96,7 +96,7 @@ article {
   color: #060810;
 }
 
-/* ---------- Admonitions — use dashboard status colors ---------- */
+/* ---------- Admonitions - use dashboard status colors ---------- */
 :root {
   --ifm-color-success: #059669;
   --ifm-color-info: #2563eb;
