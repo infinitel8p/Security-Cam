@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import { initLocale, t } from "../i18n";
   import Icon from "./Icon.svelte";
   import boltIcon from "../icons/bolt.svg?raw";
   import cpuIcon from "../icons/cpu.svg?raw";
@@ -42,6 +43,7 @@
   }
 
   onMount(() => {
+    initLocale();
     fetchStatus();
     interval = setInterval(fetchStatus, 5_000);
   });
@@ -52,12 +54,12 @@
 
   let statusLabel = $derived(
     !data?.enabled
-      ? "Disabled"
+      ? t("status.disabled")
       : data?.triggered
-        ? "Triggered"
+        ? t("status.triggered")
         : data?.armed
-          ? "Armed"
-          : "Idle"
+          ? t("status.armed")
+          : t("status.idle")
   );
 
   let statusColor = $derived(
@@ -83,8 +85,8 @@
 
 {#if error}
   <div class="card flex flex-col items-center justify-center gap-2 px-4 py-6 text-center">
-    <p class="text-[0.8125rem] text-text-muted">Unable to load sensor status</p>
-    <button onclick={fetchStatus} class="text-[0.75rem] font-medium text-accent hover:text-accent-hover">Retry</button>
+    <p class="text-[0.8125rem] text-text-muted">{t("error.sensorStatus")}</p>
+    <button onclick={fetchStatus} class="text-[0.75rem] font-medium text-accent hover:text-accent-hover">{t("btn.retry")}</button>
   </div>
 {:else if data}
   <div class="card">
@@ -93,7 +95,7 @@
       <div class="px-4 py-3 text-center">
         <div class="flex items-center justify-center gap-1.5">
           <Icon icon={boltIcon} class="h-3 w-3 text-text-muted" stroke={2.5} />
-          <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">Sensor</p>
+          <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.sensor")}</p>
         </div>
         <p class="mt-1 truncate text-[0.8125rem] font-bold leading-none {data.enabled ? 'text-text-primary' : 'text-text-muted'}">
           {#if data.sensor}
@@ -104,7 +106,7 @@
               button: "Button", mock: "Mock",
             })[data.config.type] ?? data.config.type}
           {:else}
-            Off
+            {t("status.off")}
           {/if}
         </p>
       </div>
@@ -113,7 +115,7 @@
       <div class="px-4 py-3 text-center">
         <div class="flex items-center justify-center gap-1.5">
           <span class="h-1.5 w-1.5 rounded-full {dotColor}" class:status-live={data.armed && !data.triggered}></span>
-          <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">Status</p>
+          <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.status")}</p>
         </div>
         <p class="mt-1 text-[0.8125rem] font-bold leading-none {statusColor}">
           {statusLabel}
@@ -124,7 +126,7 @@
       <div class="px-4 py-3 text-center">
         <div class="flex items-center justify-center gap-1.5">
           <Icon icon={cpuIcon} class="h-3 w-3 text-text-muted" stroke={2.5} />
-          <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">GPIO</p>
+          <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.gpio")}</p>
         </div>
         <p class="mt-1 text-xl font-bold tabular-nums leading-none {data.enabled ? 'text-accent' : 'text-text-muted'}">
           {data.enabled && data.config.gpio != null ? data.config.gpio : "--"}

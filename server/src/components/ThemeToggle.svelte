@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { initLocale, t } from "../i18n";
   import Icon from "./Icon.svelte";
   import deviceDesktopIcon from "../icons/device-desktop.svg?raw";
   import sunIcon from "../icons/sun.svg?raw";
@@ -12,6 +13,7 @@
   const order: ThemeMode[] = ["system", "light", "dark"];
 
   onMount(() => {
+    initLocale();
     const saved = localStorage.getItem("theme") as ThemeMode | null;
     mode = saved === "light" || saved === "dark" ? saved : "system";
   });
@@ -38,7 +40,7 @@
 <button
   onclick={cycle}
   class="btn-press flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors duration-150 hover:bg-surface-overlay hover:text-text-secondary"
-  title="{mode === 'system' ? 'Theme: System' : mode === 'light' ? 'Theme: Light' : 'Theme: Dark'}"
+  title="{mode === 'system' ? t('theme.system') : mode === 'light' ? t('theme.light') : t('theme.dark')}"
   aria-label="Cycle theme: system, light, dark"
 >
   {#if mode === "system"}

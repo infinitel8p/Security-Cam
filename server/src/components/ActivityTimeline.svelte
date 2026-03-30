@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
+  import { initLocale, t } from "../i18n";
   import { getBackendUrl } from "../lib/api";
   import Icon from "./Icon.svelte";
   import activityIcon from "../icons/activity.svg?raw";
@@ -94,6 +95,7 @@
   }
 
   onMount(() => {
+    initLocale();
     fetchEvents();
     interval = setInterval(fetchEvents, 30_000);
   });
@@ -120,15 +122,21 @@
     return d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
   }
 
+  function eventLabel(type: string): string {
+    const key = "event." + type.replace(/_([a-z])/g, (_: string, c: string) => c.toUpperCase());
+    const result = t(key);
+    return result !== key ? result : type.replace(/_/g, " ");
+  }
+
   function relativeTime(iso: string): string {
     const diff = Date.now() - new Date(iso).getTime();
     const mins = Math.floor(diff / 60000);
-    if (mins < 1) return "Just now";
-    if (mins < 60) return `${mins}m ago`;
+    if (mins < 1) return t("time.justNow");
+    if (mins < 60) return t("time.minutesAgo", { n: mins });
     const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h ago`;
+    if (hrs < 24) return t("time.hoursAgo", { n: hrs });
     const days = Math.floor(hrs / 24);
-    return `${days}d ago`;
+    return t("time.daysAgo", { n: days });
   }
 
   function severityDot(severity: string): string {
@@ -154,14 +162,14 @@
   </div>
 {:else if error}
   <div class="card flex flex-col items-center justify-center gap-2 px-5 py-8 text-center">
-    <p class="text-[0.8125rem] text-text-muted">Unable to load activity timeline</p>
-    <button onclick={fetchEvents} class="text-[0.75rem] font-medium text-accent hover:text-accent-hover">Retry</button>
+    <p class="text-[0.8125rem] text-text-muted">{t("error.activityTimeline")}</p>
+    <button onclick={fetchEvents} class="text-[0.75rem] font-medium text-accent hover:text-accent-hover">{t("btn.retry")}</button>
   </div>
 {:else if events.length === 0}
   <div class="card px-5 py-8 text-center">
     <Icon icon={activityIcon} class="animate-float mx-auto h-8 w-8 text-text-muted/20" stroke={1.5} />
     <p class="mt-2.5 text-[0.8125rem] text-text-muted">
-      System is running smoothly — no events to report
+      {t("empty.activityTimeline")}
     </p>
   </div>
 {:else}
@@ -183,7 +191,7 @@
         <!-- Content -->
         <div class="min-w-0 flex-1">
           <div class="flex items-center gap-2">
-            <span class="text-[0.8125rem] font-medium text-text-primary">{meta.label}</span>
+            <span class="text-[0.8125rem] font-medium text-text-primary">{eventLabel(event.type)}</span>
             <span class="h-1.5 w-1.5 shrink-0 rounded-full {severityDot(event.severity)}"></span>
           </div>
           {#if event.detail}
@@ -203,7 +211,7 @@
         onclick={() => { expanded = true; page = 0; }}
         class="flex w-full items-center justify-center gap-1.5 px-4 py-2.5 text-[0.75rem] font-medium text-accent transition-colors hover:bg-surface-overlay/40"
       >
-        Show more
+        {t("btn.showMore")}
         <Icon icon={chevronDownIcon} class="h-3 w-3" />
       </button>
     {/if}
@@ -218,7 +226,7 @@
             class="flex items-center gap-1 text-[0.75rem] font-medium transition-colors {page === 0 ? 'text-text-muted/30 cursor-not-allowed' : 'text-accent hover:text-accent-hover'}"
           >
             <Icon icon={chevronLeftIcon} class="h-3 w-3" />
-            Newer
+            {t("btn.newer")}
           </button>
           <span class="text-[0.6875rem] tabular-nums text-text-muted">{page + 1} / {totalPages}</span>
           <button
@@ -226,7 +234,7 @@
             disabled={page >= totalPages - 1}
             class="flex items-center gap-1 text-[0.75rem] font-medium transition-colors {page >= totalPages - 1 ? 'text-text-muted/30 cursor-not-allowed' : 'text-accent hover:text-accent-hover'}"
           >
-            Older
+            {t("btn.older")}
             <Icon icon={chevronRightIcon} class="h-3 w-3" />
           </button>
         {:else}
@@ -239,7 +247,7 @@
         onclick={() => { expanded = false; page = 0; }}
         class="flex w-full items-center justify-center gap-1.5 px-4 py-2.5 text-[0.75rem] font-medium text-accent transition-colors hover:bg-surface-overlay/40"
       >
-        Show less
+        {t("btn.showLess")}
         <Icon icon={chevronUpIcon} class="h-3 w-3" />
       </button>
     {/if}

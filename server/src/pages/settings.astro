@@ -1,11 +1,12 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import SettingsPage from "../components/SettingsPage.svelte";
+import I18nText from "../components/I18nText.svelte";
 ---
 
 <Layout title="Settings - Security Cam">
-  <div class="mx-auto max-w-2xl space-y-5 sm:space-y-6">
-    <h1 class="animate-in text-xl font-bold tracking-tight text-text-primary sm:text-2xl">Settings</h1>
+  <div class="mx-auto max-w-6xl">
+    <h1 class="animate-in text-xl font-bold tracking-tight text-text-primary sm:text-2xl"><I18nText key="page.settings" fallback="Settings" client:load /></h1>
     <SettingsPage client:load />
   </div>
 </Layout>

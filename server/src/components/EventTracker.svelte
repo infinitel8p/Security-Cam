@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import { initLocale, t } from "../i18n";
   import Icon from "./Icon.svelte";
   import shieldIcon from "../icons/shield.svg?raw";
 
@@ -71,7 +72,7 @@
   }
 
   function hoveredSummary(slot: { severity: string; events: EventEntry[] }): string {
-    if (slot.events.length === 0) return "No events";
+    if (slot.events.length === 0) return t("status.noData");
     const types = slot.events.map((e) => typeLabels[e.type] ?? e.type);
     // Deduplicate
     const unique = [...new Set(types)];
@@ -93,14 +94,17 @@
     }
   }
 
-  onMount(fetchEvents);
+  onMount(() => {
+    initLocale();
+    fetchEvents();
+  });
 </script>
 
 <div class="card px-4 py-3 sm:px-5 sm:py-3.5">
   <div class="flex min-h-[1.25rem] items-center justify-between gap-2">
     <div class="flex shrink-0 items-center gap-1.5">
       <Icon icon={shieldIcon} class="h-3 w-3 text-text-muted" />
-      <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">Events - Last 7 days</p>
+      <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.eventsLast7Days")}</p>
     </div>
     {#if hoveredIndex >= 0 && slots[hoveredIndex]}
       <span class="truncate text-[0.625rem] tabular-nums text-text-muted">
@@ -117,14 +121,14 @@
     </div>
   {:else if error}
     <div class="mt-2.5 flex items-center justify-center gap-2">
-      <p class="text-[0.6875rem] text-text-muted">Unable to load event data</p>
-      <button onclick={fetchEvents} class="text-[0.6875rem] font-medium text-accent hover:text-accent-hover">Retry</button>
+      <p class="text-[0.6875rem] text-text-muted">{t("error.eventData")}</p>
+      <button onclick={fetchEvents} class="text-[0.6875rem] font-medium text-accent hover:text-accent-hover">{t("btn.retry")}</button>
     </div>
   {:else}
     <div
       class="mt-2.5 flex gap-[2px]"
       role="img"
-      aria-label="Security events over the last 7 days"
+      aria-label={t("label.eventsLast7Days")}
       onmouseleave={() => (hoveredIndex = -1)}
     >
       {#each slots as slot, i}
@@ -140,7 +144,7 @@
     <div class="mt-1 flex justify-between text-[0.625rem] tabular-nums text-text-muted">
       <span>{slots[0]?.label ?? ""}</span>
       <span>{slots[Math.floor(TOTAL_SLOTS / 2)]?.label ?? ""}</span>
-      <span>Now</span>
+      <span>{t("label.now")}</span>
     </div>
   {/if}
 </div>

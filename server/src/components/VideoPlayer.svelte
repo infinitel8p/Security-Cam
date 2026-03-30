@@ -2,6 +2,7 @@
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl, getMediaMtxUrl } from "../lib/api";
   import toast from "svelte-5-french-toast";
+  import { initLocale, t } from "../i18n";
   import Icon from "./Icon.svelte";
   import cameraIcon from "../icons/camera.svg?raw";
   import alertCircleIcon from "../icons/alert-circle.svg?raw";
@@ -50,7 +51,7 @@
     pc.onconnectionstatechange = () => {
       if (pc?.connectionState === "failed" || pc?.connectionState === "disconnected") {
         connected = false;
-        error = "Stream disconnected";
+        error = t("error.streamDisconnected");
         cleanup();
         clearTimeout(reconnectTimer);
         reconnectTimer = setTimeout(startWebRTC, 3000);
@@ -78,7 +79,7 @@
       });
     } catch (e) {
       console.error("WebRTC connection failed:", e);
-      error = "Failed to connect to stream";
+      error = t("error.connectFailed");
       cleanup();
       clearTimeout(reconnectTimer);
       reconnectTimer = setTimeout(startWebRTC, 5000);
@@ -115,9 +116,9 @@
       if (!res.ok) throw new Error();
       const data = await res.json();
       recording = data.message?.toLowerCase().includes("started") ?? false;
-      toast.success(recording ? "Recording started" : "Recording stopped");
+      toast.success(recording ? t("toast.recordingStarted") : t("toast.recordingStopped"));
     } catch {
-      toast.error("Failed to toggle recording");
+      toast.error(t("toast.toggleRecordingFailed"));
     } finally {
       toggling = false;
     }
@@ -156,6 +157,7 @@
   }
 
   onMount(() => {
+    initLocale();
     startWebRTC();
     fetchRotation();
     fetchRecordingStatus();
@@ -203,8 +205,8 @@
             </div>
             <span class="text-sm text-text-secondary">{error}</span>
             <div class="flex items-center gap-3">
-              <span class="text-xs text-text-muted">Reconnecting...</span>
-              <button onclick={manualReconnect} class="text-xs font-medium text-accent hover:text-accent-hover">Retry now</button>
+              <span class="text-xs text-text-muted">{t("status.reconnecting")}</span>
+              <button onclick={manualReconnect} class="text-xs font-medium text-accent hover:text-accent-hover">{t("btn.retryNow")}</button>
             </div>
           </div>
         {:else}
@@ -212,7 +214,7 @@
             <div class="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10">
               <Icon icon={cameraIcon} class="h-5 w-5 animate-pulse text-accent" stroke={2} />
             </div>
-            <span class="text-sm text-text-secondary">Connecting to camera...</span>
+            <span class="text-sm text-text-secondary">{t("status.connectingToCamera")}</span>
           </div>
         {/if}
       </div>
@@ -228,12 +230,12 @@
         {#if recording}
           <div class="animate-pop flex items-center gap-2 rounded-lg bg-black/60 px-2.5 py-1.5 backdrop-blur-md">
             <span class="h-2 w-2 animate-pulse rounded-full bg-status-critical shadow-[0_0_8px_rgba(240,104,104,0.6)]"></span>
-            <span class="text-[0.6875rem] font-semibold tracking-wide text-white/90">REC</span>
+            <span class="text-[0.6875rem] font-semibold tracking-wide text-white/90">{t("badge.rec")}</span>
           </div>
         {:else if connected}
           <div class="animate-fade-in flex items-center gap-1.5 rounded-lg bg-black/60 px-2.5 py-1.5 backdrop-blur-md">
             <span class="h-1.5 w-1.5 rounded-full bg-status-ok shadow-[0_0_6px_rgba(52,217,172,0.5)]"></span>
-            <span class="text-[0.6875rem] font-medium tracking-wide text-white/80">LIVE</span>
+            <span class="text-[0.6875rem] font-medium tracking-wide text-white/80">{t("badge.live")}</span>
           </div>
         {/if}
       </div>
@@ -244,7 +246,7 @@
   <div class="controls-bar relative flex items-center justify-between border-t border-border-subtle px-3 py-2 sm:px-4 sm:py-2.5" class:controls-bar-rec={recording}>
     <div class="flex items-center gap-2">
       <Icon icon={cameraIcon} class="h-4 w-4 text-text-muted" stroke={2} />
-      <span class="hidden text-[0.8125rem] font-medium text-text-secondary sm:inline">Live Feed</span>
+      <span class="hidden text-[0.8125rem] font-medium text-text-secondary sm:inline">{t("label.liveFeed")}</span>
     </div>
     <div class="flex items-center gap-1">
       <button
@@ -260,19 +262,19 @@
           <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
             <rect x="6" y="6" width="12" height="12" rx="2" />
           </svg>
-          Stop
+          {t("btn.stop")}
         {:else}
           <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
             <circle cx="12" cy="12" r="6" />
           </svg>
-          Record
+          {t("btn.record")}
         {/if}
       </button>
 
       <button
         onclick={toggleFullscreen}
         class="flex min-h-[2.75rem] min-w-[2.75rem] items-center justify-center rounded-lg text-text-muted transition-colors duration-150 hover:bg-surface-overlay hover:text-text-secondary sm:min-h-0 sm:min-w-0 sm:p-1.5"
-        title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+        title={isFullscreen ? t("btn.exitFullscreen") : t("btn.fullscreen")}
       >
         {#if isFullscreen}
           <Icon icon={minimizeIcon} class="h-4 w-4" stroke={2} />

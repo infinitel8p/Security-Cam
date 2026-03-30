@@ -1,6 +1,7 @@
 <script lang="ts">
   import { getBackendUrl } from "../lib/api";
   import toast from "svelte-5-french-toast";
+  import { t } from "../i18n";
   import Icon from "./Icon.svelte";
   import bluetoothIcon from "../icons/bluetooth.svg?raw";
   import wifiIcon from "../icons/wifi.svg?raw";
@@ -72,10 +73,10 @@
 
       scanResults = data[scanResultKey] ?? [];
       if (scanResults.length === 0) {
-        scanError = "No devices found";
+        scanError = t("status.noData");
       }
     } catch {
-      scanError = "Unable to connect to the backend";
+      scanError = t("error.connectionStatus");
     } finally {
       scanning = false;
     }
@@ -91,9 +92,9 @@
       await onAdd(finalDevice);
       scanResults = scanResults.filter(d => d.address !== device.address);
       delete editingNames[device.address];
-      toast.success(`Added ${finalDevice.name}`);
+      toast.success(t("toast.deviceAdded", { name: finalDevice.name }));
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to add device");
+      toast.error(e instanceof Error ? e.message : t("toast.addDeviceFailed"));
     } finally {
       addingAddress = null;
     }
@@ -103,9 +104,9 @@
     removingAddress = address;
     try {
       await onRemove(address);
-      toast.success("Device removed");
+      toast.success(t("toast.deviceRemoved"));
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to remove device");
+      toast.error(e instanceof Error ? e.message : t("toast.removeDeviceFailed"));
     } finally {
       removingAddress = null;
     }
@@ -118,12 +119,12 @@
     manualAdding = true;
     try {
       await onAdd({ address, name: manualName.trim() || address });
-      toast.success(`Added ${manualName.trim() || address}`);
+      toast.success(t("toast.deviceAdded", { name: manualName.trim() || address }));
       manualMac = "";
       manualName = "";
       showManualAdd = false;
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to add device");
+      toast.error(e instanceof Error ? e.message : t("toast.addDeviceFailed"));
     } finally {
       manualAdding = false;
     }
@@ -158,13 +159,13 @@
   <!-- Device list -->
   {#if devices.length === 0 && !showScanPanel}
     <div class="px-4 py-6 text-center sm:px-5 sm:py-8">
-      <p class="text-sm text-text-muted">No devices configured</p>
+      <p class="text-sm text-text-muted">{t("empty.noDevicesConfigured")}</p>
       <button
         onclick={startScan}
         class="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent transition-colors hover:bg-accent/15"
       >
         <Icon icon={searchIcon} class="h-3 w-3" />
-        Scan for devices
+        {t("btn.scanForDevices")}
       </button>
     </div>
   {:else if devices.length > 0}
@@ -189,8 +190,8 @@
             onclick={() => handleRemove(device.address)}
             disabled={removingAddress === device.address}
             class="shrink-0 rounded-md p-2 text-text-muted opacity-0 transition-all hover:bg-status-critical/10 hover:text-status-critical group-hover:opacity-100 disabled:opacity-50"
-            title="Remove device"
-            aria-label="Remove device"
+            title={t("btn.removeDevice")}
+            aria-label={t("btn.removeDevice")}
           >
             {#if removingAddress === device.address}
               <Icon icon={loader2Icon} class="h-3.5 w-3.5 animate-spin" />
@@ -211,7 +212,7 @@
         class="inline-flex items-center gap-1.5 rounded-lg text-xs font-medium text-text-muted transition-colors hover:text-accent"
       >
         <Icon icon={plusIcon} class="h-3 w-3" />
-        Add device
+        {t("btn.addDevice")}
       </button>
     </div>
   {/if}
@@ -222,7 +223,7 @@
       <!-- Panel header -->
       <div class="flex items-center justify-between px-4 py-2.5 sm:px-5">
         <span class="text-xs font-semibold text-text-secondary">
-          {scanning ? "Scanning..." : "Discovered devices"}
+          {scanning ? t("status.scanning") : t("label.discoveredDevices")}
         </span>
         <div class="flex items-center gap-2">
           {#if !scanning}
@@ -230,14 +231,14 @@
               onclick={() => { showManualAdd = !showManualAdd; }}
               class="text-[0.6875rem] font-medium text-text-muted transition-colors hover:text-accent"
             >
-              Enter manually
+              {t("btn.enterManually")}
             </button>
             <span class="text-border-default">|</span>
             <button
               onclick={startScan}
               class="text-[0.6875rem] font-medium text-text-muted transition-colors hover:text-accent"
             >
-              Rescan
+              {t("btn.rescan")}
             </button>
             <span class="text-border-default">|</span>
           {/if}
@@ -246,7 +247,7 @@
             disabled={scanning}
             class="text-[0.6875rem] font-medium text-text-muted transition-colors hover:text-text-primary disabled:opacity-50"
           >
-            Close
+            {t("btn.close")}
           </button>
         </div>
       </div>
@@ -264,7 +265,7 @@
             {/if}
           </div>
           <p class="text-xs text-text-muted">
-            {icon === "bluetooth" ? "Searching for nearby Bluetooth devices..." : "Checking connected WiFi clients..."}
+            {icon === "bluetooth" ? t("help.searchingBluetooth") : t("help.checkingWiFi")}
           </p>
         </div>
       {/if}
@@ -276,13 +277,13 @@
             <input
               type="text"
               bind:value={manualMac}
-              placeholder="MAC address"
+              placeholder={t("input.macAddress")}
               class="rounded-lg border border-border-default bg-surface-elevated px-3 py-1.5 text-xs font-medium text-text-primary placeholder:text-text-muted/50 outline-none focus:border-accent"
             />
             <input
               type="text"
               bind:value={manualName}
-              placeholder="Name (optional)"
+              placeholder={t("input.nameOptional")}
               class="rounded-lg border border-border-default bg-surface-elevated px-3 py-1.5 text-xs font-medium text-text-primary placeholder:text-text-muted/50 outline-none focus:border-accent"
             />
           </div>
@@ -291,7 +292,7 @@
             disabled={!manualMac.trim() || manualAdding}
             class="rounded-lg bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent transition-colors hover:bg-accent/15 disabled:opacity-40"
           >
-            {manualAdding ? "Adding..." : "Add"}
+            {manualAdding ? t("btn.adding") : t("btn.add")}
           </button>
         </div>
       {/if}
@@ -312,7 +313,7 @@
                 {#if !device.name}
                   <input
                     type="text"
-                    placeholder="Name (optional)"
+                    placeholder={t("input.nameOptional")}
                     value={editingNames[device.address] ?? ""}
                     oninput={(e) => { editingNames[device.address] = e.currentTarget.value; }}
                     class="w-28 shrink-0 rounded-lg border border-border-default bg-surface-elevated px-2.5 py-1 text-xs font-medium text-text-primary placeholder:text-text-muted/50 outline-none focus:border-accent"
@@ -320,14 +321,14 @@
                 {/if}
               </div>
               {#if alreadyAdded}
-                <span class="shrink-0 text-[0.6875rem] font-medium text-status-ok">Added</span>
+                <span class="shrink-0 text-[0.6875rem] font-medium text-status-ok">{t("status.added")}</span>
               {:else}
                 <button
                   onclick={() => handleAdd(device)}
                   disabled={addingAddress === device.address}
                   class="shrink-0 rounded-lg bg-accent/10 px-2.5 py-1 text-[0.6875rem] font-semibold text-accent transition-colors hover:bg-accent/15 disabled:opacity-50"
                 >
-                  {addingAddress === device.address ? "Adding..." : "Add"}
+                  {addingAddress === device.address ? t("btn.adding") : t("btn.add")}
                 </button>
               {/if}
             </li>

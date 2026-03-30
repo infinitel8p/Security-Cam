@@ -2,6 +2,7 @@
   import { onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
   import toast from "svelte-5-french-toast";
+  import { t } from "../i18n";
   import Note from "./Note.svelte";
   import Icon from "./Icon.svelte";
   import rotateIcon from "../icons/rotate.svg?raw";
@@ -138,7 +139,7 @@
         });
         if (!res.ok) {
           const data = await res.json();
-          rotationError = data.message || "Failed to apply stream rotation";
+          rotationError = data.message || t("toast.rotationFailed");
           return;
         }
       }
@@ -149,8 +150,8 @@
       clearTimeout(rotationTimer);
       rotationTimer = setTimeout(() => (rotationSaved = false), 2000);
     } catch {
-      rotationError = "Failed to save rotation settings";
-      toast.error("Failed to save rotation settings");
+      rotationError = t("toast.rotationFailed");
+      toast.error(t("toast.rotationFailed"));
       angle = currentAngle;
       mode = currentMode;
     } finally {
@@ -183,7 +184,7 @@
 
       if (!res.ok) {
         const data = await res.json();
-        streamError = data.message || "Failed to apply stream settings";
+        streamError = data.message || t("toast.streamSettingsFailed");
         toast.error(streamError);
         return;
       }
@@ -192,12 +193,12 @@
       streamHeight = height;
       streamFPS = fps;
       streamSaved = true;
-      toast.success("Stream settings applied");
+      toast.success(t("toast.streamSettingsApplied"));
       clearTimeout(streamTimer);
       streamTimer = setTimeout(() => (streamSaved = false), 2000);
     } catch {
-      streamError = "Failed to save stream settings";
-      toast.error("Failed to save stream settings");
+      streamError = t("toast.streamSettingsFailed");
+      toast.error(t("toast.streamSettingsFailed"));
       width = streamWidth;
       height = streamHeight;
       fps = streamFPS;
@@ -218,22 +219,22 @@
     <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-accent/10">
       <Icon icon={rotateIcon} class="h-3.5 w-3.5 text-accent" stroke={2.5} />
     </div>
-    <h3 class="text-sm font-semibold text-text-primary">Camera Rotation</h3>
+    <h3 class="text-sm font-semibold text-text-primary">{t("section.cameraRotation")}</h3>
   </div>
     
   <div class="mt-3 space-y-3">
     <!-- Info/warnings -->
     {#if mode === "display"}
       <p class="text-xs leading-relaxed text-text-muted">
-        Rotates the video on the dashboard only. Recordings are not affected. No performance cost.
+        {t("help.displayRotation")}
       </p>
     {:else if hardwareUnsupported}
       <Note variant="warning">
-        Hardware rotation only supports 0° and 180°. The {angle}° rotation will be applied as display-only instead.
+        {t("help.hardwareRotationLimited", { angle })}
       </Note>
     {:else}
       <p class="text-xs leading-relaxed text-text-muted">
-        Applies rotation at the hardware level via MediaMTX. No performance cost for 0°/180°. Recordings will also be rotated.
+        {t("help.hardwareRotation")}
       </p>
     {/if}
   </div>
@@ -247,21 +248,21 @@
         disabled={rotationSaving}
         class="rounded-xl border border-border-default bg-surface-elevated px-3.5 py-2 text-sm font-medium text-text-primary outline-none transition-all duration-200 focus:border-accent focus:shadow-[var(--shadow-glow)] disabled:opacity-50"
       >
-        <option value={0}>0° - Default</option>
-        <option value={90}>90° - Clockwise</option>
-        <option value={180}>180° - Flipped</option>
-        <option value={270}>270° - Counter-clockwise</option>
+        <option value={0}>{t("rotation.default")}</option>
+        <option value={90}>{t("rotation.clockwise")}</option>
+        <option value={180}>{t("rotation.flipped")}</option>
+        <option value={270}>{t("rotation.counterClockwise")}</option>
       </select>
 
       {#if rotationSaving}
-        <span class="text-xs font-medium text-text-muted">Saving...</span>
+        <span class="text-xs font-medium text-text-muted">{t("status.saving")}</span>
       {/if}
       {#if rotationSaved}
         <span class="flex items-center gap-1 text-xs font-medium text-status-ok animate-fade-in">
           <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
             <polyline class="animate-check" points="20 6 9 17 4 12" />
           </svg>
-          Saved
+          {t("status.saved")}
         </span>
       {/if}
       {#if rotationError}
@@ -280,7 +281,7 @@
             : 'border-border-default bg-surface-base text-text-muted hover:border-border-strong hover:text-text-secondary'}
           disabled:opacity-50"
       >
-        Display only
+        {t("btn.displayOnly")}
       </button>
       <button
         onclick={() => { mode = "stream"; saveRotation(); }}
@@ -291,7 +292,7 @@
             : 'border-border-default bg-surface-base text-text-muted hover:border-border-strong hover:text-text-secondary'}
           disabled:opacity-50"
       >
-        Apply to stream
+        {t("btn.applyToStream")}
       </button>
     </div>
   </div>
@@ -303,13 +304,13 @@
     <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-accent/10">
       <Icon icon={deviceDesktopIcon} class="h-3.5 w-3.5 text-accent" stroke={2.5} />
     </div>
-    <h3 class="text-sm font-semibold text-text-primary">Stream Quality</h3>
+    <h3 class="text-sm font-semibold text-text-primary">{t("section.streamQuality")}</h3>
   </div>
 
   <div class="mt-3 space-y-3">
     <!-- Preset selector -->
     <div>
-      <label for="stream-preset" class="mb-1 block text-[0.6875rem] font-medium text-text-muted">Preset</label>
+      <label for="stream-preset" class="mb-1 block text-[0.6875rem] font-medium text-text-muted">{t("label.preset")}</label>
       <select
         id="stream-preset"
         value={selectedPreset}
@@ -325,7 +326,7 @@
             {/each}
           </optgroup>
         {/each}
-        <option value={-1}>Custom</option>
+        <option value={-1}>{t("label.custom")}</option>
       </select>
     </div>
 
@@ -333,7 +334,7 @@
       <p class="text-xs leading-relaxed text-text-muted">
         {presetNote}
         {#if presetRecommended}
-          <span class="ml-1 inline-flex items-center rounded-md bg-accent/10 px-1.5 py-0.5 text-[0.625rem] font-semibold text-accent">Recommended</span>
+          <span class="ml-1 inline-flex items-center rounded-md bg-accent/10 px-1.5 py-0.5 text-[0.625rem] font-semibold text-accent">{t("label.recommended")}</span>
         {/if}
       </p>
     {/if}
@@ -341,7 +342,7 @@
     <!-- Custom fields (always visible but muted when a preset is active) -->
     <div class="grid grid-cols-3 gap-3">
       <div>
-        <label for="stream-width" class="mb-1 block text-[0.6875rem] font-medium text-text-muted">Width</label>
+        <label for="stream-width" class="mb-1 block text-[0.6875rem] font-medium text-text-muted">{t("label.width")}</label>
         <input
           id="stream-width"
           type="number"
@@ -355,7 +356,7 @@
         />
       </div>
       <div>
-        <label for="stream-height" class="mb-1 block text-[0.6875rem] font-medium text-text-muted">Height</label>
+        <label for="stream-height" class="mb-1 block text-[0.6875rem] font-medium text-text-muted">{t("label.height")}</label>
         <input
           id="stream-height"
           type="number"
@@ -369,7 +370,7 @@
         />
       </div>
       <div>
-        <label for="stream-fps" class="mb-1 block text-[0.6875rem] font-medium text-text-muted">FPS</label>
+        <label for="stream-fps" class="mb-1 block text-[0.6875rem] font-medium text-text-muted">{t("label.fps")}</label>
         <input
           id="stream-fps"
           type="number"
@@ -390,7 +391,7 @@
         disabled={streamSaving || !streamParamsChanged}
         class="btn-press rounded-xl bg-accent/10 px-4 py-2 text-xs font-semibold text-accent transition-colors hover:bg-accent/15 disabled:opacity-40"
       >
-        {streamSaving ? "Applying..." : "Apply"}
+        {streamSaving ? t("btn.applying") : t("btn.apply")}
       </button>
 
       {#if streamSaved}
@@ -398,7 +399,7 @@
           <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
             <polyline class="animate-check" points="20 6 9 17 4 12" />
           </svg>
-          Applied
+          {t("status.applied")}
         </span>
       {/if}
       {#if streamError}
@@ -407,7 +408,7 @@
     </div>
 
     <Note>
-      Changing stream settings will briefly interrupt the live feed while MediaMTX restarts.
+      {t("help.streamInterrupt")}
     </Note>
   </div>
 </div>

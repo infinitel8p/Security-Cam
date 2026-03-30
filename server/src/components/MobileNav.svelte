@@ -1,9 +1,15 @@
 <script lang="ts">
+  import { onMount } from "svelte";
+  import { initLocale, t } from "../i18n";
   import ThemeToggle from "./ThemeToggle.svelte";
   import Icon from "./Icon.svelte";
   import layoutGridIcon from "../icons/layout-grid.svg?raw";
   import archiveIcon from "../icons/archive.svg?raw";
   import settingsIcon from "../icons/settings.svg?raw";
+
+  onMount(() => {
+    initLocale();
+  });
 
   const path = $derived(typeof window !== "undefined" ? window.location.pathname : "/");
 
@@ -25,7 +31,7 @@
   >
     <span class="absolute top-0 left-1/2 h-[2px] w-8 -translate-x-1/2 rounded-b-full bg-accent transition-all duration-200 {isActive('/') ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0'}"></span>
     <Icon icon={layoutGridIcon} class="h-5 w-5 shrink-0" />
-    <span class="text-[0.6875rem] leading-none font-medium">Dashboard</span>
+    <span class="text-[0.6875rem] leading-none font-medium">{t("nav.dashboard")}</span>
   </a>
 
   <a
@@ -35,7 +41,7 @@
   >
     <span class="absolute top-0 left-1/2 h-[2px] w-8 -translate-x-1/2 rounded-b-full bg-accent transition-all duration-200 {isActive('/archive') ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0'}"></span>
     <Icon icon={archiveIcon} class="h-5 w-5 shrink-0" />
-    <span class="text-[0.6875rem] leading-none font-medium">Archive</span>
+    <span class="text-[0.6875rem] leading-none font-medium">{t("nav.archive")}</span>
   </a>
 
   <a
@@ -45,6 +51,6 @@
   >
     <span class="absolute top-0 left-1/2 h-[2px] w-8 -translate-x-1/2 rounded-b-full bg-accent transition-all duration-200 {isActive('/settings') ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0'}"></span>
     <Icon icon={settingsIcon} class="h-5 w-5 shrink-0" />
-    <span class="text-[0.6875rem] leading-none font-medium">Settings</span>
+    <span class="text-[0.6875rem] leading-none font-medium">{t("nav.settings")}</span>
   </a>
 </nav>

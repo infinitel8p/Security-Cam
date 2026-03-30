@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import { initLocale, t } from "../i18n";
   import Icon from "./Icon.svelte";
   import bluetoothIcon from "../icons/bluetooth.svg?raw";
   import wifiIcon from "../icons/wifi.svg?raw";
@@ -28,6 +29,7 @@
   }
 
   onMount(() => {
+    initLocale();
     fetchConnections();
     interval = setInterval(fetchConnections, 15_000);
   });
@@ -39,15 +41,15 @@
 
 {#if error}
   <div class="card flex flex-col items-center justify-center gap-2 px-4 py-6 text-center">
-    <p class="text-[0.8125rem] text-text-muted">Unable to reach connection status</p>
-    <button onclick={fetchConnections} class="text-[0.75rem] font-medium text-accent hover:text-accent-hover">Retry</button>
+    <p class="text-[0.8125rem] text-text-muted">{t("error.connectionStatus")}</p>
+    <button onclick={fetchConnections} class="text-[0.75rem] font-medium text-accent hover:text-accent-hover">{t("btn.retry")}</button>
   </div>
 {:else if data}
   {@const noDevices = data.bluetooth.total === 0 && data.wifi.total === 0}
   {#if noDevices}
     <a href="/settings" class="card-interactive block px-4 py-3 text-center">
-      <p class="text-[0.8125rem] font-medium text-text-secondary">No devices tracked</p>
-      <p class="mt-0.5 text-[0.6875rem] text-text-muted">Add a phone or laptop in <span class="text-accent">Settings</span> for presence detection</p>
+      <p class="text-[0.8125rem] font-medium text-text-secondary">{t("empty.noDevicesTracked")}</p>
+      <p class="mt-0.5 text-[0.6875rem] text-text-muted">{t("help.addDevicesForPresence")}</p>
     </a>
   {:else}
   <div class="card">
@@ -56,7 +58,7 @@
       <div class="px-4 py-3 text-center">
         <div class="flex items-center justify-center gap-1.5">
           <Icon icon={bluetoothIcon} class="h-3 w-3 text-text-muted" stroke={2.5} />
-          <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">BT</p>
+          <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.bluetooth")}</p>
         </div>
         <p class="mt-1 text-xl font-bold tabular-nums leading-none {data.bluetooth.online > 0 ? 'text-status-ok' : 'text-text-muted'}">
           {data.bluetooth.online}<span class="text-[0.625rem] font-medium text-text-muted">/{data.bluetooth.total}</span>
@@ -67,7 +69,7 @@
       <div class="px-4 py-3 text-center">
         <div class="flex items-center justify-center gap-1.5">
           <Icon icon={wifiIcon} class="h-3 w-3 text-text-muted" stroke={2.5} />
-          <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">WiFi</p>
+          <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.wifi")}</p>
         </div>
         <p class="mt-1 text-xl font-bold tabular-nums leading-none {data.wifi.online > 0 ? 'text-status-ok' : 'text-text-muted'}">
           {data.wifi.online}<span class="text-[0.625rem] font-medium text-text-muted">/{data.wifi.total}</span>
@@ -78,7 +80,7 @@
       <div class="px-4 py-3 text-center">
         <div class="flex items-center justify-center gap-1.5">
           <Icon icon={usersIcon} class="h-3 w-3 text-text-muted" />
-          <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">AP</p>
+          <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.accessPoint")}</p>
         </div>
         <p class="mt-1 text-xl font-bold tabular-nums leading-none {data.ap_clients > 0 ? 'text-accent' : 'text-text-muted'}">
           {data.ap_clients}

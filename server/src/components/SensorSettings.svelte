@@ -2,6 +2,7 @@
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
   import toast from "svelte-5-french-toast";
+  import { initLocale, t } from "../i18n";
   import Note from "./Note.svelte";
   import WiringDiagram from "./WiringDiagram.svelte";
   import Icon from "./Icon.svelte";
@@ -96,7 +97,10 @@
     }
   }
 
-  onMount(fetchAll);
+  onMount(() => {
+    initLocale();
+    fetchAll();
+  });
 
   onDestroy(() => {
     if (testInterval) clearInterval(testInterval);
@@ -140,13 +144,13 @@
       if (res.ok) {
         const statusRes = await fetch(`${getBackendUrl()}/sensor/status`);
         status = await statusRes.json();
-        showMessage("Sensor configured");
+        showMessage(t("toast.sensorConfigured"));
       } else {
         const data = await res.json();
-        showMessage(data.error || "Failed to save sensor configuration", true);
+        showMessage(data.error || t("toast.saveFailed"), true);
       }
     } catch {
-      showMessage("Unable to connect to the backend", true);
+      showMessage(t("error.connectionStatus"), true);
     } finally {
       saving = false;
     }
@@ -161,12 +165,12 @@
       if (res.ok) {
         const statusRes = await fetch(`${getBackendUrl()}/sensor/status`);
         status = await statusRes.json();
-        showMessage(status?.enabled ? "Sensor enabled" : "Sensor disabled");
+        showMessage(status?.enabled ? t("toast.sensorEnabled") : t("toast.sensorDisabled"));
       } else {
-        showMessage("Failed to toggle sensor", true);
+        showMessage(t("toast.saveFailed"), true);
       }
     } catch {
-      showMessage("Unable to connect to the backend", true);
+      showMessage(t("error.connectionStatus"), true);
     } finally {
       toggling = false;
     }
@@ -199,11 +203,11 @@
         testError = "";
         testHistory = [...testHistory.slice(-19), data.value ?? false];
       } else {
-        testError = data.error || "Test failed";
+        testError = data.error || t("toast.saveFailed");
         testValue = null;
       }
     } catch {
-      testError = "Unable to connect to the backend - is the Pi running?";
+      testError = t("error.connectionStatus");
       testValue = null;
     }
   }
@@ -238,7 +242,7 @@
     <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-accent/10">
       <Icon icon={boltIcon} class="h-3.5 w-3.5 text-accent" stroke={2.5} />
     </div>
-    <h3 class="text-sm font-semibold text-text-primary">Trigger Sensors</h3>
+    <h3 class="text-sm font-semibold text-text-primary">{t("section.triggerSensors")}</h3>
     <div class="ml-auto flex items-center gap-2">
       {#if status}
         <span class="rounded-full px-2 py-0.5 text-[0.6875rem] font-semibold
@@ -247,7 +251,7 @@
               ? 'bg-status-ok/10 text-status-ok'
               : 'bg-status-warning/10 text-status-warning'
             : 'bg-surface-elevated text-text-muted'}">
-          {status.enabled ? (status.armed ? "Armed" : "Starting...") : "Disabled"}
+          {status.enabled ? (status.armed ? t("status.armed") : t("status.starting")) : t("status.disabled")}
         </span>
       {/if}
     </div>
@@ -260,16 +264,16 @@
     </div>
   {:else if loadError}
     <div class="flex flex-col items-center justify-center gap-2 px-6 py-12 text-center">
-      <p class="text-sm text-text-muted">Unable to load sensor configuration</p>
-      <button onclick={fetchAll} class="text-[0.8125rem] font-medium text-accent hover:text-accent-hover">Retry</button>
+      <p class="text-sm text-text-muted">{t("error.sensorConfig")}</p>
+      <button onclick={fetchAll} class="text-[0.8125rem] font-medium text-accent hover:text-accent-hover">{t("btn.retry")}</button>
     </div>
   {:else}
     <div class="px-4 py-4 sm:px-5 sm:py-5">
       <!-- Enable/disable toggle -->
       <div class="flex items-center justify-between">
         <div>
-          <p class="text-sm font-medium text-text-primary">Auto-recording</p>
-          <p class="mt-0.5 text-xs text-text-muted">Trigger recording when sensor fires and no tracked device is present</p>
+          <p class="text-sm font-medium text-text-primary">{t("label.autoRecording")}</p>
+          <p class="mt-0.5 text-xs text-text-muted">{t("help.autoRecording")}</p>
         </div>
         <button
           onclick={toggleEnabled}
@@ -287,7 +291,7 @@
 
       <!-- ── Sensor Selection ── -->
       <div class="mt-5">
-        <label class="mb-2 block text-xs font-medium text-text-secondary" for="sensor-type">Sensor Type</label>
+        <label class="mb-2 block text-xs font-medium text-text-secondary" for="sensor-type">{t("label.sensorType")}</label>
         <div class="grid grid-cols-3 gap-1.5 sm:grid-cols-4">
           {#each sensorTypes as st (st.type)}
             <button
@@ -353,7 +357,7 @@
               <Icon icon={chevronRightIcon}
                 class="h-3 w-3 transition-transform duration-200 {showWiring ? 'rotate-90' : ''}"
               />
-              {showWiring ? "Hide" : "Show"} wiring guide
+              {showWiring ? t("btn.hideWiring") : t("btn.showWiring")}
             </button>
 
             {#if showWiring}
@@ -370,8 +374,8 @@
                   <table class="w-full text-[0.6875rem]">
                     <thead>
                       <tr class="bg-surface-elevated/50">
-                        <th class="px-3 py-1.5 text-left font-semibold text-text-secondary">Sensor Pin</th>
-                        <th class="px-3 py-1.5 text-left font-semibold text-text-secondary">Raspberry Pi</th>
+                        <th class="px-3 py-1.5 text-left font-semibold text-text-secondary">{t("label.sensorPin")}</th>
+                        <th class="px-3 py-1.5 text-left font-semibold text-text-secondary">{t("label.raspberryPi")}</th>
                       </tr>
                     </thead>
                     <tbody class="divide-y divide-border-subtle">
@@ -396,7 +400,7 @@
       <!-- ── Configuration Controls ── -->
       {#if !isMock}
         <div class="mt-5">
-          <label class="mb-1.5 block text-xs font-medium text-text-secondary" for="gpio-pin">GPIO Pin</label>
+          <label class="mb-1.5 block text-xs font-medium text-text-secondary" for="gpio-pin">{t("label.gpioPin")}</label>
           <input
             id="gpio-pin"
             type="number"
@@ -405,16 +409,16 @@
             bind:value={gpio}
             class="w-24 rounded-lg border border-border-default bg-surface-elevated px-3 py-1.5 text-sm font-medium tabular-nums text-text-primary outline-none focus:border-accent"
           />
-          <p class="mt-1 text-[0.6875rem] text-text-muted">BCM pin number (0-27). Default for this sensor: GPIO {currentMeta?.default_gpio ?? "-"}</p>
+          <p class="mt-1 text-[0.6875rem] text-text-muted">{t("help.gpioPin", { n: currentMeta?.default_gpio ?? "-" })}</p>
         </div>
 
         <!-- Wiring test panel -->
         <div class="mt-3 rounded-lg border border-border-default bg-surface-base px-3 py-3">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-xs font-semibold text-text-secondary">Test Wiring</p>
+              <p class="text-xs font-semibold text-text-secondary">{t("label.testWiring")}</p>
               <p class="mt-0.5 text-[0.6875rem] text-text-muted">
-                Read the live GPIO pin state to verify your sensor is connected correctly
+                {t("help.testWiring")}
               </p>
             </div>
             {#if testMode}
@@ -422,14 +426,14 @@
                 onclick={stopTest}
                 class="rounded-lg bg-status-critical/10 px-3 py-1.5 text-xs font-semibold text-status-critical transition-colors hover:bg-status-critical/15"
               >
-                Stop Test
+                {t("btn.stopTest")}
               </button>
             {:else}
               <button
                 onclick={startTest}
                 class="rounded-lg bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent transition-colors hover:bg-accent/15"
               >
-                Start Test
+                {t("btn.startTest")}
               </button>
             {/if}
           </div>
@@ -452,7 +456,7 @@
                     </span>
                     <div>
                       <p class="text-xs font-semibold {testValue ? 'text-status-ok' : 'text-text-muted'}">
-                        {testValue ? "HIGH" : "LOW"}
+                        {testValue ? t("label.high") : t("label.low")}
                       </p>
                       <p class="text-[0.625rem] text-text-muted">GPIO {gpio}</p>
                     </div>
@@ -473,7 +477,7 @@
                 </div>
 
                 <p class="text-[0.6875rem] text-text-muted">
-                  Activate the sensor now - you should see the value change. Polling every 500ms.
+                  {t("help.testInstructions")}
                 </p>
               {/if}
             </div>
@@ -483,7 +487,7 @@
 
       <!-- Hold timeout -->
       <div class="mt-5">
-        <label class="mb-1.5 block text-xs font-medium text-text-secondary" for="hold-seconds">Hold Timeout</label>
+        <label class="mb-1.5 block text-xs font-medium text-text-secondary" for="hold-seconds">{t("label.holdTimeout")}</label>
         <div class="flex items-center gap-2">
           <input
             id="hold-seconds"
@@ -493,20 +497,20 @@
             bind:value={holdSeconds}
             class="w-24 rounded-lg border border-border-default bg-surface-elevated px-3 py-1.5 text-sm font-medium tabular-nums text-text-primary outline-none focus:border-accent"
           />
-          <span class="text-xs text-text-muted">seconds</span>
+          <span class="text-xs text-text-muted">{t("label.seconds")}</span>
         </div>
-        <p class="mt-1 text-[0.6875rem] text-text-muted">Keep recording for this long after sensor releases (prevents gaps from brief interruptions)</p>
+        <p class="mt-1 text-[0.6875rem] text-text-muted">{t("help.holdTimeout")}</p>
       </div>
 
       <!-- Invert trigger logic -->
       {#if !isMock}
         <div class="mt-5 flex items-center justify-between">
           <div>
-            <p class="text-sm font-medium text-text-primary">Invert trigger</p>
+            <p class="text-sm font-medium text-text-primary">{t("label.invertTrigger")}</p>
             <p class="mt-0.5 text-xs text-text-muted">
               {invertLogic
-                ? "Recording starts when sensor activates (e.g. magnet detected)"
-                : "Recording starts when sensor deactivates (e.g. magnet removed)"}
+                ? t("help.invertActive")
+                : t("help.invertInactive")}
             </p>
           </div>
           <button
@@ -526,28 +530,28 @@
       <!-- Info note -->
       <div class="mt-5">
         <Note variant="info">
-          Sensor-triggered recording is gated by presence detection. If any tracked Bluetooth or WiFi device is connected, the sensor trigger is ignored. Manual recording from the dashboard is always allowed regardless of sensor or presence state.
+          {t("help.presenceGating")}
         </Note>
       </div>
 
       <!-- Mock sensor testing controls -->
       {#if isMockActive}
         <div class="mt-4 rounded-lg border border-border-default bg-surface-base px-3 py-3">
-          <p class="mb-2 text-xs font-semibold text-text-secondary">Mock Sensor Controls</p>
+          <p class="mb-2 text-xs font-semibold text-text-secondary">{t("label.mockSensorControls")}</p>
           <div class="flex gap-2">
             <button
               onclick={mockTrigger}
               disabled={testingTrigger}
               class="rounded-lg bg-status-warning/10 px-3 py-1.5 text-xs font-semibold text-status-warning transition-colors hover:bg-status-warning/15 disabled:opacity-50"
             >
-              {testingTrigger ? "Firing..." : "Simulate Trigger"}
+              {testingTrigger ? t("btn.firing") : t("btn.simulateTrigger")}
             </button>
             <button
               onclick={mockRelease}
               disabled={testingRelease}
               class="rounded-lg bg-status-ok/10 px-3 py-1.5 text-xs font-semibold text-status-ok transition-colors hover:bg-status-ok/15 disabled:opacity-50"
             >
-              {testingRelease ? "Releasing..." : "Simulate Release"}
+              {testingRelease ? t("btn.releasing") : t("btn.simulateRelease")}
             </button>
           </div>
         </div>
@@ -560,7 +564,7 @@
           disabled={saving}
           class="btn-press rounded-lg bg-accent px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-accent/90 disabled:opacity-50"
         >
-          {saving ? "Saving..." : "Save Configuration"}
+          {saving ? t("btn.saving") : t("btn.save")}
         </button>
         {#if message}
           <span class="text-xs font-medium {messageIsError ? 'text-status-critical' : 'text-status-ok'}">{message}</span>

@@ -10,6 +10,7 @@ import ActivityTimeline from "../components/ActivityTimeline.svelte";
 import SensorStatus from "../components/SensorStatus.svelte";
 import LiveClock from "../components/LiveClock.svelte";
 import SetupChecklist from "../components/SetupChecklist.svelte";
+import I18nText from "../components/I18nText.svelte";
 ---
 
 <Layout title="Dashboard - Security Cam">
@@ -17,7 +18,7 @@ import SetupChecklist from "../components/SetupChecklist.svelte";
 		<!-- Header -->
 		<div class="animate-in flex items-center justify-between">
 			<h1 class="text-xl font-bold tracking-tight text-text-primary sm:text-2xl">
-				Dashboard
+				<I18nText key="page.dashboard" fallback="Dashboard" client:load />
 			</h1>
 			<div class="flex items-center gap-3">
 				<LiveClock client:load />
@@ -28,7 +29,7 @@ import SetupChecklist from "../components/SetupChecklist.svelte";
 					></span>
 					<span
 						class="text-[0.75rem] font-semibold text-status-ok">
-						Online
+						<I18nText key="status.online" fallback="Online" client:load />
 					</span>
 				</div>
 			</div>
@@ -42,38 +43,42 @@ import SetupChecklist from "../components/SetupChecklist.svelte";
 			<!-- Live Feed (takes 2 cols on desktop) -->
 			<div class="animate-in stagger-1 min-w-0 lg:col-span-2">
 				<h2 class="section-label mb-2.5">
-					Live Feed
+					<I18nText key="section.liveFeed" fallback="Live Feed" client:load />
 				</h2>
 				<VideoPlayer client:load />
 			</div>
 
-			<!-- System Monitor -->
+			<!-- System Status (compact sidebar) -->
 			<div class="animate-in stagger-2 min-w-0 flex flex-col gap-2.5">
 				<h2 class="section-label">
-					System Health
+					<I18nText key="section.systemHealth" fallback="System Health" client:load />
 				</h2>
 				<ConnectionStatus client:load />
 				<SensorStatus client:load />
 				<SystemMonitor client:load />
-				<EventTracker client:load />
-				<HealthTracker client:load />
 			</div>
 		</div>
 
+		<!-- Timelines row -->
+		<div class="animate-in stagger-3 mt-4 grid grid-cols-1 gap-4 sm:mt-5 sm:gap-5 lg:grid-cols-2">
+			<EventTracker client:load />
+			<HealthTracker client:load />
+		</div>
+
 		<!-- Access Log -->
-		<section class="animate-in stagger-3 mt-6 sm:mt-8">
-			<div class="flex items-center justify-between mb-3">
-				<h2 class="section-label">Access Log</h2>
-				<span class="text-[0.625rem] tabular-nums text-text-muted">Last 72h</span>
+		<section class="animate-in stagger-4 mt-4 sm:mt-5">
+			<div class="flex items-center justify-between mb-2.5">
+				<h2 class="section-label"><I18nText key="section.accessLog" fallback="Access Log" client:load /></h2>
+				<span class="text-[0.625rem] tabular-nums text-text-muted"><I18nText key="label.last72h" fallback="Last 72h" client:load /></span>
 			</div>
 			<AccessLog client:load />
 		</section>
 
 		<!-- Activity Timeline -->
-		<section class="animate-in stagger-4 mt-6 sm:mt-8">
-			<div class="flex items-center justify-between mb-3">
-				<h2 class="section-label">Activity Timeline</h2>
-				<span class="text-[0.625rem] tabular-nums text-text-muted">Last 7 days</span>
+		<section class="animate-in stagger-5 mt-4 sm:mt-5">
+			<div class="flex items-center justify-between mb-2.5">
+				<h2 class="section-label"><I18nText key="section.activityTimeline" fallback="Activity Timeline" client:load /></h2>
+				<span class="text-[0.625rem] tabular-nums text-text-muted"><I18nText key="label.last7days" fallback="Last 7 days" client:load /></span>
 			</div>
 			<ActivityTimeline client:load />
 		</section>

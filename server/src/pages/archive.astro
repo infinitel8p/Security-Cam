@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import ArchiveGrid from "../components/ArchiveGrid.svelte";
 import Icon from "../components/Icon.svelte";
+import I18nText from "../components/I18nText.svelte";
 import videoIcon from "../icons/video.svg?raw";
 ---
 
@@ -11,7 +12,7 @@ import videoIcon from "../icons/video.svg?raw";
       <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-accent/10">
         <Icon icon={videoIcon} class="h-[1.125rem] w-[1.125rem] text-accent" />
       </div>
-      <h1 class="text-xl font-bold tracking-tight text-text-primary sm:text-2xl">Archive</h1>
+      <h1 class="text-xl font-bold tracking-tight text-text-primary sm:text-2xl"><I18nText key="page.archive" fallback="Archive" client:load /></h1>
     </div>
     <ArchiveGrid client:load />
   </div>

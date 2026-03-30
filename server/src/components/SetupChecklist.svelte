@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { initLocale, t } from "../i18n";
   import { getBackendUrl } from "../lib/api";
   import Icon from "./Icon.svelte";
   import shieldIcon from "../icons/shield.svg?raw";
@@ -21,6 +22,7 @@
   let totalSteps = 2;
 
   onMount(async () => {
+    initLocale();
     if (localStorage.getItem("setup-checklist-dismissed") === "true") {
       dismissed = true;
       loading = false;
@@ -67,14 +69,14 @@
           <Icon icon={shieldIcon} class="h-3.5 w-3.5 text-accent" stroke={2.5} />
         </div>
         <div>
-          <h3 class="text-sm font-semibold text-text-primary">Get your camera ready</h3>
-          <p class="text-[0.6875rem] text-text-muted">{completedCount} of {totalSteps} steps done</p>
+          <h3 class="text-sm font-semibold text-text-primary">{t("setup.title")}</h3>
+          <p class="text-[0.6875rem] text-text-muted">{t("setup.stepProgress", { n: completedCount, total: totalSteps })}</p>
         </div>
       </div>
       <button
         onclick={dismiss}
         class="rounded-md p-1 text-text-muted transition-colors hover:bg-surface-overlay hover:text-text-secondary"
-        title="Dismiss"
+        title={t("btn.dismiss")}
       >
         <Icon icon={xIcon} class="h-4 w-4" />
       </button>
@@ -106,10 +108,10 @@
         </div>
         <div class="min-w-0 flex-1">
           <p class="text-[0.8125rem] font-medium {setup.hasDevices ? 'text-text-muted line-through' : 'text-text-primary'}">
-            Add your phone or laptop
+            {t("setup.addDevices")}
           </p>
           <p class="text-[0.6875rem] text-text-muted">
-            {setup.hasDevices ? "Devices configured" : "Bluetooth or WiFi device for presence detection"}
+            {setup.hasDevices ? t("setup.addDevicesDone") : t("setup.addDevicesDesc")}
           </p>
         </div>
         {#if !setup.hasDevices}
@@ -133,10 +135,10 @@
         </div>
         <div class="min-w-0 flex-1">
           <p class="text-[0.8125rem] font-medium {setup.hasSensor ? 'text-text-muted line-through' : 'text-text-primary'}">
-            Enable a trigger sensor
+            {t("setup.enableSensor")}
           </p>
           <p class="text-[0.6875rem] text-text-muted">
-            {setup.hasSensor ? "Sensor armed" : "Auto-record when motion or door activity is detected"}
+            {setup.hasSensor ? t("setup.enableSensorDone") : t("setup.enableSensorDesc")}
           </p>
         </div>
         {#if !setup.hasSensor}

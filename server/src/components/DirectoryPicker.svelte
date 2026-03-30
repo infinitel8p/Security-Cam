@@ -1,6 +1,7 @@
 <script lang="ts">
   import { getBackendUrl } from "../lib/api";
   import toast from "svelte-5-french-toast";
+  import { t } from "../i18n";
   import Icon from "./Icon.svelte";
   import folderIcon from "../icons/folder.svg?raw";
   import xIcon from "../icons/x.svg?raw";
@@ -67,9 +68,9 @@
       if (!res.ok) throw new Error();
       current = browsePath;
       open = false;
-      toast.success("Save location updated");
+      toast.success(t("toast.saveLocationUpdated"));
     } catch {
-      toast.error("Failed to save location");
+      toast.error(t("toast.saveLocationFailed"));
     } finally {
       saving = false;
     }
@@ -81,7 +82,7 @@
     <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-accent/10">
       <Icon icon={folderIcon} class="h-3.5 w-3.5 text-accent" stroke={2.5} />
     </div>
-    <label class="text-sm font-semibold text-text-primary">Video Save Location</label>
+    <label class="text-sm font-semibold text-text-primary">{t("label.videoSaveLocation")}</label>
   </div>
   <div class="mt-3 flex items-center gap-3">
     <code class="flex-1 truncate rounded-xl border border-border-default bg-surface-elevated px-3.5 py-2 text-sm font-medium text-text-secondary">
@@ -91,7 +92,7 @@
       onclick={openBrowser}
       class="shrink-0 rounded-xl bg-accent/12 px-4 py-2 text-sm font-semibold text-accent shadow-[inset_0_0_0_1px_rgba(0,111,255,0.2)] transition-colors hover:bg-accent/20"
     >
-      Browse
+      {t("btn.browse")}
     </button>
   </div>
 </div>
@@ -108,7 +109,7 @@
     <div class="animate-dialog mx-4 w-full max-w-md overflow-hidden rounded-2xl border border-border-subtle bg-surface-raised shadow-[var(--shadow-lg)]">
       <!-- Header -->
       <div class="flex items-center justify-between border-b border-border-subtle px-5 py-3.5">
-        <h3 class="text-sm font-semibold text-text-primary">Select Directory</h3>
+        <h3 class="text-sm font-semibold text-text-primary">{t("dialog.selectDirectory")}</h3>
         <button
           onclick={() => (open = false)}
           class="flex h-7 w-7 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-surface-overlay hover:text-text-secondary"
@@ -125,11 +126,11 @@
       <!-- Directory list -->
       <div class="max-h-64 overflow-y-auto p-2">
         {#if loading}
-          <p class="px-3 py-6 text-center text-sm text-text-muted">Loading...</p>
+          <p class="px-3 py-6 text-center text-sm text-text-muted">{t("status.loading")}</p>
         {:else if dirError}
           <div class="px-3 py-6 text-center">
-            <p class="text-sm text-status-critical">Failed to load directories</p>
-            <button onclick={() => loadDirectories(browsePath)} class="mt-2 text-[0.8125rem] font-medium text-accent hover:text-accent-hover">Retry</button>
+            <p class="text-sm text-status-critical">{t("error.directories")}</p>
+            <button onclick={() => loadDirectories(browsePath)} class="mt-2 text-[0.8125rem] font-medium text-accent hover:text-accent-hover">{t("btn.retry")}</button>
           </div>
         {:else}
           <button
@@ -149,7 +150,7 @@
             </button>
           {/each}
           {#if directories.length === 0}
-            <p class="px-3 py-6 text-center text-sm text-text-muted">No subdirectories</p>
+            <p class="px-3 py-6 text-center text-sm text-text-muted">{t("empty.noSubdirectories")}</p>
           {/if}
         {/if}
       </div>
@@ -160,14 +161,14 @@
           onclick={() => (open = false)}
           class="rounded-xl px-4 py-2 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-overlay"
         >
-          Cancel
+          {t("btn.cancel")}
         </button>
         <button
           onclick={selectPath}
           disabled={saving}
           class="rounded-xl bg-accent/12 px-4 py-2 text-sm font-semibold text-accent shadow-[inset_0_0_0_1px_rgba(0,111,255,0.2)] transition-colors hover:bg-accent/20 disabled:opacity-50"
         >
-          {saving ? "Saving..." : "Select"}
+          {saving ? t("btn.saving") : t("btn.select")}
         </button>
       </div>
     </div>

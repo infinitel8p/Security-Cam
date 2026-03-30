@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import { initLocale, t } from "../i18n";
   import Icon from "./Icon.svelte";
   import temperatureIcon from "../icons/temperature.svg?raw";
   import cpuIcon from "../icons/cpu.svg?raw";
@@ -44,7 +45,10 @@
     }
   }
 
-  onMount(fetchInfo);
+  onMount(() => {
+    initLocale();
+    fetchInfo();
+  });
 
   function tempColor(temp: number): string {
     if (temp >= 70) return "text-status-critical";
@@ -93,8 +97,8 @@
 
 {#if error}
   <div class="card flex flex-col items-center justify-center gap-2 px-4 py-8 text-center">
-    <p class="text-[0.8125rem] text-text-muted">Unable to reach system monitor</p>
-    <button onclick={fetchInfo} class="text-[0.75rem] font-medium text-accent hover:text-accent-hover">Retry</button>
+    <p class="text-[0.8125rem] text-text-muted">{t("error.systemMonitor")}</p>
+    <button onclick={fetchInfo} class="text-[0.75rem] font-medium text-accent hover:text-accent-hover">{t("btn.retry")}</button>
   </div>
 {:else if info}
   <div class="card divide-y divide-border-subtle">
@@ -104,7 +108,7 @@
       <div class="px-4 py-3">
         <div class="flex items-center gap-1.5">
           <Icon icon={temperatureIcon} class="h-3 w-3 text-text-muted" stroke={2} />
-          <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">Temp</p>
+          <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.temperature")}</p>
         </div>
         <p class="mt-1 text-xl font-bold tabular-nums leading-none {tempColor(info.cpu_temp_celsius)}">
           {info.cpu_temp_celsius.toFixed(0)}<span class="text-[0.625rem] font-medium">&deg;C</span>
@@ -115,7 +119,7 @@
       <div class="px-4 py-3">
         <div class="flex items-center gap-1.5">
           <Icon icon={cpuIcon} class="h-3 w-3 text-text-muted" stroke={2} />
-          <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">CPU</p>
+          <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.cpu")}</p>
         </div>
         <p class="mt-1 text-xl font-bold tabular-nums leading-none text-text-primary">
           {loadPct}<span class="text-[0.625rem] font-medium">%</span>
@@ -133,7 +137,7 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-1.5">
             <Icon icon={databaseIcon} class="h-3 w-3 text-text-muted" stroke={2} />
-            <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">Disk</p>
+            <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.disk")}</p>
           </div>
           <p class="text-[0.625rem] tabular-nums text-text-muted">{info.storage_info_gb.used_gb.toFixed(1)}/{info.storage_info_gb.total_gb.toFixed(0)}GB</p>
         </div>
@@ -150,7 +154,7 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-1.5">
             <Icon icon={deviceDesktopIcon} class="h-3 w-3 text-text-muted" stroke={2} />
-            <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">RAM</p>
+            <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.ram")}</p>
           </div>
           <p class="text-[0.625rem] tabular-nums text-text-muted">{info.ram_usage_mb.used_mb.toFixed(0)}/{info.ram_usage_mb.total_mb.toFixed(0)}MB</p>
         </div>
@@ -169,7 +173,7 @@
       <div class="px-4 py-3">
         <div class="flex items-center gap-1.5">
           <Icon icon={clockIcon} class="h-3 w-3 text-text-muted" stroke={2} />
-          <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">Uptime</p>
+          <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.uptime")}</p>
         </div>
         <p class="mt-1 text-xl font-bold tabular-nums leading-none {info.uptime_seconds ? 'text-text-primary' : 'text-text-muted'}">
           {formatUptime(info.uptime_seconds)}
@@ -180,32 +184,32 @@
       <div class="px-4 py-3">
         <div class="flex items-center gap-1.5">
           <Icon icon={boltIcon} class="h-3 w-3 text-text-muted" stroke={2} />
-          <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">Throttle</p>
+          <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.throttle")}</p>
         </div>
         {#if info.throttle}
           {@const active = throttleActive(info.throttle)}
           {@const history = throttleHistory(info.throttle)}
           {#if active}
-            <p class="mt-1 text-lg font-bold leading-none text-status-critical">Active</p>
+            <p class="mt-1 text-lg font-bold leading-none text-status-critical">{t("status.active")}</p>
             <div class="mt-1 flex flex-wrap gap-1">
               {#if info.throttle.under_voltage_now}
-                <span class="rounded bg-status-critical/10 px-1.5 py-0.5 text-[0.625rem] font-medium text-status-critical">Low voltage</span>
+                <span class="rounded bg-status-critical/10 px-1.5 py-0.5 text-[0.625rem] font-medium text-status-critical">{t("throttle.lowVoltage")}</span>
               {/if}
               {#if info.throttle.throttled_now}
-                <span class="rounded bg-status-critical/10 px-1.5 py-0.5 text-[0.625rem] font-medium text-status-critical">Throttled</span>
+                <span class="rounded bg-status-critical/10 px-1.5 py-0.5 text-[0.625rem] font-medium text-status-critical">{t("throttle.throttled")}</span>
               {/if}
               {#if info.throttle.freq_capped_now}
-                <span class="rounded bg-status-warning/10 px-1.5 py-0.5 text-[0.625rem] font-medium text-status-warning">Freq cap</span>
+                <span class="rounded bg-status-warning/10 px-1.5 py-0.5 text-[0.625rem] font-medium text-status-warning">{t("throttle.freqCapped")}</span>
               {/if}
               {#if info.throttle.soft_temp_limit_now}
-                <span class="rounded bg-status-warning/10 px-1.5 py-0.5 text-[0.625rem] font-medium text-status-warning">Temp limit</span>
+                <span class="rounded bg-status-warning/10 px-1.5 py-0.5 text-[0.625rem] font-medium text-status-warning">{t("throttle.tempLimit")}</span>
               {/if}
             </div>
           {:else if history}
-            <p class="mt-1 text-lg font-bold leading-none text-status-warning">Past</p>
-            <p class="mt-0.5 text-[0.625rem] text-text-muted">Since boot</p>
+            <p class="mt-1 text-lg font-bold leading-none text-status-warning">{t("status.past")}</p>
+            <p class="mt-0.5 text-[0.625rem] text-text-muted">{t("label.sinceBoot")}</p>
           {:else}
-            <p class="mt-1 text-lg font-bold leading-none text-status-ok">OK</p>
+            <p class="mt-1 text-lg font-bold leading-none text-status-ok">{t("status.ok")}</p>
           {/if}
         {:else}
           <p class="mt-1 text-xl font-bold leading-none text-text-muted">-</p>

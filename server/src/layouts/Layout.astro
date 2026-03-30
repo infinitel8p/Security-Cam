@@ -22,12 +22,16 @@ const { title = "Security Cam" } = Astro.props;
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 		<link rel="apple-touch-icon" href="/icon.png" />
 <title>{title}</title>
-		<!-- Prevent flash: apply saved theme before paint -->
+		<!-- Prevent flash: apply saved theme + detect locale before paint -->
 		<script is:inline>
 			(function () {
 				var saved = localStorage.getItem("theme");
 				var isLight = saved === "light" || (saved !== "dark" && window.matchMedia("(prefers-color-scheme: light)").matches);
 				if (isLight) document.documentElement.classList.add("light");
+
+				var locale = localStorage.getItem("locale");
+				if (!locale) locale = navigator.language.startsWith("de") ? "de" : "en";
+				document.documentElement.lang = locale;
 			})();
 		</script>
 	</head>

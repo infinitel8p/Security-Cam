@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { getBackendUrl } from "../lib/api";
   import toast from "svelte-5-french-toast";
+  import { initLocale, t } from "../i18n";
   import Icon from "./Icon.svelte";
   import searchIcon from "../icons/search.svg?raw";
   import xIcon from "../icons/x.svg?raw";
@@ -118,7 +119,10 @@
     }
   }
 
-  onMount(fetchArchive);
+  onMount(() => {
+    initLocale();
+    fetchArchive();
+  });
 
   function streamUrl(path: string): string {
     return `${getBackendUrl()}/stream_video?video_path=${encodeURIComponent(path)}&cache_buster=${Date.now()}`;
@@ -142,10 +146,10 @@
       });
       if (!res.ok) throw new Error("Server returned an error");
       allVideos = allVideos.filter((v) => v.path !== deleteTarget!.path);
-      toast.success("Recording deleted");
+      toast.success(t("toast.recordingDeleted"));
       deleteTarget = null;
     } catch {
-      toast.error("Failed to delete recording");
+      toast.error(t("toast.deleteRecordingFailed"));
     } finally {
       deleting = false;
     }
@@ -213,8 +217,8 @@
 
   const sortOptions: SortMode[] = ["newest", "oldest", "name"];
   const filterOptions: FilterMode[] = ["all", "today", "week", "month"];
-  const sortLabels: Record<SortMode, string> = { newest: "Newest first", oldest: "Oldest first", name: "Name" };
-  const filterLabels: Record<FilterMode, string> = { all: "All time", today: "Today", week: "This week", month: "This month" };
+  const sortLabels: Record<SortMode, string> = { newest: t("sort.newestFirst"), oldest: t("sort.oldestFirst"), name: t("sort.name") };
+  const filterLabels: Record<FilterMode, string> = { all: t("filter.allTime"), today: t("filter.today"), week: t("filter.thisWeek"), month: t("filter.thisMonth") };
 
   // Close dropdowns on outside click
   function handleGlobalClick(e: MouseEvent) {
@@ -270,17 +274,17 @@
     <div class="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-status-critical/8">
       <Icon icon={alertCircleIcon} class="h-5 w-5 text-status-critical" stroke={1.5} />
     </div>
-    <p class="mt-3 text-[0.8125rem] text-text-secondary">Unable to load archive</p>
-    <p class="mt-1 text-[0.8125rem] text-text-muted">Check that the backend is running</p>
-    <button onclick={fetchArchive} class="mt-3 text-[0.8125rem] font-medium text-accent hover:text-accent-hover">Retry</button>
+    <p class="mt-3 text-[0.8125rem] text-text-secondary">{t("error.archive")}</p>
+    <p class="mt-1 text-[0.8125rem] text-text-muted">{t("error.checkBackend")}</p>
+    <button onclick={fetchArchive} class="mt-3 text-[0.8125rem] font-medium text-accent hover:text-accent-hover">{t("btn.retry")}</button>
   </div>
 {:else if allVideos.length === 0}
   <div class="card px-6 py-16 text-center">
     <div class="animate-float mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-surface-overlay">
       <Icon icon={videoIcon} class="h-6 w-6 text-text-muted" stroke={1.5} />
     </div>
-    <p class="mt-4 text-sm font-medium text-text-secondary">All quiet on the home front</p>
-    <p class="mt-1 text-[0.8125rem] text-text-muted">Recordings will appear here once you start capturing</p>
+    <p class="mt-4 text-sm font-medium text-text-secondary">{t("empty.archive")}</p>
+    <p class="mt-1 text-[0.8125rem] text-text-muted">{t("empty.archiveDesc")}</p>
   </div>
 {:else}
   <!-- Toolbar -->
@@ -291,7 +295,7 @@
       <input
         type="text"
         bind:value={search}
-        placeholder="Search recordings..."
+        placeholder={t("input.searchRecordings")}
         class="h-9 w-full rounded-lg border border-border-subtle bg-surface-raised pl-9 pr-3 text-[0.8125rem] text-text-primary placeholder:text-text-muted transition-colors focus:border-accent/40 focus:outline-none focus:ring-1 focus:ring-accent/20"
       />
       {#if search}
@@ -396,14 +400,14 @@
     <p class="text-[0.8125rem] tabular-nums text-text-muted">
       {filteredVideos.length}
       {filteredVideos.length !== allVideos.length ? `of ${allVideos.length}` : ""}
-      recording{filteredVideos.length !== 1 ? "s" : ""}
+      {filteredVideos.length !== 1 ? t("label.recordings").split(" | ")[1] : t("label.recordings").split(" | ")[0]}
     </p>
     {#if filterMode !== "all" || search}
       <button
         onclick={() => { filterMode = "all"; search = ""; }}
         class="rounded-md bg-accent/8 px-2 py-0.5 text-[0.75rem] font-medium text-accent transition-colors hover:bg-accent/14"
       >
-        Clear filters
+        {t("btn.clearFilters")}
       </button>
     {/if}
   </div>
@@ -417,12 +421,12 @@
           <line x1="8" y1="11" x2="14" y2="11" />
         </svg>
       </div>
-      <p class="mt-3 text-[0.8125rem] text-text-secondary">No recordings match your filters</p>
+      <p class="mt-3 text-[0.8125rem] text-text-secondary">{t("empty.noMatches")}</p>
       <button
         onclick={() => { filterMode = "all"; search = ""; }}
         class="mt-2 text-[0.8125rem] font-medium text-accent hover:text-accent-hover"
       >
-        Clear all filters
+        {t("btn.clearAllFilters")}
       </button>
     </div>
   {:else if viewMode === "grid"}
@@ -434,7 +438,7 @@
             <h3 class="text-[0.8125rem] font-semibold text-text-primary">{group.label}</h3>
             <div class="h-px flex-1 bg-border-subtle"></div>
             <span class="text-[0.6875rem] tabular-nums text-text-muted">
-              {group.videos.length} clip{group.videos.length !== 1 ? "s" : ""}
+              {group.videos.length} {group.videos.length !== 1 ? t("label.clips").split(" | ")[1] : t("label.clips").split(" | ")[0]}
             </span>
           </div>
           <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -466,14 +470,14 @@
                     <button
                       onclick={() => downloadVideo(video)}
                       class="flex h-10 w-10 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-accent-muted hover:text-accent sm:h-auto sm:w-auto sm:p-2"
-                      title="Download"
+                      title={t("btn.download")}
                     >
                       <Icon icon={downloadIcon} class="h-[1.125rem] w-[1.125rem] sm:h-4 sm:w-4" />
                     </button>
                     <button
                       onclick={(e) => openDeleteDialog(video, e.currentTarget as HTMLButtonElement)}
                       class="flex h-10 w-10 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-status-critical/8 hover:text-status-critical sm:h-auto sm:w-auto sm:p-2"
-                      title="Delete"
+                      title={t("btn.delete")}
                     >
                       <Icon icon={trashIcon} class="h-4 w-4" />
                     </button>
@@ -494,7 +498,7 @@
             <h3 class="text-[0.8125rem] font-semibold text-text-primary">{group.label}</h3>
             <div class="h-px flex-1 bg-border-subtle"></div>
             <span class="text-[0.6875rem] tabular-nums text-text-muted">
-              {group.videos.length} clip{group.videos.length !== 1 ? "s" : ""}
+              {group.videos.length} {group.videos.length !== 1 ? t("label.clips").split(" | ")[1] : t("label.clips").split(" | ")[0]}
             </span>
           </div>
           <div class="overflow-hidden rounded-xl border border-border-subtle">
@@ -531,16 +535,16 @@
                   <button
                     onclick={() => downloadVideo(video)}
                     class="flex h-10 w-10 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-accent-muted hover:text-accent sm:h-8 sm:w-8"
-                    title="Download"
-                    aria-label="Download recording"
+                    title={t("btn.download")}
+                    aria-label={t("btn.downloadRecording")}
                   >
                     <Icon icon={downloadIcon} class="h-4 w-4" />
                   </button>
                   <button
                     onclick={(e) => openDeleteDialog(video, e.currentTarget as HTMLButtonElement)}
                     class="flex h-10 w-10 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-status-critical/8 hover:text-status-critical sm:h-8 sm:w-8"
-                    title="Delete"
-                    aria-label="Delete recording"
+                    title={t("btn.delete")}
+                    aria-label={t("btn.deleteRecording")}
                   >
                     <Icon icon={trashIcon} class="h-4 w-4" />
                   </button>
@@ -570,23 +574,23 @@
       <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-status-critical/8">
         <Icon icon={trashIcon} class="h-4.5 w-4.5 text-status-critical" />
       </div>
-      <h3 class="mt-3 text-sm font-semibold text-text-primary">Delete recording?</h3>
+      <h3 class="mt-3 text-sm font-semibold text-text-primary">{t("dialog.deleteTitle")}</h3>
       <p class="mt-1 text-[0.8125rem] leading-relaxed text-text-secondary">
-        <span class="break-all font-medium text-text-primary">{deleteTarget.filename}</span> will be permanently removed.
+        {t("dialog.deleteMessage", { filename: deleteTarget.filename })}
       </p>
       <div class="mt-5 flex justify-end gap-2.5">
         <button
           onclick={closeDeleteDialog}
           class="rounded-lg px-4 py-2.5 text-[0.8125rem] font-medium text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary"
         >
-          Cancel
+          {t("btn.cancel")}
         </button>
         <button
           onclick={confirmDelete}
           disabled={deleting}
           class="rounded-lg bg-status-critical/10 px-4 py-2.5 text-[0.8125rem] font-semibold text-status-critical transition-colors hover:bg-status-critical/18 disabled:opacity-40"
         >
-          {deleting ? "Deleting..." : "Delete"}
+          {deleting ? t("btn.deleting") : t("btn.delete")}
         </button>
       </div>
     </div>
