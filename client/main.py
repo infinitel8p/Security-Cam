@@ -53,6 +53,14 @@ def log_response(response):
 health_logger.start()
 presence_monitor.start()
 sensor_manager.start()
+
+def _on_ffmpeg_crash():
+    sensor_manager.notify_manual_recording_stopped()
+    event_logger.log_event("recording_stopped", "ffmpeg crash")
+    log.warning("FFmpeg crashed — recording state reset")
+
+stream_helpers.set_on_crash(_on_ffmpeg_crash)
+
 event_logger.log_event("system_boot")
 log.info("Security Cam backend started")
 

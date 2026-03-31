@@ -16,13 +16,67 @@ is_recording = False
 recorded_filename = None
 _recording_start_time = None
 _recording_reason = None
+_watchdog_thread = None
+_on_crash_callback = None  # Called when ffmpeg dies unexpectedly
 
 RTSP_URL = "rtsp://localhost:8554/cam"
+_WATCHDOG_INTERVAL = 3  # seconds between health checks
+
+
+def set_on_crash(callback):
+    """Register a callback for ffmpeg crash. Called with no arguments."""
+    global _on_crash_callback
+    _on_crash_callback = callback
 
 
 def reload_settings():
     global settings
     settings = settings_helpers.get_settings()
+
+
+def _watchdog():
+    """Monitor ffmpeg health and clean up if it dies unexpectedly."""
+    while True:
+        time.sleep(_WATCHDOG_INTERVAL)
+        with lock:
+            if not is_recording or _ffmpeg_process is None:
+                return  # Recording ended normally, exit watchdog
+            if _ffmpeg_process.poll() is not None:
+                # ffmpeg died — clean up state
+                code = _ffmpeg_process.returncode
+                log.error("FFmpeg died unexpectedly (code=%d), resetting recording state", code)
+                _cleanup_dead_recording()
+                return
+
+
+def _cleanup_dead_recording():
+    """Reset recording state after ffmpeg crash. Caller must hold lock."""
+    global _ffmpeg_process, is_recording, recorded_filename
+    global _recording_start_time, _recording_reason
+
+    filename = recorded_filename
+    start_time = _recording_start_time
+
+    _ffmpeg_process = None
+    is_recording = False
+    _recording_start_time = None
+    _recording_reason = None
+
+    # Update metadata with what we know
+    if filename and start_time:
+        duration = (datetime.now(timezone.utc) - start_time).total_seconds()
+        meta = _read_meta(filename) or {}
+        meta["stopped"] = datetime.now(timezone.utc).isoformat()
+        meta["duration_seconds"] = round(duration, 1)
+        meta["crash"] = True
+        _write_meta(filename, meta)
+
+    # Notify listener (sensor_manager) so it can reset _sensor_recording
+    if _on_crash_callback:
+        try:
+            _on_crash_callback()
+        except Exception as e:
+            log.error("Crash callback failed: %s", e)
 
 
 def _meta_path(video_path: str) -> str:
@@ -104,6 +158,11 @@ def start_recording(reason: str = "manual", sensor_type: str | None = None) -> N
 
         log.info("Recording started: %s (pid=%d, reason=%s)",
                  recorded_filename, _ffmpeg_process.pid, reason)
+
+    # Start watchdog outside the lock
+    global _watchdog_thread
+    _watchdog_thread = threading.Thread(target=_watchdog, daemon=True)
+    _watchdog_thread.start()
 
 
 def stop_recording() -> None:
