@@ -210,13 +210,14 @@ def start():
     sensor_type = sensor_cfg.get("type", "reed_switch")
     gpio = sensor_cfg.get("gpio")
     invert = sensor_cfg.get("invert_logic", False)
+    calibration = sensor_cfg.get("calibration", {})
 
     if sensor_type not in SENSOR_REGISTRY:
         log.error("Unknown sensor type '%s'", sensor_type)
         return
 
     try:
-        _sensor = create_sensor(sensor_type, gpio=gpio)
+        _sensor = create_sensor(sensor_type, gpio=gpio, **calibration)
         if invert:
             # Swap trigger/release so sensor fires on opposite state
             log.info("Trigger logic inverted")
@@ -261,7 +262,7 @@ def restart():
 
 def configure(sensor_type: str, gpio: int | None = None,
               enabled: bool = True, hold_seconds: int = 10,
-              invert_logic: bool = False):
+              invert_logic: bool = False, calibration: dict | None = None):
     """Update sensor settings and restart.
 
     Returns the new sensor config dict.
@@ -279,6 +280,9 @@ def configure(sensor_type: str, gpio: int | None = None,
         cls = SENSOR_REGISTRY.get(sensor_type)
         if cls:
             cfg["gpio"] = cls.default_gpio
+
+    if calibration:
+        cfg["calibration"] = calibration
 
     settings_helpers.update_settings({"Sensor": cfg})
     restart()

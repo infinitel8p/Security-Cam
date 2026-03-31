@@ -30,6 +30,7 @@ class BaseSensor(ABC):
     icon: str = "wrench"              # icon key for the frontend
     wiring: tuple[dict, ...] = ()      # ({"pin": "VCC", "connect": "3V3 [pin 17]"}, ...)
     wiring_note: str = ""             # optional note shown below the wiring table
+    calibration_schema: tuple[dict, ...] = ()  # calibration parameters for this sensor type
 
     def __init__(self, gpio: int | None = None, **kwargs):
         self.gpio = gpio if gpio is not None else self.default_gpio

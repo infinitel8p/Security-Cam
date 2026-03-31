@@ -2,7 +2,7 @@
 sidebar_position: 2
 description: "Configure modular trigger sensors to automatically start recording"
 last_update:
-  date: 2026-03-30
+  date: 2026-03-31
   author: Ludo
 ---
 
@@ -180,7 +180,17 @@ Any momentary push button works. The software enables an internal pull-up resist
 
 ### Mock Sensor (Software Only)
 
-No hardware needed. Trigger and release from the Settings page in the dashboard, or via the API:
+No hardware needed — the mock sensor lets you test the full recording pipeline without any physical sensor connected.
+
+**Setup:**
+
+1. Go to **Settings > Sensors**
+2. Select **Mock** from the sensor type grid
+3. Click **Save Configuration**
+4. Toggle **Auto-recording** on
+5. The **Mock Sensor Controls** panel appears with **Simulate Trigger** and **Simulate Release** buttons — these fake a sensor event so you can verify that presence gating, recording, and hold timeout all work correctly
+
+You can also trigger and release via the API:
 
 ```bash
 # Simulate a trigger (e.g. door opened)
@@ -212,15 +222,15 @@ curl -X POST http://<pi-ip>:5005/sensor/configure \
   -H 'Content-Type: application/json' \
   -d '{"type": "reed_switch", "gpio": 22, "enabled": true, "hold_seconds": 10}'
 
-# Switch to vibration sensor on GPIO 5
+# Switch to vibration sensor on GPIO 5 with pulse threshold calibration
 curl -X POST http://<pi-ip>:5005/sensor/configure \
   -H 'Content-Type: application/json' \
-  -d '{"type": "vibration", "gpio": 5, "enabled": true}'
+  -d '{"type": "vibration", "gpio": 5, "enabled": true, "calibration": {"pulse_count": 3, "pulse_window": 5}}'
 
-# Switch to hall magnetic sensor
+# Switch to hall magnetic sensor with inverted trigger logic
 curl -X POST http://<pi-ip>:5005/sensor/configure \
   -H 'Content-Type: application/json' \
-  -d '{"type": "hall_digital", "gpio": 13, "enabled": true}'
+  -d '{"type": "hall_digital", "gpio": 13, "enabled": true, "invert_logic": true}'
 
 # Disable the sensor
 curl -X POST http://<pi-ip>:5005/sensor/disable
@@ -228,9 +238,25 @@ curl -X POST http://<pi-ip>:5005/sensor/disable
 # Check current sensor status
 curl http://<pi-ip>:5005/sensor/status
 
-# List available sensor types
+# List available sensor types (includes calibration schema)
 curl http://<pi-ip>:5005/sensor/types
+
+# Test GPIO wiring - read raw pin state without interfering with the running sensor
+curl -X POST http://<pi-ip>:5005/sensor/test \
+  -H 'Content-Type: application/json' \
+  -d '{"type": "reed_switch", "gpio": 22}'
 ```
+
+The `/sensor/configure` endpoint accepts these parameters:
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `type` | string | *(required)* | Sensor type identifier (e.g. `reed_switch`, `pir`, `vibration`) |
+| `gpio` | number | sensor default | BCM GPIO pin number (0-27) |
+| `enabled` | boolean | `true` | Whether the sensor is active |
+| `hold_seconds` | number | `10` | Seconds to keep recording after sensor releases |
+| `invert_logic` | boolean | `false` | Swap trigger/release - e.g. trigger on LOW instead of HIGH |
+| `calibration` | object | `{}` | Sensor-specific calibration parameters |
 
 ### Settings File
 
@@ -242,10 +268,13 @@ The sensor configuration is stored in `client/settings/settings.json`:
     "type": "reed_switch",
     "gpio": 22,
     "enabled": false,
-    "hold_seconds": 10
+    "hold_seconds": 10,
+    "calibration": {}
   }
 }
 ```
+
+The `calibration` object holds sensor-specific parameters. For example, a PIR sensor might have `{"sensitivity": 7}`, while a vibration sensor might have `{"pulse_count": 3, "pulse_window": 5}`. Sensors without calibration parameters use an empty object or omit the field entirely.
 
 ---
 
@@ -265,6 +294,38 @@ For pulse-based sensors (KY-002 vibration, KY-031 knock), set a longer hold time
 
 ---
 
+## Calibration
+
+Some sensors expose calibration parameters that let you fine-tune their behaviour from the dashboard. When you select a sensor type that supports calibration, a **Calibration** panel appears with sliders.
+
+### PIR Motion — Sensitivity
+
+The PIR sensor has a **Sensitivity** slider (1–10, default 7):
+
+- **High (10)** — triggers on the slightest motion. Good for monitoring quiet rooms.
+- **Low (1)** — requires sustained movement over multiple readings to trigger. Useful if the sensor is near a heat source or in a high-traffic area where you only want to capture deliberate activity.
+
+Internally this controls how many consecutive motion readings are averaged before firing — lower sensitivity means a larger averaging window.
+
+:::tip
+Most HC-SR501 modules also have a physical potentiometer for sensitivity on the back of the board. Use the hardware pot for coarse adjustment and the software slider for fine-tuning.
+:::
+
+### Vibration / Knock — Pulse Threshold
+
+Vibration (KY-002) and Knock (KY-031) sensors produce brief digital pulses on each impact. By default, a single pulse triggers recording. The calibration sliders let you require multiple impacts before triggering:
+
+- **Pulse threshold** — number of impacts required (default: 1 for vibration, 3 for knock). Higher values filter out single accidental bumps.
+- **Counting window** — time window in seconds to count pulses (default: 5s). Only used when threshold is greater than 1.
+
+For example, setting the knock sensor to **threshold 3, window 5s** means "3 knocks within 5 seconds" are needed to start recording — a typical knock-knock-knock pattern. A single accidental bump is ignored.
+
+:::note
+The mock sensor has no calibration parameters — there is no hardware to calibrate.
+:::
+
+---
+
 ## Adding a Custom Sensor
 
 The sensor system is modular. To add a new sensor type:
@@ -272,7 +333,25 @@ The sensor system is modular. To add a new sensor type:
 1. Create a new file in `client/modules/sensors/` (e.g. `my_sensor.py`)
 2. Subclass `BaseSensor` from `client/modules/sensors/base.py`
 3. Implement `start(on_trigger, on_release)` and `stop()`
-4. Register the class in `client/modules/sensors/__init__.py`
+4. Set the class attributes for the dashboard UI
+5. Register the class in `client/modules/sensors/__init__.py`
+
+### Class Attributes
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `name` | `str` | Yes | Human-readable name shown in the dashboard |
+| `sensor_type` | `str` | Yes | Short identifier used in settings and API (e.g. `"my_sensor"`) |
+| `default_gpio` | `int` | Yes | Default BCM GPIO pin number |
+| `module` | `str` | No | Hardware module number (e.g. `"KY-025"`) |
+| `description` | `str` | No | One-line description shown in sensor details |
+| `use_case` | `str` | No | What the sensor is good for |
+| `icon` | `str` | No | Icon key for the dashboard (`"magnet"`, `"eye"`, `"zap"`, `"rotate"`, `"hand"`, `"gate"`, `"circle"`, `"wrench"`) |
+| `wiring` | `tuple[dict, ...]` | No | Wiring instructions, each dict has `pin` and `connect` keys |
+| `wiring_note` | `str` | No | Extra note shown below the wiring table |
+| `calibration_schema` | `tuple[dict, ...]` | No | Calibration parameters for the dashboard UI (see below) |
+
+### Example
 
 ```python
 # client/modules/sensors/my_sensor.py
@@ -282,6 +361,20 @@ class MySensor(BaseSensor):
     name = "My Custom Sensor"
     sensor_type = "my_sensor"
     default_gpio = 18
+    module = "XY-100"
+    description = "Custom sensor for my specific use case"
+    use_case = "Monitoring a custom trigger condition"
+    icon = "zap"
+    wiring = (
+        {"pin": "VCC", "connect": "3V3 [pin 17]"},
+        {"pin": "GND", "connect": "GND [pin 14]"},
+        {"pin": "DO", "connect": "GPIO 18 [pin 12]"},
+    )
+    wiring_note = "Optional note about wiring specifics."
+
+    def __init__(self, gpio=None, **kwargs):
+        super().__init__(gpio, **kwargs)
+        self._device = None
 
     def start(self, on_trigger, on_release):
         # Set up your hardware monitoring here
@@ -294,9 +387,45 @@ class MySensor(BaseSensor):
     def stop(self):
         # Clean up hardware resources
         self._running = False
+
+    def read_value(self):
+        # Optional: return raw GPIO state for the wiring test panel
+        return self._read_gpio(pull_up=True)
 ```
 
-Then register it in `client/modules/sensors/__init__.py`:
+### Adding Calibration Parameters
+
+To add calibration sliders to the dashboard for your sensor, define `calibration_schema`. Each entry is a dict describing one slider. The values are passed as keyword arguments to your `__init__`:
+
+```python
+class MySensor(BaseSensor):
+    # ... other attributes ...
+
+    calibration_schema = (
+        {
+            "key": "threshold",       # kwarg name passed to __init__
+            "name": "Threshold",      # label shown in dashboard
+            "type": "range",          # always "range" for now
+            "min": 1,
+            "max": 100,
+            "default": 50,
+            "step": 1,
+            "unit": "seconds",        # optional, shown next to the value
+            "description": "How sensitive the sensor is",
+            "labels": {"min": "Low", "max": "High"},
+        },
+    )
+
+    def __init__(self, gpio=None, **kwargs):
+        super().__init__(gpio, **kwargs)
+        self._threshold = kwargs.get("threshold", 50)
+```
+
+The dashboard renders the sliders automatically and persists the values in `settings.json` under `Sensor.calibration`.
+
+### Registering
+
+Add your sensor to the registry in `client/modules/sensors/__init__.py`:
 
 ```python
 from .my_sensor import MySensor

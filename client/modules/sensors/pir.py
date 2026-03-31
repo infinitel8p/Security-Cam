@@ -27,10 +27,24 @@ class PIRSensor(BaseSensor):
         {"pin": "OUT", "connect": "GPIO 17 [pin 11]"},
     )
     wiring_note = "PIR modules need 5V power. Adjust the onboard potentiometers for sensitivity and hold time."
+    calibration_schema = (
+        {
+            "key": "sensitivity",
+            "name": "Sensitivity",
+            "type": "range",
+            "min": 1,
+            "max": 10,
+            "default": 7,
+            "step": 1,
+            "description": "How easily motion triggers the sensor. Lower values require more sustained movement.",
+            "labels": {"min": "Low", "max": "High"},
+        },
+    )
 
     def __init__(self, gpio: int | None = None, **kwargs):
         super().__init__(gpio, **kwargs)
         self._device = None
+        self._sensitivity = kwargs.get("sensitivity", 7)
 
     def start(self, on_trigger, on_release) -> None:
         if self._running:
@@ -40,13 +54,19 @@ class PIRSensor(BaseSensor):
 
         self._on_trigger = on_trigger
         self._on_release = on_release
-        self._device = MotionSensor(self.gpio)
+        # Map sensitivity 1-10 to queue_len: lower sensitivity = larger queue
+        # sensitivity 10 → queue_len 1 (instant trigger)
+        # sensitivity 1  → queue_len 10 (needs sustained motion)
+        queue_len = max(1, 11 - self._sensitivity)
+        self._device = MotionSensor(self.gpio, queue_len=queue_len,
+                                    threshold=0.5)
 
         self._device.when_motion = self._handle_trigger
         self._device.when_no_motion = self._handle_release
 
         self._running = True
-        log.info("PIR sensor started on GPIO %d", self.gpio)
+        log.info("PIR sensor started on GPIO %d (sensitivity=%d, queue_len=%d)",
+                 self.gpio, self._sensitivity, queue_len)
 
     def _handle_trigger(self):
         log.info("PIR motion detected")

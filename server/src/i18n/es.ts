@@ -140,6 +140,7 @@ export default {
     bluetoothDevices: "Dispositivos Bluetooth",
     wifiDevices: "Dispositivos WiFi",
     status: "Estado",
+    calibration: "Calibración",
   },
 
   input: {
@@ -306,6 +307,21 @@ export default {
     fr: "Français",
     es: "Español",
     it: "Italiano",
+  },
+
+  calibration: {
+    sensitivity: "Sensibilidad",
+    sensitivity_min: "Baja",
+    sensitivity_max: "Alta",
+    sensitivity_help: "Facilidad con la que el movimiento activa el sensor. Valores bajos requieren movimiento más sostenido.",
+    pulse_count: "Umbral de impulsos",
+    pulse_count_min: "Sensible",
+    pulse_count_max: "Firme",
+    pulse_count_help: "Número de impactos necesarios para activar. Valores altos filtran golpes accidentales.",
+    pulse_window: "Ventana de conteo",
+    pulse_window_min: "1s",
+    pulse_window_max: "30s",
+    pulse_window_help: "Ventana de tiempo para contar impulsos. Solo se usa cuando el umbral es mayor que 1.",
   },
 
   wiring: {

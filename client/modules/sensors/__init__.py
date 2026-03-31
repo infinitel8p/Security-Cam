@@ -54,6 +54,7 @@ def available_types() -> list[dict]:
             "icon": cls.icon,
             "wiring": cls.wiring,
             "wiring_note": cls.wiring_note,
+            "calibration": cls.calibration_schema,
         }
         for cls in SENSOR_REGISTRY.values()
     ]

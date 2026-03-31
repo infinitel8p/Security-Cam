@@ -147,6 +147,7 @@ export default {
     bluetoothDevices: "Bluetooth Devices",
     wifiDevices: "WiFi Devices",
     status: "Status",
+    calibration: "Calibration",
   },
 
   // Input placeholders
@@ -329,6 +330,22 @@ export default {
     fr: "Français",
     es: "Español",
     it: "Italiano",
+  },
+
+  // Calibration
+  calibration: {
+    sensitivity: "Sensitivity",
+    sensitivity_min: "Low",
+    sensitivity_max: "High",
+    sensitivity_help: "How easily motion triggers the sensor. Lower values require more sustained movement.",
+    pulse_count: "Pulse threshold",
+    pulse_count_min: "Sensitive",
+    pulse_count_max: "Firm",
+    pulse_count_help: "Number of impacts required to trigger. Higher values filter out accidental bumps.",
+    pulse_window: "Counting window",
+    pulse_window_min: "1s",
+    pulse_window_max: "30s",
+    pulse_window_help: "Time window to count pulses in. Only used when pulse threshold is greater than 1.",
   },
 
   // Wiring

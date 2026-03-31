@@ -9,6 +9,19 @@
   import boltIcon from "../icons/bolt.svg?raw";
   import chevronRightIcon from "../icons/chevron-right.svg?raw";
 
+  interface CalibrationParam {
+    key: string;
+    name: string;
+    type: string;
+    min: number;
+    max: number;
+    default: number;
+    step: number;
+    unit?: string;
+    description: string;
+    labels: { min: string; max: string };
+  }
+
   interface SensorType {
     type: string;
     name: string;
@@ -19,6 +32,7 @@
     icon: string;
     wiring: { pin: string; connect: string }[];
     wiring_note: string;
+    calibration: CalibrationParam[];
   }
 
   interface SensorConfig {
@@ -27,6 +41,7 @@
     enabled: boolean;
     hold_seconds: number;
     invert_logic?: boolean;
+    calibration?: Record<string, number>;
   }
 
   interface SensorStatusData {
@@ -71,6 +86,7 @@
   let gpio = $state(22);
   let holdSeconds = $state(10);
   let invertLogic = $state(false);
+  let calibration = $state<Record<string, number>>({});
 
   async function fetchAll() {
     loading = true;
@@ -89,6 +105,7 @@
         gpio = status.config.gpio ?? 22;
         holdSeconds = status.config.hold_seconds ?? 10;
         invertLogic = status.config.invert_logic ?? false;
+        calibration = status.config.calibration ?? {};
       }
     } catch {
       loadError = true;
@@ -112,8 +129,16 @@
 
   function onTypeChange(type: string) {
     selectedType = type;
-    const t = getSensorMeta(type);
-    if (t) gpio = t.default_gpio;
+    const meta = getSensorMeta(type);
+    if (meta) {
+      gpio = meta.default_gpio;
+      // Reset calibration to defaults for the new sensor type
+      const defaults: Record<string, number> = {};
+      for (const param of meta.calibration ?? []) {
+        defaults[param.key] = param.default;
+      }
+      calibration = defaults;
+    }
     showWiring = false;
     if (testMode) stopTest();
   }
@@ -139,6 +164,7 @@
           enabled: status?.enabled ?? false,
           hold_seconds: holdSeconds,
           invert_logic: invertLogic,
+          calibration: Object.keys(calibration).length > 0 ? calibration : undefined,
         }),
       });
       if (res.ok) {
@@ -234,7 +260,53 @@
   let isMock = $derived(selectedType === "mock");
   let isMockActive = $derived(status?.enabled && status?.sensor?.type === "mock");
   let currentMeta = $derived(getSensorMeta(selectedType));
+  let calibrationParams = $derived(currentMeta?.calibration ?? []);
+
+  /** Try i18n key, fall back to raw string if key returns itself (not found). */
+  function tOr(key: string, fallback: string): string {
+    const result = t(key);
+    return result === key ? fallback : result;
+  }
 </script>
+
+<style>
+  .calibration-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--color-surface-elevated);
+    outline: none;
+  }
+  .calibration-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    cursor: pointer;
+    box-shadow: 0 0 6px rgba(77, 148, 255, 0.3);
+    transition: box-shadow 0.2s;
+  }
+  .calibration-slider::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 10px rgba(77, 148, 255, 0.5);
+  }
+  .calibration-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 6px rgba(77, 148, 255, 0.3);
+  }
+  .calibration-slider::-moz-range-track {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--color-surface-elevated);
+  }
+</style>
 
 <div class="card overflow-hidden">
   <!-- Header -->
@@ -501,6 +573,50 @@
         </div>
         <p class="mt-1 text-[0.6875rem] text-text-muted">{t("help.holdTimeout")}</p>
       </div>
+
+      <!-- ── Calibration Controls ── -->
+      {#if calibrationParams.length > 0}
+        <div class="mt-5 rounded-lg border border-border-default bg-surface-base px-3.5 py-3">
+          <p class="mb-3 text-xs font-semibold text-text-secondary">{t("label.calibration")}</p>
+          <div class="space-y-4">
+            {#each calibrationParams as param (param.key)}
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <label class="text-xs font-medium text-text-secondary" for="cal-{param.key}">
+                    {tOr(`calibration.${param.key}`, param.name)}
+                  </label>
+                  <span class="rounded-md bg-surface-elevated px-2 py-0.5 text-[0.6875rem] font-semibold tabular-nums text-text-primary">
+                    {calibration[param.key] ?? param.default}{param.unit ? ` ${param.unit === "seconds" ? "s" : param.unit}` : ""}
+                  </span>
+                </div>
+                <div class="flex items-center gap-2.5">
+                  <span class="text-[0.625rem] text-text-muted w-12 shrink-0 text-right">
+                    {tOr(`calibration.${param.key}_min`, param.labels.min)}
+                  </span>
+                  <input
+                    id="cal-{param.key}"
+                    type="range"
+                    min={param.min}
+                    max={param.max}
+                    step={param.step}
+                    value={calibration[param.key] ?? param.default}
+                    oninput={(e: Event) => {
+                      calibration = { ...calibration, [param.key]: Number((e.target as HTMLInputElement).value) };
+                    }}
+                    class="calibration-slider flex-1"
+                  />
+                  <span class="text-[0.625rem] text-text-muted w-12 shrink-0">
+                    {tOr(`calibration.${param.key}_max`, param.labels.max)}
+                  </span>
+                </div>
+                <p class="mt-1 text-[0.6875rem] text-text-muted">
+                  {tOr(`calibration.${param.key}_help`, param.description)}
+                </p>
+              </div>
+            {/each}
+          </div>
+        </div>
+      {/if}
 
       <!-- Invert trigger logic -->
       {#if !isMock}

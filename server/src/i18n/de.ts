@@ -140,6 +140,7 @@ export default {
     bluetoothDevices: "Bluetooth-Geräte",
     wifiDevices: "WiFi-Geräte",
     status: "Status",
+    calibration: "Kalibrierung",
   },
 
   input: {
@@ -306,6 +307,21 @@ export default {
     fr: "Français",
     es: "Español",
     it: "Italiano",
+  },
+
+  calibration: {
+    sensitivity: "Empfindlichkeit",
+    sensitivity_min: "Niedrig",
+    sensitivity_max: "Hoch",
+    sensitivity_help: "Wie leicht Bewegung den Sensor auslöst. Niedrigere Werte erfordern anhaltendere Bewegung.",
+    pulse_count: "Impulsschwelle",
+    pulse_count_min: "Empfindlich",
+    pulse_count_max: "Fest",
+    pulse_count_help: "Anzahl der Erschütterungen zum Auslösen. Höhere Werte filtern versehentliche Stöße heraus.",
+    pulse_window: "Zählfenster",
+    pulse_window_min: "1s",
+    pulse_window_max: "30s",
+    pulse_window_help: "Zeitfenster zum Zählen der Impulse. Wird nur verwendet, wenn die Impulsschwelle größer als 1 ist.",
   },
 
   wiring: {

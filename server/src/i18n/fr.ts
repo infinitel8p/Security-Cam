@@ -140,6 +140,7 @@ export default {
     bluetoothDevices: "Appareils Bluetooth",
     wifiDevices: "Appareils WiFi",
     status: "Statut",
+    calibration: "Calibration",
   },
 
   input: {
@@ -306,6 +307,21 @@ export default {
     fr: "Français",
     es: "Español",
     it: "Italiano",
+  },
+
+  calibration: {
+    sensitivity: "Sensibilité",
+    sensitivity_min: "Faible",
+    sensitivity_max: "Élevée",
+    sensitivity_help: "Facilité de déclenchement par le mouvement. Les valeurs basses nécessitent un mouvement plus soutenu.",
+    pulse_count: "Seuil d'impulsions",
+    pulse_count_min: "Sensible",
+    pulse_count_max: "Ferme",
+    pulse_count_help: "Nombre d'impacts requis pour déclencher. Les valeurs élevées filtrent les chocs accidentels.",
+    pulse_window: "Fenêtre de comptage",
+    pulse_window_min: "1s",
+    pulse_window_max: "30s",
+    pulse_window_help: "Fenêtre de temps pour compter les impulsions. Utilisé uniquement quand le seuil est supérieur à 1.",
   },
 
   wiring: {
