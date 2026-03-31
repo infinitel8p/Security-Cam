@@ -245,7 +245,7 @@
 {:else}
   <div class="mt-5 flex gap-6 lg:gap-8 items-start">
     <!-- Sidebar nav -->
-    <nav class="hidden lg:block sticky top-6 w-48 shrink-0">
+    <nav class="hidden lg:block w-48 shrink-0">
       <div class="flex flex-col gap-0.5">
         {@render navItem("appearance", t("section.appearance"))}
         {@render navItem("camera", t("section.camera"))}

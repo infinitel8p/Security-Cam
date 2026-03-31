@@ -63,6 +63,7 @@
   let testMode = $state(false);
   let testValue = $state<boolean | null>(null);
   let testError = $state("");
+  let wasEnabledBeforeTest = false;
   let testInterval: ReturnType<typeof setInterval> | null = null;
   let testHistory = $state<boolean[]>([]);
 
@@ -103,7 +104,8 @@
   });
 
   onDestroy(() => {
-    if (testInterval) clearInterval(testInterval);
+    if (testMode) stopTest();
+    else if (testInterval) clearInterval(testInterval);
   });
 
   function getSensorMeta(type: string): SensorType | undefined {
@@ -212,7 +214,16 @@
     }
   }
 
-  function startTest() {
+  async function startTest() {
+    // Suppress sensor-triggered recording during test
+    wasEnabledBeforeTest = status?.enabled ?? false;
+    if (wasEnabledBeforeTest) {
+      try {
+        await fetch(`${getBackendUrl()}/sensor/disable`, { method: "POST" });
+        const statusRes = await fetch(`${getBackendUrl()}/sensor/status`);
+        status = await statusRes.json();
+      } catch { /* proceed with test anyway */ }
+    }
     testMode = true;
     testValue = null;
     testError = "";
@@ -221,7 +232,7 @@
     testInterval = setInterval(testRead, 500);
   }
 
-  function stopTest() {
+  async function stopTest() {
     testMode = false;
     if (testInterval) {
       clearInterval(testInterval);
@@ -229,6 +240,15 @@
     }
     testValue = null;
     testHistory = [];
+    // Re-enable sensor if it was enabled before test
+    if (wasEnabledBeforeTest) {
+      try {
+        await fetch(`${getBackendUrl()}/sensor/enable`, { method: "POST" });
+        const statusRes = await fetch(`${getBackendUrl()}/sensor/status`);
+        status = await statusRes.json();
+      } catch { /* silent */ }
+      wasEnabledBeforeTest = false;
+    }
   }
 
   let isMock = $derived(selectedType === "mock");
