@@ -14,11 +14,13 @@ system - this module only controls *automatic* sensor-triggered recording.
 
 import atexit
 import logging
+import os
 import threading
 import time
 
 from . import activity_helpers
 from . import event_logger
+from . import presence_monitor
 from . import settings_helpers
 from . import stream_helpers
 from . import sse
@@ -41,6 +43,7 @@ _suppressed = False  # True when trigger was ignored due to presence
 _last_presence_check_time = 0.0
 _last_presence_result = False
 _PRESENCE_CHECK_INTERVAL = 5.0  # seconds
+_CONFIRM_DELAY = 2.0  # seconds between first and confirmation check
 
 
 def _emit_state():
@@ -54,11 +57,33 @@ def _emit_state():
     })
 
 
+def _check_presence_once() -> tuple[bool, dict]:
+    """Run a single presence check. Returns (someone_home, raw_statuses)."""
+    settings = settings_helpers.get_settings()
+    bt_addrs = settings.get("TARGET_BT_ADDRESSES", [])
+    wifi_addrs = settings.get("TARGET_AP_MAC_ADDRESSES", [])
+
+    if not bt_addrs and not wifi_addrs:
+        return False, {"bt": {}, "wifi": {}}
+
+    statuses = activity_helpers.get_device_statuses()
+
+    someone_home = (any(statuses["bt"].values())
+                    or any(statuses["wifi"].values()))
+    return someone_home, statuses
+
+
+def _report_to_presence_monitor(statuses: dict):
+    """Feed BT check results back to the presence monitor for the timeline."""
+    for addr, online in statuses["bt"].items():
+        presence_monitor.report_bt_status(addr, online)
+
+
 def _is_someone_home() -> bool:
     """Return True if any tracked device is present (BT or WiFi).
 
-    Results are cached for _PRESENCE_CHECK_INTERVAL seconds to avoid
-    hammering BT scanning on rapid sensor pulses.
+    Uses a rate-limit cache for rapid sensor pulses.
+    Results are fed back to the presence monitor for the activity timeline.
     """
     global _last_presence_check_time, _last_presence_result
 
@@ -66,32 +91,61 @@ def _is_someone_home() -> bool:
     if now - _last_presence_check_time < _PRESENCE_CHECK_INTERVAL:
         return _last_presence_result
 
-    settings = settings_helpers.get_settings()
-    bt_addrs = settings.get("TARGET_BT_ADDRESSES", [])
-    wifi_addrs = settings.get("TARGET_AP_MAC_ADDRESSES", [])
+    someone_home, statuses = _check_presence_once()
+    _report_to_presence_monitor(statuses)
 
-    # If no devices are configured, presence gate is disabled (always record)
-    if not bt_addrs and not wifi_addrs:
-        _last_presence_check_time = now
-        _last_presence_result = False
-        return False
+    _last_presence_check_time = time.monotonic()
+    _last_presence_result = someone_home
+    return someone_home
 
-    statuses = activity_helpers.get_device_statuses()
 
-    result = False
-    for online in statuses["bt"].values():
-        if online:
-            result = True
-            break
-    if not result:
-        for online in statuses["wifi"].values():
-            if online:
-                result = True
-                break
+def _confirmation_check():
+    """Background confirmation: if someone is actually home, roll back the recording.
 
-    _last_presence_check_time = now
-    _last_presence_result = result
-    return result
+    Runs after _CONFIRM_DELAY seconds. If the second presence check finds
+    a device, stops the recording and deletes the file since it was a
+    false alarm caused by a flaky first BT lookup.
+    """
+    global _sensor_recording, _suppressed
+
+    time.sleep(_CONFIRM_DELAY)
+
+    someone_home, statuses = _check_presence_once()
+    _report_to_presence_monitor(statuses)
+
+    if not someone_home:
+        log.debug("Presence confirmation: confirmed nobody home, recording continues")
+        return
+
+    # False alarm — someone IS home, first check was a flaky BT miss
+    log.info("Presence confirmation: device found on second lookup — "
+             "rolling back sensor recording (false alarm)")
+
+    with _lock:
+        if not _sensor_recording:
+            # Recording was already stopped by release/manual/other
+            return
+
+        # Grab the filename before stopping
+        filename = stream_helpers.recorded_filename
+
+        _sensor_recording = False
+        _suppressed = True
+        stream_helpers.stop_recording()
+        event_logger.log_event("recording_stopped", "presence confirmation (false alarm)")
+
+    _emit_state()
+    sse.emit("recording_state", {"recording": False})
+
+    # Delete the short false-alarm recording and its metadata
+    if filename:
+        for path in [filename, os.path.splitext(filename)[0] + ".meta.json"]:
+            try:
+                if os.path.exists(path):
+                    os.remove(path)
+                    log.info("Deleted false-alarm file: %s", path)
+            except OSError as e:
+                log.warning("Could not delete false-alarm file %s: %s", path, e)
 
 
 def _on_trigger():
@@ -112,7 +166,7 @@ def _on_trigger():
 
     # Presence check runs outside the lock (can be slow / blocking)
     if _is_someone_home():
-        log.info("Sensor triggered but device present - skipping recording")
+        log.info("Sensor triggered but device present — skipping recording")
         with _lock:
             _suppressed = True
         _emit_state()
@@ -124,8 +178,7 @@ def _on_trigger():
             _emit_state()
             return
 
-        log.info("Sensor triggered, no presence detected - starting recording")
-        sensor_name = _sensor.name if _sensor else None
+        log.info("Sensor triggered, no presence detected — starting recording")
         sensor_type = _sensor.sensor_type if _sensor else None
         stream_helpers.start_recording(reason="sensor", sensor_type=sensor_type)
         _sensor_recording = True
@@ -133,6 +186,12 @@ def _on_trigger():
 
     _emit_state()
     sse.emit("recording_state", {"recording": True})
+
+    # Run a background confirmation check — if the first BT lookup was
+    # a false negative (device IS home), roll back the recording.
+    settings = settings_helpers.get_settings()
+    if settings.get("TARGET_BT_ADDRESSES") or settings.get("TARGET_AP_MAC_ADDRESSES"):
+        threading.Thread(target=_confirmation_check, daemon=True).start()
 
 
 def _on_release():
