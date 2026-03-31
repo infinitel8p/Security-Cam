@@ -215,8 +215,9 @@ def start():
     """Load sensor config from settings and start monitoring if enabled."""
     global _sensor, _armed
 
-    # Always clean up any existing sensor first to avoid GPIO busy errors
-    stop()
+    # Clean up any existing sensor to avoid GPIO busy on restart
+    if _sensor is not None:
+        stop()
 
     settings = settings_helpers.get_settings()
     sensor_cfg = settings.get("Sensor", {})
