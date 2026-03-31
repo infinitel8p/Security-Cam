@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import subprocess
+import tempfile
 import threading
 import time
 from datetime import datetime, timezone
@@ -85,13 +86,22 @@ def _meta_path(video_path: str) -> str:
 
 
 def _write_meta(video_path: str, meta: dict) -> None:
-    """Write recording metadata to a sidecar JSON file."""
+    """Write recording metadata to a sidecar JSON file atomically."""
     path = _meta_path(video_path)
+    dirpath = os.path.dirname(path) or "."
     try:
-        with open(path, "w") as f:
+        fd, tmp = tempfile.mkstemp(dir=dirpath, suffix=".tmp")
+        with os.fdopen(fd, "w") as f:
             json.dump(meta, f, indent=2)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, path)
     except Exception as e:
         log.error("Failed to write metadata %s: %s", path, e)
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
 
 
 def _read_meta(video_path: str) -> dict | None:

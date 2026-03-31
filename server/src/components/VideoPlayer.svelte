@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
-  import { getBackendUrl, getMediaMtxUrl } from "../lib/api";
+  import { getBackendUrl, getMediaMtxUrl, getHlsUrl } from "../lib/api";
   import toast from "svelte-5-french-toast";
   import { initLocale, t } from "../i18n";
   import Icon from "./Icon.svelte";
@@ -20,6 +20,10 @@
   let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
   let recordingPollInterval: ReturnType<typeof setInterval> | undefined;
   let destroyed = false;
+  let webrtcFailCount = $state(0);
+  let hlsFailCount = $state(0);
+  let streamMode: "webrtc" | "hls" = $state("webrtc");
+  const MAX_FAILURES = 3;
 
   let rotationAngle = $state(0);
   let rotationMode = $state("display");
@@ -30,6 +34,14 @@
   let isSideways = $derived(cssRotation === 90 || cssRotation === 270);
 
   const STREAM_PATH = "cam";
+
+  function startStream() {
+    if (streamMode === "hls") {
+      startHLS();
+    } else {
+      startWebRTC();
+    }
+  }
 
   async function startWebRTC() {
     if (destroyed) return;
@@ -46,15 +58,17 @@
     pc.ontrack = (ev) => {
       videoEl.srcObject = ev.streams[0];
       connected = true;
+      webrtcFailCount = 0;
+      hlsFailCount = 0;
     };
 
     pc.onconnectionstatechange = () => {
       if (pc?.connectionState === "failed" || pc?.connectionState === "disconnected") {
         connected = false;
         error = t("error.streamDisconnected");
+        webrtcFailCount++;
         cleanup();
-        clearTimeout(reconnectTimer);
-        reconnectTimer = setTimeout(startWebRTC, 3000);
+        scheduleRetry();
       }
     };
 
@@ -79,10 +93,53 @@
       });
     } catch (e) {
       console.error("WebRTC connection failed:", e);
+      webrtcFailCount++;
       error = t("error.connectFailed");
       cleanup();
-      clearTimeout(reconnectTimer);
-      reconnectTimer = setTimeout(startWebRTC, 5000);
+      scheduleRetry();
+    }
+  }
+
+  function startHLS() {
+    if (destroyed) return;
+    error = "";
+
+    const hlsSrc = `${getHlsUrl()}/${STREAM_PATH}/index.m3u8`;
+
+    // Clear any WebRTC source
+    videoEl.srcObject = null;
+    videoEl.src = hlsSrc;
+    videoEl.load();
+
+    videoEl.onloadeddata = () => {
+      connected = true;
+      hlsFailCount = 0;
+      webrtcFailCount = 0;
+    };
+
+    videoEl.onerror = () => {
+      if (destroyed) return;
+      connected = false;
+      hlsFailCount++;
+      error = t("error.connectFailed");
+      scheduleRetry();
+    };
+  }
+
+  function scheduleRetry() {
+    clearTimeout(reconnectTimer);
+    if (streamMode === "webrtc" && webrtcFailCount >= MAX_FAILURES) {
+      console.warn(`WebRTC failed ${webrtcFailCount}x, switching to HLS`);
+      streamMode = "hls";
+      webrtcFailCount = 0;
+      reconnectTimer = setTimeout(startHLS, 1000);
+    } else if (streamMode === "hls" && hlsFailCount >= MAX_FAILURES) {
+      console.warn(`HLS failed ${hlsFailCount}x, switching to WebRTC`);
+      streamMode = "webrtc";
+      hlsFailCount = 0;
+      reconnectTimer = setTimeout(startWebRTC, 1000);
+    } else {
+      reconnectTimer = setTimeout(startStream, streamMode === "webrtc" ? 3000 : 5000);
     }
   }
 
@@ -151,14 +208,17 @@
   function manualReconnect() {
     error = "";
     connected = false;
+    webrtcFailCount = 0;
+    hlsFailCount = 0;
+    streamMode = "webrtc";
     clearTimeout(reconnectTimer);
     cleanup();
-    startWebRTC();
+    startStream();
   }
 
   onMount(() => {
     initLocale();
-    startWebRTC();
+    startStream();
     fetchRotation();
     fetchRecordingStatus();
     recordingPollInterval = setInterval(fetchRecordingStatus, 5_000);
@@ -205,7 +265,9 @@
             </div>
             <span class="text-sm text-text-secondary">{error}</span>
             <div class="flex items-center gap-3">
-              <span class="text-xs text-text-muted">{t("status.reconnecting")}</span>
+              <span class="text-xs text-text-muted">
+                {t("status.reconnecting")}{streamMode === "hls" ? " (HLS)" : ""}
+              </span>
               <button onclick={manualReconnect} class="text-xs font-medium text-accent hover:text-accent-hover">{t("btn.retryNow")}</button>
             </div>
           </div>
@@ -235,7 +297,7 @@
         {:else if connected}
           <div class="animate-fade-in flex items-center gap-1.5 rounded-lg bg-black/60 px-2.5 py-1.5 backdrop-blur-md">
             <span class="h-1.5 w-1.5 rounded-full bg-status-ok shadow-[0_0_6px_rgba(52,217,172,0.5)]"></span>
-            <span class="text-[0.6875rem] font-medium tracking-wide text-white/80">{t("badge.live")}</span>
+            <span class="text-[0.6875rem] font-medium tracking-wide text-white/80">{t("badge.live")}{streamMode === "hls" ? " · HLS" : ""}</span>
           </div>
         {/if}
       </div>

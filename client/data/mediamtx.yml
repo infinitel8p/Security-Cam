@@ -44,8 +44,11 @@ rtcpAddress: :8001
 # RTMP (disabled - not needed)
 rtmp: no
 
-# HLS (disabled - using WebRTC instead)
-hls: no
+# HLS - fallback when WebRTC fails
+hls: yes
+hlsAddress: :8888
+hlsEncryption: no
+hlsAllowOrigins: ['*']
 
 # WebRTC - main protocol for the dashboard
 webrtc: yes

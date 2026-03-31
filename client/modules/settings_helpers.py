@@ -2,6 +2,7 @@ import logging
 import os
 import json
 import subprocess
+import tempfile
 
 log = logging.getLogger("settings")
 
@@ -11,15 +12,29 @@ SETTINGS_FILE = os.path.join(_SETTINGS_DIR, "settings.json")
 DEFAULTS_FILE = os.path.join(_SETTINGS_DIR, "settings.defaults.json")
 
 
+def _atomic_write_json(path: str, data, indent=None):
+    """Write JSON to a file atomically via temp file + rename."""
+    dirpath = os.path.dirname(path)
+    os.makedirs(dirpath, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(dir=dirpath, suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w") as f:
+            json.dump(data, f, indent=indent)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, path)
+    except BaseException:
+        os.unlink(tmp)
+        raise
+
+
 def _ensure_settings():
     """Create settings.json from defaults if missing, and merge any new keys."""
     with open(DEFAULTS_FILE, 'r') as f:
         defaults = json.load(f)
 
     if not os.path.exists(SETTINGS_FILE):
-        os.makedirs(_SETTINGS_DIR, exist_ok=True)
-        with open(SETTINGS_FILE, 'w') as f:
-            json.dump(defaults, f, indent=4)
+        _atomic_write_json(SETTINGS_FILE, defaults, indent=4)
         log.info("Created settings.json from defaults")
         return defaults
 
@@ -34,8 +49,7 @@ def _ensure_settings():
             updated = True
 
     if updated:
-        with open(SETTINGS_FILE, 'w') as f:
-            json.dump(settings, f, indent=4)
+        _atomic_write_json(SETTINGS_FILE, settings, indent=4)
 
     return settings
 
@@ -59,12 +73,10 @@ def update_settings(new_settings) -> None:
         new_settings (Dict[str, Any]): The new settings to be updated.
     """
 
-    with open(SETTINGS_FILE, 'r+') as f:
+    with open(SETTINGS_FILE, 'r') as f:
         settings = json.load(f)
-        settings.update(new_settings)
-        f.seek(0)
-        json.dump(settings, f, indent=4)
-        f.truncate()
+    settings.update(new_settings)
+    _atomic_write_json(SETTINGS_FILE, settings, indent=4)
     log.info("Settings updated: %s", list(new_settings.keys()))
 
 

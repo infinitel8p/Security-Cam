@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import tempfile
 import threading
 import time
 from datetime import datetime, timezone
@@ -79,10 +80,19 @@ def _load_log():
 
 
 def _save_log(entries):
-    """Save entries to the log file."""
-    os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
-    with open(LOG_PATH, "w") as f:
-        json.dump(entries, f)
+    """Save entries to the log file atomically."""
+    dirpath = os.path.dirname(LOG_PATH)
+    os.makedirs(dirpath, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(dir=dirpath, suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w") as f:
+            json.dump(entries, f)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, LOG_PATH)
+    except BaseException:
+        os.unlink(tmp)
+        raise
 
 
 def _log_loop():

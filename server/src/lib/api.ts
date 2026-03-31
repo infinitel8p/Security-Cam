@@ -19,3 +19,14 @@ export function getMediaMtxUrl(): string {
   if (env) return env.replace(/\/$/, "");
   return `${window.location.protocol}//${window.location.hostname}:8889`;
 }
+
+/**
+ * Build the MediaMTX HLS endpoint URL (fallback when WebRTC fails).
+ * Set PUBLIC_HLS_URL in a .env file to override (e.g. http://192.168.1.50:8888).
+ * Falls back to same-hostname:8888 for production on the Pi.
+ */
+export function getHlsUrl(): string {
+  const env = (import.meta as any).env?.PUBLIC_HLS_URL;
+  if (env) return env.replace(/\/$/, "");
+  return `${window.location.protocol}//${window.location.hostname}:8888`;
+}
