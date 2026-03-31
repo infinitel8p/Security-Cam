@@ -33,6 +33,7 @@ _hold_timer: threading.Timer | None = None
 _triggered = False
 _armed = False  # True when sensor is running and will auto-record
 _sensor_recording = False  # True only when this module started the recording
+_suppressed = False  # True when trigger was ignored due to presence
 
 # Rate-limit presence checks for pulse-based sensors (vibration, knock).
 # Avoids hammering BT scanning on every rapid pulse.
@@ -83,10 +84,11 @@ def _is_someone_home() -> bool:
 
 def _on_trigger():
     """Called by the active sensor when it fires."""
-    global _triggered, _sensor_recording
+    global _triggered, _sensor_recording, _suppressed
 
     with _lock:
         _triggered = True
+        _suppressed = False
         _cancel_hold_timer_locked()
 
         event_logger.log_event("sensor_triggered", _sensor.name if _sensor else None)
@@ -98,6 +100,8 @@ def _on_trigger():
     # Presence check runs outside the lock (can be slow / blocking)
     if _is_someone_home():
         log.info("Sensor triggered but device present - skipping recording")
+        with _lock:
+            _suppressed = True
         return
 
     with _lock:
@@ -115,10 +119,11 @@ def _on_trigger():
 
 def _on_release():
     """Called by the active sensor when it resets."""
-    global _triggered
+    global _triggered, _suppressed
 
     with _lock:
         _triggered = False
+        _suppressed = False
         event_logger.log_event("sensor_released", _sensor.name if _sensor else None)
 
         if not _sensor_recording:
@@ -235,7 +240,7 @@ def start():
 
 def stop():
     """Stop the active sensor."""
-    global _sensor, _armed, _triggered, _sensor_recording
+    global _sensor, _armed, _triggered, _sensor_recording, _suppressed
 
     with _lock:
         _cancel_hold_timer_locked()
@@ -246,6 +251,7 @@ def stop():
             _sensor = None
             _armed = False
             _triggered = False
+            _suppressed = False
             _sensor_recording = False
             event_logger.log_event("sensor_disarmed", name)
             log.info("Sensor manager stopped")
@@ -298,6 +304,7 @@ def get_status() -> dict:
         "enabled": sensor_cfg.get("enabled", False),
         "armed": _armed,
         "triggered": _triggered,
+        "suppressed": _suppressed,
         "recording_from_sensor": _sensor_recording,
         "hold_seconds": sensor_cfg.get("hold_seconds", 10),
         "config": sensor_cfg,

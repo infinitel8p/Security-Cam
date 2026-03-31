@@ -32,6 +32,7 @@ export default {
     starting: "Démarrage...",
     disabled: "Désactivé",
     triggered: "Déclenché",
+    suppressed: "Ignoré",
     idle: "En veille",
     off: "Éteint",
     active: "Actif",

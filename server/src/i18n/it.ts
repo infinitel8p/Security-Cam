@@ -32,6 +32,7 @@ export default {
     starting: "Avvio...",
     disabled: "Disattivato",
     triggered: "Attivato",
+    suppressed: "Ignorato",
     idle: "In attesa",
     off: "Spento",
     active: "Attivo",

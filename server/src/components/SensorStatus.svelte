@@ -17,6 +17,7 @@
     enabled: boolean;
     armed: boolean;
     triggered: boolean;
+    suppressed: boolean;
     hold_seconds: number;
     config: {
       type: string;
@@ -55,31 +56,37 @@
   let statusLabel = $derived(
     !data?.enabled
       ? t("status.disabled")
-      : data?.triggered
-        ? t("status.triggered")
-        : data?.armed
-          ? t("status.armed")
-          : t("status.idle")
+      : data?.suppressed
+        ? t("status.suppressed")
+        : data?.triggered
+          ? t("status.triggered")
+          : data?.armed
+            ? t("status.armed")
+            : t("status.idle")
   );
 
   let statusColor = $derived(
     !data?.enabled
       ? "text-text-muted"
-      : data?.triggered
-        ? "text-status-critical"
-        : data?.armed
-          ? "text-status-ok"
-          : "text-text-muted"
+      : data?.suppressed
+        ? "text-status-warning"
+        : data?.triggered
+          ? "text-status-critical"
+          : data?.armed
+            ? "text-status-ok"
+            : "text-text-muted"
   );
 
   let dotColor = $derived(
     !data?.enabled
       ? "bg-text-muted/40"
-      : data?.triggered
-        ? "bg-status-critical shadow-[0_0_6px_rgba(240,104,104,0.5)]"
-        : data?.armed
-          ? "bg-status-ok shadow-[0_0_6px_rgba(52,217,172,0.5)]"
-          : "bg-text-muted/40"
+      : data?.suppressed
+        ? "bg-status-warning shadow-[0_0_6px_rgba(234,179,8,0.4)]"
+        : data?.triggered
+          ? "bg-status-critical shadow-[0_0_6px_rgba(240,104,104,0.5)]"
+          : data?.armed
+            ? "bg-status-ok shadow-[0_0_6px_rgba(52,217,172,0.5)]"
+            : "bg-text-muted/40"
   );
 </script>
 

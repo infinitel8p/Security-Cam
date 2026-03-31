@@ -32,6 +32,7 @@ export default {
     starting: "Startet...",
     disabled: "Deaktiviert",
     triggered: "Ausgelöst",
+    suppressed: "Unterdrückt",
     idle: "Bereit",
     off: "Aus",
     active: "Aktiv",

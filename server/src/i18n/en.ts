@@ -37,6 +37,7 @@ export default {
     starting: "Starting...",
     disabled: "Disabled",
     triggered: "Triggered",
+    suppressed: "Suppressed",
     idle: "Idle",
     off: "Off",
     active: "Active",
