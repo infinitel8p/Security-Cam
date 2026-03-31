@@ -3,7 +3,7 @@ import os
 import subprocess
 import yaml
 
-log = logging.getLogger("mediamtx")
+log = logging.getLogger("stream.mtx")
 
 CONFIG_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.realpath(__file__))),

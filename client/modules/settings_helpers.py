@@ -5,6 +5,7 @@ import subprocess
 import tempfile
 
 log = logging.getLogger("settings")
+bt_log = logging.getLogger("bt.pair")
 
 _SETTINGS_DIR = os.path.join(os.path.dirname(os.path.dirname(
     os.path.realpath(__file__))), "settings")
@@ -85,12 +86,12 @@ def update_settings(new_settings) -> None:
 
 def pair_bt_device(device_mac: str) -> bool:
     """Pair and trust a Bluetooth device. Returns True on success."""
-    log.info("Pairing BT device %s ...", device_mac)
+    bt_log.info("Pairing device %s ...", device_mac)
     current_dir = os.path.dirname(os.path.realpath(__file__))
     script_path = os.path.join(current_dir, "shell/pair.sh")
 
     if not os.path.exists(script_path):
-        log.error("pair.sh not found at %s", script_path)
+        bt_log.error("pair.sh not found at %s", script_path)
         raise FileNotFoundError("pair.sh not found")
 
     subprocess.run(["chmod", "+x", script_path],
@@ -99,26 +100,30 @@ def pair_bt_device(device_mac: str) -> bool:
     result = subprocess.run(
         [script_path, device_mac], capture_output=True, text=True)
 
-    output = result.stdout.strip()
-    log.debug("pair.sh output: %s", output)
-    if "Device is already paired" in output:
-        log.info("BT device %s already paired", device_mac)
+    stdout = result.stdout.strip()
+    stderr = result.stderr.strip()
+    bt_log.info("pair.sh stdout: %s", stdout or "(empty)")
+    if stderr:
+        bt_log.info("pair.sh stderr: %s", stderr)
+    if "Device is already paired" in stdout:
+        bt_log.info("Device %s already paired", device_mac)
         return True
     if result.returncode != 0:
-        log.error("BT pairing failed for %s: %s", device_mac, output or result.stderr.strip())
-        raise RuntimeError(f"Pairing failed: {output or result.stderr.strip()}")
-    log.info("BT device %s paired and trusted", device_mac)
+        bt_log.error("Pairing failed for %s (exit %d): %s",
+                     device_mac, result.returncode, stdout or stderr)
+        raise RuntimeError(stdout or stderr or "Pairing failed (no output)")
+    bt_log.info("Device %s paired and trusted", device_mac)
     return True
 
 
 def unpair_bt_device(device_mac: str) -> bool:
     """Unpair a Bluetooth device. Returns True on success."""
-    log.info("Unpairing BT device %s ...", device_mac)
+    bt_log.info("Unpairing device %s ...", device_mac)
     current_dir = os.path.dirname(os.path.realpath(__file__))
     script_path = os.path.join(current_dir, "shell/unpair.sh")
 
     if not os.path.exists(script_path):
-        log.error("unpair.sh not found at %s", script_path)
+        bt_log.error("unpair.sh not found at %s", script_path)
         raise FileNotFoundError("unpair.sh not found")
 
     subprocess.run(["chmod", "+x", script_path],
@@ -127,27 +132,31 @@ def unpair_bt_device(device_mac: str) -> bool:
     result = subprocess.run(
         [script_path, device_mac], capture_output=True, text=True)
 
-    output = result.stdout.strip()
-    log.debug("unpair.sh output: %s", output)
-    if "Device not found or already unpaired" in output:
-        log.info("BT device %s was already unpaired", device_mac)
+    stdout = result.stdout.strip()
+    stderr = result.stderr.strip()
+    bt_log.info("unpair.sh stdout: %s", stdout or "(empty)")
+    if stderr:
+        bt_log.info("unpair.sh stderr: %s", stderr)
+    if "Device not found or already unpaired" in stdout:
+        bt_log.info("Device %s was already unpaired", device_mac)
         return True
     if result.returncode != 0:
-        log.error("BT unpairing failed for %s: %s", device_mac, output or result.stderr.strip())
-        raise RuntimeError(f"Unpairing failed: {output or result.stderr.strip()}")
-    log.info("BT device %s unpaired", device_mac)
+        bt_log.error("Unpairing failed for %s (exit %d): %s",
+                     device_mac, result.returncode, stdout or stderr)
+        raise RuntimeError(stdout or stderr or "Unpairing failed (no output)")
+    bt_log.info("Device %s unpaired", device_mac)
     return True
 
 
 def make_bt_discoverable(timeout: int = 90) -> dict:
     """Make the Pi discoverable and wait for incoming pairing.
     Returns {"address": "...", "name": "..."} on success, or raises RuntimeError."""
-    log.info("Making Pi BT-discoverable for %ds ...", timeout)
+    bt_log.info("Making Pi discoverable for %ds ...", timeout)
     current_dir = os.path.dirname(os.path.realpath(__file__))
     script_path = os.path.join(current_dir, "shell/discoverable.sh")
 
     if not os.path.exists(script_path):
-        log.error("discoverable.sh not found at %s", script_path)
+        bt_log.error("discoverable.sh not found at %s", script_path)
         raise FileNotFoundError("discoverable.sh not found")
 
     subprocess.run(["chmod", "+x", script_path],
@@ -158,18 +167,22 @@ def make_bt_discoverable(timeout: int = 90) -> dict:
         capture_output=True, text=True,
         timeout=timeout + 15)  # extra margin for script cleanup
 
-    output = result.stdout.strip()
-    log.debug("discoverable.sh output: %s", output)
+    stdout = result.stdout.strip()
+    stderr = result.stderr.strip()
+    bt_log.info("discoverable.sh stdout: %s", stdout or "(empty)")
+    if stderr:
+        bt_log.info("discoverable.sh stderr: %s", stderr)
+    bt_log.info("discoverable.sh exit code: %d", result.returncode)
 
-    for line in output.splitlines():
+    for line in stdout.splitlines():
         if line.startswith("PAIRED "):
             parts = line.split(" ", 2)
             mac = parts[1] if len(parts) > 1 else ""
             name = parts[2] if len(parts) > 2 else mac
-            log.info("BT discoverable: paired with %s (%s)", name, mac)
+            bt_log.info("Discoverable: paired with %s (%s)", name, mac)
             return {"address": mac, "name": name}
 
-    log.info("BT discoverable: no device paired within timeout")
+    bt_log.info("Discoverable: no device paired within timeout")
     raise RuntimeError("No device paired within the time limit")
 
 

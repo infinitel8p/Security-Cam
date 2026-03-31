@@ -290,6 +290,7 @@ export default {
     discoverableWaiting: "The Pi is now visible to nearby devices",
     discoverableHint: "Open Bluetooth settings on your phone and pair with the Pi. This will automatically time out after 90 seconds.",
     searchingBluetooth: "Searching for nearby Bluetooth devices...",
+    pairingCheckPhone: "A pairing request may appear on your phone — please accept it",
     checkingWiFi: "Checking connected WiFi devices...",
     addDevicesForPresence: "Add a phone or laptop in Settings for presence detection",
   },

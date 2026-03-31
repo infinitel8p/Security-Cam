@@ -50,8 +50,27 @@
   let editingNames = $state<Record<string, string>>({});
 
   // Discoverable mode (BT only)
-  let discoverable = $state(false);
+  // Restore state if mobile browser reloaded the tab while user was in phone BT settings
+  const DISCO_KEY = "bt-discoverable-until";
+  const savedUntil = typeof sessionStorage !== "undefined" ? Number(sessionStorage.getItem(DISCO_KEY) || 0) : 0;
+  const restoredDiscoverable = savedUntil > Date.now();
+
+  let discoverable = $state(restoredDiscoverable);
   let discoverableError = $state("");
+
+  if (restoredDiscoverable) {
+    // The backend request is still running (or already timed out).
+    // Show the animation and clear it when the timestamp expires.
+    showScanPanel = true;
+    const remaining = savedUntil - Date.now();
+    setTimeout(() => {
+      if (discoverable) {
+        discoverable = false;
+        discoverableError = "";
+        sessionStorage.removeItem(DISCO_KEY);
+      }
+    }, remaining);
+  }
 
   function isAlreadyAdded(address: string): boolean {
     return devices.some(d => d.address.toLowerCase() === address.toLowerCase());
@@ -139,6 +158,7 @@
     discoverableError = "";
     showManualAdd = false;
     showScanPanel = true;
+    sessionStorage.setItem(DISCO_KEY, String(Date.now() + 90_000));
 
     try {
       const res = await fetch(`${getBackendUrl()}/bt/discoverable`, {
@@ -164,6 +184,7 @@
       discoverableError = t("error.connectionStatus");
     } finally {
       discoverable = false;
+      sessionStorage.removeItem(DISCO_KEY);
     }
   }
 
@@ -415,13 +436,18 @@
               {#if alreadyAdded}
                 <span class="shrink-0 text-[0.6875rem] font-medium text-status-ok">{t("status.added")}</span>
               {:else}
-                <button
-                  onclick={() => handleAdd(device)}
-                  disabled={addingAddress === device.address}
-                  class="shrink-0 rounded-lg bg-accent/10 px-2.5 py-1 text-[0.6875rem] font-semibold text-accent transition-colors hover:bg-accent/15 disabled:opacity-50"
-                >
-                  {addingAddress === device.address ? t("btn.adding") : t("btn.add")}
-                </button>
+                <div class="flex shrink-0 flex-col items-end gap-1">
+                  <button
+                    onclick={() => handleAdd(device)}
+                    disabled={addingAddress === device.address}
+                    class="rounded-lg bg-accent/10 px-2.5 py-1 text-[0.6875rem] font-semibold text-accent transition-colors hover:bg-accent/15 disabled:opacity-50"
+                  >
+                    {addingAddress === device.address ? t("btn.adding") : t("btn.add")}
+                  </button>
+                  {#if addingAddress === device.address && icon === "bluetooth"}
+                    <span class="text-[0.625rem] text-text-muted">{t("help.pairingCheckPhone")}</span>
+                  {/if}
+                </div>
               {/if}
             </li>
           {/each}

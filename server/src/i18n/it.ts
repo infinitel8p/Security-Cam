@@ -274,6 +274,7 @@ export default {
     discoverableWaiting: "Il Pi è ora visibile ai dispositivi nelle vicinanze",
     discoverableHint: "Apri le impostazioni Bluetooth del tuo telefono e accoppia con il Pi. Scadrà automaticamente dopo 90 secondi.",
     searchingBluetooth: "Ricerca di dispositivi Bluetooth nelle vicinanze...",
+    pairingCheckPhone: "Sul telefono potrebbe apparire una richiesta di accoppiamento — accettala",
     checkingWiFi: "Verifica dei client WiFi connessi...",
     addDevicesForPresence: "Aggiungi un telefono o un portatile nelle Impostazioni per il rilevamento presenza",
   },

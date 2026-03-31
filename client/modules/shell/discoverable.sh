@@ -18,7 +18,7 @@ set before_paired [exec bluetoothctl devices Paired 2>/dev/null]
 log_user 0
 set timeout $timeout_secs
 spawn bluetoothctl
-expect "#"
+expect "Agent registered"
 send "agent on\r"
 send "default-agent\r"
 send "discoverable on\r"
@@ -36,6 +36,11 @@ expect {
         exp_continue
     }
     "Request confirmation" {
+        send "yes\r"
+        set timeout 15
+        exp_continue
+    }
+    "Request passkey" {
         send "yes\r"
         set timeout 15
         exp_continue

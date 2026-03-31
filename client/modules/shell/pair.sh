@@ -2,10 +2,9 @@
 
 set address [lindex $argv 0]
 
-spawn sudo bluetoothctl
-expect "#"
-send "agent NoInputNoOutput\r"
-expect "#"
+spawn bluetoothctl
+expect "Agent registered"
+send "agent on\r"
 send "default-agent\r"
 
 # Check if the device is already paired
@@ -20,16 +19,24 @@ expect {
         puts "Device not paired, proceeding with scan and pairing..."
         send "scan on\r"
 
-        # Wait up to 20 seconds for the device to appear
-        set timeout 20
+        # Wait up to 30 seconds for the device to appear
+        set timeout 30
         expect {
             -re "Device $address" {
                 puts "Device found, proceeding with pairing..."
                 send "scan off\r"
-                expect "Controller"
+                expect "Discovery stopped"
                 send "pair $address\r"
                 expect {
+                    "Confirm passkey" {
+                        send "yes\r"
+                        expect "Pairing successful"
+                    }
                     "Request confirmation" {
+                        send "yes\r"
+                        expect "Pairing successful"
+                    }
+                    "Authorize service" {
                         send "yes\r"
                         exp_continue
                     }
@@ -54,7 +61,7 @@ expect {
                 }
             }
             timeout {
-                puts "Device not found within 20 seconds, aborting."
+                puts "Device not found within 30 seconds, aborting."
                 send "scan off\r"
                 exit 1
             }
@@ -65,6 +72,7 @@ expect {
 # Trust the device
 sleep 2
 send "trust $address\r"
-sleep 2
+expect "trust succeeded"
+sleep 1
 send "quit\r"
 expect eof

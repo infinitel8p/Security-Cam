@@ -4,7 +4,8 @@ import bluetooth
 import subprocess
 from . import settings_helpers
 
-log = logging.getLogger("devices")
+log = logging.getLogger("wifi")
+bt_log = logging.getLogger("bt.scan")
 
 
 def is_device_connected_to_bt() -> bool:
@@ -13,9 +14,9 @@ def is_device_connected_to_bt() -> bool:
     for addr in settings.get("TARGET_BT_ADDRESSES", []):
         status = bluetooth.lookup_name(addr["address"], timeout=3)
         if status:
-            log.info("BT device %s (%s) is nearby", addr["name"], addr["address"])
+            bt_log.info("Device %s (%s) is nearby", addr["name"], addr["address"])
             return True
-    log.debug("No target BT devices detected")
+    bt_log.debug("No target devices detected")
     return False
 
 
@@ -31,7 +32,7 @@ def scan_bt_devices(duration: int = 20) -> list[dict]:
 
     Returns a list of {"address": "...", "name": "..."} dicts.
     """
-    log.info("Starting BT scan (%ds)...", duration)
+    bt_log.info("Scan starting (%ds)...", duration)
 
     # Collect devices from scan output in real-time
     scan_output = ""
@@ -46,7 +47,7 @@ def scan_bt_devices(duration: int = 20) -> list[dict]:
             proc.kill()
             scan_output, _ = proc.communicate()
     except Exception as e:
-        log.error("BT scan failed: %s", e)
+        bt_log.error("Scan failed: %s", e)
         raise RuntimeError(f"Bluetooth scan failed: {e}")
 
     # Also get the full device list (includes cached + just-discovered)
@@ -58,7 +59,7 @@ def scan_bt_devices(duration: int = 20) -> list[dict]:
         )
         devices_output = result.stdout
     except Exception as e:
-        log.error("BT device listing failed: %s", e)
+        bt_log.error("Device listing failed: %s", e)
 
     # Parse both outputs for device addresses and names
     devices = []
@@ -82,7 +83,7 @@ def scan_bt_devices(duration: int = 20) -> list[dict]:
             seen.add(key)
             devices.append({"address": addr, "name": addr})
 
-    log.info("BT scan found %d device(s)", len(devices))
+    bt_log.info("Scan found %d device(s)", len(devices))
     return devices
 
 
@@ -92,7 +93,7 @@ def get_bt_device_status(address: str) -> bool:
         status = bluetooth.lookup_name(address, timeout=3)
         return status is not None
     except Exception as e:
-        log.error("BT status check failed for %s: %s", address, e)
+        bt_log.error("Status check failed for %s: %s", address, e)
         return False
 
 

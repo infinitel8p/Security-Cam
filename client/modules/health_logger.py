@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 
 from . import system_helpers
 
-log = logging.getLogger("health")
+log = logging.getLogger("system.health")
 
 LOG_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.realpath(__file__))),

@@ -1,4 +1,5 @@
 import logging
+from logging.handlers import RotatingFileHandler
 import os
 import subprocess
 from flask import Flask, jsonify, send_file, request, abort, Response
@@ -28,14 +29,17 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
     handlers=[
-        logging.FileHandler(LOG_FILE, encoding="utf-8"),
+        RotatingFileHandler(
+            LOG_FILE, maxBytes=2 * 1024 * 1024, backupCount=3, encoding="utf-8"
+        ),
         logging.StreamHandler(),
     ],
 )
 # Quiet noisy libraries
 logging.getLogger("werkzeug").setLevel(logging.WARNING)
 
-log = logging.getLogger("main")
+log = logging.getLogger("api")
+bt_log = logging.getLogger("bt.api")
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -209,14 +213,14 @@ def bt_discoverable():
         if not any(d["address"].lower() == addr.lower() for d in bt_list):
             bt_list.append(device)
             settings_helpers.update_settings({"TARGET_BT_ADDRESSES": bt_list})
-        log.info("BT discoverable: device registered: %s (%s)", device["name"], addr)
+        bt_log.info("Discoverable: device registered: %s (%s)", device["name"], addr)
         return jsonify({"device": device})
     except RuntimeError as e:
         return jsonify({"error": str(e)}), 408  # Request Timeout
     except subprocess.TimeoutExpired:
         return jsonify({"error": "Discoverable mode timed out"}), 408
     except Exception as e:
-        log.error("BT discoverable failed: %s", e)
+        bt_log.error("Discoverable failed: %s", e)
         return jsonify({"error": str(e)}), 500
 
 
@@ -231,7 +235,7 @@ def add_bt_device():
     try:
         settings_helpers.pair_bt_device(address)
     except Exception as e:
-        log.error("BT add failed for %s: %s", address, e)
+        bt_log.error("Add failed for %s: %s", address, e)
         return jsonify({"error": f"Pairing failed: {e}"}), 500
 
     settings = settings_helpers.get_settings()
@@ -240,7 +244,7 @@ def add_bt_device():
         bt_list.append({"address": address, "name": name})
         settings_helpers.update_settings({"TARGET_BT_ADDRESSES": bt_list})
 
-    log.info("BT device added: %s (%s)", name, address)
+    bt_log.info("Device added: %s (%s)", name, address)
     return jsonify({"message": "Device added"})
 
 
@@ -254,14 +258,14 @@ def remove_bt_device():
     try:
         settings_helpers.unpair_bt_device(address)
     except Exception as e:
-        log.warning("BT unpair best-effort failed for %s: %s", address, e)
+        bt_log.warning("Unpair best-effort failed for %s: %s", address, e)
 
     settings = settings_helpers.get_settings()
     bt_list = [d for d in settings.get("TARGET_BT_ADDRESSES", [])
                if d["address"].lower() != address.lower()]
     settings_helpers.update_settings({"TARGET_BT_ADDRESSES": bt_list})
 
-    log.info("BT device removed: %s", address)
+    bt_log.info("Device removed: %s", address)
     return jsonify({"message": "Device removed"})
 
 

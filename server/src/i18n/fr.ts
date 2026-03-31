@@ -274,6 +274,7 @@ export default {
     discoverableWaiting: "Le Pi est maintenant visible pour les appareils à proximité",
     discoverableHint: "Ouvrez les paramètres Bluetooth de votre téléphone et appairez avec le Pi. Délai d'expiration automatique après 90 secondes.",
     searchingBluetooth: "Recherche d'appareils Bluetooth à proximité...",
+    pairingCheckPhone: "Une demande d'appairage peut apparaître sur votre téléphone — veuillez l'accepter",
     checkingWiFi: "Vérification des clients WiFi connectés...",
     addDevicesForPresence: "Ajoutez un téléphone ou un ordinateur portable dans les Paramètres pour la détection de présence",
   },

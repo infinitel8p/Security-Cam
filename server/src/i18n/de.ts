@@ -274,6 +274,7 @@ export default {
     discoverableWaiting: "Der Pi ist jetzt für Geräte in der Nähe sichtbar",
     discoverableHint: "Öffnen Sie die Bluetooth-Einstellungen auf Ihrem Telefon und koppeln Sie mit dem Pi. Die Wartezeit beträgt 90 Sekunden.",
     searchingBluetooth: "Suche nach Bluetooth-Geräten in der Nähe...",
+    pairingCheckPhone: "Auf deinem Telefon erscheint möglicherweise eine Kopplungsanfrage — bitte akzeptiere sie",
     checkingWiFi: "Prüfe verbundene WiFi-Clients...",
     addDevicesForPresence: "Füge ein Smartphone oder Laptop in den Einstellungen für Anwesenheitserkennung hinzu",
   },

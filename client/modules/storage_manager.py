@@ -15,7 +15,7 @@ import psutil
 
 from . import settings_helpers
 
-log = logging.getLogger("storage_mgr")
+log = logging.getLogger("system.storage")
 
 _CHECK_INTERVAL = 300  # seconds between background checks (5 min)
 _thread: threading.Thread | None = None

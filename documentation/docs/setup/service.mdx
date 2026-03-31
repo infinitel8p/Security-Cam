@@ -72,6 +72,14 @@ cd /opt/security-cam
 ./start.sh
 ```
 
+To follow the application log in real-time:
+
+```bash
+tail -f /opt/security-cam/client/data/security-cam.log
+```
+
+You can filter by subsystem using grep — see [Troubleshooting > Checking logs](../basics/troubleshooting#checking-logs) for the full list of logger names.
+
 :::note
 The frontend must be built first. This is done automatically by `install_requirements.sh`. If you change frontend code, rebuild with:
 

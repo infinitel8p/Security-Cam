@@ -24,7 +24,7 @@ from . import stream_helpers
 from . import sse
 from .sensors import SENSOR_REGISTRY, create_sensor
 
-log = logging.getLogger("sensor_mgr")
+log = logging.getLogger("sensor.mgr")
 
 _sensor = None
 _lock = threading.Lock()
