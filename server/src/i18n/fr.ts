@@ -242,7 +242,7 @@ export default {
     autoRecording: "Déclencher l'enregistrement lorsque le capteur s'active et qu'aucun appareil suivi n'est présent",
     gpioPin: "Numéro de broche BCM (0-27). Par défaut pour ce capteur : GPIO {n}",
     testWiring: "Lire l'état de la broche GPIO pour vérifier le câblage du capteur",
-    testInstructions: "Activez le capteur maintenant — la valeur devrait changer. Interrogation toutes les 500ms. L'enregistrement par capteur est suspendu pendant le test.",
+    testInstructions: "Activez le capteur maintenant — la valeur devrait changer. Interrogation toutes les 500ms.",
     holdTimeout: "Continuer l'enregistrement pendant cette durée après le relâchement du capteur (évite les coupures lors d'interruptions brèves)",
     invertActive: "Actuellement : GPIO LOW (0) déclenche l'enregistrement — ex. aimant retiré, porte ouverte",
     invertInactive: "Actuellement : GPIO HIGH (1) déclenche l'enregistrement — ex. PIR détecte un mouvement, bouton pressé",

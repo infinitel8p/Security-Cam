@@ -257,7 +257,7 @@ export default {
     autoRecording: "Trigger recording when sensor fires and no tracked device is present",
     gpioPin: "BCM pin number (0-27). Default for this sensor: GPIO {n}",
     testWiring: "Read the live GPIO pin state to verify your sensor is connected correctly",
-    testInstructions: "Activate the sensor now — you should see the value change. Polling every 500ms. Sensor-triggered recording is paused during testing.",
+    testInstructions: "Activate the sensor now — you should see the value change. Polling every 500ms.",
     holdTimeout: "Keep recording for this long after sensor releases (prevents gaps from brief interruptions)",
     invertActive: "Currently: GPIO LOW (0) triggers recording — e.g. reed switch magnet removed, door opened",
     invertInactive: "Currently: GPIO HIGH (1) triggers recording — e.g. PIR detects motion, button pressed",

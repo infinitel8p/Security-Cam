@@ -242,7 +242,7 @@ export default {
     autoRecording: "Avvia la registrazione quando il sensore si attiva e nessun dispositivo tracciato è presente",
     gpioPin: "Numero pin BCM (0-27). Predefinito per questo sensore: GPIO {n}",
     testWiring: "Leggi lo stato del pin GPIO per verificare il cablaggio del sensore",
-    testInstructions: "Attiva il sensore ora — il valore dovrebbe cambiare. Interrogazione ogni 500ms. La registrazione tramite sensore è sospesa durante il test.",
+    testInstructions: "Attiva il sensore ora — il valore dovrebbe cambiare. Interrogazione ogni 500ms.",
     holdTimeout: "Continua a registrare per questa durata dopo il rilascio del sensore (previene interruzioni da pause brevi)",
     invertActive: "Attualmente: GPIO LOW (0) avvia la registrazione — es. magnete rimosso, porta aperta",
     invertInactive: "Attualmente: GPIO HIGH (1) avvia la registrazione — es. PIR rileva movimento, pulsante premuto",

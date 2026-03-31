@@ -312,20 +312,6 @@ def sensor_disable():
     return jsonify({"message": "Sensor disabled"})
 
 
-@app.route('/sensor/pause', methods=['POST'])
-def sensor_pause():
-    """Pause sensor callbacks for wiring test mode. Sensor stays running."""
-    sensor_manager.pause()
-    return jsonify({"message": "Sensor paused"})
-
-
-@app.route('/sensor/resume', methods=['POST'])
-def sensor_resume():
-    """Resume sensor callbacks after wiring test."""
-    sensor_manager.resume()
-    return jsonify({"message": "Sensor resumed"})
-
-
 @app.route('/sensor/mock/trigger', methods=['POST'])
 def sensor_mock_trigger():
     """Simulate a trigger event (only works when mock sensor is active)."""

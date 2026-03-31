@@ -103,8 +103,7 @@
   });
 
   onDestroy(() => {
-    if (testMode) stopTest();
-    else if (testInterval) clearInterval(testInterval);
+    if (testInterval) clearInterval(testInterval);
   });
 
   function getSensorMeta(type: string): SensorType | undefined {
@@ -213,11 +212,7 @@
     }
   }
 
-  async function startTest() {
-    // Pause sensor callbacks during test (sensor stays running, just ignores triggers)
-    try {
-      await fetch(`${getBackendUrl()}/sensor/pause`, { method: "POST" });
-    } catch { /* proceed with test anyway */ }
+  function startTest() {
     testMode = true;
     testValue = null;
     testError = "";
@@ -226,7 +221,7 @@
     testInterval = setInterval(testRead, 500);
   }
 
-  async function stopTest() {
+  function stopTest() {
     testMode = false;
     if (testInterval) {
       clearInterval(testInterval);
@@ -234,10 +229,6 @@
     }
     testValue = null;
     testHistory = [];
-    // Resume sensor callbacks
-    try {
-      await fetch(`${getBackendUrl()}/sensor/resume`, { method: "POST" });
-    } catch { /* silent */ }
   }
 
   let isMock = $derived(selectedType === "mock");

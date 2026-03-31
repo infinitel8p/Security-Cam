@@ -242,7 +242,7 @@ export default {
     autoRecording: "Aufnahme starten, wenn der Sensor auslöst und kein überwachtes Gerät anwesend ist",
     gpioPin: "BCM-Pinnummer (0-27). Standard für diesen Sensor: GPIO {n}",
     testWiring: "Lese den aktuellen GPIO-Pin-Zustand, um die Verkabelung zu prüfen",
-    testInstructions: "Aktiviere jetzt den Sensor — der Wert sollte sich ändern. Abfrage alle 500ms. Sensorgesteuerte Aufnahme ist während des Tests pausiert.",
+    testInstructions: "Aktiviere jetzt den Sensor — der Wert sollte sich ändern. Abfrage alle 500ms.",
     holdTimeout: "So lange nach Sensorfreigabe weiter aufnehmen (verhindert Lücken bei kurzen Unterbrechungen)",
     invertActive: "Aktuell: GPIO LOW (0) startet Aufnahme — z.B. Reed-Magnet entfernt, Tür geöffnet",
     invertInactive: "Aktuell: GPIO HIGH (1) startet Aufnahme — z.B. PIR erkennt Bewegung, Taste gedrückt",
