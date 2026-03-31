@@ -1,4 +1,4 @@
-const CACHE_NAME = "seccam-v2";
+const CACHE_NAME = "seccam-v3";
 
 const PRECACHE = [
   "/",
@@ -43,8 +43,8 @@ self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Don't cache MediaMTX WebRTC traffic or Flask API calls
-  if (url.port === "8889" || url.port === "5005") {
+  // Don't cache MediaMTX (WebRTC/HLS) or Flask API calls
+  if (url.port === "8889" || url.port === "8888" || url.port === "5005") {
     return;
   }
 
@@ -53,6 +53,25 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  // Astro static assets (/_astro/) are content-hashed — cache-first since
+  // the filename changes on every build, so stale entries are never served.
+  if (url.pathname.startsWith("/_astro/")) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        if (cached) return cached;
+        return fetch(request).then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        });
+      })
+    );
+    return;
+  }
+
+  // Everything else: network-first with cache fallback
   event.respondWith(
     fetch(request)
       .then((response) => {
