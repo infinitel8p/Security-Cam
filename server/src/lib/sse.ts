@@ -64,6 +64,9 @@ export function sseClient(): SSEClient {
   const fallbacks = new Map<string, FallbackConfig>();
   const pollTimers = new Map<string, ReturnType<typeof setInterval>>();
 
+  // Track which event names have been registered on the current EventSource
+  const registeredEvents = new Set<string>();
+
   let es: EventSource | null = null;
   let _connected = false;
   let _degraded = false;
@@ -87,20 +90,41 @@ export function sseClient(): SSEClient {
     }
   }
 
+  /** Create an EventSource listener for a named event and register it. */
+  function attachEvent(eventName: string) {
+    if (!es || registeredEvents.has(eventName)) return;
+    registeredEvents.add(eventName);
+    es.addEventListener(eventName, ((e: MessageEvent) => {
+      try {
+        const data = JSON.parse(e.data);
+        dispatch(eventName, data);
+      } catch { /* ignore malformed */ }
+    }) as EventListener);
+  }
+
+  /** Poll a single fallback endpoint once. */
+  async function pollOnce(config: FallbackConfig) {
+    try {
+      const res = await fetch(`${getBackendUrl()}${config.endpoint}`);
+      if (!res.ok) return;
+      let json = await res.json();
+      if (config.transform) json = config.transform(json);
+      dispatch(config.event, json);
+    } catch { /* silent */ }
+  }
+
+  /** Start polling for a single fallback config. */
+  function startPollFor(config: FallbackConfig) {
+    if (pollTimers.has(config.event)) return;
+    // Immediate first fetch so data appears without waiting for the interval
+    pollOnce(config);
+    const timer = setInterval(() => pollOnce(config), config.interval);
+    pollTimers.set(config.event, timer);
+  }
+
   function startPolling() {
-    // Start polling for all registered fallbacks
-    for (const [event, config] of fallbacks) {
-      if (pollTimers.has(event)) continue;
-      const timer = setInterval(async () => {
-        try {
-          const res = await fetch(`${getBackendUrl()}${config.endpoint}`);
-          if (!res.ok) return;
-          let json = await res.json();
-          if (config.transform) json = config.transform(json);
-          dispatch(config.event, json);
-        } catch { /* silent */ }
-      }, config.interval);
-      pollTimers.set(event, timer);
+    for (const [, config] of fallbacks) {
+      startPollFor(config);
     }
   }
 
@@ -116,6 +140,7 @@ export function sseClient(): SSEClient {
 
     const url = `${getBackendUrl()}/events`;
     es = new EventSource(url);
+    registeredEvents.clear();
 
     es.onopen = () => {
       failCount = 0;
@@ -135,6 +160,7 @@ export function sseClient(): SSEClient {
         es.close();
         es = null;
       }
+      registeredEvents.clear();
 
       failCount++;
       if (failCount >= MAX_SSE_FAILURES && !_degraded) {
@@ -147,31 +173,9 @@ export function sseClient(): SSEClient {
       retryTimer = setTimeout(connect, SSE_RETRY_DELAY);
     };
 
-    // Listen for all named events we have subscribers for
-    // SSE sends named events like: event: sensor_state\ndata: {...}
-    // We use the generic "message" handler + named event listeners.
-    // Since our backend sends named events, we need addEventListener per type.
-    // But we don't know all types upfront, so we use onmessage as catch-all
-    // and also register specific listeners.
-
-    // The backend sends: event: <name>\ndata: <json>
-    // EventSource only fires named events on addEventListener, not onmessage.
-    // We register listeners for known event types.
-    const knownEvents = [
-      "sensor_state",
-      "recording_state",
-      "connections",
-      "presence_change",
-      "event_logged",
-    ];
-
-    for (const eventName of knownEvents) {
-      es.addEventListener(eventName, ((e: MessageEvent) => {
-        try {
-          const data = JSON.parse(e.data);
-          dispatch(eventName, data);
-        } catch { /* ignore malformed */ }
-      }) as EventListener);
+    // Register listeners for all event types that already have subscribers
+    for (const eventName of listeners.keys()) {
+      attachEvent(eventName);
     }
   }
 
@@ -183,6 +187,9 @@ export function sseClient(): SSEClient {
       if (!listeners.has(event)) listeners.set(event, new Set());
       listeners.get(event)!.add(listener);
 
+      // Dynamically register on the live EventSource if needed
+      attachEvent(event);
+
       return () => {
         listeners.get(event)?.delete(listener);
         if (listeners.get(event)?.size === 0) listeners.delete(event);
@@ -192,17 +199,8 @@ export function sseClient(): SSEClient {
     registerFallback(config: FallbackConfig) {
       fallbacks.set(config.event, config);
       // If already degraded, start polling for this fallback immediately
-      if (_degraded && !pollTimers.has(config.event)) {
-        const timer = setInterval(async () => {
-          try {
-            const res = await fetch(`${getBackendUrl()}${config.endpoint}`);
-            if (!res.ok) return;
-            let json = await res.json();
-            if (config.transform) json = config.transform(json);
-            dispatch(config.event, json);
-          } catch { /* silent */ }
-        }, config.interval);
-        pollTimers.set(config.event, timer);
+      if (_degraded) {
+        startPollFor(config);
       }
     },
 
@@ -221,6 +219,7 @@ export function sseClient(): SSEClient {
       stopPolling();
       listeners.clear();
       stateListeners.clear();
+      registeredEvents.clear();
       instance = null;
     },
   };

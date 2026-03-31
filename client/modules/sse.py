@@ -29,6 +29,10 @@ log = logging.getLogger("sse")
 _clients: list[queue.Queue] = []
 _clients_lock = threading.Lock()
 
+# Monotonic event ID for Last-Event-ID reconnection support
+_event_id = 0
+_event_id_lock = threading.Lock()
+
 
 def emit(event: str, data: dict | None = None) -> None:
     """Broadcast an event to all connected SSE clients.
@@ -37,7 +41,12 @@ def emit(event: str, data: dict | None = None) -> None:
         event: Event type string (e.g. "sensor_state", "recording_state").
         data:  JSON-serialisable payload dict (optional).
     """
-    payload = {"event": event, "data": data or {}, "time": time.time()}
+    global _event_id
+    with _event_id_lock:
+        _event_id += 1
+        eid = _event_id
+
+    payload = {"event": event, "data": data or {}, "time": time.time(), "id": eid}
 
     with _clients_lock:
         dead = []
@@ -57,8 +66,9 @@ def emit(event: str, data: dict | None = None) -> None:
 
         for q in dead:
             _clients.remove(q)
+        count = len(_clients)
 
-    log.debug("SSE emit: %s (%d clients)", event, len(_clients))
+    log.debug("SSE emit: %s (%d clients)", event, count)
 
 
 def stream():
@@ -82,7 +92,7 @@ def stream():
         while True:
             try:
                 payload = client_queue.get(timeout=15)
-                line = f"event: {payload['event']}\ndata: {json.dumps(payload['data'])}\n\n"
+                line = f"id: {payload['id']}\nevent: {payload['event']}\ndata: {json.dumps(payload['data'])}\n\n"
                 yield line
             except queue.Empty:
                 # No events for 15s - send heartbeat to keep connection alive
