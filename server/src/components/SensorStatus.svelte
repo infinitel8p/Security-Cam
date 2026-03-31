@@ -121,8 +121,10 @@
           {#if data.sensor}
             {({
               reed_switch: "Reed", mini_reed: "Mini Reed", hall_digital: "Hall",
-              pir: "PIR", vibration: "Shock", knock: "Knock",
-              light_gate: "Gate", tilt: "Tilt", touch: "Touch",
+              hall_linear: "Hall Lin.", pir: "PIR", vibration: "Shock", knock: "Knock",
+              light_gate: "Gate", ir_proximity: "IR Prox.", tilt: "Tilt",
+              tilt_ball: "Tilt Ball", touch: "Touch",
+              sound_big: "Sound", sound_small: "Sound Sm.",
               button: "Button", mock: "Mock",
             })[data.config.type] ?? data.config.type}
           {:else}

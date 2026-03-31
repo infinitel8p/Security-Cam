@@ -51,12 +51,17 @@ Place photos of your sensor modules in `documentation/static/img/sensors/` named
 | **Reed Switch** | KY-025 | GPIO 22 | Door / window open detection |
 | **Mini Reed Switch** | KY-021 | GPIO 20 | Same as above, smaller form factor |
 | **Hall Magnetic** | KY-003 | GPIO 13 | Door / window detection (no moving parts) |
+| **Hall Magnetic (Linear)** | KY-024 | GPIO 12 | Door / window detection (adjustable threshold) |
 | **PIR Motion** | HC-SR501 | GPIO 17 | Motion detection in a room |
 | **Vibration / Shock** | KY-002 | GPIO 5 | Impact, door slam, forced entry |
 | **Knock / Tap** | KY-031 | GPIO 19 | Knocking on door, tapping on window |
 | **Light Gate** | KY-010 | GPIO 6 | Alarm when pin/bolt is pulled from slot |
+| **IR Proximity** | KY-032 | GPIO 24 | Detect someone approaching (~2-40 cm) |
 | **Tilt Switch** | KY-017 | GPIO 26 | Camera tamper detection |
+| **Tilt Switch (Ball)** | KY-020 | GPIO 25 | Camera tamper detection (ball variant) |
 | **Touch Sensor** | KY-036 | GPIO 16 | Touching camera housing or door handle |
+| **Sound (Big)** | KY-037 | GPIO 23 | Glass breaking, loud noise detection |
+| **Sound (Small)** | KY-038 | GPIO 8 | Nearby sound detection (less sensitive) |
 | **Button** | KY-004 | GPIO 27 | Manual hardware trigger / testing |
 | **Mock** | Software only | - | Development and testing without hardware |
 
@@ -107,12 +112,17 @@ export const SensorImage = ({module, alt}) => {
     {module: 'ky-025', name: 'Reed Switch'},
     {module: 'ky-021', name: 'Mini Reed'},
     {module: 'ky-003', name: 'Hall Magnetic'},
+    {module: 'ky-024', name: 'Hall Linear'},
     {module: 'hc-sr501', name: 'PIR Motion'},
     {module: 'ky-002', name: 'Vibration'},
     {module: 'ky-031', name: 'Knock / Tap'},
     {module: 'ky-010', name: 'Light Gate'},
+    {module: 'ky-032', name: 'IR Proximity'},
     {module: 'ky-017', name: 'Tilt Switch'},
+    {module: 'ky-020', name: 'Tilt (Ball)'},
     {module: 'ky-036', name: 'Touch Sensor'},
+    {module: 'ky-037', name: 'Sound (Big)'},
+    {module: 'ky-038', name: 'Sound (Small)'},
     {module: 'ky-004', name: 'Button'},
   ].map(({module, name}) => (
     <div key={module} style={{textAlign: 'center'}}>

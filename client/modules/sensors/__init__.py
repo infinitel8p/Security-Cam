@@ -12,21 +12,31 @@ from .mock import MockSensor
 from .vibration import VibrationSensor
 from .light_gate import LightGateSensor
 from .hall_digital import HallDigitalSensor
+from .hall_linear import HallLinearSensor
 from .knock import KnockSensor
 from .tilt import TiltSensor
+from .tilt_ball import TiltBallSensor
 from .touch import TouchSensor
 from .mini_reed import MiniReedSensor
+from .ir_proximity import IRProximitySensor
+from .sound_big import SoundBigSensor
+from .sound_small import SoundSmallSensor
 
 SENSOR_REGISTRY: dict[str, type] = {
     "reed_switch": ReedSwitchSensor,
     "mini_reed": MiniReedSensor,
     "hall_digital": HallDigitalSensor,
+    "hall_linear": HallLinearSensor,
     "pir": PIRSensor,
     "vibration": VibrationSensor,
     "knock": KnockSensor,
     "light_gate": LightGateSensor,
+    "ir_proximity": IRProximitySensor,
     "tilt": TiltSensor,
+    "tilt_ball": TiltBallSensor,
     "touch": TouchSensor,
+    "sound_big": SoundBigSensor,
+    "sound_small": SoundSmallSensor,
     "button": ButtonSensor,
     "mock": MockSensor,
 }
