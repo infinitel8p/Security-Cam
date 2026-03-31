@@ -35,16 +35,16 @@ The dashboard is organized into three pages.
 
 The main page shows everything at a glance:
 
-- **Live Feed** — real-time camera view via WebRTC, with manual recording controls (start/stop)
-- **Backend Status** — online/offline indicator for the Flask backend, polled every 10 seconds
-- **Sensor Status** — current sensor type, armed/triggered state, and GPIO pin (live pulsing dot when armed)
-- **Connection Status** — how many tracked Bluetooth and WiFi devices are online
-- **System Health** — CPU temperature, load, RAM usage, storage, uptime, and throttle status
-- **Activity Timeline** — last 7 days of events: sensor triggers, recording events, stream disconnects. Rapid sensor pulses within 5 minutes are collapsed into a single entry with a count
-- **Access Log** — last 72 hours of device arrivals and departures
-- **Health Tracker** — 72-hour system health chart (48 time slots, colour-coded ok/warn/critical)
-- **Event Heatmap** — ~6-month activity heatmap showing event intensity by day of week
-- **Setup Checklist** — first-run onboarding guide (add devices, enable sensor). Dismissible once complete
+- **Live Feed** - real-time camera view via WebRTC, with manual recording controls (start/stop)
+- **Backend Status** - online/offline indicator for the Flask backend, polled every 10 seconds
+- **Sensor Status** - current sensor type, state (Armed / Triggered / Suppressed / Disabled), and GPIO pin. See [sensor states](./sensors#sensor-states) for what each means
+- **Connection Status** - how many tracked Bluetooth and WiFi devices are online
+- **System Health** - CPU temperature, load, RAM usage, storage, uptime, and throttle status
+- **Activity Timeline** - last 7 days of events: sensor triggers, recording events, stream disconnects. Rapid sensor pulses within 5 minutes are collapsed into a single entry with a count
+- **Access Log** - last 72 hours of device arrivals and departures
+- **Health Tracker** - 72-hour system health chart (48 time slots, colour-coded ok/warn/critical)
+- **Event Heatmap** - ~6-month activity heatmap showing event intensity by day of week
+- **Setup Checklist** - first-run onboarding guide (add devices, enable sensor). Dismissible once complete
 
 ## Archive
 
@@ -58,11 +58,11 @@ Browse and manage recorded videos:
 
 Configure the system without touching config files. The settings page has a sidebar with five sections:
 
-- **Appearance** — switch between dark, light, and system theme. Choose the dashboard language (English, German, French, Spanish, Italian).
-- **Camera** — adjust stream resolution, framerate, and rotation (display-only or hardware via MediaMTX). Toggle scan line overlay on the live feed.
-- **Storage** — choose where recorded videos are stored on the Pi with a directory browser
-- **Devices** — add or remove tracked Bluetooth and WiFi devices. Scan for nearby devices or enter MAC addresses manually. Online/offline status is shown per device. Tracked devices are used for presence detection — if any are nearby, sensor triggers are ignored.
-- **Trigger Sensors** — select and configure the active sensor type, set the GPIO pin and hold timeout, adjust calibration (sensitivity, pulse thresholds), test wiring with live GPIO readout, invert trigger logic, and enable/disable auto-recording. See the [trigger sensors guide](./sensors) for supported sensors, wiring, and configuration details.
+- **Appearance** - switch between dark, light, and system theme. Choose the dashboard language (English, German, French, Spanish, Italian).
+- **Camera** - adjust stream resolution, framerate, and rotation (display-only or hardware via MediaMTX). Toggle scan line overlay on the live feed.
+- **Storage** - choose where recorded videos are stored on the Pi with a directory browser
+- **Devices** - add or remove tracked Bluetooth and WiFi devices. Scan for nearby devices or enter MAC addresses manually. Online/offline status is shown per device. Tracked devices are used for presence detection - if any are nearby, sensor triggers are ignored.
+- **Trigger Sensors** - select and configure the active sensor type, set the GPIO pin and hold timeout, adjust calibration (sensitivity, pulse thresholds), test wiring with live GPIO readout, invert trigger logic, and enable/disable auto-recording. See the [trigger sensors guide](./sensors) for supported sensors, wiring, and configuration details.
 
 ## How auto-recording works
 

@@ -52,7 +52,7 @@
     device_left:         { icon: usersIcon,          color: "text-text-muted",      bgColor: "bg-surface-elevated" },
   };
 
-  // Exclude device events (belong in Access Log) and sensor_released (noise — grouped with trigger)
+  // Exclude device events (belong in Access Log) and sensor_released (noise - grouped with trigger)
   const EXCLUDED_TYPES = new Set(["device_arrived", "device_left"]);
 
   // Types that are low-priority and should be collapsed when repeated

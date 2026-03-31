@@ -53,7 +53,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Astro static assets (/_astro/) are content-hashed — cache-first since
+  // Astro static assets (/_astro/) are content-hashed - cache-first since
   // the filename changes on every build, so stale entries are never served.
   if (url.pathname.startsWith("/_astro/")) {
     event.respondWith(

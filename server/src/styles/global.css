@@ -84,12 +84,12 @@
 /* ── Type scale tokens ──────────────────────────────────────────────────── */
 /*
   Scale roles:
-    caption   0.625rem  (10px) — metadata, micro labels, time labels
-    label     0.6875rem (11px) — table headers, section labels, timestamps
-    ui        0.75rem   (12px) — buttons, form helpers, action text
-    body-sm   0.8125rem (13px) — secondary body, card text, descriptions
-    body      0.875rem  (14px) — primary body, form inputs, device names
-    heading   1.25rem   (20px) — page titles, data display values
+    caption   0.625rem  (10px) - metadata, micro labels, time labels
+    label     0.6875rem (11px) - table headers, section labels, timestamps
+    ui        0.75rem   (12px) - buttons, form helpers, action text
+    body-sm   0.8125rem (13px) - secondary body, card text, descriptions
+    body      0.875rem  (14px) - primary body, form inputs, device names
+    heading   1.25rem   (20px) - page titles, data display values
 */
 
 /* ── Base styles ────────────────────────────────────────────────────────── */

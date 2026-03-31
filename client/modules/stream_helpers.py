@@ -43,7 +43,7 @@ def _watchdog():
             if not is_recording or _ffmpeg_process is None:
                 return  # Recording ended normally, exit watchdog
             if _ffmpeg_process.poll() is not None:
-                # ffmpeg died — clean up state
+                # ffmpeg died - clean up state
                 code = _ffmpeg_process.returncode
                 log.error("FFmpeg died unexpectedly (code=%d), resetting recording state", code)
                 _cleanup_dead_recording()

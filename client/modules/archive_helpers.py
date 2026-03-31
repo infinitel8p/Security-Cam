@@ -54,15 +54,15 @@ def delete_video(video_path):
     # Ensure target is inside the configured video directory
     try:
         if os.path.commonpath([base_dir, target]) != base_dir:
-            log.warning("Delete blocked — path outside VideoSaveLocation: %s", video_path)
+            log.warning("Delete blocked - path outside VideoSaveLocation: %s", video_path)
             return {"error": "Invalid video path"}, 400
     except ValueError:
-        log.warning("Delete blocked — incompatible path: %s", video_path)
+        log.warning("Delete blocked - incompatible path: %s", video_path)
         return {"error": "Invalid video path"}, 400
 
     # Only allow .mp4 files (not temp files)
     if not target.endswith(".mp4") or target.endswith(".tmp.mp4"):
-        log.warning("Delete blocked — not a video file: %s", video_path)
+        log.warning("Delete blocked - not a video file: %s", video_path)
         return {"error": "Invalid video file"}, 400
 
     if not os.path.isfile(target):
