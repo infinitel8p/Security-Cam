@@ -5,13 +5,15 @@ A security camera system for the Raspberry Pi Zero 2 W using the Waveshare RPi C
 
 The system automatically records video when a trigger sensor is activated (e.g. door opened, motion detected) and no tracked device is connected via Bluetooth or WiFi. Recording stops when the sensor resets. The trigger sensor is modular - swap between a magnetic reed switch, PIR motion sensor, push button, or software mock without changing any code.
 
-Integrations:
-- **Modular Trigger Sensors**: Pluggable sensor system supporting magnetic reed switches, PIR motion sensors, Hall-effect sensors, vibration/knock sensors, tilt switches, touch sensors, push buttons, and a software mock. Swap hardware without code changes - configure via the dashboard or REST API.
-- **Presence-Gated Recording**: Sensor triggers are gated by Bluetooth and WiFi presence detection. If a tracked device (e.g. your phone) is nearby, the trigger is ignored. Manual recording is always allowed.
+Features:
+- **Modular Trigger Sensors**: Pluggable sensor system supporting 11 sensor types - magnetic reed switches, PIR motion sensors, Hall-effect sensors, vibration/knock sensors, tilt switches, touch sensors, light gates, push buttons, and a software mock. Swap hardware without code changes - configure via the dashboard or REST API.
+- **Sensor Calibration**: Fine-tune sensor behaviour from the dashboard - PIR sensitivity, vibration/knock pulse thresholds, tilt settle time, touch duration. Each sensor defines its own calibration parameters.
+- **Presence-Gated Recording**: Sensor triggers are gated by Bluetooth and WiFi presence detection. If a tracked device (e.g. your phone) is nearby, the trigger is suppressed (shown as a distinct "Suppressed" state on the dashboard). Manual recording is always allowed.
+- **Auto-Delete Storage Management**: Automatically remove oldest recordings when disk usage exceeds a configurable threshold. Prevents the Pi's SD card from filling up.
 - **WiFi Detection**: WiFi Access Point integration for device presence detection. Also allows viewing recorded videos from outside the home network.
 - **Bluetooth Detection**: Bluetooth integration for device presence detection.
 - **Real Time Clock**: DS3231 RTC module keeps accurate time when the Raspberry Pi is powered off.
-- **Web Dashboard**: Live camera feed via WebRTC, video archive, system health monitoring, event timeline, device management, and sensor configuration.
+- **Web Dashboard**: Live camera feed via WebRTC (with HLS fallback), video archive, system health monitoring, event timeline, activity heatmap, device management, and sensor configuration. Dark and light themes, 5 languages.
 - **MediaMTX Streaming**: Hardware-accelerated H.264 camera streaming via WebRTC and RTSP.
 
 ## Table of Contents
@@ -41,7 +43,9 @@ Integrations:
 Follow the instructions in our [documentation](https://dev.infinitel8p.com/Security-Cam/) to set up the hardware and find out how to use it.
 
 ## Future Enhancements
-- **Improved Error Handling**: Improved error handling to prevent the script from crashing, server from freezing, etc.
+- **API Authentication**: Token-based auth for non-isolated networks
+- **Push Notifications**: Alerts on sensor trigger events
+- **Multi-Camera Support**: Multiple camera feeds on one dashboard
 
 ## Troubleshooting
 _This section will be populated with common issues and their solutions as they are identified._

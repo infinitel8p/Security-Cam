@@ -132,7 +132,6 @@
     const meta = getSensorMeta(type);
     if (meta) {
       gpio = meta.default_gpio;
-      // Reset calibration to defaults for the new sensor type
       const defaults: Record<string, number> = {};
       for (const param of meta.calibration ?? []) {
         defaults[param.key] = param.default;
@@ -301,8 +300,9 @@
       <button onclick={fetchAll} class="text-[0.8125rem] font-medium text-accent hover:text-accent-hover">{t("btn.retry")}</button>
     </div>
   {:else}
-    <div class="px-4 py-4 sm:px-5 sm:py-5">
-      <!-- Enable/disable toggle -->
+    <div class="px-4 py-4 sm:px-5 sm:py-5 space-y-4">
+
+      <!-- ━━ 1. Enable toggle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm font-medium text-text-primary">{t("label.autoRecording")}</p>
@@ -322,70 +322,61 @@
         </button>
       </div>
 
-      <!-- ── Sensor Selection ── -->
-      <div class="mt-5">
-        <label class="mb-2 block text-xs font-medium text-text-secondary" for="sensor-type">{t("label.sensorType")}</label>
+      <!-- ━━ 2. Sensor type grid ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+      <div>
+        <label class="mb-1.5 block text-xs font-medium text-text-secondary" for="sensor-type">{t("label.sensorType")}</label>
         <div class="grid grid-cols-3 gap-1.5 sm:grid-cols-4">
           {#each sensorTypes as st (st.type)}
             <button
               onclick={() => onTypeChange(st.type)}
-              class="rounded-xl border px-2.5 py-2 text-center transition-all duration-200
+              class="rounded-xl border px-2 py-1.5 text-center transition-all duration-200
                 {selectedType === st.type
                   ? 'border-accent/30 bg-accent-muted text-accent shadow-[var(--shadow-glow)]'
                   : 'border-border-default bg-surface-base text-text-muted hover:border-border-strong hover:text-text-secondary'}"
             >
-              <div class="flex flex-col items-center gap-1">
+              <div class="flex flex-col items-center gap-0.5">
                 {#if st.icon === "gate"}
-                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="3" width="7" height="18" rx="1" /><rect x="14" y="3" width="7" height="18" rx="1" />
                     <line x1="10" y1="12" x2="14" y2="12" stroke-dasharray="2 2" />
                   </svg>
                 {:else if st.icon === "circle"}
-                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="3" />
                   </svg>
                 {:else if st.icon === "wrench"}
-                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
                   </svg>
                 {:else if st.icon === "eye"}
-                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
                     <circle cx="12" cy="12" r="3" />
                   </svg>
                 {:else}
-                  <!-- magnet, zap, rotate, hand - all simple path icons -->
-                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d={ICONS[st.icon] ?? ICONS.zap} />
                   </svg>
                 {/if}
-                <span class="text-[0.6875rem] font-medium leading-tight">{st.name}</span>
+                <span class="text-[0.625rem] font-medium leading-tight">{st.name}</span>
               </div>
             </button>
           {/each}
         </div>
       </div>
 
-      <!-- ── Selected Sensor Details ── -->
+      <!-- ━━ 3. Sensor info + wiring (collapsible) ━━━━━━━━━━━━━━━━━━━━━━━ -->
       {#if currentMeta}
-        <div class="mt-4 rounded-lg border border-border-default bg-surface-base px-3.5 py-3">
-          <div class="flex items-start justify-between">
-            <div>
-              <p class="text-xs font-semibold text-text-primary">{currentMeta.name}
-                <span class="ml-1 font-normal text-text-muted">({currentMeta.module})</span>
-              </p>
-              <p class="mt-0.5 text-[0.6875rem] text-text-muted">{currentMeta.description}</p>
-              <p class="mt-1 text-[0.6875rem] text-text-secondary">
-                <span class="font-medium">Use case:</span> {currentMeta.use_case}
-              </p>
-            </div>
-          </div>
+        <div class="rounded-lg border border-border-default bg-surface-base px-3.5 py-2.5">
+          <p class="text-xs font-semibold text-text-primary">{currentMeta.name}
+            <span class="ml-1 font-normal text-text-muted">({currentMeta.module})</span>
+          </p>
+          <p class="mt-0.5 text-[0.6875rem] text-text-muted leading-relaxed">{currentMeta.description} - {currentMeta.use_case.charAt(0).toLowerCase() + currentMeta.use_case.slice(1)}</p>
 
-          <!-- Wiring guide (expandable) -->
           {#if currentMeta.wiring.length > 0}
             <button
               onclick={() => showWiring = !showWiring}
-              class="mt-2.5 flex items-center gap-1 text-[0.6875rem] font-medium text-accent transition-colors hover:text-accent/80"
+              class="mt-2 flex items-center gap-1 text-[0.6875rem] font-medium text-accent transition-colors hover:text-accent/80"
             >
               <Icon icon={chevronRightIcon}
                 class="h-3 w-3 transition-transform duration-200 {showWiring ? 'rotate-90' : ''}"
@@ -394,16 +385,13 @@
             </button>
 
             {#if showWiring}
-              <div class="animate-slide-down mt-3 -mx-3.5 -mb-3 rounded-b-lg border-t border-border-subtle bg-surface-base/50 px-3.5 pb-3.5 pt-3.5">
-                <!-- Wiring diagram -->
+              <div class="animate-slide-down mt-2.5 -mx-3.5 -mb-2.5 rounded-b-lg border-t border-border-subtle bg-surface-base/50 px-3.5 pb-3 pt-3">
                 <WiringDiagram
                   wiring={currentMeta.wiring}
                   sensorName={currentMeta.name}
                   module={currentMeta.module}
                 />
-
-                <!-- Wiring table (compact reference) -->
-                <div class="mt-3 overflow-hidden rounded-md border border-border-subtle">
+                <div class="mt-2.5 overflow-hidden rounded-md border border-border-subtle">
                   <table class="w-full text-[0.6875rem]">
                     <thead>
                       <tr class="bg-surface-elevated/50">
@@ -430,41 +418,25 @@
         </div>
       {/if}
 
-      <!-- ── Configuration Controls ── -->
+      <!-- ━━ 3b. Wiring test (below sensor info, always visible for non-mock) ━━ -->
       {#if !isMock}
-        <div class="mt-5">
-          <label class="mb-1.5 block text-xs font-medium text-text-secondary" for="gpio-pin">{t("label.gpioPin")}</label>
-          <input
-            id="gpio-pin"
-            type="number"
-            min="0"
-            max="27"
-            bind:value={gpio}
-            class="w-24 rounded-lg border border-border-default bg-surface-elevated px-3 py-1.5 text-sm font-medium tabular-nums text-text-primary outline-none focus:border-accent"
-          />
-          <p class="mt-1 text-[0.6875rem] text-text-muted">{t("help.gpioPin", { n: currentMeta?.default_gpio ?? "-" })}</p>
-        </div>
-
-        <!-- Wiring test panel -->
-        <div class="mt-3 rounded-lg border border-border-default bg-surface-base px-3 py-3">
+        <div class="rounded-lg border border-border-default bg-surface-base px-3.5 py-2.5">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-xs font-semibold text-text-secondary">{t("label.testWiring")}</p>
-              <p class="mt-0.5 text-[0.6875rem] text-text-muted">
-                {t("help.testWiring")}
-              </p>
+              <p class="text-xs font-medium text-text-secondary">{t("label.testWiring")}</p>
+              <p class="mt-0.5 text-[0.625rem] text-text-muted">{t("help.testWiring")}</p>
             </div>
             {#if testMode}
               <button
                 onclick={stopTest}
-                class="rounded-lg bg-status-critical/10 px-3 py-1.5 text-xs font-semibold text-status-critical transition-colors hover:bg-status-critical/15"
+                class="rounded-md bg-status-critical/10 px-2.5 py-1 text-[0.6875rem] font-semibold text-status-critical transition-colors hover:bg-status-critical/15"
               >
                 {t("btn.stopTest")}
               </button>
             {:else}
               <button
                 onclick={startTest}
-                class="rounded-lg bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent transition-colors hover:bg-accent/15"
+                class="rounded-md bg-accent/10 px-2.5 py-1 text-[0.6875rem] font-semibold text-accent transition-colors hover:bg-accent/15"
               >
                 {t("btn.startTest")}
               </button>
@@ -472,35 +444,32 @@
           </div>
 
           {#if testMode}
-            <div class="animate-slide-down mt-3 space-y-2.5">
+            <div class="animate-slide-down mt-2.5 space-y-2">
               {#if testError}
                 <p class="text-xs text-status-critical">{testError}</p>
               {:else}
-                <!-- Live value indicator -->
                 <div class="flex items-center gap-3">
                   <div class="flex items-center gap-2">
                     <span
-                      class="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold
+                      class="flex h-7 w-7 items-center justify-center rounded-md text-xs font-bold
                         {testValue
-                          ? 'bg-status-ok/15 text-status-ok shadow-[0_0_12px_rgba(52,217,172,0.2)]'
+                          ? 'bg-status-ok/15 text-status-ok shadow-[0_0_10px_rgba(52,217,172,0.15)]'
                           : 'bg-surface-elevated text-text-muted'}"
                     >
                       {testValue ? "1" : "0"}
                     </span>
                     <div>
-                      <p class="text-xs font-semibold {testValue ? 'text-status-ok' : 'text-text-muted'}">
+                      <p class="text-[0.6875rem] font-semibold leading-none {testValue ? 'text-status-ok' : 'text-text-muted'}">
                         {testValue ? t("label.high") : t("label.low")}
                       </p>
-                      <p class="text-[0.625rem] text-text-muted">GPIO {gpio}</p>
+                      <p class="mt-0.5 text-[0.625rem] text-text-muted">GPIO {gpio}</p>
                     </div>
                   </div>
-
-                  <!-- Activity bar: last 20 readings -->
                   <div class="ml-auto flex items-end gap-px">
                     {#each testHistory as val, i}
                       <div
                         class="w-1.5 rounded-sm transition-all duration-150
-                          {val ? 'bg-status-ok h-4' : 'bg-surface-elevated h-1.5'}"
+                          {val ? 'bg-status-ok h-3.5' : 'bg-surface-elevated h-1.5'}"
                       ></div>
                     {/each}
                     {#each Array(Math.max(0, 20 - testHistory.length)) as _}
@@ -508,50 +477,93 @@
                     {/each}
                   </div>
                 </div>
-
-                <p class="text-[0.6875rem] text-text-muted">
-                  {t("help.testInstructions")}
-                </p>
+                <p class="text-[0.625rem] text-text-muted">{t("help.testInstructions")}</p>
               {/if}
             </div>
           {/if}
         </div>
       {/if}
 
-      <!-- Hold timeout -->
-      <div class="mt-5">
-        <label class="mb-1.5 block text-xs font-medium text-text-secondary" for="hold-seconds">{t("label.holdTimeout")}</label>
-        <div class="flex items-center gap-2">
-          <input
-            id="hold-seconds"
-            type="number"
-            min="0"
-            max="300"
-            bind:value={holdSeconds}
-            class="w-24 rounded-lg border border-border-default bg-surface-elevated px-3 py-1.5 text-sm font-medium tabular-nums text-text-primary outline-none focus:border-accent"
-          />
-          <span class="text-xs text-text-muted">{t("label.seconds")}</span>
-        </div>
-        <p class="mt-1 text-[0.6875rem] text-text-muted">{t("help.holdTimeout")}</p>
-      </div>
+      <!-- ━━ 4. Configuration group ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+      {#if !isMock}
+        <div class="rounded-lg border border-border-default bg-surface-base">
+          <!-- GPIO Pin -->
+          <div class="px-3.5 py-3">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-medium text-text-secondary" for="gpio-pin">{t("label.gpioPin")}</label>
+              <input
+                id="gpio-pin"
+                type="number"
+                min="0"
+                max="27"
+                bind:value={gpio}
+                class="w-20 rounded-md border border-border-default bg-surface-elevated px-2.5 py-1 text-right text-sm font-medium tabular-nums text-text-primary outline-none focus:border-accent"
+              />
+            </div>
+            <p class="mt-1 text-[0.6875rem] text-text-muted">{t("help.gpioPin", { n: currentMeta?.default_gpio ?? "-" })}</p>
+          </div>
 
-      <!-- ── Calibration Controls ── -->
+          <div class="border-t border-border-subtle" />
+
+          <!-- Hold Timeout -->
+          <div class="px-3.5 py-3">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-medium text-text-secondary" for="hold-seconds">{t("label.holdTimeout")} <span class="font-normal text-text-muted">({t("label.seconds")})</span></label>
+              <input
+                id="hold-seconds"
+                type="number"
+                min="0"
+                max="300"
+                bind:value={holdSeconds}
+                class="w-20 rounded-md border border-border-default bg-surface-elevated px-2.5 py-1 text-right text-sm font-medium tabular-nums text-text-primary outline-none focus:border-accent"
+              />
+            </div>
+            <p class="mt-1 text-[0.6875rem] text-text-muted">{t("help.holdTimeout")}</p>
+          </div>
+
+          <div class="border-t border-border-subtle" />
+
+          <!-- Invert Trigger -->
+          <div class="flex items-center justify-between px-3.5 py-3">
+            <div class="pr-4">
+              <p class="text-xs font-medium text-text-secondary">{t("label.invertTrigger")}</p>
+              <p class="mt-0.5 text-[0.6875rem] text-text-muted">
+                {invertLogic ? t("help.invertActive") : t("help.invertInactive")}
+              </p>
+            </div>
+            <button
+              onclick={() => { invertLogic = !invertLogic; }}
+              class="btn-press relative h-5.5 w-10 shrink-0 rounded-full transition-colors duration-300
+                {invertLogic ? 'bg-accent shadow-[0_0_8px_rgba(77,148,255,0.25)]' : 'bg-surface-elevated'}"
+            >
+              <span
+                class="absolute top-0.5 left-0.5 h-4.5 w-4.5 rounded-full bg-white shadow-md transition-transform duration-300
+                  {invertLogic ? 'translate-x-[1.125rem]' : 'translate-x-0'}"
+                style="transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1);"
+              ></span>
+            </button>
+          </div>
+
+        </div>
+      {/if}
+
+      <!-- ━━ 5. Calibration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
       {#if calibrationParams.length > 0}
-        <div class="mt-5 rounded-lg border border-border-default bg-surface-base px-3.5 py-3">
-          <p class="mb-3 text-xs font-semibold text-text-secondary">{t("label.calibration")}</p>
-          <div class="space-y-4">
+        <div class="rounded-lg border border-border-default bg-surface-base px-3.5 py-3">
+          <p class="mb-2.5 text-xs font-semibold text-text-secondary">{t("label.calibration")}</p>
+          <div class="space-y-3.5">
             {#each calibrationParams as param (param.key)}
               <div>
-                <div class="flex items-center justify-between mb-1.5">
-                  <label class="text-xs font-medium text-text-secondary" for="cal-{param.key}">
+                <div class="flex items-center justify-between mb-1">
+                  <label class="text-[0.6875rem] font-medium text-text-secondary" for="cal-{param.key}">
                     {tOr(`calibration.${param.key}`, param.name)}
                   </label>
-                  <span class="rounded-md bg-surface-elevated px-2 py-0.5 text-[0.6875rem] font-semibold tabular-nums text-text-primary">
+                  <span class="rounded bg-surface-elevated px-1.5 py-0.5 text-[0.625rem] font-semibold tabular-nums text-text-primary">
                     {calibration[param.key] ?? param.default}{param.unit ? ` ${param.unit === "seconds" ? "s" : param.unit}` : ""}
                   </span>
                 </div>
-                <div class="flex items-center gap-2.5">
-                  <span class="text-[0.625rem] text-text-muted w-12 shrink-0 text-right">
+                <div class="flex items-center gap-2">
+                  <span class="text-[0.625rem] text-text-muted w-11 shrink-0 text-right">
                     {tOr(`calibration.${param.key}_min`, param.labels.min)}
                   </span>
                   <input
@@ -566,11 +578,11 @@
                     }}
                     class="range-slider flex-1"
                   />
-                  <span class="text-[0.625rem] text-text-muted w-12 shrink-0">
+                  <span class="text-[0.625rem] text-text-muted w-11 shrink-0">
                     {tOr(`calibration.${param.key}_max`, param.labels.max)}
                   </span>
                 </div>
-                <p class="mt-1 text-[0.6875rem] text-text-muted">
+                <p class="mt-0.5 text-[0.625rem] text-text-muted leading-relaxed">
                   {tOr(`calibration.${param.key}_help`, param.description)}
                 </p>
               </div>
@@ -579,54 +591,22 @@
         </div>
       {/if}
 
-      <!-- Invert trigger logic -->
-      {#if !isMock}
-        <div class="mt-5 flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-text-primary">{t("label.invertTrigger")}</p>
-            <p class="mt-0.5 text-xs text-text-muted">
-              {invertLogic
-                ? t("help.invertActive")
-                : t("help.invertInactive")}
-            </p>
-          </div>
-          <button
-            onclick={() => { invertLogic = !invertLogic; }}
-            class="btn-press relative h-6 w-11 shrink-0 rounded-full transition-colors duration-300
-              {invertLogic ? 'bg-accent shadow-[0_0_8px_rgba(77,148,255,0.25)]' : 'bg-surface-elevated'}"
-          >
-            <span
-              class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-300
-                {invertLogic ? 'translate-x-5' : 'translate-x-0'}"
-              style="transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1);"
-            ></span>
-          </button>
-        </div>
-      {/if}
-
-      <!-- Info note -->
-      <div class="mt-5">
-        <Note variant="info">
-          {t("help.presenceGating")}
-        </Note>
-      </div>
-
-      <!-- Mock sensor testing controls -->
+      <!-- ━━ 6. Mock sensor controls ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
       {#if isMockActive}
-        <div class="mt-4 rounded-lg border border-border-default bg-surface-base px-3 py-3">
+        <div class="rounded-lg border border-border-default bg-surface-base px-3.5 py-3">
           <p class="mb-2 text-xs font-semibold text-text-secondary">{t("label.mockSensorControls")}</p>
           <div class="flex gap-2">
             <button
               onclick={mockTrigger}
               disabled={testingTrigger}
-              class="rounded-lg bg-status-warning/10 px-3 py-1.5 text-xs font-semibold text-status-warning transition-colors hover:bg-status-warning/15 disabled:opacity-50"
+              class="rounded-md bg-status-warning/10 px-3 py-1.5 text-xs font-semibold text-status-warning transition-colors hover:bg-status-warning/15 disabled:opacity-50"
             >
               {testingTrigger ? t("btn.firing") : t("btn.simulateTrigger")}
             </button>
             <button
               onclick={mockRelease}
               disabled={testingRelease}
-              class="rounded-lg bg-status-ok/10 px-3 py-1.5 text-xs font-semibold text-status-ok transition-colors hover:bg-status-ok/15 disabled:opacity-50"
+              class="rounded-md bg-status-ok/10 px-3 py-1.5 text-xs font-semibold text-status-ok transition-colors hover:bg-status-ok/15 disabled:opacity-50"
             >
               {testingRelease ? t("btn.releasing") : t("btn.simulateRelease")}
             </button>
@@ -634,8 +614,16 @@
         </div>
       {/if}
 
-      <!-- Save button + message -->
-      <div class="mt-6 flex items-center gap-3 border-t border-border-subtle pt-4">
+      <!-- ━━ 7. Presence note ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+      <Note variant="info">
+        {t("help.presenceGating")}
+      </Note>
+
+      <!-- ━━ 8. Save ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+      <div class="flex items-center justify-end gap-3 border-t border-border-subtle pt-3">
+        {#if message}
+          <span class="text-xs font-medium {messageIsError ? 'text-status-critical' : 'text-status-ok'}">{message}</span>
+        {/if}
         <button
           onclick={saveConfig}
           disabled={saving}
@@ -643,9 +631,6 @@
         >
           {saving ? t("btn.saving") : t("btn.save")}
         </button>
-        {#if message}
-          <span class="text-xs font-medium {messageIsError ? 'text-status-critical' : 'text-status-ok'}">{message}</span>
-        {/if}
       </div>
     </div>
   {/if}

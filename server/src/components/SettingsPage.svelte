@@ -328,23 +328,19 @@
           </div>
         </div>
         <div class="card px-4 py-3.5 sm:px-5 sm:py-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm font-medium text-text-primary">{t("language.label")}</p>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              {#each ["en", "de", "fr", "es", "it"] as lang}
-                <button
-                  onclick={() => changeLocale(lang as import("../i18n").Locale)}
-                  class="rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors
-                    {locale === lang
-                      ? 'border-accent bg-accent/10 text-accent'
-                      : 'border-border-default bg-surface-base text-text-muted hover:border-border-strong hover:text-text-secondary'}"
-                >
-                  {t(`language.${lang}`)}
-                </button>
-              {/each}
-            </div>
+          <p class="mb-2 text-sm font-medium text-text-primary">{t("language.label")}</p>
+          <div class="grid grid-cols-3 gap-1.5 sm:grid-cols-5">
+            {#each ["en", "de", "fr", "es", "it"] as lang}
+              <button
+                onclick={() => changeLocale(lang as import("../i18n").Locale)}
+                class="rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors text-center
+                  {locale === lang
+                    ? 'border-accent bg-accent/10 text-accent'
+                    : 'border-border-default bg-surface-base text-text-muted hover:border-border-strong hover:text-text-secondary'}"
+              >
+                {t(`language.${lang}`)}
+              </button>
+            {/each}
           </div>
         </div>
       </section>
