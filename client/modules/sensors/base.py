@@ -28,6 +28,7 @@ class BaseSensor(ABC):
     description: str = ""             # one-line description
     use_case: str = ""                # what it's good for
     icon: str = "wrench"              # icon key for the frontend
+    image: str = ""                   # image filename (without extension) in public/sensors/
     wiring: tuple[dict, ...] = ()      # ({"pin": "VCC", "connect": "3V3 [pin 17]"}, ...)
     wiring_note: str = ""             # optional note shown below the wiring table
     calibration_schema: tuple[dict, ...] = ()  # calibration parameters for this sensor type

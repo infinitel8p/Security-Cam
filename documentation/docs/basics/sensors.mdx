@@ -42,6 +42,10 @@ The **Suppressed** state is the key distinction: it tells you the sensor is work
 
 All sensors below use the **digital output (DO)** pin and work with 3.3V logic. GPIO pins are configurable from the dashboard - the defaults listed here are suggestions to avoid conflicts. See the [wiring guides](./wiring) for detailed pin connections and tips for each sensor.
 
+:::tip[Sensor images]
+Place photos of your sensor modules in `documentation/static/img/sensors/` named by module (e.g., `ky-025.png`) and they will appear below. The same convention works on the dashboard — place images in `server/public/sensors/`.
+:::
+
 | Type | Module | Default GPIO | Use Case |
 | --- | --- | --- | --- |
 | **Reed Switch** | KY-025 | GPIO 22 | Door / window open detection |
@@ -53,8 +57,70 @@ All sensors below use the **digital output (DO)** pin and work with 3.3V logic. 
 | **Light Gate** | KY-010 | GPIO 6 | Alarm when pin/bolt is pulled from slot |
 | **Tilt Switch** | KY-017 | GPIO 26 | Camera tamper detection |
 | **Touch Sensor** | KY-036 | GPIO 16 | Touching camera housing or door handle |
-| **Button** | Push button | GPIO 27 | Manual hardware trigger / testing |
+| **Button** | KY-004 | GPIO 27 | Manual hardware trigger / testing |
 | **Mock** | Software only | - | Development and testing without hardware |
+
+import useBaseUrl from '@docusaurus/useBaseUrl';
+import {useState} from 'react';
+
+export const SensorImage = ({module, alt}) => {
+  const src = useBaseUrl(`/img/sensors/${module}.png`);
+  const [open, setOpen] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  if (hidden) return null;
+  return (
+    <>
+      <img
+        src={src}
+        alt={alt}
+        style={{height: '80px', borderRadius: '8px', objectFit: 'cover', cursor: 'pointer'}}
+        onClick={() => setOpen(true)}
+        onError={() => setHidden(true)}
+      />
+      {open && (
+        <div
+          onClick={() => setOpen(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 9999,
+            background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'zoom-out',
+          }}>
+          <img
+            src={src}
+            alt={alt}
+            style={{maxHeight: '80vh', maxWidth: '80vw', borderRadius: '12px', boxShadow: '0 8px 32px rgba(0,0,0,0.4)'}}
+          />
+          <p style={{position: 'absolute', bottom: '12%', color: 'white', fontSize: '1rem', fontWeight: 600}}>
+            {alt} <span style={{opacity: 0.7, fontWeight: 400}}>({module.toUpperCase()})</span>
+          </p>
+        </div>
+      )}
+    </>
+  );
+};
+
+### Sensor modules
+
+<div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '12px', marginTop: '8px'}}>
+  {[
+    {module: 'ky-025', name: 'Reed Switch'},
+    {module: 'ky-021', name: 'Mini Reed'},
+    {module: 'ky-003', name: 'Hall Magnetic'},
+    {module: 'hc-sr501', name: 'PIR Motion'},
+    {module: 'ky-002', name: 'Vibration'},
+    {module: 'ky-031', name: 'Knock / Tap'},
+    {module: 'ky-010', name: 'Light Gate'},
+    {module: 'ky-017', name: 'Tilt Switch'},
+    {module: 'ky-036', name: 'Touch Sensor'},
+    {module: 'ky-004', name: 'Button'},
+  ].map(({module, name}) => (
+    <div key={module} style={{textAlign: 'center'}}>
+      <SensorImage module={module} alt={name} />
+      <p style={{fontSize: '0.8rem', marginTop: '4px', fontWeight: 500}}>{name}<br/><span style={{opacity: 0.6, fontSize: '0.75rem'}}>{module.toUpperCase()}</span></p>
+    </div>
+  ))}
+</div>
 
 ## Configuration
 

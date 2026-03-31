@@ -43,8 +43,13 @@ def create_sensor(sensor_type: str, gpio: int | None = None, **kwargs):
 
 def available_types() -> list[dict]:
     """Return full metadata for all registered sensor types."""
-    return [
-        {
+    result = []
+    for cls in SENSOR_REGISTRY.values():
+        # Image filename: explicit override, or derive from module name
+        image = cls.image
+        if not image and cls.module:
+            image = cls.module.lower().replace(" ", "-")
+        result.append({
             "type": cls.sensor_type,
             "name": cls.name,
             "default_gpio": cls.default_gpio,
@@ -52,9 +57,9 @@ def available_types() -> list[dict]:
             "description": cls.description,
             "use_case": cls.use_case,
             "icon": cls.icon,
+            "image": image,
             "wiring": cls.wiring,
             "wiring_note": cls.wiring_note,
             "calibration": cls.calibration_schema,
-        }
-        for cls in SENSOR_REGISTRY.values()
-    ]
+        })
+    return result

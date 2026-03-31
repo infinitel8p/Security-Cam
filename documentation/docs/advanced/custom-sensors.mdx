@@ -27,6 +27,7 @@ The sensor system is modular. To add a new sensor type:
 | `description` | `str` | No | One-line description shown in sensor details |
 | `use_case` | `str` | No | What the sensor is good for |
 | `icon` | `str` | No | Icon key for the dashboard (`"magnet"`, `"eye"`, `"zap"`, `"rotate"`, `"hand"`, `"gate"`, `"circle"`, `"wrench"`) |
+| `image` | `str` | No | Image filename (without extension) in `server/public/sensors/`. Defaults to lowercase module name (e.g. `"ky-025"`). Place a `.png` file there to show a photo in the dashboard. |
 | `wiring` | `tuple[dict, ...]` | No | Wiring instructions, each dict has `pin` and `connect` keys |
 | `wiring_note` | `str` | No | Extra note shown below the wiring table |
 | `calibration_schema` | `tuple[dict, ...]` | No | Calibration parameters for the dashboard UI (see below) |

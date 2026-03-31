@@ -16,7 +16,7 @@ class ButtonSensor(BaseSensor):
     name = "Button"
     sensor_type = "button"
     default_gpio = 27
-    module = "Momentary push button"
+    module = "KY-004"
     description = "Simple push button - triggers on press, releases on release"
     use_case = "Manual hardware trigger or testing"
     icon = "circle"

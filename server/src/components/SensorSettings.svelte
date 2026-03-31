@@ -30,6 +30,7 @@
     description: string;
     use_case: string;
     icon: string;
+    image: string;
     wiring: { pin: string; connect: string }[];
     wiring_note: string;
     calibration: CalibrationParam[];
@@ -368,10 +369,23 @@
       <!-- ━━ 3. Sensor info + wiring (collapsible) ━━━━━━━━━━━━━━━━━━━━━━━ -->
       {#if currentMeta}
         <div class="rounded-lg border border-border-default bg-surface-base px-3.5 py-2.5">
-          <p class="text-xs font-semibold text-text-primary">{currentMeta.name}
-            <span class="ml-1 font-normal text-text-muted">({currentMeta.module})</span>
-          </p>
-          <p class="mt-0.5 text-[0.6875rem] text-text-muted leading-relaxed">{currentMeta.description} - {currentMeta.use_case.charAt(0).toLowerCase() + currentMeta.use_case.slice(1)}</p>
+          <div class="flex gap-3">
+            {#if currentMeta.image}
+              <img
+                src="/sensors/{currentMeta.image}.png"
+                alt={currentMeta.module}
+                class="hidden h-16 w-16 shrink-0 rounded-md object-cover bg-surface-elevated"
+                onload={(e) => { (e.currentTarget as HTMLImageElement).classList.remove('hidden'); }}
+                onerror={(e) => { (e.currentTarget as HTMLImageElement).classList.add('hidden'); }}
+              />
+            {/if}
+            <div class="min-w-0">
+              <p class="text-xs font-semibold text-text-primary">{currentMeta.name}
+                <span class="ml-1 font-normal text-text-muted">({currentMeta.module})</span>
+              </p>
+              <p class="mt-0.5 text-[0.6875rem] text-text-muted leading-relaxed">{currentMeta.description} - {currentMeta.use_case.charAt(0).toLowerCase() + currentMeta.use_case.slice(1)}</p>
+            </div>
+          </div>
 
           {#if currentMeta.wiring.length > 0}
             <button
