@@ -42,6 +42,7 @@
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "start" });
       activeSection = id;
+      history.replaceState(null, "", `#${id}`);
     }
   }
 
@@ -54,6 +55,7 @@
           if (entry.isIntersecting) {
             const id = entry.target.id.replace("settings-", "");
             activeSection = id;
+            history.replaceState(null, "", `#${id}`);
           }
         }
       },
@@ -139,7 +141,15 @@
     statusInterval = setInterval(fetchDeviceStatuses, 15_000);
 
     // Track which section is visible for nav highlighting
-    requestAnimationFrame(() => setupObserver());
+    requestAnimationFrame(() => {
+      setupObserver();
+
+      // Scroll to section if URL has a hash (e.g. /settings#camera)
+      const hash = window.location.hash.replace("#", "");
+      if (hash && sectionIds.includes(hash)) {
+        scrollToSection(hash);
+      }
+    });
   });
 
   async function addBtDevice(device: Device) {
