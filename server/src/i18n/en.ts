@@ -333,6 +333,12 @@ export default {
     enableSensor: "Enable a trigger sensor",
     enableSensorDesc: "Auto-record when motion or door activity is detected",
     enableSensorDone: "Sensor armed",
+    testRecording: "Try a test recording",
+    testRecordingDesc: "Hit record on the live feed, then check the archive",
+    testRecordingDone: "First recording captured",
+    setupStorage: "Set up storage",
+    setupStorageDesc: "Enable auto-delete so the SD card doesn't fill up",
+    setupStorageDone: "Storage configured",
   },
 
   // Arrived/Left

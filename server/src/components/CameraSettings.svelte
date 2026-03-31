@@ -247,7 +247,7 @@
         bind:value={angle}
         onchange={saveRotation}
         disabled={rotationSaving}
-        class="rounded-xl border border-border-default bg-surface-elevated px-3.5 py-2 text-sm font-medium text-text-primary outline-none transition-all duration-200 focus:border-accent focus:shadow-[var(--shadow-glow)] disabled:opacity-50"
+        class="rounded-xl border border-border-default w-full bg-surface-elevated px-3.5 py-2 text-sm font-medium text-text-primary outline-none transition-all duration-200 focus:border-accent focus:shadow-(--shadow-glow) disabled:opacity-50"
       >
         <option value={0}>{t("rotation.default")}</option>
         <option value={90}>{t("rotation.clockwise")}</option>

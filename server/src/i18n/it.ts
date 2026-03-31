@@ -312,6 +312,12 @@ export default {
     enableSensor: "Attiva un sensore di attivazione",
     enableSensorDesc: "Registra automaticamente quando viene rilevato movimento o attività alla porta",
     enableSensorDone: "Sensore armato",
+    testRecording: "Fai una registrazione di prova",
+    testRecordingDesc: "Premi registra sul video in diretta, poi controlla l'archivio",
+    testRecordingDone: "Prima registrazione effettuata",
+    setupStorage: "Configura l'archiviazione",
+    setupStorageDesc: "Attiva l'eliminazione automatica per evitare che la scheda SD si riempia",
+    setupStorageDone: "Archiviazione configurata",
   },
 
   device: {

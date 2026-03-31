@@ -312,6 +312,12 @@ export default {
     enableSensor: "Auslöser-Sensor aktivieren",
     enableSensorDesc: "Automatisch aufnehmen bei Bewegung oder Türaktivität",
     enableSensorDone: "Sensor scharf",
+    testRecording: "Testaufnahme machen",
+    testRecordingDesc: "Drücke Aufnahme im Live-Bild und prüfe dann das Archiv",
+    testRecordingDone: "Erste Aufnahme erstellt",
+    setupStorage: "Speicher einrichten",
+    setupStorageDesc: "Automatisches Löschen aktivieren, damit die SD-Karte nicht voll wird",
+    setupStorageDone: "Speicher konfiguriert",
   },
 
   device: {

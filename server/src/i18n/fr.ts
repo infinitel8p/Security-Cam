@@ -312,6 +312,12 @@ export default {
     enableSensor: "Activer un capteur de déclenchement",
     enableSensorDesc: "Enregistrer automatiquement lors de la détection de mouvement ou d'activité de porte",
     enableSensorDone: "Capteur armé",
+    testRecording: "Faire un essai d'enregistrement",
+    testRecordingDesc: "Appuyez sur enregistrer sur le flux en direct, puis vérifiez les archives",
+    testRecordingDone: "Premier enregistrement capturé",
+    setupStorage: "Configurer le stockage",
+    setupStorageDesc: "Activez la suppression automatique pour éviter que la carte SD ne se remplisse",
+    setupStorageDone: "Stockage configuré",
   },
 
   device: {
