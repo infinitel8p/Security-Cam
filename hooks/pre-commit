@@ -1,0 +1,56 @@
+#!/bin/bash
+# Auto-bump CalVer version (YYYY.MM.DD.N) on every commit from ./VERSION
+# Syncs to: server/package.json, documentation/package.json, Navbar.astro
+
+ROOT="$(git rev-parse --show-toplevel)"
+VERSION_FILE="$ROOT/VERSION"
+
+# Current date parts (zero-padded: YYYY.MM.DD)
+YEAR=$(date +%Y)
+MONTH=$(date +%m)
+DAY=$(date +%d)
+TODAY_PREFIX="${YEAR}.${MONTH}.${DAY}"
+
+# Read current version
+if [ -f "$VERSION_FILE" ]; then
+    CURRENT=$(cat "$VERSION_FILE" | tr -d '[:space:]')
+else
+    CURRENT=""
+fi
+
+# Extract prefix (YYYY.M.D) and build number
+CURRENT_PREFIX=$(echo "$CURRENT" | sed 's/\.[^.]*$//')
+CURRENT_BUILD=$(echo "$CURRENT" | grep -oE '[0-9]+$')
+
+# Bump: same day → increment build, new day → reset to 1
+if [ "$CURRENT_PREFIX" = "$TODAY_PREFIX" ]; then
+    BUILD=$((CURRENT_BUILD + 1))
+else
+    BUILD=1
+fi
+
+NEW_VERSION="${TODAY_PREFIX}.${BUILD}"
+
+# Write VERSION file
+echo "$NEW_VERSION" > "$VERSION_FILE"
+
+# Sync to server/package.json
+if [ -f "$ROOT/server/package.json" ]; then
+    sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"${NEW_VERSION}\"/" "$ROOT/server/package.json"
+    git add "$ROOT/server/package.json"
+fi
+
+# Sync to documentation/package.json
+if [ -f "$ROOT/documentation/package.json" ]; then
+    sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"${NEW_VERSION}\"/" "$ROOT/documentation/package.json"
+    git add "$ROOT/documentation/package.json"
+fi
+
+# Sync to Navbar.astro
+NAVBAR="$ROOT/server/src/components/Navbar.astro"
+if [ -f "$NAVBAR" ]; then
+    sed -i "s/v\.[^<]*/v.${NEW_VERSION}/" "$NAVBAR"
+    git add "$NAVBAR"
+fi
+
+git add "$VERSION_FILE"
