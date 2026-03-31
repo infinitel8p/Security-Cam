@@ -89,6 +89,7 @@
   }
 
   async function fetchEvents() {
+    loading = true;
     try {
       const res = await fetch(`${getBackendUrl()}/event_history?hours=168`);
       if (!res.ok) throw new Error();

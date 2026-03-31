@@ -33,8 +33,10 @@
 
   let info = $state<SystemInfo | null>(null);
   let error = $state(false);
+  let retrying = $state(false);
 
   async function fetchInfo() {
+    retrying = true;
     try {
       const res = await fetch(`${getBackendUrl()}/system_info`);
       if (!res.ok) throw new Error();
@@ -42,6 +44,8 @@
       error = false;
     } catch {
       error = true;
+    } finally {
+      retrying = false;
     }
   }
 
@@ -98,7 +102,9 @@
 {#if error}
   <div class="card flex flex-col items-center justify-center gap-2 px-4 py-8 text-center">
     <p class="text-[0.8125rem] text-text-muted">{t("error.systemMonitor")}</p>
-    <button onclick={fetchInfo} class="text-[0.75rem] font-medium text-accent hover:text-accent-hover">{t("btn.retry")}</button>
+    <button onclick={fetchInfo} disabled={retrying} class="text-[0.75rem] font-medium text-accent hover:text-accent-hover disabled:opacity-50">
+      {retrying ? t("status.retrying") : t("btn.retry")}
+    </button>
   </div>
 {:else if info}
   <div class="card divide-y divide-border-subtle">

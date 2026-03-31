@@ -1,6 +1,6 @@
 ---
 import "../styles/global.css";
-import Navbar from "../components/Navbar.astro";
+import Navbar from "../components/Navbar.svelte";
 import MobileNav from "../components/MobileNav.svelte";
 import ToastProvider from "../components/ToastProvider.svelte";
 
@@ -36,7 +36,7 @@ const { title = "Security Cam" } = Astro.props;
 		</script>
 	</head>
 	<body class="flex min-h-screen">
-		<Navbar />
+		<Navbar client:load />
 		<MobileNav client:load />
 		<ToastProvider client:load />
 		<main

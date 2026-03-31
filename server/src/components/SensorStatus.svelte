@@ -31,9 +31,11 @@
 
   let data = $state<SensorStatusData | null>(null);
   let error = $state(false);
+  let retrying = $state(false);
   let unsub: (() => void) | null = null;
 
   async function fetchStatus() {
+    retrying = true;
     try {
       const res = await fetch(`${getBackendUrl()}/sensor/status`);
       if (!res.ok) throw new Error();
@@ -41,6 +43,8 @@
       error = false;
     } catch {
       error = true;
+    } finally {
+      retrying = false;
     }
   }
 
@@ -106,7 +110,9 @@
 {#if error}
   <div class="card flex flex-col items-center justify-center gap-2 px-4 py-6 text-center">
     <p class="text-[0.8125rem] text-text-muted">{t("error.sensorStatus")}</p>
-    <button onclick={fetchStatus} class="text-[0.75rem] font-medium text-accent hover:text-accent-hover">{t("btn.retry")}</button>
+    <button onclick={fetchStatus} disabled={retrying} class="text-[0.75rem] font-medium text-accent hover:text-accent-hover disabled:opacity-50">
+      {retrying ? t("status.retrying") : t("btn.retry")}
+    </button>
   </div>
 {:else if data}
   <div class="card">

@@ -48,6 +48,7 @@ export default {
     connectingToCamera: "Conectando a la cámara...",
     reconnecting: "Reconectando...",
     loading: "Cargando...",
+    retrying: "Reintentando...",
   },
 
   btn: {

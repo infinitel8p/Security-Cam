@@ -53,6 +53,7 @@ export default {
     connectingToCamera: "Connecting to camera...",
     reconnecting: "Reconnecting...",
     loading: "Loading...",
+    retrying: "Retrying...",
   },
 
   // Buttons

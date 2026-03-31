@@ -48,6 +48,7 @@ export default {
     connectingToCamera: "Verbinde mit Kamera...",
     reconnecting: "Verbindung wird wiederhergestellt...",
     loading: "Laden...",
+    retrying: "Erneut versuchen...",
   },
 
   btn: {

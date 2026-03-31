@@ -16,9 +16,11 @@
 
   let data = $state<Connections | null>(null);
   let error = $state(false);
+  let retrying = $state(false);
   let unsub: (() => void) | null = null;
 
   async function fetchConnections() {
+    retrying = true;
     try {
       const res = await fetch(`${getBackendUrl()}/connections`);
       if (!res.ok) throw new Error();
@@ -26,6 +28,8 @@
       error = false;
     } catch {
       error = true;
+    } finally {
+      retrying = false;
     }
   }
 
@@ -53,7 +57,9 @@
 {#if error}
   <div class="card flex flex-col items-center justify-center gap-2 px-4 py-6 text-center">
     <p class="text-[0.8125rem] text-text-muted">{t("error.connectionStatus")}</p>
-    <button onclick={fetchConnections} class="text-[0.75rem] font-medium text-accent hover:text-accent-hover">{t("btn.retry")}</button>
+    <button onclick={fetchConnections} disabled={retrying} class="text-[0.75rem] font-medium text-accent hover:text-accent-hover disabled:opacity-50">
+      {retrying ? t("status.retrying") : t("btn.retry")}
+    </button>
   </div>
 {:else if data}
   {@const noDevices = data.bluetooth.total === 0 && data.wifi.total === 0}
