@@ -30,4 +30,4 @@ If you'd like to contribute to this project, please follow the guidelines in the
 
 ## License
 
-This project is licensed under the [MIT License](https://github.com/infinitel8p/Security-Cam/blob/main/LICENSE).
+This project is licensed under the [GNU Affero General Public License v3.0 (AGPL-3.0)](https://github.com/infinitel8p/Security-Cam/blob/main/LICENSE).

@@ -54,4 +54,4 @@ _This section will be populated with common issues and their solutions as they a
 If you'd like to contribute to this project, please follow the guidelines in the [CONTRIBUTING.md](./CONTRIBUTING.md) file.
 
 ## License
-This project is licensed under the [MIT License](./LICENSE). Please see the `LICENSE` file for more details.
+This project is licensed under the [GNU Affero General Public License v3.0 (AGPL-3.0)](./LICENSE). Please see the `LICENSE` file for more details.
