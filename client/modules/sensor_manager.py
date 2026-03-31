@@ -12,6 +12,7 @@ Manual recording (/toggle_recording) is never blocked by the sensor
 system - this module only controls *automatic* sensor-triggered recording.
 """
 
+import atexit
 import logging
 import threading
 import time
@@ -193,6 +194,10 @@ def start():
     """Load sensor config from settings and start monitoring if enabled."""
     global _sensor, _armed
 
+    # Clean up any existing sensor to avoid GPIO busy on restart
+    if _sensor is not None:
+        stop()
+
     settings = settings_helpers.get_settings()
     sensor_cfg = settings.get("Sensor", {})
 
@@ -241,6 +246,9 @@ def stop():
             _sensor_recording = False
             event_logger.log_event("sensor_disarmed", name)
             log.info("Sensor manager stopped")
+
+
+atexit.register(lambda: stop())
 
 
 def restart():
