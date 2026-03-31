@@ -7,6 +7,7 @@ import HealthTracker from "../components/HealthTracker.svelte";
 import EventTracker from "../components/EventTracker.svelte";
 import AccessLog from "../components/AccessLog.svelte";
 import ActivityTimeline from "../components/ActivityTimeline.svelte";
+import EventHeatmap from "../components/EventHeatmap.svelte";
 import SensorStatus from "../components/SensorStatus.svelte";
 import LiveClock from "../components/LiveClock.svelte";
 import SetupChecklist from "../components/SetupChecklist.svelte";
@@ -81,6 +82,7 @@ import videoIcon from "../icons/device-tv-old.svg?raw";
 				<ConnectionStatus client:load />
 				<SensorStatus client:load />
 				<SystemMonitor client:load />
+				<EventHeatmap client:load />
 			</div>
 		</div>
 

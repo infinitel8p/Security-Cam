@@ -442,7 +442,7 @@ def health_history():
 @app.route('/event_history', methods=['GET'])
 def event_history():
     hours = request.args.get('hours', 168, type=int)
-    hours = min(hours, 168)
+    hours = min(hours, 4380)  # ~6 months max
     return jsonify(event_logger.get_events(hours))
 
 

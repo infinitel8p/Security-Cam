@@ -110,6 +110,7 @@ export default {
     wifi: "WiFi",
     accessPoint: "AP",
     eventsLast7Days: "Ereignisse - Letzte 7 Tage",
+    activityHeatmap: "Aktivität - Letzte 5 Wochen",
     healthLast72h: "Zustand - Letzte 72h",
     now: "Jetzt",
     recordings: "Aufnahme | Aufnahmen",
