@@ -8,9 +8,9 @@ last_update:
 
 # Trigger Sensors
 
-The security camera supports modular trigger sensors that automatically start recording when activated. The system is designed so you can swap hardware - a magnetic reed switch, vibration sensor, light gate, or any of the supported modules - without changing any code. Configuration is done entirely through the web dashboard or the REST API.
+The security camera supports modular trigger sensors that automatically start recording when activated. The system is designed so you can swap hardware - a magnetic reed switch, vibration sensor, light gate, or any of the supported modules - without changing any code. Configuration is done entirely through the web dashboard or the [REST API](../advanced/api).
 
-## How It Works
+## How it works
 
 The recording trigger flow is:
 
@@ -24,7 +24,7 @@ The recording trigger flow is:
 Manual recording from the dashboard is always allowed, regardless of sensor state or presence detection. The presence gate only applies to automatic sensor-triggered recording.
 :::
 
-## Sensor States
+## Sensor states
 
 The dashboard shows the current sensor state with a colour-coded indicator:
 
@@ -38,9 +38,9 @@ The dashboard shows the current sensor state with a colour-coded indicator:
 
 The **Suppressed** state is the key distinction: it tells you the sensor is working (it detected something) but the system decided not to record because someone is home. This prevents false alarms when you walk past your own camera.
 
-## Supported Sensors
+## Supported sensors
 
-All sensors below use the **digital output (DO)** pin and work with 3.3V logic. GPIO pins are configurable from the dashboard - the defaults listed here are suggestions to avoid conflicts.
+All sensors below use the **digital output (DO)** pin and work with 3.3V logic. GPIO pins are configurable from the dashboard - the defaults listed here are suggestions to avoid conflicts. See the [wiring guides](./wiring) for detailed pin connections and tips for each sensor.
 
 | Type | Module | Default GPIO | Use Case |
 | --- | --- | --- | --- |
@@ -56,243 +56,22 @@ All sensors below use the **digital output (DO)** pin and work with 3.3V logic. 
 | **Button** | Push button | GPIO 27 | Manual hardware trigger / testing |
 | **Mock** | Software only | - | Development and testing without hardware |
 
----
-
-## Sensor Wiring Guides
-
-All KY-series modules follow the same basic wiring pattern. Connect **VCC** to 3V3, **GND** to ground, and **DO** (digital output) to a GPIO pin. The dashboard shows the wiring table for each sensor when you select it.
-
-:::info
-All GPIO pin numbers below use **BCM numbering** (the GPIO number), not the physical board pin number. The board pin is shown in brackets for reference.
-:::
-
-### Reed Switch (KY-025)
-
-Magnetic reed switch - triggers when the magnet is removed (door opens). This is the default sensor and is already documented in the [hardware setup](../setup/hardware#magnet-reed-switch).
-
-| Sensor Pin | Raspberry Pi |
-| --- | --- |
-| **+ (VCC)** | 3V3 [pin 17] |
-| **GND** | GND [pin 14] |
-| **DO** | GPIO 22 [pin 15] |
-
-:::note
-The KY-025 has a fourth pin marked `AO` (analog output) - this is not used since the Raspberry Pi doesn't have analog inputs.
-:::
-
-### Mini Reed Switch (KY-021)
-
-Compact reed switch - functionally identical to the KY-025 but in a smaller package. Only has 2 pins - no VCC needed because the software enables an internal pull-up resistor on the GPIO pin.
-
-| Sensor Pin | Raspberry Pi |
-| --- | --- |
-| **GND** | GND [pin 14] |
-| **S (Signal)** | GPIO 20 [pin 38] |
-
-### Hall Magnetic Sensor (KY-003)
-
-Digital Hall-effect sensor - detects the presence of a magnetic field using a Hall-effect IC instead of a mechanical reed contact. No moving parts means longer lifespan. Works the same way as a reed switch: attach a magnet to the door, the sensor detects when it moves away.
-
-| Sensor Pin | Raspberry Pi |
-| --- | --- |
-| **+ (VCC)** | 3V3 [pin 17] |
-| **GND** | GND [pin 14] |
-| **DO** | GPIO 13 [pin 33] |
-
-### PIR Motion Sensor
-
-Any standard HC-SR501 (or similar) passive infrared motion sensor. Detects heat and movement - ideal for room or hallway monitoring.
-
-| Sensor Pin | Raspberry Pi |
-| --- | --- |
-| **VCC** | 5V [pin 2] |
-| **GND** | GND [pin 6] |
-| **OUT** | GPIO 17 [pin 11] |
-
-:::caution
-PIR modules need **5V power** (not 3.3V). The output signal is still 3.3V-safe for the GPIO pin.
-:::
-
-:::tip
-Most PIR modules have two potentiometers on the back: one for sensitivity and one for the output hold time. Set the hardware hold time short (1-2 seconds) and use the software hold timeout instead - this gives you more control from the dashboard.
-:::
-
-### Vibration / Shock Sensor (KY-002)
-
-Spring-contact vibration sensor - produces brief digital pulses on impact. Good for detecting door slams, forced entry attempts, or window impacts. Because the output is pulsed (not sustained), the hold timeout is important - it keeps recording running through repeated vibrations.
-
-| Sensor Pin | Raspberry Pi |
-| --- | --- |
-| **+ (VCC)** | 3V3 [pin 17] |
-| **GND** | GND [pin 14] |
-| **DO** | GPIO 5 [pin 29] |
-
-:::tip
-For door/window monitoring, mount the sensor directly on the frame so it picks up vibrations from opening, closing, or impact.
-:::
-
-### Knock / Tap Sensor (KY-031)
-
-Spring-contact knock sensor - similar to the KY-002 vibration sensor but tuned for deliberate taps and knocks rather than sustained vibration. Produces brief pulses.
-
-| Sensor Pin | Raspberry Pi |
-| --- | --- |
-| **+ (VCC)** | 3V3 [pin 17] |
-| **GND** | GND [pin 14] |
-| **DO (S)** | GPIO 19 [pin 35] |
-
-### Light Gate / Photo Interrupter (KY-010)
-
-Small slotted optical sensor with an IR emitter and receiver on opposite sides of a ~5mm gap. Triggers when the infrared beam is blocked. The slot is very narrow, so this sensor requires some mechanical effort to mount - typically you position a pin, bolt, or similar object inside the slot so that removing it breaks the beam and triggers the alarm.
-
-| Sensor Pin | Raspberry Pi |
-| --- | --- |
-| **+ (VCC)** | 3V3 [pin 17] |
-| **GND** | GND [pin 14] |
-| **DO** | GPIO 6 [pin 31] |
-
-:::tip
-For a simple alarm, insert a pin or folded piece of card into the slot. When someone pulls it out, the beam is restored/broken and recording triggers. The challenge is mechanical - making sure the object stays in the slot reliably.
-:::
-
-### Tilt Switch (KY-017)
-
-Mercury tilt switch - triggers when the sensor is tilted beyond its threshold angle. Mount it on the camera itself for tamper detection - if someone moves or repositions the camera, recording starts.
-
-| Sensor Pin | Raspberry Pi |
-| --- | --- |
-| **+ (VCC)** | 3V3 [pin 17] |
-| **GND** | GND [pin 14] |
-| **DO (S)** | GPIO 26 [pin 37] |
-
-:::caution
-The KY-017 contains a small amount of mercury. Handle with care and do not break the glass capsule.
-:::
-
-### Touch Sensor (KY-036)
-
-Capacitive metal touch sensor - triggers when a person touches the metal contact pad. The sensor detects the electrical conductivity of skin.
-
-| Sensor Pin | Raspberry Pi |
-| --- | --- |
-| **+ (VCC)** | 3V3 [pin 17] |
-| **GND** | GND [pin 14] |
-| **DO** | GPIO 16 [pin 36] |
-
-:::tip
-You can extend the touch surface by soldering a wire from the sensor pad to a larger metal surface (e.g. a door handle or metal plate).
-:::
-
-### Push Button
-
-Any momentary push button works. The software enables an internal pull-up resistor, so no external components are needed - just wire the button between a GPIO pin and GND.
-
-| Button Pin | Raspberry Pi |
-| --- | --- |
-| **Pin 1** | GPIO 27 [pin 13] |
-| **Pin 2** | GND [pin 14] |
-
-### Mock Sensor (Software Only)
-
-No hardware needed - the mock sensor lets you test the full recording pipeline without any physical sensor connected.
-
-**Setup:**
-
-1. Go to **Settings > Sensors**
-2. Select **Mock** from the sensor type grid
-3. Click **Save Configuration**
-4. Toggle **Auto-recording** on
-5. The **Mock Sensor Controls** panel appears with **Simulate Trigger** and **Simulate Release** buttons - these fake a sensor event so you can verify that presence gating, recording, and hold timeout all work correctly
-
-You can also trigger and release via the API:
-
-```bash
-# Simulate a trigger (e.g. door opened)
-curl -X POST http://<pi-ip>:5005/sensor/mock/trigger
-
-# Simulate a release (e.g. door closed)
-curl -X POST http://<pi-ip>:5005/sensor/mock/release
-```
-
----
-
 ## Configuration
 
-### Via the Dashboard
+### Via the dashboard
 
 1. Go to **Settings** in the web dashboard
 2. Scroll to the **Trigger Sensors** section
 3. Select your sensor type - each card shows the module name, use case, and an expandable wiring guide
 4. Set the GPIO pin (if applicable)
 5. Set the hold timeout (seconds to keep recording after release)
-6. Click **Save Configuration**
-7. Toggle **Auto-recording** on
+6. Adjust [calibration](./calibration) if the sensor supports it (PIR sensitivity, vibration thresholds, etc.)
+7. Click **Save Configuration**
+8. Toggle **Auto-recording** on
 
-### Via the REST API
+You can also configure sensors via the [REST API](../advanced/api) or by editing `client/settings/settings.json` directly.
 
-```bash
-# Configure and enable a reed switch on GPIO 22
-curl -X POST http://<pi-ip>:5005/sensor/configure \
-  -H 'Content-Type: application/json' \
-  -d '{"type": "reed_switch", "gpio": 22, "enabled": true, "hold_seconds": 10}'
-
-# Switch to vibration sensor on GPIO 5 with pulse threshold calibration
-curl -X POST http://<pi-ip>:5005/sensor/configure \
-  -H 'Content-Type: application/json' \
-  -d '{"type": "vibration", "gpio": 5, "enabled": true, "calibration": {"pulse_count": 3, "pulse_window": 5}}'
-
-# Switch to hall magnetic sensor with inverted trigger logic
-curl -X POST http://<pi-ip>:5005/sensor/configure \
-  -H 'Content-Type: application/json' \
-  -d '{"type": "hall_digital", "gpio": 13, "enabled": true, "invert_logic": true}'
-
-# Disable the sensor
-curl -X POST http://<pi-ip>:5005/sensor/disable
-
-# Check current sensor status
-curl http://<pi-ip>:5005/sensor/status
-
-# List available sensor types (includes calibration schema)
-curl http://<pi-ip>:5005/sensor/types
-
-# Test GPIO wiring - read raw pin state without interfering with the running sensor
-curl -X POST http://<pi-ip>:5005/sensor/test \
-  -H 'Content-Type: application/json' \
-  -d '{"type": "reed_switch", "gpio": 22}'
-```
-
-The `/sensor/configure` endpoint accepts these parameters:
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `type` | string | *(required)* | Sensor type identifier (e.g. `reed_switch`, `pir`, `vibration`) |
-| `gpio` | number | sensor default | BCM GPIO pin number (0-27) |
-| `enabled` | boolean | `true` | Whether the sensor is active |
-| `hold_seconds` | number | `10` | Seconds to keep recording after sensor releases |
-| `invert_logic` | boolean | `false` | Swap trigger/release - e.g. trigger on LOW instead of HIGH |
-| `calibration` | object | `{}` | Sensor-specific calibration parameters |
-
-### Settings File
-
-The sensor configuration is stored in `client/settings/settings.json`:
-
-```json
-{
-  "Sensor": {
-    "type": "reed_switch",
-    "gpio": 22,
-    "enabled": false,
-    "hold_seconds": 10,
-    "calibration": {}
-  }
-}
-```
-
-The `calibration` object holds sensor-specific parameters. For example, a PIR sensor might have `{"sensitivity": 7}`, while a vibration sensor might have `{"pulse_count": 3, "pulse_window": 5}`. Sensors without calibration parameters use an empty object or omit the field entirely.
-
----
-
-## Hold Timeout
+### Hold timeout
 
 The `hold_seconds` setting controls how long recording continues after the sensor releases. This prevents recording gaps from:
 
@@ -306,166 +85,13 @@ Set to `0` to stop recording immediately on release. The default is `10` seconds
 For pulse-based sensors (KY-002 vibration, KY-031 knock), set a longer hold timeout (15-30 seconds) since each event is a brief pulse rather than a sustained state change.
 :::
 
----
+### Invert trigger logic
 
-## Calibration
+The **Invert trigger** toggle swaps what GPIO state means "triggered". Use this when your sensor's wiring results in the opposite logic from what you expect - e.g. if the reed switch reads LOW when the door is closed instead of when it's open.
 
-Some sensors expose calibration parameters that let you fine-tune their behaviour from the dashboard. When you select a sensor type that supports calibration, a **Calibration** panel appears with sliders.
+## Next steps
 
-### PIR Motion - Sensitivity
-
-The PIR sensor has a **Sensitivity** slider (1–10, default 7):
-
-- **High (10)** - triggers on the slightest motion. Good for monitoring quiet rooms.
-- **Low (1)** - requires sustained movement over multiple readings to trigger. Useful if the sensor is near a heat source or in a high-traffic area where you only want to capture deliberate activity.
-
-Internally this controls how many consecutive motion readings are averaged before firing - lower sensitivity means a larger averaging window.
-
-:::tip
-Most HC-SR501 modules also have a physical potentiometer for sensitivity on the back of the board. Use the hardware pot for coarse adjustment and the software slider for fine-tuning.
-:::
-
-### Vibration / Knock - Pulse Threshold
-
-Vibration (KY-002) and Knock (KY-031) sensors produce brief digital pulses on each impact. By default, a single pulse triggers recording. The calibration sliders let you require multiple impacts before triggering:
-
-- **Pulse threshold** - number of impacts required (default: 1 for vibration, 3 for knock). Higher values filter out single accidental bumps.
-- **Counting window** - time window in seconds to count pulses (default: 5s). Only used when threshold is greater than 1.
-
-For example, setting the knock sensor to **threshold 3, window 5s** means "3 knocks within 5 seconds" are needed to start recording - a typical knock-knock-knock pattern. A single accidental bump is ignored.
-
-### Tilt Switch - Settle Time
-
-The mercury tilt sensor (KY-017) is sensitive to vibrations - a door slamming nearby can slosh the mercury and cause a false trigger. The **Settle time** slider (0–50 in tenths of a second, default 0.5s) requires the sensor to stay tilted for the set duration before triggering:
-
-- **Instant (0)** - trigger on any tilt change, no filtering.
-- **5s (50)** - the camera must be held at a new angle for 5 full seconds before recording starts. Good for noisy environments.
-
-If the sensor returns to its original position before the settle time elapses, the trigger is silently discarded.
-
-### Touch Sensor - Touch Duration
-
-The capacitive touch sensor (KY-036) can fire from static discharge or accidental brushes. The **Touch duration** slider (0–30 in tenths of a second, default 0.3s) requires the touch to be held before triggering:
-
-- **Instant (0)** - trigger on any contact, no filtering.
-- **3s (30)** - finger must stay on the pad for 3 seconds. Filters out everything except deliberate, sustained touches.
-
-### Sensors Without Calibration
-
-Reed switches (KY-025, KY-021), hall sensors (KY-003), light gates (KY-010), buttons, and the mock sensor have clean digital signals that don't benefit from calibration. They work reliably with the default settings.
-
----
-
-## Adding a Custom Sensor
-
-The sensor system is modular. To add a new sensor type:
-
-1. Create a new file in `client/modules/sensors/` (e.g. `my_sensor.py`)
-2. Subclass `BaseSensor` from `client/modules/sensors/base.py`
-3. Implement `start(on_trigger, on_release)` and `stop()`
-4. Set the class attributes for the dashboard UI
-5. Register the class in `client/modules/sensors/__init__.py`
-
-### Class Attributes
-
-| Attribute | Type | Required | Description |
-| --- | --- | --- | --- |
-| `name` | `str` | Yes | Human-readable name shown in the dashboard |
-| `sensor_type` | `str` | Yes | Short identifier used in settings and API (e.g. `"my_sensor"`) |
-| `default_gpio` | `int` | Yes | Default BCM GPIO pin number |
-| `module` | `str` | No | Hardware module number (e.g. `"KY-025"`) |
-| `description` | `str` | No | One-line description shown in sensor details |
-| `use_case` | `str` | No | What the sensor is good for |
-| `icon` | `str` | No | Icon key for the dashboard (`"magnet"`, `"eye"`, `"zap"`, `"rotate"`, `"hand"`, `"gate"`, `"circle"`, `"wrench"`) |
-| `wiring` | `tuple[dict, ...]` | No | Wiring instructions, each dict has `pin` and `connect` keys |
-| `wiring_note` | `str` | No | Extra note shown below the wiring table |
-| `calibration_schema` | `tuple[dict, ...]` | No | Calibration parameters for the dashboard UI (see below) |
-
-### Example
-
-```python
-# client/modules/sensors/my_sensor.py
-from .base import BaseSensor
-
-class MySensor(BaseSensor):
-    name = "My Custom Sensor"
-    sensor_type = "my_sensor"
-    default_gpio = 18
-    module = "XY-100"
-    description = "Custom sensor for my specific use case"
-    use_case = "Monitoring a custom trigger condition"
-    icon = "zap"
-    wiring = (
-        {"pin": "VCC", "connect": "3V3 [pin 17]"},
-        {"pin": "GND", "connect": "GND [pin 14]"},
-        {"pin": "DO", "connect": "GPIO 18 [pin 12]"},
-    )
-    wiring_note = "Optional note about wiring specifics."
-
-    def __init__(self, gpio=None, **kwargs):
-        super().__init__(gpio, **kwargs)
-        self._device = None
-
-    def start(self, on_trigger, on_release):
-        # Set up your hardware monitoring here
-        # Call on_trigger() when the sensor fires
-        # Call on_release() when the sensor resets
-        self._on_trigger = on_trigger
-        self._on_release = on_release
-        self._running = True
-
-    def stop(self):
-        # Clean up hardware resources
-        self._running = False
-
-    def read_value(self):
-        # Optional: return raw GPIO state for the wiring test panel
-        return self._read_gpio(pull_up=True)
-```
-
-### Adding Calibration Parameters
-
-To add calibration sliders to the dashboard for your sensor, define `calibration_schema`. Each entry is a dict describing one slider. The values are passed as keyword arguments to your `__init__`:
-
-```python
-class MySensor(BaseSensor):
-    # ... other attributes ...
-
-    calibration_schema = (
-        {
-            "key": "threshold",       # kwarg name passed to __init__
-            "name": "Threshold",      # label shown in dashboard
-            "type": "range",          # always "range" for now
-            "min": 1,
-            "max": 100,
-            "default": 50,
-            "step": 1,
-            "unit": "seconds",        # optional, shown next to the value
-            "description": "How sensitive the sensor is",
-            "labels": {"min": "Low", "max": "High"},
-        },
-    )
-
-    def __init__(self, gpio=None, **kwargs):
-        super().__init__(gpio, **kwargs)
-        self._threshold = kwargs.get("threshold", 50)
-```
-
-The dashboard renders the sliders automatically and persists the values in `settings.json` under `Sensor.calibration`.
-
-### Registering
-
-Add your sensor to the registry in `client/modules/sensors/__init__.py`:
-
-```python
-from .my_sensor import MySensor
-
-SENSOR_REGISTRY: dict[str, type] = {
-    # ... existing sensors ...
-    "my_sensor": MySensor,
-}
-```
-
-The new sensor will automatically appear in the dashboard and API.
-
-Continue to the [getting started guide](./start) to learn how to start the system and use the web interface.
+- [Wiring guides](./wiring) - pin connections for all 11 sensors
+- [Calibration](./calibration) - fine-tune PIR sensitivity, vibration thresholds, and more
+- [REST API](../advanced/api) - configure sensors programmatically
+- [Custom sensors](../advanced/custom-sensors) - build your own sensor module

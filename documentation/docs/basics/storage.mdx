@@ -1,0 +1,53 @@
+---
+sidebar_position: 5
+last_update:
+  date: 2026-03-31
+  author: Ludo
+---
+
+# Storage
+
+Recordings are stored locally on the Pi's SD card by default, but you can change the save location, enable automatic cleanup to prevent the disk from filling up, or point recordings to a network share.
+
+## Save location
+
+Choose where recorded videos are stored via **Settings > Storage**. A directory browser lets you pick any path on the Pi. The default is `./recordings` relative to the client directory.
+
+## Auto-delete
+
+The Pi's SD card will eventually fill up with recordings. The **auto-delete** feature prevents this by automatically removing the oldest recordings when disk usage exceeds a configurable threshold.
+
+1. Go to **Settings > Storage**
+2. Toggle **Auto-delete old recordings** on
+3. Set the threshold (default 85%) - when disk usage exceeds this, the oldest recordings are deleted until usage drops below the limit
+4. Click **Save**
+
+The check runs before each new recording starts and every 5 minutes in the background. A disk usage bar shows your current usage relative to the threshold.
+
+## Network storage
+
+If you have a NAS or network storage, you can use it as the recording destination. Mount the share on the Pi and select the mount point as the save location.
+
+```bash
+# Mount an NFS share
+sudo mount -t nfs 192.168.1.50:/recordings /mnt/nas
+
+# Or an SMB/CIFS share
+sudo mount -t cifs //192.168.1.50/cam /mnt/nas -o guest
+```
+
+Then select `/mnt/nas` as the save location in Settings > Storage.
+
+To persist across reboots, add the mount to `/etc/fstab`:
+
+```bash
+# NFS
+echo '192.168.1.50:/recordings /mnt/nas nfs defaults,noatime 0 0' | sudo tee -a /etc/fstab
+
+# SMB/CIFS
+echo '//192.168.1.50/cam /mnt/nas cifs guest,noatime 0 0' | sudo tee -a /etc/fstab
+```
+
+:::tip
+Network storage also means auto-delete has much more room to work with. You can set a higher threshold or disable it entirely if your NAS has plenty of space.
+:::

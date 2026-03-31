@@ -1,0 +1,119 @@
+---
+sidebar_position: 2
+description: "Build and register custom trigger sensors"
+last_update:
+  date: 2026-03-31
+  author: Ludo
+---
+
+# Custom Sensors
+
+The sensor system is modular. To add a new sensor type:
+
+1. Create a new file in `client/modules/sensors/` (e.g. `my_sensor.py`)
+2. Subclass `BaseSensor` from `client/modules/sensors/base.py`
+3. Implement `start(on_trigger, on_release)` and `stop()`
+4. Set the class attributes for the dashboard UI
+5. Register the class in `client/modules/sensors/__init__.py`
+
+## Class attributes
+
+| Attribute | Type | Required | Description |
+| --- | --- | --- | --- |
+| `name` | `str` | Yes | Human-readable name shown in the dashboard |
+| `sensor_type` | `str` | Yes | Short identifier used in settings and API (e.g. `"my_sensor"`) |
+| `default_gpio` | `int` | Yes | Default BCM GPIO pin number |
+| `module` | `str` | No | Hardware module number (e.g. `"KY-025"`) |
+| `description` | `str` | No | One-line description shown in sensor details |
+| `use_case` | `str` | No | What the sensor is good for |
+| `icon` | `str` | No | Icon key for the dashboard (`"magnet"`, `"eye"`, `"zap"`, `"rotate"`, `"hand"`, `"gate"`, `"circle"`, `"wrench"`) |
+| `wiring` | `tuple[dict, ...]` | No | Wiring instructions, each dict has `pin` and `connect` keys |
+| `wiring_note` | `str` | No | Extra note shown below the wiring table |
+| `calibration_schema` | `tuple[dict, ...]` | No | Calibration parameters for the dashboard UI (see below) |
+
+## Example
+
+```python
+# client/modules/sensors/my_sensor.py
+from .base import BaseSensor
+
+class MySensor(BaseSensor):
+    name = "My Custom Sensor"
+    sensor_type = "my_sensor"
+    default_gpio = 18
+    module = "XY-100"
+    description = "Custom sensor for my specific use case"
+    use_case = "Monitoring a custom trigger condition"
+    icon = "zap"
+    wiring = (
+        {"pin": "VCC", "connect": "3V3 [pin 17]"},
+        {"pin": "GND", "connect": "GND [pin 14]"},
+        {"pin": "DO", "connect": "GPIO 18 [pin 12]"},
+    )
+    wiring_note = "Optional note about wiring specifics."
+
+    def __init__(self, gpio=None, **kwargs):
+        super().__init__(gpio, **kwargs)
+        self._device = None
+
+    def start(self, on_trigger, on_release):
+        # Set up your hardware monitoring here
+        # Call on_trigger() when the sensor fires
+        # Call on_release() when the sensor resets
+        self._on_trigger = on_trigger
+        self._on_release = on_release
+        self._running = True
+
+    def stop(self):
+        # Clean up hardware resources
+        self._running = False
+
+    def read_value(self):
+        # Optional: return raw GPIO state for the wiring test panel
+        return self._read_gpio(pull_up=True)
+```
+
+## Adding calibration parameters
+
+To add calibration sliders to the dashboard for your sensor, define `calibration_schema`. Each entry is a dict describing one slider. The values are passed as keyword arguments to your `__init__`:
+
+```python
+class MySensor(BaseSensor):
+    # ... other attributes ...
+
+    calibration_schema = (
+        {
+            "key": "threshold",       # kwarg name passed to __init__
+            "name": "Threshold",      # label shown in dashboard
+            "type": "range",          # always "range" for now
+            "min": 1,
+            "max": 100,
+            "default": 50,
+            "step": 1,
+            "unit": "seconds",        # optional, shown next to the value
+            "description": "How sensitive the sensor is",
+            "labels": {"min": "Low", "max": "High"},
+        },
+    )
+
+    def __init__(self, gpio=None, **kwargs):
+        super().__init__(gpio, **kwargs)
+        self._threshold = kwargs.get("threshold", 50)
+```
+
+The dashboard renders the sliders automatically and persists the values in `settings.json` under `Sensor.calibration`. See [calibration](../basics/calibration) for how the built-in sensors use this.
+
+## Registering
+
+Add your sensor to the registry in `client/modules/sensors/__init__.py`:
+
+```python
+from .my_sensor import MySensor
+
+SENSOR_REGISTRY: dict[str, type] = {
+    # ... existing sensors ...
+    "my_sensor": MySensor,
+}
+```
+
+The new sensor will automatically appear in the dashboard and API.

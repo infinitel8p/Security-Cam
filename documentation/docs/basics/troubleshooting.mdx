@@ -1,0 +1,54 @@
+---
+sidebar_position: 6
+last_update:
+  date: 2026-03-31
+  author: Ludo
+---
+
+# Troubleshooting
+
+Common issues and how to resolve them. Most problems can be diagnosed by checking service status and logs.
+
+## Dashboard loads but no video feed
+
+- Check MediaMTX is running: `sudo systemctl status mediamtx`
+- Verify the stream directly: open `http://<pi-ip>:8889/cam` in a browser
+- Check camera is detected: `rpicam-vid --list-cameras`
+
+## Cannot reach the dashboard
+
+- Check the service is running: `sudo systemctl status security-cam`
+- Make sure you're using port `3000`
+- Check firewall: `sudo nft list ruleset`
+
+## API errors in the dashboard
+
+- Check Flask is running: `curl http://localhost:5005/system_info`
+- Check logs: `journalctl -u security-cam --no-pager -n 30`
+
+## Service fails on boot
+
+Check the logs:
+
+```bash
+journalctl -u security-cam --no-pager -n 30
+```
+
+Common causes:
+- **No internet** - `git pull` fails. The service continues with the current code, but if this is the first run and deps aren't installed, it will fail. Run `install_requirements.sh` manually once.
+- **Build fails** - check Node.js is installed: `node --version`
+
+## Sensor not triggering
+
+- Verify wiring with the **Test Wiring** panel in Settings > Sensors - activate the sensor and check if the GPIO value changes
+- Check the correct GPIO pin is configured (BCM numbering, not board pin)
+- Try toggling **Invert trigger** - some sensors fire on LOW instead of HIGH
+- Check the sensor is **enabled** (auto-recording toggle is on)
+- If using presence detection, make sure no tracked device is nearby (the trigger may be [suppressed](./sensors#sensor-states))
+
+## Recording starts but no file appears
+
+- Check the save location exists and is writable: `ls -la /path/to/recordings/`
+- Check disk space: `df -h`
+- Check ffmpeg is installed: `ffmpeg -version`
+- Check RTSP stream is accessible: `ffmpeg -i rtsp://localhost:8554/cam -t 5 -c copy /tmp/test.mp4`

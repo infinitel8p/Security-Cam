@@ -1,0 +1,153 @@
+---
+sidebar_position: 3
+description: "Wiring diagrams for all supported trigger sensors"
+last_update:
+  date: 2026-03-31
+  author: Ludo
+---
+
+# Sensor Wiring
+
+All KY-series modules follow the same basic wiring pattern. Connect **VCC** to 3V3, **GND** to ground, and **DO** (digital output) to a GPIO pin. The dashboard shows the wiring table for each sensor when you select it.
+
+:::info
+All GPIO pin numbers below use **BCM numbering** (the GPIO number), not the physical board pin number. The board pin is shown in brackets for reference.
+:::
+
+## Reed Switch (KY-025)
+
+Magnetic reed switch - triggers when the magnet is removed (door opens). This is the default sensor and is already documented in the [hardware setup](../setup/hardware#magnet-reed-switch).
+
+| Sensor Pin | Raspberry Pi |
+| --- | --- |
+| **+ (VCC)** | 3V3 [pin 17] |
+| **GND** | GND [pin 14] |
+| **DO** | GPIO 22 [pin 15] |
+
+:::note
+The KY-025 has a fourth pin marked `AO` (analog output) - this is not used since the Raspberry Pi doesn't have analog inputs.
+:::
+
+## Mini Reed Switch (KY-021)
+
+Compact reed switch - functionally identical to the KY-025 but in a smaller package. Only has 2 pins - no VCC needed because the software enables an internal pull-up resistor on the GPIO pin.
+
+| Sensor Pin | Raspberry Pi |
+| --- | --- |
+| **GND** | GND [pin 14] |
+| **S (Signal)** | GPIO 20 [pin 38] |
+
+## Hall Magnetic Sensor (KY-003)
+
+Digital Hall-effect sensor - detects the presence of a magnetic field using a Hall-effect IC instead of a mechanical reed contact. No moving parts means longer lifespan. Works the same way as a reed switch: attach a magnet to the door, the sensor detects when it moves away.
+
+| Sensor Pin | Raspberry Pi |
+| --- | --- |
+| **+ (VCC)** | 3V3 [pin 17] |
+| **GND** | GND [pin 14] |
+| **DO** | GPIO 13 [pin 33] |
+
+## PIR Motion Sensor (HC-SR501)
+
+Any standard HC-SR501 (or similar) passive infrared motion sensor. Detects heat and movement - ideal for room or hallway monitoring.
+
+| Sensor Pin | Raspberry Pi |
+| --- | --- |
+| **VCC** | 5V [pin 2] |
+| **GND** | GND [pin 6] |
+| **OUT** | GPIO 17 [pin 11] |
+
+:::caution
+PIR modules need **5V power** (not 3.3V). The output signal is still 3.3V-safe for the GPIO pin.
+:::
+
+:::tip
+Most PIR modules have two potentiometers on the back: one for sensitivity and one for the output hold time. Set the hardware hold time short (1-2 seconds) and use the software hold timeout instead - this gives you more control from the dashboard.
+:::
+
+## Vibration / Shock Sensor (KY-002)
+
+Spring-contact vibration sensor - produces brief digital pulses on impact. Good for detecting door slams, forced entry attempts, or window impacts. Because the output is pulsed (not sustained), the hold timeout is important - it keeps recording running through repeated vibrations.
+
+| Sensor Pin | Raspberry Pi |
+| --- | --- |
+| **+ (VCC)** | 3V3 [pin 17] |
+| **GND** | GND [pin 14] |
+| **DO** | GPIO 5 [pin 29] |
+
+:::tip
+For door/window monitoring, mount the sensor directly on the frame so it picks up vibrations from opening, closing, or impact.
+:::
+
+## Knock / Tap Sensor (KY-031)
+
+Spring-contact knock sensor - similar to the KY-002 vibration sensor but tuned for deliberate taps and knocks rather than sustained vibration. Produces brief pulses.
+
+| Sensor Pin | Raspberry Pi |
+| --- | --- |
+| **+ (VCC)** | 3V3 [pin 17] |
+| **GND** | GND [pin 14] |
+| **DO (S)** | GPIO 19 [pin 35] |
+
+## Light Gate / Photo Interrupter (KY-010)
+
+Small slotted optical sensor with an IR emitter and receiver on opposite sides of a ~5mm gap. Triggers when the infrared beam is blocked. The slot is very narrow, so this sensor requires some mechanical effort to mount - typically you position a pin, bolt, or similar object inside the slot so that removing it breaks the beam and triggers the alarm.
+
+| Sensor Pin | Raspberry Pi |
+| --- | --- |
+| **+ (VCC)** | 3V3 [pin 17] |
+| **GND** | GND [pin 14] |
+| **DO** | GPIO 6 [pin 31] |
+
+:::tip
+For a simple alarm, insert a pin or folded piece of card into the slot. When someone pulls it out, the beam is restored/broken and recording triggers. The challenge is mechanical - making sure the object stays in the slot reliably.
+:::
+
+## Tilt Switch (KY-017)
+
+Mercury tilt switch - triggers when the sensor is tilted beyond its threshold angle. Mount it on the camera itself for tamper detection - if someone moves or repositions the camera, recording starts.
+
+| Sensor Pin | Raspberry Pi |
+| --- | --- |
+| **+ (VCC)** | 3V3 [pin 17] |
+| **GND** | GND [pin 14] |
+| **DO (S)** | GPIO 26 [pin 37] |
+
+:::caution
+The KY-017 contains a small amount of mercury. Handle with care and do not break the glass capsule.
+:::
+
+## Touch Sensor (KY-036)
+
+Capacitive metal touch sensor - triggers when a person touches the metal contact pad. The sensor detects the electrical conductivity of skin.
+
+| Sensor Pin | Raspberry Pi |
+| --- | --- |
+| **+ (VCC)** | 3V3 [pin 17] |
+| **GND** | GND [pin 14] |
+| **DO** | GPIO 16 [pin 36] |
+
+:::tip
+You can extend the touch surface by soldering a wire from the sensor pad to a larger metal surface (e.g. a door handle or metal plate).
+:::
+
+## Push Button
+
+Any momentary push button works. The software enables an internal pull-up resistor, so no external components are needed - just wire the button between a GPIO pin and GND.
+
+| Button Pin | Raspberry Pi |
+| --- | --- |
+| **Pin 1** | GPIO 27 [pin 13] |
+| **Pin 2** | GND [pin 14] |
+
+## Mock Sensor (Software Only)
+
+No hardware needed - the mock sensor lets you test the full recording pipeline without any physical sensor connected.
+
+1. Go to **Settings > Sensors**
+2. Select **Mock** from the sensor type grid
+3. Click **Save Configuration**
+4. Toggle **Auto-recording** on
+5. The **Mock Sensor Controls** panel appears with **Simulate Trigger** and **Simulate Release** buttons
+
+You can also trigger and release via the [REST API](../advanced/api#mock-sensor).

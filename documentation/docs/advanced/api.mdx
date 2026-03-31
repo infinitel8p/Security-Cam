@@ -1,0 +1,136 @@
+---
+sidebar_position: 1
+description: "REST API reference for sensor configuration and storage management"
+last_update:
+  date: 2026-03-31
+  author: Ludo
+---
+
+# REST API
+
+The Flask backend runs on port `5005` and exposes REST endpoints for sensor control, storage management, and system info. All endpoints accept and return JSON.
+
+Replace `<pi-ip>` with your Raspberry Pi's IP address in the examples below.
+
+## Sensor endpoints
+
+### Configure sensor
+
+```bash
+curl -X POST http://<pi-ip>:5005/sensor/configure \
+  -H 'Content-Type: application/json' \
+  -d '{"type": "reed_switch", "gpio": 22, "enabled": true, "hold_seconds": 10}'
+```
+
+**Parameters:**
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `type` | string | *(required)* | Sensor type identifier (e.g. `reed_switch`, `pir`, `vibration`) |
+| `gpio` | number | sensor default | BCM GPIO pin number (0-27) |
+| `enabled` | boolean | `true` | Whether the sensor is active |
+| `hold_seconds` | number | `10` | Seconds to keep recording after sensor releases |
+| `invert_logic` | boolean | `false` | Swap trigger/release - e.g. trigger on LOW instead of HIGH |
+| `calibration` | object | `{}` | Sensor-specific [calibration](../basics/calibration) parameters |
+
+**Examples with calibration:**
+
+```bash
+# Vibration sensor with pulse threshold
+curl -X POST http://<pi-ip>:5005/sensor/configure \
+  -H 'Content-Type: application/json' \
+  -d '{"type": "vibration", "gpio": 5, "enabled": true, "calibration": {"pulse_count": 3, "pulse_window": 5}}'
+
+# Hall sensor with inverted logic
+curl -X POST http://<pi-ip>:5005/sensor/configure \
+  -H 'Content-Type: application/json' \
+  -d '{"type": "hall_digital", "gpio": 13, "enabled": true, "invert_logic": true}'
+```
+
+### Enable / disable
+
+```bash
+curl -X POST http://<pi-ip>:5005/sensor/enable
+curl -X POST http://<pi-ip>:5005/sensor/disable
+```
+
+### Get status
+
+```bash
+curl http://<pi-ip>:5005/sensor/status
+```
+
+Returns the current sensor state including `enabled`, `armed`, `triggered`, `suppressed`, `recording_from_sensor`, and the active sensor's config.
+
+### List sensor types
+
+```bash
+curl http://<pi-ip>:5005/sensor/types
+```
+
+Returns metadata for all registered sensor types including wiring info and calibration schemas.
+
+### Test GPIO wiring
+
+Read the raw pin state without interfering with the running sensor:
+
+```bash
+curl -X POST http://<pi-ip>:5005/sensor/test \
+  -H 'Content-Type: application/json' \
+  -d '{"type": "reed_switch", "gpio": 22}'
+```
+
+### Mock sensor
+
+Simulate trigger and release events when the mock sensor is active:
+
+```bash
+curl -X POST http://<pi-ip>:5005/sensor/mock/trigger
+curl -X POST http://<pi-ip>:5005/sensor/mock/release
+```
+
+## Storage endpoints
+
+### Get storage status
+
+```bash
+curl http://<pi-ip>:5005/storage/status
+```
+
+Returns disk usage, threshold, and whether auto-delete is enabled.
+
+### Configure auto-delete
+
+```bash
+curl -X POST http://<pi-ip>:5005/storage/configure \
+  -H 'Content-Type: application/json' \
+  -d '{"enabled": true, "max_percent": 85}'
+```
+
+### Manual cleanup
+
+Force an immediate cleanup regardless of schedule:
+
+```bash
+curl -X POST http://<pi-ip>:5005/storage/cleanup
+```
+
+## Settings file
+
+The sensor and storage configuration is stored in `client/settings/settings.json`:
+
+```json
+{
+  "Sensor": {
+    "type": "reed_switch",
+    "gpio": 22,
+    "enabled": false,
+    "hold_seconds": 10,
+    "calibration": {}
+  },
+  "StorageLimit": {
+    "enabled": false,
+    "max_percent": 85
+  }
+}
+```
