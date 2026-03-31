@@ -49,9 +49,12 @@ def _handle_transition(addr: str, online: bool, name: str, transport: str,
     """
     was_online = state_dict.get(addr)
 
-    # First time seeing this device - just record state, don't log
+    # First time seeing this device after boot
     if was_online is None:
         state_dict[addr] = online
+        if online:
+            log.info("%s device already present at startup: %s (%s)", transport, name, addr)
+            event_logger.log_event("device_arrived", f"{name} ({transport})")
         return
 
     # No change
