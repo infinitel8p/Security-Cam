@@ -530,4 +530,4 @@ if __name__ == "__main__":
     # pin first and the child (which serves HTTP) can never arm the sensor.
     # Disabling the reloader keeps a single process that owns both the
     # GPIO and the HTTP server.
-    app.run(host='0.0.0.0', port=5005, debug=True, use_reloader=False)
+    app.run(host='0.0.0.0', port=5005, debug=False, use_reloader=False)
