@@ -315,7 +315,7 @@
   </div>
 {:else}
   <!-- Toolbar -->
-  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-3">
     <!-- Search -->
     <div class="relative max-w-xs flex-1">
       <Icon icon={searchIcon} class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
@@ -423,7 +423,7 @@
   </div>
 
   <!-- Results summary -->
-  <div class="flex items-center gap-2">
+  <div class="flex items-center gap-2 mb-3">
     <p class="text-[0.8125rem] tabular-nums text-text-muted">
       {filteredVideos.length}
       {filteredVideos.length !== allVideos.length ? `of ${allVideos.length}` : ""}
