@@ -269,45 +269,6 @@
   }
 </script>
 
-<style>
-  .calibration-slider {
-    -webkit-appearance: none;
-    appearance: none;
-    height: 6px;
-    border-radius: 3px;
-    background: var(--color-surface-elevated);
-    outline: none;
-  }
-  .calibration-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: var(--color-accent);
-    cursor: pointer;
-    box-shadow: 0 0 6px rgba(77, 148, 255, 0.3);
-    transition: box-shadow 0.2s;
-  }
-  .calibration-slider::-webkit-slider-thumb:hover {
-    box-shadow: 0 0 10px rgba(77, 148, 255, 0.5);
-  }
-  .calibration-slider::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: var(--color-accent);
-    cursor: pointer;
-    border: none;
-    box-shadow: 0 0 6px rgba(77, 148, 255, 0.3);
-  }
-  .calibration-slider::-moz-range-track {
-    height: 6px;
-    border-radius: 3px;
-    background: var(--color-surface-elevated);
-  }
-</style>
-
 <div class="card overflow-hidden">
   <!-- Header -->
   <div class="flex items-center gap-2.5 border-b border-border-subtle px-4 py-3 sm:px-5 sm:py-3.5">
@@ -603,7 +564,7 @@
                     oninput={(e: Event) => {
                       calibration = { ...calibration, [param.key]: Number((e.target as HTMLInputElement).value) };
                     }}
-                    class="calibration-slider flex-1"
+                    class="range-slider flex-1"
                   />
                   <span class="text-[0.625rem] text-text-muted w-12 shrink-0">
                     {tOr(`calibration.${param.key}_max`, param.labels.max)}

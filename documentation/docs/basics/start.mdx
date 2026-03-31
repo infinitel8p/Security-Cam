@@ -60,7 +60,7 @@ Configure the system without touching config files. The settings page has a side
 
 - **Appearance** - switch between dark, light, and system theme. Choose the dashboard language (English, German, French, Spanish, Italian).
 - **Camera** - adjust stream resolution, framerate, and rotation (display-only or hardware via MediaMTX). Toggle scan line overlay on the live feed.
-- **Storage** - choose where recorded videos are stored on the Pi with a directory browser
+- **Storage** - choose where recorded videos are stored on the Pi with a directory browser. Enable auto-delete to automatically remove the oldest recordings when disk usage exceeds a threshold.
 - **Devices** - add or remove tracked Bluetooth and WiFi devices. Scan for nearby devices or enter MAC addresses manually. Online/offline status is shown per device. Tracked devices are used for presence detection - if any are nearby, sensor triggers are ignored.
 - **Trigger Sensors** - select and configure the active sensor type, set the GPIO pin and hold timeout, adjust calibration (sensitivity, pulse thresholds), test wiring with live GPIO readout, invert trigger logic, and enable/disable auto-recording. See the [trigger sensors guide](./sensors) for supported sensors, wiring, and configuration details.
 
@@ -75,6 +75,34 @@ When a trigger sensor is enabled:
 5. After the hold timeout, recording stops
 
 Manual recording from the dashboard is always allowed, regardless of sensor state or presence detection.
+
+## Storage management
+
+The Pi's SD card will eventually fill up with recordings. The **auto-delete** feature prevents this by automatically removing the oldest recordings when disk usage exceeds a configurable threshold.
+
+1. Go to **Settings > Storage**
+2. Toggle **Auto-delete old recordings** on
+3. Set the threshold (default 85%) - when disk usage exceeds this, the oldest recordings are deleted until usage drops below the limit
+4. Click **Save**
+
+The check runs before each new recording starts and every 5 minutes in the background. A disk usage bar shows your current usage relative to the threshold.
+
+:::tip
+If you have a NAS or network storage, you can use it as the recording destination. Mount the share on the Pi and select the mount point as the save location:
+
+```bash
+# Mount an NFS share
+sudo mount -t nfs 192.168.1.50:/recordings /mnt/nas
+
+# Or an SMB/CIFS share
+sudo mount -t cifs //192.168.1.50/cam /mnt/nas -o guest
+
+# Add to /etc/fstab to persist across reboots
+echo '192.168.1.50:/recordings /mnt/nas nfs defaults,noatime 0 0' | sudo tee -a /etc/fstab
+```
+
+Then select `/mnt/nas` as the save location in Settings > Storage.
+:::
 
 ## Troubleshooting
 

@@ -7,6 +7,10 @@
     "StreamWidth": 1296,
     "StreamHeight": 972,
     "StreamFPS": 30,
+    "StorageLimit": {
+        "enabled": false,
+        "max_percent": 85
+    },
     "Sensor": {
         "type": "reed_switch",
         "gpio": 22,

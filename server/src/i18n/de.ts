@@ -142,6 +142,9 @@ export default {
     wifiDevices: "WiFi-Geräte",
     status: "Status",
     calibration: "Kalibrierung",
+    autoDelete: "Alte Aufnahmen automatisch löschen",
+    storageThreshold: "Maximale Speichernutzung",
+    currentUsage: "Aktuelle Speichernutzung",
   },
 
   input: {
@@ -209,6 +212,7 @@ export default {
     saveFailed: "Einstellung konnte nicht gespeichert werden",
     streamSettingsApplied: "Stream-Einstellungen angewendet",
     streamSettingsFailed: "Stream-Einstellungen konnten nicht gespeichert werden",
+    storageConfigured: "Speicherlimit konfiguriert",
     rotationFailed: "Drehungseinstellungen konnten nicht gespeichert werden",
   },
 
@@ -254,6 +258,8 @@ export default {
     hardwareRotationLimited: "Hardware-Drehung unterstützt nur 0° und 180°. Die {angle}°-Drehung wird stattdessen nur als Anzeige angewendet.",
     streamInterrupt: "Das Ändern der Stream-Einstellungen unterbricht kurzzeitig das Live-Bild während MediaMTX neustartet.",
     scanLines: "Dezenter CRT-ähnlicher Overlay auf dem Live-Kamerabild",
+    autoDelete: "Älteste Aufnahmen automatisch löschen, wenn die Speichernutzung den Grenzwert überschreitet",
+    storageThreshold: "Älteste Aufnahmen werden gelöscht, wenn die Speichernutzung diesen Grenzwert überschreitet. Wird vor jeder Aufnahme und alle 5 Minuten geprüft.",
     presenceGating: "Sensor-gesteuerte Aufnahme wird durch Anwesenheitserkennung gesteuert. Wenn ein überwachtes Bluetooth- oder WiFi-Gerät verbunden ist, wird der Sensorauslöser ignoriert. Manuelle Aufnahme vom Dashboard ist immer möglich.",
     searchingBluetooth: "Suche nach Bluetooth-Geräten in der Nähe...",
     checkingWiFi: "Prüfe verbundene WiFi-Clients...",

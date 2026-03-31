@@ -149,6 +149,9 @@ export default {
     wifiDevices: "WiFi Devices",
     status: "Status",
     calibration: "Calibration",
+    autoDelete: "Auto-delete old recordings",
+    storageThreshold: "Maximum disk usage",
+    currentUsage: "Current disk usage",
   },
 
   // Input placeholders
@@ -221,6 +224,7 @@ export default {
     saveFailed: "Failed to save setting",
     streamSettingsApplied: "Stream settings applied",
     streamSettingsFailed: "Failed to save stream settings",
+    storageConfigured: "Storage limit configured",
     rotationFailed: "Failed to save rotation settings",
   },
 
@@ -270,6 +274,8 @@ export default {
     hardwareRotationLimited: "Hardware rotation only supports 0° and 180°. The {angle}° rotation will be applied as display-only instead.",
     streamInterrupt: "Changing stream settings will briefly interrupt the live feed while MediaMTX restarts.",
     scanLines: "Subtle CRT-style overlay on the live camera feed",
+    autoDelete: "Automatically delete oldest recordings when disk usage exceeds the threshold",
+    storageThreshold: "Oldest recordings are deleted when disk usage exceeds this limit. Checked before each recording and every 5 minutes.",
     presenceGating: "Sensor-triggered recording is gated by presence detection. If any tracked Bluetooth or WiFi device is connected, the sensor trigger is ignored. Manual recording from the dashboard is always allowed regardless of sensor or presence state.",
     searchingBluetooth: "Searching for nearby Bluetooth devices...",
     checkingWiFi: "Checking connected WiFi clients...",

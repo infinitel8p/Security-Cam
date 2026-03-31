@@ -27,6 +27,10 @@
   let streamFPS = $state(30);
   let saveLocation = $state("");
   let scanLinesEnabled = $state(true);
+  let storageLimitEnabled = $state(false);
+  let storageLimitPercent = $state(85);
+  let storageDiskPercent = $state(0);
+  let storageSaving = $state(false);
   let loading = $state(true);
   let error = $state(false);
   let activeSection = $state("appearance");
@@ -122,6 +126,18 @@
       streamFPS = settings.StreamFPS ?? 30;
       saveLocation = settings.VideoSaveLocation ?? "/home/pi/Videos";
       scanLinesEnabled = settings.ScanLines !== false;
+      const sl = settings.StorageLimit ?? {};
+      storageLimitEnabled = sl.enabled ?? false;
+      storageLimitPercent = sl.max_percent ?? 85;
+
+      // Fetch live disk usage
+      try {
+        const storageRes = await fetch(`${getBackendUrl()}/storage/status`);
+        if (storageRes.ok) {
+          const st = await storageRes.json();
+          storageDiskPercent = st.disk_percent ?? 0;
+        }
+      } catch { /* non-critical */ }
     } catch {
       error = true;
     } finally {
@@ -151,6 +167,29 @@
       }
     });
   });
+
+  async function saveStorageLimit() {
+    storageSaving = true;
+    try {
+      const res = await fetch(`${getBackendUrl()}/storage/configure`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          enabled: storageLimitEnabled,
+          max_percent: storageLimitPercent,
+        }),
+      });
+      if (res.ok) {
+        toast.success(t("toast.storageConfigured"));
+      } else {
+        toast.error(t("toast.saveFailed"));
+      }
+    } catch {
+      toast.error(t("error.connectionStatus"));
+    } finally {
+      storageSaving = false;
+    }
+  }
 
   async function addBtDevice(device: Device) {
     const res = await fetch(`${getBackendUrl()}/devices/bt/add`, {
@@ -345,6 +384,82 @@
       <section id="settings-storage" class="scroll-mt-6 space-y-3">
         <h2 class="section-label">{t("section.storage")}</h2>
         <DirectoryPicker current={saveLocation} />
+
+        <!-- Auto-delete -->
+        <div class="card overflow-hidden">
+          <div class="px-4 py-4 sm:px-5 sm:py-5">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-text-primary">{t("label.autoDelete")}</p>
+                <p class="mt-0.5 text-xs text-text-muted">{t("help.autoDelete")}</p>
+              </div>
+              <button
+                onclick={() => { storageLimitEnabled = !storageLimitEnabled; saveStorageLimit(); }}
+                class="btn-press relative h-6 w-11 shrink-0 rounded-full transition-colors duration-300
+                  {storageLimitEnabled ? 'bg-accent shadow-[0_0_8px_rgba(77,148,255,0.25)]' : 'bg-surface-elevated'}"
+              >
+                <span
+                  class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-300
+                    {storageLimitEnabled ? 'translate-x-5' : 'translate-x-0'}"
+                  style="transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1);"
+                ></span>
+              </button>
+            </div>
+
+            {#if storageLimitEnabled}
+              <div class="mt-4 space-y-3 animate-slide-down">
+                <div>
+                  <div class="flex items-center justify-between mb-1.5">
+                    <label class="text-xs font-medium text-text-secondary" for="storage-limit">{t("label.storageThreshold")}</label>
+                    <span class="rounded-md bg-surface-elevated px-2 py-0.5 text-[0.6875rem] font-semibold tabular-nums text-text-primary">{storageLimitPercent}%</span>
+                  </div>
+                  <div class="flex items-center gap-2.5">
+                    <span class="text-[0.625rem] text-text-muted w-8 shrink-0 text-right">10%</span>
+                    <input
+                      id="storage-limit"
+                      type="range"
+                      min="10"
+                      max="95"
+                      step="5"
+                      bind:value={storageLimitPercent}
+                      class="range-slider flex-1"
+                    />
+                    <span class="text-[0.625rem] text-text-muted w-8 shrink-0">95%</span>
+                  </div>
+                  <p class="mt-1 text-[0.6875rem] text-text-muted">{t("help.storageThreshold")}</p>
+                </div>
+
+                <!-- Disk usage bar -->
+                {#if storageDiskPercent > 0}
+                  <div class="rounded-lg border border-border-default bg-surface-base px-3 py-2.5">
+                    <div class="flex items-center justify-between mb-1.5">
+                      <span class="text-[0.6875rem] font-medium text-text-secondary">{t("label.currentUsage")}</span>
+                      <span class="text-[0.6875rem] font-semibold tabular-nums {storageDiskPercent > storageLimitPercent ? 'text-status-critical' : 'text-text-primary'}">{storageDiskPercent}%</span>
+                    </div>
+                    <div class="h-1.5 w-full rounded-full bg-surface-elevated overflow-hidden">
+                      <div
+                        class="h-full rounded-full transition-all duration-500 {storageDiskPercent > storageLimitPercent ? 'bg-status-critical' : storageDiskPercent > storageLimitPercent - 10 ? 'bg-status-warning' : 'bg-accent'}"
+                        style="width: {storageDiskPercent}%"
+                      ></div>
+                    </div>
+                    <!-- Threshold marker -->
+                    <div class="relative h-0">
+                      <div class="absolute -top-1.5 h-1.5 w-px bg-text-muted/50" style="left: {storageLimitPercent}%"></div>
+                    </div>
+                  </div>
+                {/if}
+
+                <button
+                  onclick={saveStorageLimit}
+                  disabled={storageSaving}
+                  class="btn-press rounded-lg bg-accent px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-accent/90 disabled:opacity-50"
+                >
+                  {storageSaving ? t("btn.saving") : t("btn.save")}
+                </button>
+              </div>
+            {/if}
+          </div>
+        </div>
       </section>
 
       <!-- Devices -->

@@ -13,6 +13,7 @@ from modules import health_logger
 from modules import event_logger
 from modules import presence_monitor
 from modules import sensor_manager
+from modules import storage_manager
 from modules.sensors import available_types as sensor_available_types
 
 # --- Logging setup ---
@@ -53,6 +54,7 @@ def log_response(response):
 health_logger.start()
 presence_monitor.start()
 sensor_manager.start()
+storage_manager.start()
 
 def _on_ffmpeg_crash():
     sensor_manager.notify_manual_recording_stopped()
@@ -259,6 +261,40 @@ def remove_wifi_device():
 
     log.info("WiFi device removed: %s", address)
     return jsonify({"message": "Device removed"})
+
+
+# --- Storage management endpoints ---
+
+
+@app.route('/storage/status', methods=['GET'])
+def storage_status():
+    return jsonify(storage_manager.get_status())
+
+
+@app.route('/storage/configure', methods=['POST'])
+def storage_configure():
+    data = request.json or {}
+    enabled = data.get("enabled")
+    max_percent = data.get("max_percent")
+
+    settings = settings_helpers.get_settings()
+    cfg = settings.get("StorageLimit", {"enabled": False, "max_percent": 85})
+
+    if enabled is not None:
+        cfg["enabled"] = bool(enabled)
+    if max_percent is not None:
+        cfg["max_percent"] = max(10, min(95, int(max_percent)))
+
+    settings_helpers.update_settings({"StorageLimit": cfg})
+    log.info("Storage limit configured: %s", cfg)
+    return jsonify({"message": "Storage limit configured", "config": cfg})
+
+
+@app.route('/storage/cleanup', methods=['POST'])
+def storage_cleanup():
+    """Manually trigger a storage cleanup."""
+    result = storage_manager.check_and_cleanup()
+    return jsonify(result)
 
 
 # --- Sensor endpoints ---

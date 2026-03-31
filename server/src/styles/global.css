@@ -362,6 +362,44 @@ body {
   animation: draw-check 0.3s var(--ease-out) 0.1s forwards;
 }
 
+/* ── Range slider ──────────────────────────────────────────────────────── */
+.range-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-surface-elevated);
+  outline: none;
+}
+.range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  cursor: pointer;
+  box-shadow: 0 0 6px rgba(77, 148, 255, 0.3);
+  transition: box-shadow 0.2s;
+}
+.range-slider::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 10px rgba(77, 148, 255, 0.5);
+}
+.range-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 6px rgba(77, 148, 255, 0.3);
+}
+.range-slider::-moz-range-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-surface-elevated);
+}
+
 /* ── Reduced motion ────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .animate-in, .animate-bar, .animate-bar-grow,

@@ -7,6 +7,7 @@ import threading
 import time
 from datetime import datetime, timezone
 from . import settings_helpers
+from . import storage_manager
 
 log = logging.getLogger("stream")
 settings = settings_helpers.get_settings()
@@ -124,6 +125,9 @@ def start_recording(reason: str = "manual", sensor_type: str | None = None) -> N
 
     video_save_location = settings.get('VideoSaveLocation', './recordings')
     os.makedirs(video_save_location, exist_ok=True)
+
+    # Clean up old recordings if disk is full before starting a new one
+    storage_manager.ensure_storage()
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     recorded_filename = os.path.join(video_save_location, f'output_{timestamp}.mp4')

@@ -142,6 +142,9 @@ export default {
     wifiDevices: "Dispositivos WiFi",
     status: "Estado",
     calibration: "Calibración",
+    autoDelete: "Eliminar grabaciones antiguas automáticamente",
+    storageThreshold: "Uso máximo de disco",
+    currentUsage: "Uso actual del disco",
   },
 
   input: {
@@ -209,6 +212,7 @@ export default {
     saveFailed: "Error al guardar el ajuste",
     streamSettingsApplied: "Ajustes del stream aplicados",
     streamSettingsFailed: "Error al guardar los ajustes del stream",
+    storageConfigured: "Límite de almacenamiento configurado",
     rotationFailed: "Error al guardar los ajustes de rotación",
   },
 
@@ -254,6 +258,8 @@ export default {
     hardwareRotationLimited: "La rotación por hardware solo admite 0° y 180°. La rotación de {angle}° se aplicará solo como visualización.",
     streamInterrupt: "Cambiar los ajustes del stream interrumpirá brevemente el feed en vivo mientras MediaMTX se reinicia.",
     scanLines: "Superposición sutil estilo CRT en el feed de la cámara en vivo",
+    autoDelete: "Eliminar automáticamente las grabaciones más antiguas cuando el uso del disco supere el umbral",
+    storageThreshold: "Las grabaciones más antiguas se eliminan cuando el uso del disco supera este límite. Se comprueba antes de cada grabación y cada 5 minutos.",
     presenceGating: "La grabación por sensor está condicionada por la detección de presencia. Si hay un dispositivo Bluetooth o WiFi rastreado conectado, se ignora el activador del sensor. La grabación manual desde el panel siempre está permitida.",
     searchingBluetooth: "Buscando dispositivos Bluetooth cercanos...",
     checkingWiFi: "Comprobando clientes WiFi conectados...",
