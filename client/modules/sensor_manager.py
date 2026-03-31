@@ -106,7 +106,9 @@ def _on_trigger():
             return
 
         log.info("Sensor triggered, no presence detected - starting recording")
-        stream_helpers.start_recording()
+        sensor_name = _sensor.name if _sensor else None
+        sensor_type = _sensor.sensor_type if _sensor else None
+        stream_helpers.start_recording(reason="sensor", sensor_type=sensor_type)
         _sensor_recording = True
         event_logger.log_event("recording_started", "sensor trigger")
 

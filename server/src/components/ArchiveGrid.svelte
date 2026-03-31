@@ -19,12 +19,21 @@
 
   let deleteButtonEl: HTMLButtonElement | null = null;
 
+  interface VideoMeta {
+    reason?: string;
+    sensor_type?: string;
+    started?: string;
+    stopped?: string;
+    duration_seconds?: number;
+  }
+
   interface Video {
     path: string;
     filename: string;
     date: string;
     time: string;
     timestamp: number;
+    meta?: VideoMeta;
   }
 
   type SortMode = "newest" | "oldest" | "name";
@@ -43,7 +52,8 @@
   let showSortMenu = $state(false);
   let showFilterMenu = $state(false);
 
-  function parseFilename(filepath: string): Video {
+  function parseEntry(entry: { path: string; meta?: VideoMeta }): Video {
+    const filepath = entry.path;
     const filename = filepath.split("/").pop() ?? filepath;
     const match = filename.match(/(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/);
     const date = match ? `${match[1]}-${match[2]}-${match[3]}` : "Unknown";
@@ -51,7 +61,23 @@
     const timestamp = match
       ? new Date(`${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}:${match[6]}`).getTime()
       : 0;
-    return { path: filepath, filename, date, time, timestamp };
+    return { path: filepath, filename, date, time, timestamp, meta: entry.meta };
+  }
+
+  function formatDuration(seconds: number): string {
+    if (seconds < 60) return `${Math.round(seconds)}s`;
+    const m = Math.floor(seconds / 60);
+    const s = Math.round(seconds % 60);
+    if (m < 60) return `${m}m ${s}s`;
+    const h = Math.floor(m / 60);
+    return `${h}h ${m % 60}m`;
+  }
+
+  function triggerLabel(meta?: VideoMeta): string | null {
+    if (!meta?.reason) return null;
+    if (meta.reason === "sensor") return meta.sensor_type ?? "Sensor";
+    if (meta.reason === "manual") return "Manual";
+    return meta.reason;
   }
 
   const filteredVideos = $derived.by(() => {
@@ -61,7 +87,8 @@
     if (search.trim()) {
       const q = search.toLowerCase();
       result = result.filter(
-        (v) => v.filename.toLowerCase().includes(q) || v.date.includes(q) || v.time.includes(q),
+        (v) => v.filename.toLowerCase().includes(q) || v.date.includes(q) || v.time.includes(q)
+          || (triggerLabel(v.meta)?.toLowerCase().includes(q) ?? false),
       );
     }
 
@@ -110,8 +137,8 @@
     try {
       const res = await fetch(`${getBackendUrl()}/archive`);
       if (!res.ok) throw new Error();
-      const paths: string[] = await res.json();
-      allVideos = paths.map(parseFilename);
+      const entries: { path: string; meta?: VideoMeta }[] = await res.json();
+      allVideos = entries.map(parseEntry);
     } catch {
       error = true;
     } finally {
@@ -452,19 +479,40 @@
                     controls
                     preload="none"
                   ></video>
-                  <!-- Time badge overlay -->
+                  <!-- Overlay badges -->
                   {#if video.time}
                     <div class="pointer-events-none absolute left-2.5 top-2.5 rounded-md bg-black/60 px-2 py-0.5 text-[0.6875rem] font-medium tabular-nums text-white/90 backdrop-blur-sm">
                       {formatTime(video.time)}
                     </div>
                   {/if}
+                  {#if video.meta?.duration_seconds}
+                    <div class="pointer-events-none absolute right-2.5 bottom-2.5 rounded-md bg-black/60 px-2 py-0.5 text-[0.6875rem] font-medium tabular-nums text-white/90 backdrop-blur-sm">
+                      {formatDuration(video.meta.duration_seconds)}
+                    </div>
+                  {/if}
                 </div>
                 <div class="flex items-center justify-between border-t border-border-subtle px-3.5 py-2.5">
                   <div class="min-w-0">
-                    <p class="text-[0.8125rem] font-medium text-text-primary">{formatDate(video.date)}</p>
-                    {#if video.time}
-                      <p class="text-[0.6875rem] tabular-nums text-text-muted">{formatTime(video.time)}</p>
-                    {/if}
+                    <div class="flex items-center gap-2">
+                      <p class="text-[0.8125rem] font-medium text-text-primary">{formatDate(video.date)}</p>
+                      {#if triggerLabel(video.meta)}
+                        <span class="rounded-full px-1.5 py-0.5 text-[0.5625rem] font-semibold uppercase tracking-wide
+                          {video.meta?.reason === 'sensor'
+                            ? 'bg-status-warning/10 text-status-warning'
+                            : 'bg-accent/10 text-accent'}">
+                          {triggerLabel(video.meta)}
+                        </span>
+                      {/if}
+                    </div>
+                    <div class="flex items-center gap-1.5 text-[0.6875rem] tabular-nums text-text-muted">
+                      {#if video.time}
+                        <span>{formatTime(video.time)}</span>
+                      {/if}
+                      {#if video.meta?.duration_seconds}
+                        <span class="text-border-strong">·</span>
+                        <span>{formatDuration(video.meta.duration_seconds)}</span>
+                      {/if}
+                    </div>
                   </div>
                   <div class="flex shrink-0 gap-0.5 sm:opacity-0 sm:transition-opacity sm:duration-150 sm:group-hover:opacity-100">
                     <button
@@ -520,12 +568,26 @@
 
                 <!-- Info -->
                 <div class="min-w-0 flex-1">
-                  <p class="truncate text-[0.8125rem] font-medium text-text-primary">{video.filename}</p>
+                  <div class="flex items-center gap-2">
+                    <p class="truncate text-[0.8125rem] font-medium text-text-primary">{video.filename}</p>
+                    {#if triggerLabel(video.meta)}
+                      <span class="shrink-0 rounded-full px-1.5 py-0.5 text-[0.5625rem] font-semibold uppercase tracking-wide
+                        {video.meta?.reason === 'sensor'
+                          ? 'bg-status-warning/10 text-status-warning'
+                          : 'bg-accent/10 text-accent'}">
+                        {triggerLabel(video.meta)}
+                      </span>
+                    {/if}
+                  </div>
                   <div class="mt-0.5 flex items-center gap-2 text-[0.75rem] text-text-muted">
                     <span>{formatDate(video.date)}</span>
                     {#if video.time}
                       <span class="text-border-strong">|</span>
                       <span class="tabular-nums">{formatTime(video.time)}</span>
+                    {/if}
+                    {#if video.meta?.duration_seconds}
+                      <span class="text-border-strong">|</span>
+                      <span class="tabular-nums">{formatDuration(video.meta.duration_seconds)}</span>
                     {/if}
                   </div>
                 </div>

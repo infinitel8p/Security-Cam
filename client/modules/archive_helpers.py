@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 from . import settings_helpers
@@ -13,10 +14,22 @@ def get_videos():
     for root, dirs, files in os.walk(video_dir):
         for file in files:
             if file.endswith(".mp4") and not file.endswith(".tmp.mp4"):
-                videos.append(os.path.join(root, file))
+                filepath = os.path.join(root, file)
+                entry = {"path": filepath}
+
+                # Load sidecar metadata if it exists
+                meta_path = os.path.splitext(filepath)[0] + ".meta.json"
+                if os.path.exists(meta_path):
+                    try:
+                        with open(meta_path, "r") as f:
+                            entry["meta"] = json.load(f)
+                    except (json.JSONDecodeError, IOError):
+                        pass
+
+                videos.append(entry)
 
     # Sort newest first by modification time
-    videos.sort(key=lambda f: os.path.getmtime(f), reverse=True)
+    videos.sort(key=lambda v: os.path.getmtime(v["path"]), reverse=True)
     return videos
 
 
@@ -58,6 +71,10 @@ def delete_video(video_path):
 
     try:
         os.remove(target)
+        # Remove sidecar metadata file if it exists
+        meta_path = os.path.splitext(target)[0] + ".meta.json"
+        if os.path.exists(meta_path):
+            os.remove(meta_path)
         log.info("Video deleted: %s", target)
         return {"message": "Video deleted successfully"}, 200
     except Exception as e:
