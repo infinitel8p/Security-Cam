@@ -9,6 +9,7 @@ import AccessLog from "../components/AccessLog.svelte";
 import ActivityTimeline from "../components/ActivityTimeline.svelte";
 import EventHeatmap from "../components/EventHeatmap.svelte";
 import SensorStatus from "../components/SensorStatus.svelte";
+import BackendStatus from "../components/BackendStatus.svelte";
 import LiveClock from "../components/LiveClock.svelte";
 import SetupChecklist from "../components/SetupChecklist.svelte";
 import I18nText from "../components/I18nText.svelte";
@@ -36,19 +37,7 @@ import videoIcon from "../icons/device-tv-old.svg?raw";
 			</div>
 			<div class="flex items-center gap-3">
 				<LiveClock client:load />
-				<div
-					class="flex items-center gap-2 rounded-full border border-status-ok/15 bg-status-ok/6 px-3 py-1.5">
-					<span
-						class="status-live h-1.5 w-1.5 rounded-full bg-status-ok shadow-[0_0_6px_rgba(52,217,172,0.5)]"
-					></span>
-					<span class="text-[0.75rem] font-semibold text-status-ok">
-						<I18nText
-							key="status.online"
-							fallback="Online"
-							client:load
-						/>
-					</span>
-				</div>
+				<BackendStatus client:load />
 			</div>
 		</div>
 

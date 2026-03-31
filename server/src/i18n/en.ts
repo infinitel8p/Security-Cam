@@ -32,6 +32,7 @@ export default {
   // Status labels
   status: {
     online: "Online",
+    offline: "Offline",
     armed: "Armed",
     starting: "Starting...",
     disabled: "Disabled",
