@@ -32,6 +32,7 @@ _hold_timer: threading.Timer | None = None
 _triggered = False
 _armed = False  # True when sensor is running and will auto-record
 _sensor_recording = False  # True only when this module started the recording
+_paused = False  # True during wiring test - callbacks are ignored
 
 # Rate-limit presence checks for pulse-based sensors (vibration, knock).
 # Avoids hammering BT scanning on every rapid pulse.
@@ -84,6 +85,9 @@ def _on_trigger():
     """Called by the active sensor when it fires."""
     global _triggered, _sensor_recording
 
+    if _paused:
+        return
+
     with _lock:
         _triggered = True
         _cancel_hold_timer_locked()
@@ -113,6 +117,9 @@ def _on_trigger():
 def _on_release():
     """Called by the active sensor when it resets."""
     global _triggered
+
+    if _paused:
+        return
 
     with _lock:
         _triggered = False
@@ -172,6 +179,20 @@ def _cancel_hold_timer_locked():
 
 
 # --- Public API ---
+
+
+def pause():
+    """Pause sensor callbacks (for wiring test mode). Sensor stays running."""
+    global _paused
+    _paused = True
+    log.info("Sensor callbacks paused (test mode)")
+
+
+def resume():
+    """Resume sensor callbacks after wiring test."""
+    global _paused
+    _paused = False
+    log.info("Sensor callbacks resumed")
 
 
 def notify_manual_recording_stopped():
@@ -283,6 +304,7 @@ def get_status() -> dict:
     result = {
         "enabled": sensor_cfg.get("enabled", False),
         "armed": _armed,
+        "paused": _paused,
         "triggered": _triggered,
         "recording_from_sensor": _sensor_recording,
         "hold_seconds": sensor_cfg.get("hold_seconds", 10),

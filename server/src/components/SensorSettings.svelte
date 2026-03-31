@@ -63,7 +63,6 @@
   let testMode = $state(false);
   let testValue = $state<boolean | null>(null);
   let testError = $state("");
-  let wasEnabledBeforeTest = false;
   let testInterval: ReturnType<typeof setInterval> | null = null;
   let testHistory = $state<boolean[]>([]);
 
@@ -215,15 +214,10 @@
   }
 
   async function startTest() {
-    // Suppress sensor-triggered recording during test
-    wasEnabledBeforeTest = status?.enabled ?? false;
-    if (wasEnabledBeforeTest) {
-      try {
-        await fetch(`${getBackendUrl()}/sensor/disable`, { method: "POST" });
-        const statusRes = await fetch(`${getBackendUrl()}/sensor/status`);
-        status = await statusRes.json();
-      } catch { /* proceed with test anyway */ }
-    }
+    // Pause sensor callbacks during test (sensor stays running, just ignores triggers)
+    try {
+      await fetch(`${getBackendUrl()}/sensor/pause`, { method: "POST" });
+    } catch { /* proceed with test anyway */ }
     testMode = true;
     testValue = null;
     testError = "";
@@ -240,15 +234,10 @@
     }
     testValue = null;
     testHistory = [];
-    // Re-enable sensor if it was enabled before test
-    if (wasEnabledBeforeTest) {
-      try {
-        await fetch(`${getBackendUrl()}/sensor/enable`, { method: "POST" });
-        const statusRes = await fetch(`${getBackendUrl()}/sensor/status`);
-        status = await statusRes.json();
-      } catch { /* silent */ }
-      wasEnabledBeforeTest = false;
-    }
+    // Resume sensor callbacks
+    try {
+      await fetch(`${getBackendUrl()}/sensor/resume`, { method: "POST" });
+    } catch { /* silent */ }
   }
 
   let isMock = $derived(selectedType === "mock");
@@ -269,9 +258,9 @@
           {status.enabled
             ? status.armed
               ? 'bg-status-ok/10 text-status-ok'
-              : 'bg-status-warning/10 text-status-warning'
+              : 'bg-surface-elevated text-text-muted'
             : 'bg-surface-elevated text-text-muted'}">
-          {status.enabled ? (status.armed ? t("status.armed") : t("status.starting")) : t("status.disabled")}
+          {status.enabled ? (status.armed ? t("status.armed") : t("status.idle")) : t("status.disabled")}
         </span>
       {/if}
     </div>
