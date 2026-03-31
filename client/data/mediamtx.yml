@@ -13,17 +13,17 @@ udpMaxPayloadSize: 1472
 authMethod: internal
 authInternalUsers:
   - user: any
-    pass:
+    pass: ""
     ips: []
     permissions:
       - action: publish
-        path:
+        path: ""
       - action: read
-        path:
+        path: ""
       - action: playback
-        path:
+        path: ""
   - user: any
-    pass:
+    pass: ""
     ips: ['127.0.0.1', '::1']
     permissions:
       - action: api
