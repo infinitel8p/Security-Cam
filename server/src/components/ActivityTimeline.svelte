@@ -2,6 +2,7 @@
   import { onMount, onDestroy } from "svelte";
   import { initLocale, t } from "../i18n";
   import { getBackendUrl } from "../lib/api";
+  import { sseClient } from "../lib/sse";
   import Icon from "./Icon.svelte";
   import activityIcon from "../icons/activity.svg?raw";
   import chevronDownIcon from "../icons/chevron-down.svg?raw";
@@ -34,7 +35,7 @@
   let page = $state(0);
   let loading = $state(true);
   let error = $state(false);
-  let interval: ReturnType<typeof setInterval> | null = null;
+  let unsub: (() => void) | null = null;
 
   const EVENT_META: Record<string, { icon: string; color: string; bgColor: string }> = {
     recording_started:   { icon: playerRecordIcon,   color: "text-status-critical", bgColor: "bg-status-critical/10" },
@@ -107,11 +108,21 @@
   onMount(() => {
     initLocale();
     fetchEvents();
-    interval = setInterval(fetchEvents, 30_000);
+
+    const sse = sseClient();
+    // When a new event is logged, prepend it to the timeline (if not excluded)
+    unsub = sse.on("event_logged", (ev) => {
+      if (!EXCLUDED_TYPES.has(ev.type)) {
+        // Prepend to the raw list and re-collapse
+        const raw = [ev, ...events];
+        events = collapseEvents(raw);
+        page = 0;
+      }
+    });
   });
 
   onDestroy(() => {
-    if (interval) clearInterval(interval);
+    unsub?.();
   });
 
   function getMeta(type: string) {

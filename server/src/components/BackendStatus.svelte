@@ -1,11 +1,12 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import { sseClient } from "../lib/sse";
   import { initLocale, t } from "../i18n";
 
   let online = $state(false);
   let checked = $state(false);
-  let interval: ReturnType<typeof setInterval> | null = null;
+  let unsubState: (() => void) | null = null;
 
   async function check() {
     try {
@@ -22,11 +23,17 @@
   onMount(() => {
     initLocale();
     check();
-    interval = setInterval(check, 10_000);
+
+    const sse = sseClient();
+    // SSE connection itself proves the backend is online
+    unsubState = sse.onStateChange((state) => {
+      online = state.connected;
+      checked = true;
+    });
   });
 
   onDestroy(() => {
-    if (interval) clearInterval(interval);
+    unsubState?.();
   });
 </script>
 

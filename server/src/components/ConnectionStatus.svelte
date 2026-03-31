@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import { sseClient } from "../lib/sse";
   import { initLocale, t } from "../i18n";
   import Icon from "./Icon.svelte";
   import bluetoothIcon from "../icons/bluetooth.svg?raw";
@@ -15,7 +16,7 @@
 
   let data = $state<Connections | null>(null);
   let error = $state(false);
-  let interval: ReturnType<typeof setInterval> | null = null;
+  let unsub: (() => void) | null = null;
 
   async function fetchConnections() {
     try {
@@ -31,11 +32,21 @@
   onMount(() => {
     initLocale();
     fetchConnections();
-    interval = setInterval(fetchConnections, 15_000);
+
+    const sse = sseClient();
+    sse.registerFallback({
+      event: "connections",
+      endpoint: "/connections",
+      interval: 15_000,
+    });
+    unsub = sse.on("connections", (ev) => {
+      data = ev;
+      error = false;
+    });
   });
 
   onDestroy(() => {
-    if (interval) clearInterval(interval);
+    unsub?.();
   });
 </script>
 

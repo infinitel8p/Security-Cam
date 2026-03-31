@@ -1,6 +1,6 @@
 import logging
 import os
-from flask import Flask, jsonify, send_file, request, abort
+from flask import Flask, jsonify, send_file, request, abort, Response
 from flask_cors import CORS
 from urllib.parse import unquote
 from modules import system_helpers
@@ -14,6 +14,7 @@ from modules import event_logger
 from modules import presence_monitor
 from modules import sensor_manager
 from modules import storage_manager
+from modules import sse
 from modules.sensors import available_types as sensor_available_types
 
 # --- Logging setup ---
@@ -49,6 +50,14 @@ def log_response(response):
     if response.status_code >= 400:
         log.warning("%s %s → %s", request.method, request.path, response.status)
     return response
+
+
+@app.route('/events', methods=['GET'])
+def events():
+    """Server-Sent Events endpoint for real-time state updates."""
+    return Response(sse.stream(), mimetype='text/event-stream',
+                    headers={'Cache-Control': 'no-cache',
+                             'X-Accel-Buffering': 'no'})
 
 
 health_logger.start()
@@ -98,6 +107,7 @@ def toggle_recording():
         stream_helpers.stop_recording()
         sensor_manager.notify_manual_recording_stopped()
         event_logger.log_event("recording_stopped")
+        sse.emit("recording_state", {"recording": False})
         log.info("Recording stopped (manual)")
         return jsonify({"message": "Recording stopped"})
     else:
@@ -105,6 +115,7 @@ def toggle_recording():
         # applies to automatic sensor-triggered recording (sensor_manager).
         stream_helpers.start_recording()
         event_logger.log_event("recording_started")
+        sse.emit("recording_state", {"recording": True})
         log.info("Recording started (manual)")
         return jsonify({"message": "Recording started"})
 

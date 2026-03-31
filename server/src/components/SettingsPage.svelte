@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import { sseClient } from "../lib/sse";
   import toast from "svelte-5-french-toast";
   import DeviceList from "./DeviceList.svelte";
   import CameraSettings from "./CameraSettings.svelte";
@@ -37,7 +38,7 @@
 
   // Device online/offline status: { bt: { "AA:BB:...": true }, wifi: { "AA:BB:...": false } }
   let deviceStatuses = $state<{ bt: Record<string, boolean>; wifi: Record<string, boolean> }>({ bt: {}, wifi: {} });
-  let statusInterval: ReturnType<typeof setInterval> | null = null;
+  let unsubPresence: (() => void) | null = null;
 
   const sectionIds = ["appearance", "camera", "storage", "devices", "sensors"];
 
@@ -81,7 +82,7 @@
   }
 
   onDestroy(() => {
-    if (statusInterval) clearInterval(statusInterval);
+    unsubPresence?.();
     if (observer) observer.disconnect();
   });
 
@@ -152,9 +153,23 @@
     theme = saved === "light" || saved === "dark" ? saved : "system";
     await fetchSettings();
 
-    // Poll device statuses every 15 seconds (BT lookup takes ~3s per device)
+    // Fetch initial device statuses, then use SSE for updates
     fetchDeviceStatuses();
-    statusInterval = setInterval(fetchDeviceStatuses, 15_000);
+    const sse = sseClient();
+    sse.registerFallback({
+      event: "presence_change",
+      endpoint: "/devices/status",
+      interval: 15_000,
+      transform: (json) => json,
+    });
+    unsubPresence = sse.on("presence_change", (ev) => {
+      // Update the specific device status in-place
+      const key = ev.transport === "bluetooth" ? "bt" : "wifi";
+      deviceStatuses = {
+        ...deviceStatuses,
+        [key]: { ...deviceStatuses[key], [ev.address.toUpperCase()]: ev.online },
+      };
+    });
 
     // Track which section is visible for nav highlighting
     requestAnimationFrame(() => {

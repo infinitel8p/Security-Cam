@@ -21,6 +21,7 @@ from . import activity_helpers
 from . import event_logger
 from . import settings_helpers
 from . import stream_helpers
+from . import sse
 from .sensors import SENSOR_REGISTRY, create_sensor
 
 log = logging.getLogger("sensor_mgr")
@@ -40,6 +41,17 @@ _suppressed = False  # True when trigger was ignored due to presence
 _last_presence_check_time = 0.0
 _last_presence_result = False
 _PRESENCE_CHECK_INTERVAL = 5.0  # seconds
+
+
+def _emit_state():
+    """Push current sensor state to all SSE clients."""
+    sse.emit("sensor_state", {
+        "enabled": settings_helpers.get_settings().get("Sensor", {}).get("enabled", False),
+        "armed": _armed,
+        "triggered": _triggered,
+        "suppressed": _suppressed,
+        "recording_from_sensor": _sensor_recording,
+    })
 
 
 def _is_someone_home() -> bool:
@@ -95,6 +107,7 @@ def _on_trigger():
 
         if _sensor_recording:
             # Already recording from a prior trigger - just reset the hold timer
+            _emit_state()
             return
 
     # Presence check runs outside the lock (can be slow / blocking)
@@ -102,11 +115,13 @@ def _on_trigger():
         log.info("Sensor triggered but device present - skipping recording")
         with _lock:
             _suppressed = True
+        _emit_state()
         return
 
     with _lock:
         if stream_helpers.is_recording:
             log.info("Sensor triggered but already recording (manual)")
+            _emit_state()
             return
 
         log.info("Sensor triggered, no presence detected - starting recording")
@@ -115,6 +130,9 @@ def _on_trigger():
         stream_helpers.start_recording(reason="sensor", sensor_type=sensor_type)
         _sensor_recording = True
         event_logger.log_event("recording_started", "sensor trigger")
+
+    _emit_state()
+    sse.emit("recording_state", {"recording": True})
 
 
 def _on_release():
@@ -127,6 +145,7 @@ def _on_release():
         event_logger.log_event("sensor_released", _sensor.name if _sensor else None)
 
         if not _sensor_recording:
+            _emit_state()
             return
 
         # Use hold timeout: keep recording for N seconds after release
@@ -140,6 +159,8 @@ def _on_release():
         else:
             _stop_sensor_recording_locked()
 
+    _emit_state()
+
 
 def _stop_sensor_recording_locked():
     """Stop a sensor-initiated recording. Caller must hold _lock."""
@@ -150,6 +171,7 @@ def _stop_sensor_recording_locked():
     _sensor_recording = False
     stream_helpers.stop_recording()
     event_logger.log_event("recording_stopped", "sensor release")
+    sse.emit("recording_state", {"recording": False})
 
 
 def _start_hold_timer_locked(seconds: float):
@@ -167,6 +189,7 @@ def _hold_expired():
         _hold_timer = None
         if not _triggered:
             _stop_sensor_recording_locked()
+            _emit_state()
         else:
             log.info("Hold expired but sensor still triggered - continuing recording")
 
@@ -237,6 +260,8 @@ def start():
         log.error("Failed to start sensor '%s': %s", sensor_type, e)
         _armed = False
 
+    _emit_state()
+
 
 def stop():
     """Stop the active sensor."""
@@ -255,6 +280,8 @@ def stop():
             _sensor_recording = False
             event_logger.log_event("sensor_disarmed", name)
             log.info("Sensor manager stopped")
+
+    _emit_state()
 
 
 atexit.register(lambda: stop())

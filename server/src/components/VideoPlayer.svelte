@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl, getMediaMtxUrl, getHlsUrl } from "../lib/api";
+  import { sseClient } from "../lib/sse";
   import toast from "svelte-5-french-toast";
   import { initLocale, t } from "../i18n";
   import Icon from "./Icon.svelte";
@@ -18,7 +19,7 @@
   let toggling = $state(false);
   let isFullscreen = $state(false);
   let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
-  let recordingPollInterval: ReturnType<typeof setInterval> | undefined;
+  let unsubRecording: (() => void) | undefined;
   let destroyed = false;
   let webrtcFailCount = $state(0);
   let hlsFailCount = $state(0);
@@ -221,13 +222,23 @@
     startStream();
     fetchRotation();
     fetchRecordingStatus();
-    recordingPollInterval = setInterval(fetchRecordingStatus, 5_000);
+
+    const sse = sseClient();
+    sse.registerFallback({
+      event: "recording_state",
+      endpoint: "/recording_status",
+      interval: 5_000,
+      transform: (json) => json,
+    });
+    unsubRecording = sse.on("recording_state", (ev) => {
+      recording = ev.recording ?? false;
+    });
   });
 
   onDestroy(() => {
     destroyed = true;
     clearTimeout(reconnectTimer);
-    clearInterval(recordingPollInterval);
+    unsubRecording?.();
     cleanup();
   });
 </script>

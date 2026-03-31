@@ -5,6 +5,7 @@ import time
 from . import activity_helpers
 from . import event_logger
 from . import settings_helpers
+from . import sse
 
 log = logging.getLogger("presence")
 
@@ -66,6 +67,10 @@ def _handle_transition(addr: str, online: bool, name: str, transport: str,
         label = "arrived" if online else "left"
         log.info("%s device %s: %s (%s)", transport, label, name, addr)
         event_logger.log_event(event_type, f"{name} ({transport})")
+        sse.emit("presence_change", {
+            "address": addr, "name": name,
+            "transport": transport.lower(), "online": online,
+        })
         # Commit the state change only after a successful log
         state_dict[addr] = online
     # else: leave state_dict unchanged so we retry next poll
@@ -94,6 +99,16 @@ def _check_presence():
     current_wifi = set(statuses["wifi"].keys())
     _bt_state = {k: v for k, v in _bt_state.items() if k in current_bt}
     _wifi_state = {k: v for k, v in _wifi_state.items() if k in current_wifi}
+
+    # Push connection summary to SSE clients
+    bt_online = sum(1 for v in statuses["bt"].values() if v)
+    wifi_online = sum(1 for v in statuses["wifi"].values() if v)
+    ap_clients = len(activity_helpers.get_ap_stations()) if activity_helpers.is_in_ap_mode() else 0
+    sse.emit("connections", {
+        "bluetooth": {"online": bt_online, "total": len(statuses["bt"])},
+        "wifi": {"online": wifi_online, "total": len(statuses["wifi"])},
+        "ap_clients": ap_clients,
+    })
 
 
 def _monitor_loop():

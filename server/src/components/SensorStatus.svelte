@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import { sseClient } from "../lib/sse";
   import { initLocale, t } from "../i18n";
   import Icon from "./Icon.svelte";
   import boltIcon from "../icons/bolt.svg?raw";
@@ -30,7 +31,7 @@
 
   let data = $state<SensorStatusData | null>(null);
   let error = $state(false);
-  let interval: ReturnType<typeof setInterval> | null = null;
+  let unsub: (() => void) | null = null;
 
   async function fetchStatus() {
     try {
@@ -46,11 +47,23 @@
   onMount(() => {
     initLocale();
     fetchStatus();
-    interval = setInterval(fetchStatus, 5_000);
+
+    const sse = sseClient();
+    sse.registerFallback({
+      event: "sensor_state",
+      endpoint: "/sensor/status",
+      interval: 5_000,
+    });
+    unsub = sse.on("sensor_state", (ev) => {
+      if (data) {
+        data = { ...data, ...ev };
+        error = false;
+      }
+    });
   });
 
   onDestroy(() => {
-    if (interval) clearInterval(interval);
+    unsub?.();
   });
 
   let statusLabel = $derived(

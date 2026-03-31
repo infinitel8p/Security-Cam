@@ -2,6 +2,7 @@
   import { onMount, onDestroy } from "svelte";
   import { initLocale, t } from "../i18n";
   import { getBackendUrl } from "../lib/api";
+  import { sseClient } from "../lib/sse";
   import Icon from "./Icon.svelte";
   import usersIcon from "../icons/users.svg?raw";
   import chevronDownIcon from "../icons/chevron-down.svg?raw";
@@ -24,7 +25,7 @@
   let page = $state(0);
   let loading = $state(true);
   let error = $state(false);
-  let interval: ReturnType<typeof setInterval> | null = null;
+  let unsub: (() => void) | null = null;
 
   async function fetchEvents() {
     try {
@@ -45,11 +46,23 @@
   onMount(() => {
     initLocale();
     fetchEvents();
-    interval = setInterval(fetchEvents, 30_000);
+
+    const sse = sseClient();
+    sse.registerFallback({
+      event: "event_logged",
+      endpoint: "/event_history?hours=72",
+      interval: 30_000,
+    });
+    // When a new event arrives via SSE, prepend if it's an access event
+    unsub = sse.on("event_logged", (ev) => {
+      if (ev.type === "device_arrived" || ev.type === "device_left") {
+        events = [ev, ...events];
+      }
+    });
   });
 
   onDestroy(() => {
-    if (interval) clearInterval(interval);
+    unsub?.();
   });
 
   function formatDate(iso: string): string {

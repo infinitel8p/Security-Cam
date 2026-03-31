@@ -5,6 +5,8 @@ import tempfile
 import threading
 from datetime import datetime, timezone
 
+from . import sse
+
 log = logging.getLogger("events")
 
 LOG_PATH = os.path.join(
@@ -99,6 +101,9 @@ def log_event(event_type, detail=None):
         if len(entries) > MAX_ENTRIES:
             entries = entries[-MAX_ENTRIES:]
         _save_log(entries)
+
+    # Notify SSE clients of new event (outside lock)
+    sse.emit("event_logged", entry)
 
 
 def get_events(hours=24):

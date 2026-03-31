@@ -8,6 +8,7 @@ import time
 from datetime import datetime, timezone
 from . import settings_helpers
 from . import storage_manager
+from . import sse
 
 log = logging.getLogger("stream")
 settings = settings_helpers.get_settings()
@@ -72,6 +73,9 @@ def _cleanup_dead_recording():
         meta["duration_seconds"] = round(duration, 1)
         meta["crash"] = True
         _write_meta(filename, meta)
+
+    # Notify SSE clients that recording stopped
+    sse.emit("recording_state", {"recording": False})
 
     # Notify listener (sensor_manager) so it can reset _sensor_recording
     if _on_crash_callback:
