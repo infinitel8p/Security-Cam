@@ -89,23 +89,26 @@
     loadDirectories(parent);
   }
 
-  async function selectPath() {
+  function selectPath() {
     saving = true;
-    try {
-      const res = await fetch(`${getBackendUrl()}/settings`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ VideoSaveLocation: browsePath }),
-      });
-      if (!res.ok) throw new Error();
-      current = browsePath;
-      open = false;
-      toast.success(t("toast.saveLocationUpdated"));
-    } catch {
-      toast.error(t("toast.saveLocationFailed"));
-    } finally {
-      saving = false;
-    }
+
+    toast.promise(
+      (async () => {
+        const res = await fetch(`${getBackendUrl()}/settings`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ VideoSaveLocation: browsePath }),
+        });
+        if (!res.ok) throw new Error();
+        current = browsePath;
+        open = false;
+      })(),
+      {
+        loading: t("status.saving"),
+        success: t("toast.saveLocationUpdated"),
+        error: t("toast.saveLocationFailed"),
+      },
+    ).finally(() => { saving = false; });
   }
 </script>
 

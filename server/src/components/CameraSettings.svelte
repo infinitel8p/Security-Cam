@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onDestroy } from "svelte";
+
   import { getBackendUrl } from "../lib/api";
   import toast from "svelte-5-french-toast";
   import { t } from "../i18n";
@@ -28,20 +28,20 @@
   let angle = $state(currentAngle);
   let mode = $state(currentMode);
   let rotationSaving = $state(false);
-  let rotationSaved = $state(false);
   let rotationError = $state("");
-  let rotationTimer: ReturnType<typeof setTimeout> | undefined;
 
   // Stream params state
   let width = $state(streamWidth);
   let height = $state(streamHeight);
   let fps = $state(streamFPS);
   let streamSaving = $state(false);
-  let streamSaved = $state(false);
   let streamError = $state("");
-  let streamTimer: ReturnType<typeof setTimeout> | undefined;
 
-  // Quality presets (Pi Camera v2 sensor modes, tuned for Pi Zero 2 W)
+  // Quality presets covering common Pi camera modules:
+  // OV5647 (v1): 640×480, 1296×972, 1920×1080, 2592×1944
+  // IMX219 (v2): 640×480, 1640×1232, 1920×1080, 3280×2464
+  // IMX477 (HQ):  640×480, 1332×990, 1920×1080, 2028×1520, 4056×3040
+  // IMX708 (v3): 640×480, 1536×864, 2304×1296, 4608×2592
   interface Preset {
     label: string;
     w: number;
@@ -49,6 +49,7 @@
     fps: number;
     note: string;
     recommended?: boolean;
+    warn?: boolean;
   }
 
   interface PresetGroup {
@@ -58,23 +59,47 @@
 
   const presetGroups: PresetGroup[] = [
     {
-      label: "4:3 - Full field of view",
+      label: "Common",
       presets: [
-        { label: "SD 640×480 · 30 fps", w: 640, h: 480, fps: 30, note: "Minimal CPU load, great for monitoring" },
+        { label: "SD 640×360 · 30 fps", w: 640, h: 360, fps: 30, note: "Lightweight 16:9 widescreen" },
         { label: "SD 640×480 · 15 fps", w: 640, h: 480, fps: 15, note: "Lowest resource usage" },
-        { label: "HD 1296×972 · 30 fps", w: 1296, h: 972, fps: 30, note: "Best balance for Pi Zero 2 W", recommended: true },
-        { label: "HD 1296×972 · 15 fps", w: 1296, h: 972, fps: 15, note: "Sharp image, relaxed CPU" },
-        { label: "Full 1640×1232 · 15 fps", w: 1640, h: 1232, fps: 15, note: "Max 4:3 resolution - may strain Pi Zero 2 W" },
+        { label: "SD 640×480 · 30 fps", w: 640, h: 480, fps: 30, note: "Minimal CPU load, works with all cameras" },
+        { label: "HD 1280×720 · 15 fps", w: 1280, h: 720, fps: 15, note: "720p, lower CPU" },
+        { label: "HD 1280×720 · 30 fps", w: 1280, h: 720, fps: 30, note: "720p, smooth playback" },
+        { label: "Full HD 1920×1080 · 15 fps", w: 1920, h: 1080, fps: 15, note: "1080p, lower CPU" },
+        { label: "Full HD 1920×1080 · 30 fps", w: 1920, h: 1080, fps: 30, note: "1080p — native on all modules" },
       ],
     },
     {
-      label: "16:9 - Wide",
+      label: "OV5647 (Camera v1 — 5 MP)",
       presets: [
-        { label: "SD 640×360 · 30 fps", w: 640, h: 360, fps: 30, note: "Lightweight widescreen" },
-        { label: "HD 1280×720 · 30 fps", w: 1280, h: 720, fps: 30, note: "720p, smooth playback" },
-        { label: "HD 1280×720 · 15 fps", w: 1280, h: 720, fps: 15, note: "720p, lower CPU" },
-        { label: "Full HD 1920×1080 · 15 fps", w: 1920, h: 1080, fps: 15, note: "1080p at comfortable framerate" },
-        { label: "Full HD 1920×1080 · 30 fps", w: 1920, h: 1080, fps: 30, note: "Max quality - will strain Pi Zero 2 W" },
+        { label: "1296×972 · 15 fps", w: 1296, h: 972, fps: 15, note: "Sharp 4:3, relaxed CPU" },
+        { label: "★ 1296×972 · 30 fps", w: 1296, h: 972, fps: 30, note: "Best balance for Pi Zero 2 W", recommended: true },
+        { label: "2592×1944 · 15 fps", w: 2592, h: 1944, fps: 15, note: "Max resolution — 5 MP, exceeds H.264 encoder limit on Pi Zero 2 W", warn: true },
+      ],
+    },
+    {
+      label: "IMX219 (Camera v2 — 8 MP)",
+      presets: [
+        { label: "1640×1232 · 15 fps", w: 1640, h: 1232, fps: 15, note: "Full sensor binned, lower CPU" },
+        { label: "★ 1640×1232 · 30 fps", w: 1640, h: 1232, fps: 30, note: "Full sensor binned — best balance", recommended: true },
+        { label: "3280×2464 · 15 fps", w: 3280, h: 2464, fps: 15, note: "Max resolution — 8 MP, exceeds H.264 encoder limit on Pi Zero 2 W", warn: true },
+      ],
+    },
+    {
+      label: "IMX477 (HQ Camera — 12.3 MP)",
+      presets: [
+        { label: "1332×990 · 30 fps", w: 1332, h: 990, fps: 30, note: "2×2 binned, lightweight" },
+        { label: "★ 2028×1520 · 30 fps", w: 2028, h: 1520, fps: 30, note: "Half-resolution — best balance, may exceed encoder limit on Pi Zero 2 W", recommended: true, warn: true },
+        { label: "4056×3040 · 10 fps", w: 4056, h: 3040, fps: 10, note: "Max resolution — 12.3 MP, exceeds H.264 encoder limit on Pi Zero 2 W", warn: true },
+      ],
+    },
+    {
+      label: "IMX708 (Camera v3 — 12 MP)",
+      presets: [
+        { label: "1536×864 · 30 fps", w: 1536, h: 864, fps: 30, note: "Binned 16:9, lightweight" },
+        { label: "★ 2304×1296 · 30 fps", w: 2304, h: 1296, fps: 30, note: "Native 16:9 — best balance, may exceed encoder limit on Pi Zero 2 W", recommended: true, warn: true },
+        { label: "4608×2592 · 14 fps", w: 4608, h: 2592, fps: 14, note: "Max resolution — 12 MP, exceeds H.264 encoder limit on Pi Zero 2 W", warn: true },
       ],
     },
   ];
@@ -106,112 +131,103 @@
   );
   let presetNote = $derived(selectedPreset >= 0 ? allPresets[selectedPreset].note : null);
   let presetRecommended = $derived(selectedPreset >= 0 ? allPresets[selectedPreset].recommended : false);
+  let presetWarn = $derived(selectedPreset >= 0 ? allPresets[selectedPreset].warn : false);
 
   function clearFeedback(which: "rotation" | "stream") {
     if (which === "rotation") {
-      rotationSaved = false;
       rotationError = "";
     } else {
-      streamSaved = false;
       streamError = "";
     }
   }
 
-  async function saveRotation() {
-    rotationSaving = true;
-    clearFeedback("rotation");
+  async function doSaveRotation() {
+    // Always save angle + mode to settings.json
+    await fetch(`${getBackendUrl()}/settings`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ RotationAngle: angle, RotationMode: mode }),
+    });
 
-    try {
-      // Always save angle + mode to settings.json
-      await fetch(`${getBackendUrl()}/settings`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ RotationAngle: angle, RotationMode: mode }),
-      });
-
-      // If stream mode, also apply to MediaMTX (only 0/180 allowed)
-      if (mode === "stream") {
-        const effectiveAngle = (angle === 90 || angle === 270) ? 0 : angle;
-        const res = await fetch(`${getBackendUrl()}/stream_settings`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ rotation_angle: effectiveAngle }),
-        });
-        if (!res.ok) {
-          const data = await res.json();
-          rotationError = data.message || t("toast.rotationFailed");
-          return;
-        }
-      }
-
-      currentAngle = angle;
-      currentMode = mode;
-      rotationSaved = true;
-      toast.success(t("toast.rotationSaved"));
-      clearTimeout(rotationTimer);
-      rotationTimer = setTimeout(() => (rotationSaved = false), 2000);
-    } catch {
-      rotationError = t("toast.rotationFailed");
-      toast.error(t("toast.rotationFailed"));
-      angle = currentAngle;
-      mode = currentMode;
-    } finally {
-      rotationSaving = false;
-    }
-  }
-
-  async function saveStreamParams() {
-    streamSaving = true;
-    clearFeedback("stream");
-
-    try {
-      // Save to settings.json
-      await fetch(`${getBackendUrl()}/settings`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          StreamWidth: width,
-          StreamHeight: height,
-          StreamFPS: fps,
-        }),
-      });
-
-      // Apply to MediaMTX
+    // If stream mode, also apply to MediaMTX (only 0/180 allowed)
+    if (mode === "stream") {
+      const effectiveAngle = (angle === 90 || angle === 270) ? 0 : angle;
       const res = await fetch(`${getBackendUrl()}/stream_settings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ width, height, fps }),
+        body: JSON.stringify({ rotation_angle: effectiveAngle }),
       });
-
       if (!res.ok) {
         const data = await res.json();
-        streamError = data.message || t("toast.streamSettingsFailed");
-        toast.error(streamError);
-        return;
+        throw new Error(data.message || t("toast.rotationFailed"));
       }
-
-      streamWidth = width;
-      streamHeight = height;
-      streamFPS = fps;
-      streamSaved = true;
-      toast.success(t("toast.streamSettingsApplied"));
-      clearTimeout(streamTimer);
-      streamTimer = setTimeout(() => (streamSaved = false), 2000);
-    } catch {
-      streamError = t("toast.streamSettingsFailed");
-      toast.error(t("toast.streamSettingsFailed"));
-      width = streamWidth;
-      height = streamHeight;
-      fps = streamFPS;
-    } finally {
-      streamSaving = false;
     }
+
+    currentAngle = angle;
+    currentMode = mode;
   }
 
-  onDestroy(() => {
-    clearTimeout(rotationTimer);
-    clearTimeout(streamTimer);
-  });
+  function saveRotation() {
+    clearFeedback("rotation");
+    rotationSaving = true;
+
+    toast.promise(doSaveRotation(), {
+      loading: t("status.saving"),
+      success: t("toast.rotationSaved"),
+      error: (err) => {
+        rotationError = err.message || t("toast.rotationFailed");
+        angle = currentAngle;
+        mode = currentMode;
+        return rotationError;
+      },
+    }).finally(() => { rotationSaving = false; });
+  }
+
+  async function saveStreamParams() {
+    clearFeedback("stream");
+    streamSaving = true;
+
+    toast.promise(doSaveStreamParams(), {
+      loading: t("status.saving"),
+      success: t("toast.streamSettingsApplied"),
+      error: (err: Error) => {
+        streamError = err.message || t("toast.streamSettingsFailed");
+        width = streamWidth;
+        height = streamHeight;
+        fps = streamFPS;
+        return streamError;
+      },
+    }).finally(() => { streamSaving = false; });
+  }
+
+  async function doSaveStreamParams() {
+    // Save to settings.json
+    await fetch(`${getBackendUrl()}/settings`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        StreamWidth: width,
+        StreamHeight: height,
+        StreamFPS: fps,
+      }),
+    });
+
+    // Apply to MediaMTX
+    const res = await fetch(`${getBackendUrl()}/stream_settings`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ width, height, fps }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.message || t("toast.streamSettingsFailed"));
+    }
+
+    streamWidth = width;
+    streamHeight = height;
+    streamFPS = fps;
+  }
 </script>
 
 <!-- Rotation -->
@@ -242,60 +258,49 @@
 
   <div class="mt-3 space-y-3">
     <!-- Angle selector -->
-    <div class="flex items-center gap-3">
-      <select
-        bind:value={angle}
-        onchange={saveRotation}
-        disabled={rotationSaving}
-        class="rounded-xl border border-border-default w-full bg-surface-elevated px-3.5 py-2 text-sm font-medium text-text-primary outline-none transition-all duration-200 focus:border-accent focus:shadow-(--shadow-glow) disabled:opacity-50"
-      >
-        <option value={0}>{t("rotation.default")}</option>
-        <option value={90}>{t("rotation.clockwise")}</option>
-        <option value={180}>{t("rotation.flipped")}</option>
-        <option value={270}>{t("rotation.counterClockwise")}</option>
-      </select>
-
-      {#if rotationSaving}
-        <span class="text-xs font-medium text-text-muted">{t("status.saving")}</span>
-      {/if}
-      {#if rotationSaved}
-        <span class="flex items-center gap-1 text-xs font-medium text-status-ok animate-fade-in">
-          <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-            <polyline class="animate-check" points="20 6 9 17 4 12" />
-          </svg>
-          {t("status.saved")}
-        </span>
-      {/if}
-      {#if rotationError}
-        <span class="text-xs font-medium text-status-critical">{rotationError}</span>
-      {/if}
-    </div>
+    <select
+      bind:value={angle}
+      onchange={saveRotation}
+      disabled={rotationSaving}
+      class="rounded-xl border border-border-default w-full bg-surface-elevated px-3.5 py-2 text-sm font-medium text-text-primary outline-none transition-all duration-200 focus:border-accent focus:shadow-(--shadow-glow) disabled:opacity-50"
+    >
+      <option value={0}>{t("rotation.default")}</option>
+      <option value={90}>{t("rotation.clockwise")}</option>
+      <option value={180}>{t("rotation.flipped")}</option>
+      <option value={270}>{t("rotation.counterClockwise")}</option>
+    </select>
 
     <!-- Mode toggle -->
-    <div class="flex gap-2">
-      <button
-        onclick={() => { mode = "display"; saveRotation(); }}
-        disabled={rotationSaving}
-        class="rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors
-          {mode === 'display'
-            ? 'border-accent bg-accent/10 text-accent'
-            : 'border-border-default bg-surface-base text-text-muted hover:border-border-strong hover:text-text-secondary'}
-          disabled:opacity-50"
-      >
-        {t("btn.displayOnly")}
-      </button>
-      <button
-        onclick={() => { mode = "stream"; saveRotation(); }}
-        disabled={rotationSaving}
-        class="rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors
-          {mode === 'stream'
-            ? 'border-accent bg-accent/10 text-accent'
-            : 'border-border-default bg-surface-base text-text-muted hover:border-border-strong hover:text-text-secondary'}
-          disabled:opacity-50"
-      >
-        {t("btn.applyToStream")}
-      </button>
+    <div class="flex items-center gap-2">
+      <div class="flex gap-2">
+        <button
+          onclick={() => { mode = "display"; saveRotation(); }}
+          disabled={rotationSaving}
+          class="rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors
+            {mode === 'display'
+              ? 'border-accent bg-accent/10 text-accent'
+              : 'border-border-default bg-surface-base text-text-muted hover:border-border-strong hover:text-text-secondary'}
+            disabled:opacity-50"
+        >
+          {t("btn.displayOnly")}
+        </button>
+        <button
+          onclick={() => { mode = "stream"; saveRotation(); }}
+          disabled={rotationSaving}
+          class="rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors
+            {mode === 'stream'
+              ? 'border-accent bg-accent/10 text-accent'
+              : 'border-border-default bg-surface-base text-text-muted hover:border-border-strong hover:text-text-secondary'}
+            disabled:opacity-50"
+        >
+          {t("btn.applyToStream")}
+        </button>
+      </div>
     </div>
+
+    {#if rotationError}
+      <p class="mt-2 rounded-lg border border-status-critical/20 bg-status-critical/5 px-3 py-2 text-xs font-medium text-status-critical">{rotationError}</p>
+    {/if}
   </div>
 </div>
 
@@ -332,12 +337,21 @@
     </div>
 
     {#if presetNote}
-      <p class="text-xs leading-relaxed text-text-muted">
-        {presetNote}
-        {#if presetRecommended}
-          <span class="ml-1 inline-flex items-center rounded-md bg-accent/10 px-1.5 py-0.5 text-[0.625rem] font-semibold text-accent">{t("label.recommended")}</span>
+      <div class="flex flex-wrap items-center gap-1.5 {presetWarn ? 'text-status-warning' : 'text-text-muted'}">
+        {#if presetWarn}
+          <span class="flex shrink-0 items-center rounded-md bg-status-warning/10 border border-status-warning/20 px-1.5 py-0.5 text-[0.625rem] font-semibold text-status-warning">
+            <svg class="mr-1 h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 9v4" /><path d="M12 17h.01" />
+              <path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z" />
+            </svg>
+            {t("label.encoderWarning")}
+          </span>
         {/if}
-      </p>
+        <span class="text-xs">{presetNote}</span>
+        {#if presetRecommended}
+          <span class="flex shrink-0 items-center rounded-md bg-accent/10 px-1.5 py-0.5 text-[0.625rem] font-semibold text-accent">{t("label.recommended")}</span>
+        {/if}
+      </div>
     {/if}
 
     <!-- Custom fields (always visible but muted when a preset is active) -->
@@ -386,18 +400,11 @@
       </div>
     </div>
 
-    <div class="flex items-center justify-end gap-3">
-      {#if streamSaved}
-        <span class="flex items-center gap-1 text-xs font-medium text-status-ok animate-fade-in">
-          <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-            <polyline class="animate-check" points="20 6 9 17 4 12" />
-          </svg>
-          {t("status.applied")}
-        </span>
-      {/if}
-      {#if streamError}
-        <span class="text-xs font-medium text-status-critical">{streamError}</span>
-      {/if}
+    {#if streamError}
+      <p class="rounded-lg border border-status-critical/20 bg-status-critical/5 px-3 py-2 text-xs font-medium text-status-critical">{streamError}</p>
+    {/if}
+
+    <div class="flex items-center justify-end">
       <button
         onclick={saveStreamParams}
         disabled={streamSaving || !streamParamsChanged}

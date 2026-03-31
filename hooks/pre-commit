@@ -46,8 +46,8 @@ if [ -f "$ROOT/documentation/package.json" ]; then
     git add "$ROOT/documentation/package.json"
 fi
 
-# Sync to Navbar.astro
-NAVBAR="$ROOT/server/src/components/Navbar.astro"
+# Sync to Navbar.svelte
+NAVBAR="$ROOT/server/src/components/Navbar.svelte"
 if [ -f "$NAVBAR" ]; then
     sed -i "s/v\.[^<]*/v.${NEW_VERSION}/" "$NAVBAR"
     git add "$NAVBAR"

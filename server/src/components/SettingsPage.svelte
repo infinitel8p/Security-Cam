@@ -195,27 +195,29 @@
     });
   });
 
-  async function saveStorageLimit() {
+  function saveStorageLimit() {
     storageSaving = true;
-    try {
-      const res = await fetch(`${getBackendUrl()}/storage/configure`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          enabled: storageLimitEnabled,
-          max_percent: storageLimitPercent,
-        }),
-      });
-      if (res.ok) {
-        toast.success(storageLimitEnabled ? t("toast.autoDeleteEnabled") : t("toast.autoDeleteDisabled"));
-      } else {
-        toast.error(t("toast.saveFailed"));
-      }
-    } catch {
-      toast.error(t("error.connectionStatus"));
-    } finally {
-      storageSaving = false;
-    }
+    const enabled = storageLimitEnabled;
+
+    toast.promise(
+      (async () => {
+        const res = await fetch(`${getBackendUrl()}/storage/configure`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            enabled: storageLimitEnabled,
+            max_percent: storageLimitPercent,
+          }),
+        });
+        if (!res.ok) throw new Error();
+        return enabled;
+      })(),
+      {
+        loading: t("status.saving"),
+        success: (on) => on ? t("toast.autoDeleteEnabled") : t("toast.autoDeleteDisabled"),
+        error: t("toast.saveFailed"),
+      },
+    ).finally(() => { storageSaving = false; });
   }
 
   async function addBtDevice(device: Device) {
@@ -258,24 +260,31 @@
   }
 
   let scanLinesSaving = false;
-  async function toggleScanLines() {
+  function toggleScanLines() {
     if (scanLinesSaving) return;
     scanLinesSaving = true;
     scanLinesEnabled = !scanLinesEnabled;
-    try {
-      const res = await fetch(`${getBackendUrl()}/settings`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ScanLines: scanLinesEnabled }),
-      });
-      if (!res.ok) throw new Error();
-      toast.success(scanLinesEnabled ? t("toast.scanLinesEnabled") : t("toast.scanLinesDisabled"));
-    } catch {
-      scanLinesEnabled = !scanLinesEnabled;
-      toast.error(t("toast.saveFailed"));
-    } finally {
-      scanLinesSaving = false;
-    }
+    const enabled = scanLinesEnabled;
+
+    toast.promise(
+      (async () => {
+        const res = await fetch(`${getBackendUrl()}/settings`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ScanLines: enabled }),
+        });
+        if (!res.ok) throw new Error();
+        return enabled;
+      })(),
+      {
+        loading: t("status.saving"),
+        success: (on) => on ? t("toast.scanLinesEnabled") : t("toast.scanLinesDisabled"),
+        error: () => {
+          scanLinesEnabled = !enabled;
+          return t("toast.saveFailed");
+        },
+      },
+    ).finally(() => { scanLinesSaving = false; });
   }
 
   async function removeWifiDevice(address: string) {

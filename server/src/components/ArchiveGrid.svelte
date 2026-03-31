@@ -162,24 +162,28 @@
     a.click();
   }
 
-  async function confirmDelete() {
+  function confirmDelete() {
     if (!deleteTarget) return;
     deleting = true;
-    try {
-      const res = await fetch(`${getBackendUrl()}/delete_video`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ video_path: deleteTarget.path }),
-      });
-      if (!res.ok) throw new Error("Server returned an error");
-      allVideos = allVideos.filter((v) => v.path !== deleteTarget!.path);
-      toast.success(t("toast.recordingDeleted"));
-      deleteTarget = null;
-    } catch {
-      toast.error(t("toast.deleteRecordingFailed"));
-    } finally {
-      deleting = false;
-    }
+    const target = deleteTarget;
+
+    toast.promise(
+      (async () => {
+        const res = await fetch(`${getBackendUrl()}/delete_video`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ video_path: target.path }),
+        });
+        if (!res.ok) throw new Error("Server returned an error");
+        allVideos = allVideos.filter((v) => v.path !== target.path);
+        deleteTarget = null;
+      })(),
+      {
+        loading: t("status.deleting"),
+        success: t("toast.recordingDeleted"),
+        error: t("toast.deleteRecordingFailed"),
+      },
+    ).finally(() => { deleting = false; });
   }
 
   function openDeleteDialog(video: Video, btnEl: HTMLButtonElement) {

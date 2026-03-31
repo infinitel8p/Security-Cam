@@ -105,52 +105,57 @@
     }
   }
 
-  async function handleAdd(device: Device) {
+  function handleAdd(device: Device) {
     addingAddress = device.address;
-    try {
-      const customName = editingNames[device.address]?.trim();
-      const finalDevice = customName
-        ? { ...device, name: customName }
-        : { ...device, name: device.name || device.address };
-      await onAdd(finalDevice);
-      scanResults = scanResults.filter(d => d.address !== device.address);
-      delete editingNames[device.address];
-      toast.success(t("toast.deviceAdded", { name: finalDevice.name }));
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : t("toast.addDeviceFailed"));
-    } finally {
-      addingAddress = null;
-    }
+    const customName = editingNames[device.address]?.trim();
+    const finalDevice = customName
+      ? { ...device, name: customName }
+      : { ...device, name: device.name || device.address };
+
+    toast.promise(
+      (async () => {
+        await onAdd(finalDevice);
+        scanResults = scanResults.filter(d => d.address !== device.address);
+        delete editingNames[device.address];
+      })(),
+      {
+        loading: t("status.saving"),
+        success: t("toast.deviceAdded", { name: finalDevice.name }),
+        error: (e) => e instanceof Error ? e.message : t("toast.addDeviceFailed"),
+      },
+    ).finally(() => { addingAddress = null; });
   }
 
-  async function handleRemove(address: string) {
+  function handleRemove(address: string) {
     removingAddress = address;
-    try {
-      await onRemove(address);
-      toast.success(t("toast.deviceRemoved"));
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : t("toast.removeDeviceFailed"));
-    } finally {
-      removingAddress = null;
-    }
+
+    toast.promise(onRemove(address), {
+      loading: t("status.removing"),
+      success: t("toast.deviceRemoved"),
+      error: (e) => e instanceof Error ? e.message : t("toast.removeDeviceFailed"),
+    }).finally(() => { removingAddress = null; });
   }
 
-  async function handleManualAdd() {
+  function handleManualAdd() {
     const address = manualMac.trim();
     if (!address) return;
 
     manualAdding = true;
-    try {
-      await onAdd({ address, name: manualName.trim() || address });
-      toast.success(t("toast.deviceAdded", { name: manualName.trim() || address }));
-      manualMac = "";
-      manualName = "";
-      showManualAdd = false;
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : t("toast.addDeviceFailed"));
-    } finally {
-      manualAdding = false;
-    }
+    const name = manualName.trim() || address;
+
+    toast.promise(
+      (async () => {
+        await onAdd({ address, name });
+        manualMac = "";
+        manualName = "";
+        showManualAdd = false;
+      })(),
+      {
+        loading: t("status.saving"),
+        success: t("toast.deviceAdded", { name }),
+        error: (e) => e instanceof Error ? e.message : t("toast.addDeviceFailed"),
+      },
+    ).finally(() => { manualAdding = false; });
   }
 
   async function startDiscoverable() {

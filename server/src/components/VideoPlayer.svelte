@@ -165,21 +165,25 @@
     isFullscreen = !!document.fullscreenElement;
   }
 
-  async function toggleRecording() {
+  function toggleRecording() {
     toggling = true;
-    try {
-      const res = await fetch(`${getBackendUrl()}/toggle_recording`, {
-        method: "POST",
-      });
-      if (!res.ok) throw new Error();
-      const data = await res.json();
-      recording = data.message?.toLowerCase().includes("started") ?? false;
-      toast.success(recording ? t("toast.recordingStarted") : t("toast.recordingStopped"));
-    } catch {
-      toast.error(t("toast.toggleRecordingFailed"));
-    } finally {
-      toggling = false;
-    }
+
+    toast.promise(
+      (async () => {
+        const res = await fetch(`${getBackendUrl()}/toggle_recording`, {
+          method: "POST",
+        });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        recording = data.message?.toLowerCase().includes("started") ?? false;
+        return recording;
+      })(),
+      {
+        loading: t("status.saving"),
+        success: (started) => started ? t("toast.recordingStarted") : t("toast.recordingStopped"),
+        error: t("toast.toggleRecordingFailed"),
+      },
+    ).finally(() => { toggling = false; });
   }
 
   async function fetchRecordingStatus() {

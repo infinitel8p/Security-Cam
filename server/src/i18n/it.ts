@@ -3,6 +3,7 @@ export default {
     dashboard: "Pannello",
     archive: "Archivio",
     settings: "Impostazioni",
+    docs: "Docs",
   },
 
   page: {
@@ -43,6 +44,8 @@ export default {
     saving: "Salvataggio...",
     saved: "Salvato",
     applied: "Applicato",
+    deleting: "Eliminazione...",
+    removing: "Rimozione...",
     scanning: "Ricerca...",
     discoverable: "In attesa di abbinamento...",
     added: "Aggiunto",
@@ -136,6 +139,7 @@ export default {
     fps: "FPS",
     custom: "Personalizzato",
     recommended: "Consigliato",
+    encoderWarning: "Limite encoder",
     discoveredDevices: "Dispositivi trovati",
     sensorPin: "Pin del sensore",
     raspberryPi: "Raspberry Pi",

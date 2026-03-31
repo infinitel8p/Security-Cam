@@ -153,55 +153,58 @@
     else toast.success(text);
   }
 
-  async function saveConfig() {
+  function saveConfig() {
     saving = true;
     message = "";
-    try {
-      const res = await fetch(`${getBackendUrl()}/sensor/configure`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: selectedType,
-          gpio: selectedType === "mock" ? null : gpio,
-          enabled: status?.enabled ?? false,
-          hold_seconds: holdSeconds,
-          invert_logic: invertLogic,
-          calibration: Object.keys(calibration).length > 0 ? calibration : undefined,
-        }),
-      });
-      if (res.ok) {
+
+    toast.promise(
+      (async () => {
+        const res = await fetch(`${getBackendUrl()}/sensor/configure`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: selectedType,
+            gpio: selectedType === "mock" ? null : gpio,
+            enabled: status?.enabled ?? false,
+            hold_seconds: holdSeconds,
+            invert_logic: invertLogic,
+            calibration: Object.keys(calibration).length > 0 ? calibration : undefined,
+          }),
+        });
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || t("toast.saveFailed"));
+        }
         const statusRes = await fetch(`${getBackendUrl()}/sensor/status`);
         status = await statusRes.json();
-        showMessage(t("toast.sensorConfigured"));
-      } else {
-        const data = await res.json();
-        showMessage(data.error || t("toast.saveFailed"), true);
-      }
-    } catch {
-      showMessage(t("error.connectionStatus"), true);
-    } finally {
-      saving = false;
-    }
+      })(),
+      {
+        loading: t("status.saving"),
+        success: t("toast.sensorConfigured"),
+        error: (e) => e instanceof Error ? e.message : t("toast.saveFailed"),
+      },
+    ).finally(() => { saving = false; });
   }
 
-  async function toggleEnabled() {
+  function toggleEnabled() {
     toggling = true;
     message = "";
     const endpoint = status?.enabled ? "/sensor/disable" : "/sensor/enable";
-    try {
-      const res = await fetch(`${getBackendUrl()}${endpoint}`, { method: "POST" });
-      if (res.ok) {
+
+    toast.promise(
+      (async () => {
+        const res = await fetch(`${getBackendUrl()}${endpoint}`, { method: "POST" });
+        if (!res.ok) throw new Error(t("toast.saveFailed"));
         const statusRes = await fetch(`${getBackendUrl()}/sensor/status`);
         status = await statusRes.json();
-        showMessage(status?.enabled ? t("toast.sensorEnabled") : t("toast.sensorDisabled"));
-      } else {
-        showMessage(t("toast.saveFailed"), true);
-      }
-    } catch {
-      showMessage(t("error.connectionStatus"), true);
-    } finally {
-      toggling = false;
-    }
+        return status?.enabled;
+      })(),
+      {
+        loading: t("status.saving"),
+        success: (on) => on ? t("toast.sensorEnabled") : t("toast.sensorDisabled"),
+        error: (e) => e instanceof Error ? e.message : t("error.connectionStatus"),
+      },
+    ).finally(() => { toggling = false; });
   }
 
   async function mockTrigger() {

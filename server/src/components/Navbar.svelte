@@ -7,6 +7,7 @@
   import archiveIcon from "../icons/archive.svg?raw";
   import settingsIcon from "../icons/settings.svg?raw";
   import brandGithubIcon from "../icons/brand-github-filled.svg?raw";
+  import bookIcon from "../icons/book.svg?raw";
 
   onMount(() => {
     initLocale();
@@ -15,9 +16,9 @@
   const path = $derived(typeof window !== "undefined" ? window.location.pathname : "/");
 
   const links = [
-    { href: "/", labelKey: "nav.dashboard" as const, icon: layoutGridIcon },
-    { href: "/archive", labelKey: "nav.archive" as const, icon: archiveIcon },
-    { href: "/settings", labelKey: "nav.settings" as const, icon: settingsIcon },
+    { href: "/", labelKey: "nav.2026.04.01.8
+    { href: "/archive", labelKey: "nav.2026.04.01.8
+    { href: "/settings", labelKey: "nav.2026.04.01.8
   ];
 
   function isActive(href: string): boolean {
@@ -36,7 +37,7 @@
     <div>
       <span class="text-[0.8125rem] font-bold tracking-tight text-text-primary">Security-Cam</span>
       <p class="text-[0.625rem] leading-none font-medium uppercase tracking-widest text-text-muted">
-        v.2026.04.01.1
+        v.2026.04.01.8
       </p>
     </div>
   </div>
@@ -64,16 +65,28 @@
   <!-- Bottom section -->
   <div class="mt-auto border-t border-border-subtle px-3 py-3">
     <div class="flex items-center justify-between px-1">
-      <a
-        href="https://github.com/infinitel8p/Security-Cam"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors duration-150 hover:bg-surface-overlay hover:text-text-secondary"
-        title="GitHub"
-        aria-label="GitHub repository"
-      >
-        <Icon icon={brandGithubIcon} class="h-4 w-4" />
-      </a>
+      <div class="flex items-center gap-1">
+        <a
+          href="https://dev.2026.04.01.8
+          target="_blank"
+          rel="noopener noreferrer"
+          class="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors duration-150 hover:bg-surface-overlay hover:text-text-secondary"
+          title={t("nav.2026.04.01.8
+          aria-label={t("nav.2026.04.01.8
+        >
+          <Icon icon={bookIcon} class="h-4 w-4" />
+        </a>
+        <a
+          href="https://github.com/infinitel8p/Security-Cam"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors duration-150 hover:bg-surface-overlay hover:text-text-secondary"
+          title="GitHub"
+          aria-label="GitHub repository"
+        >
+          <Icon icon={brandGithubIcon} class="h-4 w-4" />
+        </a>
+      </div>
       <ThemeToggle />
     </div>
   </div>

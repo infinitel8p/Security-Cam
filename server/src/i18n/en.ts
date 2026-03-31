@@ -4,6 +4,7 @@ export default {
     dashboard: "Dashboard",
     archive: "Archive",
     settings: "Settings",
+    docs: "Docs",
   },
 
   // Page titles
@@ -47,6 +48,8 @@ export default {
     saving: "Saving...",
     saved: "Saved",
     applied: "Applied",
+    deleting: "Deleting...",
+    removing: "Removing...",
     scanning: "Scanning...",
     discoverable: "Waiting for pairing...",
     added: "Added",
@@ -142,6 +145,7 @@ export default {
     fps: "FPS",
     custom: "Custom",
     recommended: "Recommended",
+    encoderWarning: "Encoder limit",
     discoveredDevices: "Discovered devices",
     sensorPin: "Sensor Pin",
     raspberryPi: "Raspberry Pi",
