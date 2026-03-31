@@ -43,6 +43,7 @@
   --color-status-warning: #f0b93a;
   --color-status-critical: #f06868;
 
+
   /* Shadows - layered for realism */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(136, 155, 195, 0.04);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(136, 155, 195, 0.04);
@@ -74,6 +75,7 @@
   --color-status-ok: #059669;
   --color-status-warning: #d97706;
   --color-status-critical: #dc2626;
+
 
   --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.04), 0 0 0 1px rgba(15, 23, 42, 0.03);
   --shadow-md: 0 4px 16px rgba(15, 23, 42, 0.06), 0 0 0 1px rgba(15, 23, 42, 0.03);
@@ -450,6 +452,15 @@ body {
 
 @keyframes morph-in {
   from { opacity: 0; transform: scale(0.9); }
+}
+
+/* ── Scrollbar hide (horizontal overflow navs) ─────────────────────────── */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 
 /* ── Selection ──────────────────────────────────────────────────────────── */

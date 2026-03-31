@@ -147,6 +147,7 @@
       currentAngle = angle;
       currentMode = mode;
       rotationSaved = true;
+      toast.success(t("toast.rotationSaved"));
       clearTimeout(rotationTimer);
       rotationTimer = setTimeout(() => (rotationSaved = false), 2000);
     } catch {
@@ -385,15 +386,7 @@
       </div>
     </div>
 
-    <div class="flex items-center gap-3">
-      <button
-        onclick={saveStreamParams}
-        disabled={streamSaving || !streamParamsChanged}
-        class="btn-press rounded-xl bg-accent/10 px-4 py-2 text-xs font-semibold text-accent transition-colors hover:bg-accent/15 disabled:opacity-40"
-      >
-        {streamSaving ? t("btn.applying") : t("btn.apply")}
-      </button>
-
+    <div class="flex items-center justify-end gap-3">
       {#if streamSaved}
         <span class="flex items-center gap-1 text-xs font-medium text-status-ok animate-fade-in">
           <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
@@ -405,6 +398,13 @@
       {#if streamError}
         <span class="text-xs font-medium text-status-critical">{streamError}</span>
       {/if}
+      <button
+        onclick={saveStreamParams}
+        disabled={streamSaving || !streamParamsChanged}
+        class="btn-press rounded-xl bg-accent/10 px-4 py-2 text-xs font-semibold text-accent transition-colors hover:bg-accent/15 disabled:opacity-40"
+      >
+        {streamSaving ? t("btn.applying") : t("btn.apply")}
+      </button>
     </div>
 
     <Note>

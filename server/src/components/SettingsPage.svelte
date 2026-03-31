@@ -8,6 +8,7 @@
   import DirectoryPicker from "./DirectoryPicker.svelte";
   import SensorSettings from "./SensorSettings.svelte";
   import Icon from "./Icon.svelte";
+  import ToggleSpring from "./ToggleSpring.svelte";
   import deviceDesktopIcon from "../icons/device-desktop.svg?raw";
   import sunIcon from "../icons/sun.svg?raw";
   import moonIcon from "../icons/moon.svg?raw";
@@ -42,12 +43,20 @@
 
   const sectionIds = ["appearance", "camera", "storage", "devices", "sensors"];
 
+  // Nav active state color (unified accent)
+  const sectionColor = "text-accent";
+
+  let scrollLock = false; // Prevents observer from overriding programmatic scroll
+
   function scrollToSection(id: string) {
     const el = document.getElementById(`settings-${id}`);
     if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      scrollLock = true;
       activeSection = id;
       history.replaceState(null, "", `#${id}`);
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      // Release lock after scroll settles
+      setTimeout(() => { scrollLock = false; }, 800);
     }
   }
 
@@ -56,6 +65,7 @@
   function setupObserver() {
     observer = new IntersectionObserver(
       (entries) => {
+        if (scrollLock) return;
         for (const entry of entries) {
           if (entry.isIntersecting) {
             const id = entry.target.id.replace("settings-", "");
@@ -64,7 +74,7 @@
           }
         }
       },
-      { rootMargin: "-20% 0px -60% 0px" }
+      { rootMargin: "-10% 0px -70% 0px" }
     );
     for (const id of sectionIds) {
       const el = document.getElementById(`settings-${id}`);
@@ -94,8 +104,9 @@
     locale = l;
     setLocale(l);
     document.documentElement.lang = l;
+    toast.success(t("toast.languageChanged"));
     // Reload to apply translations everywhere
-    location.reload();
+    setTimeout(() => location.reload(), 400);
   }
 
   function setTheme(m: ThemeMode) {
@@ -109,6 +120,7 @@
       m === "light" ||
       (m === "system" && window.matchMedia("(prefers-color-scheme: light)").matches);
     document.documentElement.classList.toggle("light", isLight);
+    toast.success(t("toast.themeChanged"));
   }
 
   async function fetchSettings() {
@@ -195,7 +207,7 @@
         }),
       });
       if (res.ok) {
-        toast.success(t("toast.storageConfigured"));
+        toast.success(storageLimitEnabled ? t("toast.autoDeleteEnabled") : t("toast.autoDeleteDisabled"));
       } else {
         toast.error(t("toast.saveFailed"));
       }
@@ -245,7 +257,10 @@
     }
   }
 
+  let scanLinesSaving = false;
   async function toggleScanLines() {
+    if (scanLinesSaving) return;
+    scanLinesSaving = true;
     scanLinesEnabled = !scanLinesEnabled;
     try {
       const res = await fetch(`${getBackendUrl()}/settings`, {
@@ -254,9 +269,12 @@
         body: JSON.stringify({ ScanLines: scanLinesEnabled }),
       });
       if (!res.ok) throw new Error();
+      toast.success(scanLinesEnabled ? t("toast.scanLinesEnabled") : t("toast.scanLinesDisabled"));
     } catch {
       scanLinesEnabled = !scanLinesEnabled;
       toast.error(t("toast.saveFailed"));
+    } finally {
+      scanLinesSaving = false;
     }
   }
 
@@ -273,12 +291,34 @@
 {#snippet navItem(id: string, label: string)}
   <button
     onclick={() => scrollToSection(id)}
-    class="w-full text-left rounded-lg px-3 py-2 text-[0.8125rem] font-medium transition-colors
+    class="group relative w-full text-left px-3.5 py-2 text-[0.8125rem] transition-all duration-200
       {activeSection === id
-        ? 'bg-accent/10 text-accent'
-        : 'text-text-muted hover:bg-surface-elevated hover:text-text-secondary'}"
+        ? `${sectionColor} font-semibold`
+        : 'text-text-muted font-medium hover:text-text-secondary'}"
+  >
+    <span
+      class="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 rounded-full bg-accent transition-all duration-300
+        {activeSection === id ? 'h-4 opacity-100' : 'h-0 opacity-0'}"
+    ></span>
+    {label}
+  </button>
+{/snippet}
+
+{#snippet mobileNavItem(id: string, label: string)}
+  <button
+    onclick={() => scrollToSection(id)}
+    class="relative shrink-0 px-3 pt-2 pb-2.5 text-xs font-medium whitespace-nowrap transition-all duration-200
+      {activeSection === id
+        ? `${sectionColor} font-semibold`
+        : 'text-text-muted hover:text-text-secondary'}"
   >
     {label}
+    <span
+      class="absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 rounded-full bg-accent transition-all duration-300
+        {activeSection === id
+          ? 'w-5 opacity-100'
+          : 'w-0 opacity-0'}"
+    ></span>
   </button>
 {/snippet}
 
@@ -297,9 +337,20 @@
     <button onclick={fetchSettings} class="text-[0.8125rem] font-medium text-accent hover:text-accent-hover">{t("btn.retry")}</button>
   </div>
 {:else}
-  <div class="mt-5 flex gap-6 lg:gap-8 items-start">
+  <!-- Mobile section nav -->
+  <nav class="mt-5 -mx-4 sm:-mx-6 px-4 sm:px-6 overflow-x-auto scrollbar-hide border-b border-border-subtle lg:hidden">
+    <div class="flex gap-0.5">
+      {@render mobileNavItem("appearance", t("section.appearance"))}
+      {@render mobileNavItem("camera", t("section.camera"))}
+      {@render mobileNavItem("storage", t("section.storage"))}
+      {@render mobileNavItem("devices", t("section.devices"))}
+      {@render mobileNavItem("sensors", t("section.triggerSensors"))}
+    </div>
+  </nav>
+
+  <div class="mt-2 flex gap-8 lg:gap-10 items-start lg:mt-6">
     <!-- Sidebar nav -->
-    <nav class="hidden lg:block sticky top-6 self-start w-48 shrink-0">
+    <nav class="hidden lg:block sticky top-6 self-start w-44 shrink-0">
       <div class="flex flex-col gap-0.5">
         {@render navItem("appearance", t("section.appearance"))}
         {@render navItem("camera", t("section.camera"))}
@@ -310,59 +361,76 @@
     </nav>
 
     <!-- Content -->
-    <div class="min-w-0 flex-1 space-y-8">
+    <div class="min-w-0 flex-1">
       <!-- Appearance -->
-      <section id="settings-appearance" class="scroll-mt-6 space-y-3">
-        <h2 class="section-label">{t("section.appearance")}</h2>
-        <div class="card px-4 py-3.5 sm:px-5 sm:py-4">
-          <div class="grid grid-cols-3 gap-2">
-            <button
-              onclick={() => setTheme("system")}
-              class="btn-press flex flex-col items-center gap-2 rounded-xl border px-3 py-3.5 transition-all duration-200
-                {theme === 'system' ? 'border-accent/30 bg-accent-muted text-accent shadow-[var(--shadow-glow)]' : 'border-border-default bg-surface-base text-text-muted hover:border-border-strong hover:text-text-secondary'}"
-            >
-              <Icon icon={deviceDesktopIcon} class="h-5 w-5" />
-              <span class="text-[0.6875rem] font-medium">{t("theme.system")}</span>
-            </button>
-            <button
-              onclick={() => setTheme("light")}
-              class="btn-press flex flex-col items-center gap-2 rounded-xl border px-3 py-3.5 transition-all duration-200
-                {theme === 'light' ? 'border-accent/30 bg-accent-muted text-accent shadow-[var(--shadow-glow)]' : 'border-border-default bg-surface-base text-text-muted hover:border-border-strong hover:text-text-secondary'}"
-            >
-              <Icon icon={sunIcon} class="h-5 w-5" />
-              <span class="text-[0.6875rem] font-medium">{t("theme.light")}</span>
-            </button>
-            <button
-              onclick={() => setTheme("dark")}
-              class="btn-press flex flex-col items-center gap-2 rounded-xl border px-3 py-3.5 transition-all duration-200
-                {theme === 'dark' ? 'border-accent/30 bg-accent-muted text-accent shadow-[var(--shadow-glow)]' : 'border-border-default bg-surface-base text-text-muted hover:border-border-strong hover:text-text-secondary'}"
-            >
-              <Icon icon={moonIcon} class="h-5 w-5" />
-              <span class="text-[0.6875rem] font-medium">{t("theme.dark")}</span>
-            </button>
-          </div>
+      <section id="settings-appearance" class="scroll-mt-16 lg:scroll-mt-8 space-y-3">
+        <div class="flex items-center gap-2.5">
+          <span class="h-3.5 w-0.5 rounded-full bg-accent"></span>
+          <h2 class="text-xs font-semibold uppercase tracking-widest text-text-secondary">{t("section.appearance")}</h2>
         </div>
-        <div class="card px-4 py-3.5 sm:px-5 sm:py-4">
-          <p class="mb-2 text-sm font-medium text-text-primary">{t("language.label")}</p>
-          <div class="grid grid-cols-3 gap-1.5 sm:grid-cols-5">
-            {#each ["en", "de", "fr", "es", "it"] as lang}
+        <div class="card overflow-hidden">
+          <div class="px-4 py-3.5 sm:px-5 sm:py-4">
+            <div class="grid grid-cols-3 gap-2">
               <button
-                onclick={() => changeLocale(lang as import("../i18n").Locale)}
-                class="rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors text-center
-                  {locale === lang
-                    ? 'border-accent bg-accent/10 text-accent'
-                    : 'border-border-default bg-surface-base text-text-muted hover:border-border-strong hover:text-text-secondary'}"
+                onclick={() => setTheme("system")}
+                class="btn-press flex flex-col items-center gap-2.5 rounded-xl border px-3 py-4 transition-all duration-200
+                  {theme === 'system' ? 'border-accent/40 bg-accent-muted text-accent shadow-[var(--shadow-glow)] scale-[1.03]' : 'border-border-default bg-surface-base text-text-muted hover:border-border-strong hover:text-text-secondary'}"
               >
-                {t(`language.${lang}`)}
+                <Icon icon={deviceDesktopIcon} class="h-5 w-5" />
+                <span class="text-[0.6875rem] font-semibold">{t("theme.system")}</span>
               </button>
-            {/each}
+              <button
+                onclick={() => setTheme("light")}
+                class="btn-press flex flex-col items-center gap-2.5 rounded-xl border px-3 py-4 transition-all duration-200
+                  {theme === 'light' ? 'border-accent/40 bg-accent-muted text-accent shadow-[var(--shadow-glow)] scale-[1.03]' : 'border-border-default bg-surface-base text-text-muted hover:border-border-strong hover:text-text-secondary'}"
+              >
+                <Icon icon={sunIcon} class="h-5 w-5" />
+                <span class="text-[0.6875rem] font-semibold">{t("theme.light")}</span>
+              </button>
+              <button
+                onclick={() => setTheme("dark")}
+                class="btn-press flex flex-col items-center gap-2.5 rounded-xl border px-3 py-4 transition-all duration-200
+                  {theme === 'dark' ? 'border-accent/40 bg-accent-muted text-accent shadow-[var(--shadow-glow)] scale-[1.03]' : 'border-border-default bg-surface-base text-text-muted hover:border-border-strong hover:text-text-secondary'}"
+              >
+                <Icon icon={moonIcon} class="h-5 w-5" />
+                <span class="text-[0.6875rem] font-semibold">{t("theme.dark")}</span>
+              </button>
+            </div>
+          </div>
+          <div class="border-t border-border-subtle px-4 py-3.5 sm:px-5 sm:py-4">
+            <p class="mb-2 text-sm font-medium text-text-primary">{t("language.label")}</p>
+            <div class="grid grid-cols-3 gap-1.5 sm:grid-cols-5">
+              {#each ["en", "de", "fr", "es", "it"] as lang}
+                <button
+                  onclick={() => changeLocale(lang as import("../i18n").Locale)}
+                  class="rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors text-center
+                    {locale === lang
+                      ? 'border-accent bg-accent/10 text-accent'
+                      : 'border-border-default bg-surface-base text-text-muted hover:border-border-strong hover:text-text-secondary'}"
+                >
+                  {t(`language.${lang}`)}
+                </button>
+              {/each}
+            </div>
+          </div>
+          <div class="border-t border-border-subtle px-4 py-3.5 sm:px-5 sm:py-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-text-primary">{t("label.scanLines")}</p>
+                <p class="mt-0.5 text-xs text-text-muted">{t("help.scanLines")}</p>
+              </div>
+              <ToggleSpring checked={scanLinesEnabled} onToggle={toggleScanLines} label={t("label.scanLines")} />
+            </div>
           </div>
         </div>
       </section>
 
       <!-- Camera -->
-      <section id="settings-camera" class="scroll-mt-6 space-y-3">
-        <h2 class="section-label">{t("section.camera")}</h2>
+      <section id="settings-camera" class="scroll-mt-16 lg:scroll-mt-8 mt-10 space-y-3">
+        <div class="flex items-center gap-2.5">
+          <span class="h-3.5 w-0.5 rounded-full bg-accent"></span>
+          <h2 class="text-xs font-semibold uppercase tracking-widest text-text-secondary">{t("section.camera")}</h2>
+        </div>
         <CameraSettings
           currentAngle={rotation}
           currentMode={rotationMode}
@@ -370,30 +438,14 @@
           {streamHeight}
           {streamFPS}
         />
-        <div class="card px-4 py-3.5 sm:px-5 sm:py-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm font-medium text-text-primary">{t("label.scanLines")}</p>
-              <p class="mt-0.5 text-xs text-text-muted">{t("help.scanLines")}</p>
-            </div>
-            <button
-              onclick={toggleScanLines}
-              class="btn-press relative h-6 w-11 shrink-0 rounded-full transition-colors duration-300
-                {scanLinesEnabled ? 'bg-accent shadow-[0_0_8px_rgba(77,148,255,0.25)]' : 'bg-surface-elevated'}"
-            >
-              <span
-                class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-300
-                  {scanLinesEnabled ? 'translate-x-5' : 'translate-x-0'}"
-                style="transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1);"
-              ></span>
-            </button>
-          </div>
-        </div>
       </section>
 
       <!-- Storage -->
-      <section id="settings-storage" class="scroll-mt-6 space-y-3">
-        <h2 class="section-label">{t("section.storage")}</h2>
+      <section id="settings-storage" class="scroll-mt-16 lg:scroll-mt-8 mt-10 space-y-3">
+        <div class="flex items-center gap-2.5">
+          <span class="h-3.5 w-0.5 rounded-full bg-accent"></span>
+          <h2 class="text-xs font-semibold uppercase tracking-widest text-text-secondary">{t("section.storage")}</h2>
+        </div>
         <DirectoryPicker current={saveLocation} />
 
         <!-- Auto-delete -->
@@ -404,17 +456,11 @@
                 <p class="text-sm font-medium text-text-primary">{t("label.autoDelete")}</p>
                 <p class="mt-0.5 text-xs text-text-muted">{t("help.autoDelete")}</p>
               </div>
-              <button
-                onclick={() => { storageLimitEnabled = !storageLimitEnabled; saveStorageLimit(); }}
-                class="btn-press relative h-6 w-11 shrink-0 rounded-full transition-colors duration-300
-                  {storageLimitEnabled ? 'bg-accent shadow-[0_0_8px_rgba(77,148,255,0.25)]' : 'bg-surface-elevated'}"
-              >
-                <span
-                  class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-300
-                    {storageLimitEnabled ? 'translate-x-5' : 'translate-x-0'}"
-                  style="transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1);"
-                ></span>
-              </button>
+              <ToggleSpring
+                checked={storageLimitEnabled}
+                onToggle={() => { storageLimitEnabled = !storageLimitEnabled; saveStorageLimit(); }}
+                label={t("label.autoDelete")}
+              />
             </div>
 
             {#if storageLimitEnabled}
@@ -433,6 +479,7 @@
                       max="95"
                       step="5"
                       bind:value={storageLimitPercent}
+                      aria-label={t("label.storageThreshold")}
                       class="range-slider flex-1"
                     />
                     <span class="text-[0.625rem] text-text-muted w-8 shrink-0">95%</span>
@@ -460,13 +507,15 @@
                   </div>
                 {/if}
 
-                <button
-                  onclick={saveStorageLimit}
-                  disabled={storageSaving}
-                  class="btn-press rounded-lg bg-accent px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-accent/90 disabled:opacity-50"
-                >
-                  {storageSaving ? t("btn.saving") : t("btn.save")}
-                </button>
+                <div class="flex justify-end">
+                  <button
+                    onclick={saveStorageLimit}
+                    disabled={storageSaving}
+                    class="btn-press rounded-lg bg-accent px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-accent/90 disabled:opacity-50"
+                  >
+                    {storageSaving ? t("btn.saving") : t("btn.save")}
+                  </button>
+                </div>
               </div>
             {/if}
           </div>
@@ -474,8 +523,11 @@
       </section>
 
       <!-- Devices -->
-      <section id="settings-devices" class="scroll-mt-6 space-y-3">
-        <h2 class="section-label">{t("section.devices")}</h2>
+      <section id="settings-devices" class="scroll-mt-16 lg:scroll-mt-8 mt-12 space-y-3">
+        <div class="flex items-center gap-2.5">
+          <span class="h-3.5 w-0.5 rounded-full bg-accent"></span>
+          <h2 class="text-xs font-semibold uppercase tracking-widest text-text-secondary">{t("section.devices")}</h2>
+        </div>
         <div class="space-y-3">
           <DeviceList
             title={t("label.bluetoothDevices")}
@@ -500,9 +552,12 @@
         </div>
       </section>
 
-      <!-- Trigger Sensors -->
-      <section id="settings-sensors" class="scroll-mt-6 space-y-3">
-        <h2 class="section-label">{t("section.triggerSensors")}</h2>
+      <!-- Recording Sensors -->
+      <section id="settings-sensors" class="scroll-mt-16 lg:scroll-mt-8 mt-12 space-y-3">
+        <div class="flex items-center gap-2.5">
+          <span class="h-3.5 w-0.5 rounded-full bg-accent"></span>
+          <h2 class="text-xs font-semibold uppercase tracking-widest text-text-secondary">{t("section.triggerSensors")}</h2>
+        </div>
         <SensorSettings />
       </section>
     </div>

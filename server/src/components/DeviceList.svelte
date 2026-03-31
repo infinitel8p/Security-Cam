@@ -278,15 +278,22 @@
               type="text"
               bind:value={manualMac}
               placeholder={t("input.macAddress")}
+              maxlength="17"
+              autocomplete="off"
+              spellcheck="false"
+              aria-label={t("input.macAddress")}
               class="rounded-lg border border-border-default bg-surface-elevated px-3 py-1.5 text-xs font-medium text-text-primary placeholder:text-text-muted/50 outline-none focus:border-accent"
             />
             <input
               type="text"
               bind:value={manualName}
               placeholder={t("input.nameOptional")}
+              maxlength="64"
+              aria-label={t("input.nameOptional")}
               class="rounded-lg border border-border-default bg-surface-elevated px-3 py-1.5 text-xs font-medium text-text-primary placeholder:text-text-muted/50 outline-none focus:border-accent"
             />
           </div>
+          <div class="flex justify-end">
           <button
             onclick={handleManualAdd}
             disabled={!manualMac.trim() || manualAdding}
@@ -294,6 +301,7 @@
           >
             {manualAdding ? t("btn.adding") : t("btn.add")}
           </button>
+          </div>
         </div>
       {/if}
 

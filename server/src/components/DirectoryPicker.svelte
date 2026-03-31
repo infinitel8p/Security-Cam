@@ -43,9 +43,41 @@
     }
   }
 
+  let dialogEl: HTMLDivElement | undefined = $state();
+  let previousFocus: HTMLElement | null = null;
+
   function openBrowser() {
+    previousFocus = document.activeElement as HTMLElement;
     open = true;
     loadDirectories(current);
+    // Focus the dialog after it renders
+    requestAnimationFrame(() => dialogEl?.focus());
+  }
+
+  function closeDialog() {
+    open = false;
+    previousFocus?.focus();
+  }
+
+  function trapFocus(e: KeyboardEvent) {
+    if (e.key === "Escape") { closeDialog(); return; }
+    if (e.key !== "Tab" || !dialogEl) return;
+
+    const focusable = dialogEl.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusable.length === 0) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
   }
 
   function navigateTo(dir: { name: string; path: string }) {
@@ -85,7 +117,7 @@
     <label class="text-sm font-semibold text-text-primary">{t("label.videoSaveLocation")}</label>
   </div>
   <div class="mt-3 flex items-center gap-3">
-    <code class="flex-1 truncate rounded-xl border border-border-default bg-surface-elevated px-3.5 py-2 text-sm font-medium text-text-secondary">
+    <code class="flex-1 min-w-0 truncate rounded-xl border border-border-default bg-surface-elevated px-3.5 py-2 text-sm font-medium text-text-secondary" title={current}>
       {current}
     </code>
     <button
@@ -100,27 +132,30 @@
 {#if open}
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div
+    bind:this={dialogEl}
     class="animate-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
     role="dialog"
     aria-modal="true"
+    aria-label={t("dialog.selectDirectory")}
     tabindex="-1"
-    onkeydown={(e) => e.key === "Escape" && (open = false)}
+    onkeydown={trapFocus}
   >
     <div class="animate-dialog mx-4 w-full max-w-md overflow-hidden rounded-2xl border border-border-subtle bg-surface-raised shadow-[var(--shadow-lg)]">
       <!-- Header -->
       <div class="flex items-center justify-between border-b border-border-subtle px-5 py-3.5">
         <h3 class="text-sm font-semibold text-text-primary">{t("dialog.selectDirectory")}</h3>
         <button
-          onclick={() => (open = false)}
+          onclick={closeDialog}
           class="flex h-7 w-7 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-surface-overlay hover:text-text-secondary"
+          aria-label={t("btn.close")}
         >
           <Icon icon={xIcon} class="h-4 w-4" />
         </button>
       </div>
 
       <!-- Current path -->
-      <div class="border-b border-border-subtle bg-surface-overlay/50 px-5 py-2">
-        <code class="text-[0.6875rem] font-medium text-text-muted">{browsePath}</code>
+      <div class="border-b border-border-subtle bg-surface-overlay/50 px-5 py-2 overflow-hidden">
+        <code class="block truncate text-[0.6875rem] font-medium text-text-muted" title={browsePath}>{browsePath}</code>
       </div>
 
       <!-- Directory list -->
@@ -135,7 +170,9 @@
         {:else}
           <button
             onclick={goUp}
-            class="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-text-secondary transition-colors hover:bg-surface-overlay"
+            disabled={loading}
+            aria-label="Go to parent directory"
+            class="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-text-secondary transition-colors hover:bg-surface-overlay disabled:opacity-50"
           >
             <Icon icon={chevronLeftIcon} class="h-4 w-4 shrink-0" />
             ..
@@ -143,10 +180,11 @@
           {#each directories as dir (dir.path)}
             <button
               onclick={() => navigateTo(dir)}
-              class="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-text-primary transition-colors hover:bg-surface-overlay"
+              disabled={loading}
+              class="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-text-primary transition-colors hover:bg-surface-overlay disabled:opacity-50"
             >
               <Icon icon={folderIcon} class="h-4 w-4 shrink-0 text-text-muted" />
-              {dir.name}
+              <span class="truncate">{dir.name}</span>
             </button>
           {/each}
           {#if directories.length === 0}
@@ -158,7 +196,7 @@
       <!-- Footer -->
       <div class="flex justify-end gap-3 border-t border-border-subtle px-5 py-3.5">
         <button
-          onclick={() => (open = false)}
+          onclick={closeDialog}
           class="rounded-xl px-4 py-2 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-overlay"
         >
           {t("btn.cancel")}

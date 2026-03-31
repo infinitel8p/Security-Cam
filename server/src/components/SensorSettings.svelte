@@ -6,6 +6,8 @@
   import Note from "./Note.svelte";
   import WiringDiagram from "./WiringDiagram.svelte";
   import Icon from "./Icon.svelte";
+  import ToggleSpring from "./ToggleSpring.svelte";
+  import SensorSparkline from "./SensorSparkline.svelte";
   import boltIcon from "../icons/bolt.svg?raw";
   import chevronRightIcon from "../icons/chevron-right.svg?raw";
 
@@ -227,7 +229,7 @@
       if (res.ok) {
         testValue = data.value;
         testError = "";
-        testHistory = [...testHistory.slice(-19), data.value ?? false];
+        testHistory = [...testHistory.slice(-39), data.value ?? false];
       } else {
         testError = data.error || t("toast.saveFailed");
         testValue = null;
@@ -239,6 +241,9 @@
   }
 
   function startTest() {
+    if (testMode) return; // prevent double-start
+    // Clear any stale interval
+    if (testInterval) clearInterval(testInterval);
     testMode = true;
     testValue = null;
     testError = "";
@@ -309,18 +314,14 @@
           <p class="text-sm font-medium text-text-primary">{t("label.autoRecording")}</p>
           <p class="mt-0.5 text-xs text-text-muted">{t("help.autoRecording")}</p>
         </div>
-        <button
-          onclick={toggleEnabled}
+        <ToggleSpring
+          checked={status?.enabled ?? false}
           disabled={toggling}
-          class="btn-press relative h-6 w-11 shrink-0 rounded-full transition-colors duration-300
-            {status?.enabled ? 'bg-accent shadow-[0_0_8px_rgba(77,148,255,0.25)]' : 'bg-surface-elevated'}"
-        >
-          <span
-            class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-300
-              {status?.enabled ? 'translate-x-5' : 'translate-x-0'}"
-            style="transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1);"
-          ></span>
-        </button>
+          onToggle={toggleEnabled}
+          label={t("label.autoRecording")}
+          accent="bg-accent"
+          glow="rgba(77,148,255,0.25)"
+        />
       </div>
 
       <!-- ━━ 2. Sensor type grid ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
@@ -458,14 +459,14 @@
           </div>
 
           {#if testMode}
-            <div class="animate-slide-down mt-2.5 space-y-2">
+            <div class="animate-slide-down mt-2.5 space-y-2.5">
               {#if testError}
                 <p class="text-xs text-status-critical">{testError}</p>
               {:else}
                 <div class="flex items-center gap-3">
                   <div class="flex items-center gap-2">
                     <span
-                      class="flex h-7 w-7 items-center justify-center rounded-md text-xs font-bold
+                      class="flex h-7 w-7 items-center justify-center rounded-md text-xs font-bold transition-all duration-200
                         {testValue
                           ? 'bg-status-ok/15 text-status-ok shadow-[0_0_10px_rgba(52,217,172,0.15)]'
                           : 'bg-surface-elevated text-text-muted'}"
@@ -479,17 +480,10 @@
                       <p class="mt-0.5 text-[0.625rem] text-text-muted">GPIO {gpio}</p>
                     </div>
                   </div>
-                  <div class="ml-auto flex items-end gap-px">
-                    {#each testHistory as val, i}
-                      <div
-                        class="w-1.5 rounded-sm transition-all duration-150
-                          {val ? 'bg-status-ok h-3.5' : 'bg-surface-elevated h-1.5'}"
-                      ></div>
-                    {/each}
-                    {#each Array(Math.max(0, 20 - testHistory.length)) as _}
-                      <div class="h-1.5 w-1.5 rounded-sm bg-surface-elevated/50"></div>
-                    {/each}
-                  </div>
+                </div>
+                <!-- Canvas sparkline -->
+                <div class="rounded-lg border border-border-subtle bg-surface-base/80 px-2 py-2">
+                  <SensorSparkline history={testHistory} value={testValue} />
                 </div>
                 <p class="text-[0.625rem] text-text-muted">{t("help.testInstructions")}</p>
               {/if}
@@ -545,17 +539,12 @@
                 {invertLogic ? t("help.invertActive") : t("help.invertInactive")}
               </p>
             </div>
-            <button
-              onclick={() => { invertLogic = !invertLogic; }}
-              class="btn-press relative h-5.5 w-10 shrink-0 rounded-full transition-colors duration-300
-                {invertLogic ? 'bg-accent shadow-[0_0_8px_rgba(77,148,255,0.25)]' : 'bg-surface-elevated'}"
-            >
-              <span
-                class="absolute top-0.5 left-0.5 h-4.5 w-4.5 rounded-full bg-white shadow-md transition-transform duration-300
-                  {invertLogic ? 'translate-x-[1.125rem]' : 'translate-x-0'}"
-                style="transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1);"
-              ></span>
-            </button>
+            <ToggleSpring
+              checked={invertLogic}
+              onToggle={() => { invertLogic = !invertLogic; }}
+              size="sm"
+              label={t("label.invertTrigger")}
+            />
           </div>
 
         </div>
