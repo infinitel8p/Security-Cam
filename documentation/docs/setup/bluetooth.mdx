@@ -34,9 +34,11 @@ Run the included pairing script:
 The script offers two modes:
 
 - **Mode 1 - Scan for devices**: The Pi scans for nearby Bluetooth devices (30 seconds). You pick your device from the list after the scan is done and the script handles pairing and trusting. Make sure your device's Bluetooth visibility is turned on. On iPhone, keep Settings → Bluetooth open during the scan.
-- **Mode 2 - Wait for incoming pairing**: The Pi makes itself discoverable as `securitycam` and waits for your device to initiate pairing (120 seconds). On your device, open Bluetooth settings and tap `securitycam`.
+- **Mode 2 - Wait for incoming pairing**: The Pi makes itself discoverable and waits for your device to initiate pairing (120 seconds). On your device, open Bluetooth settings and tap the Pi.
 
-If one mode doesn't find your device, you can try the other without restarting the script. A confirmation prompt will appear on your device during pairing - make sure to accept it.
+If one mode doesn't find your device, you can try the other without restarting the script. A confirmation prompt will appear on your device during pairing — make sure to accept it.
+
+After successful pairing, the device is automatically registered in the dashboard for presence detection. You don't need to add it again in Settings > Devices.
 
 :::info
 If you prefer to do it manually or the script fails, you can use `bluetoothctl` directly.
@@ -49,6 +51,10 @@ Enter `bluetoothctl` to open the prompt, then run the following commands **one a
 5. `pair XX:XX:XX:XX:XX:XX` (replace with your device's MAC address)
 6. `trust XX:XX:XX:XX:XX:XX`
 7. `exit`
+:::
+
+:::tip
+After setup is complete, you can also pair new Bluetooth devices directly from the dashboard at **Settings > Devices** — no SSH needed. The dashboard supports both scanning and making the Pi discoverable. See [Bluetooth pairing from the dashboard](../basics/dashboard#bluetooth-pairing-from-the-dashboard) for details.
 :::
 
 Continue to [mediamtx.mdx](./mediamtx) to set up the camera stream.

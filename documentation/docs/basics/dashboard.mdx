@@ -58,11 +58,27 @@ Browse and manage recorded videos:
 
 Configure the system without touching config files. The settings page has a sidebar with five sections:
 
-- **Appearance** - switch between dark, light, and system theme. Choose the dashboard language (English, German, French, Spanish, Italian).
-- **Camera** - adjust stream resolution, framerate, and rotation (display-only or hardware via MediaMTX). Toggle scan line overlay on the live feed.
+- **Appearance** - switch between dark, light, and system theme. Choose the dashboard language (English, German, French, Spanish, Italian). Toggle the scan line overlay on the live feed.
+- **Camera** - adjust stream resolution, framerate, and rotation (display-only or hardware via MediaMTX). Pick from quality presets tuned for the Pi Zero 2 W, or set custom resolution and FPS.
 - **Storage** - choose where recorded videos are stored on the Pi. Enable [auto-delete](./storage) to prevent the SD card from filling up.
-- **Devices** - add or remove tracked Bluetooth and WiFi devices. Scan for nearby devices or enter MAC addresses manually. Online/offline status is shown per device. Tracked devices are used for presence detection - if any are nearby, sensor triggers are ignored.
-- **Trigger Sensors** - select and configure the active sensor type, set the GPIO pin and hold timeout, adjust [calibration](./calibration), test wiring, and enable/disable auto-recording. See the [sensors guide](./sensors) for details.
+- **Devices** - add or remove tracked Bluetooth and WiFi devices. Three ways to add a Bluetooth device: scan for nearby devices, [make the Pi discoverable](#bluetooth-pairing-from-the-dashboard) so your phone can find it, or enter a MAC address manually. Online/offline status is shown per device. Tracked devices are used for presence detection — if any are nearby, sensor triggers are ignored.
+- **Recording Sensors** - select and configure the active sensor type, set the GPIO pin and hold timeout, adjust [calibration](./calibration), test wiring with a live sparkline, and enable/disable auto-recording. See the [sensors guide](./sensors) for details.
+
+All settings changes show a toast confirmation when saved successfully.
+
+## Bluetooth pairing from the dashboard
+
+You don't need SSH or the setup script to pair Bluetooth devices after initial setup. The **Settings > Devices** section in the dashboard supports two pairing methods:
+
+1. **Scan** — the Pi scans for nearby Bluetooth devices for ~20 seconds. Pick your device from the results. Works best when your device's Bluetooth visibility is turned on (on iPhone, keep Settings > Bluetooth open during the scan).
+
+2. **Make Pi discoverable** — the Pi makes itself visible for 90 seconds. Open Bluetooth settings on your phone and pair with the Pi from there. This is useful when your device doesn't show up in scans, which is common with iPhones and some Android devices.
+
+Both methods auto-accept pairing prompts, trust the device, and register it for presence detection. You can also enter a MAC address manually if you know it.
+
+:::tip
+For the initial setup before the dashboard is running, use the [`pair_bluetooth.sh`](../setup/bluetooth) script over SSH instead.
+:::
 
 ## How auto-recording works
 

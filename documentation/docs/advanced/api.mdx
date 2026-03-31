@@ -89,6 +89,48 @@ curl -X POST http://<pi-ip>:5005/sensor/mock/trigger
 curl -X POST http://<pi-ip>:5005/sensor/mock/release
 ```
 
+## Bluetooth endpoints
+
+### Scan for devices
+
+```bash
+curl -X POST http://<pi-ip>:5005/bt/scan
+```
+
+Returns a list of nearby Bluetooth devices (scans for ~20 seconds).
+
+### Make Pi discoverable
+
+```bash
+curl -X POST http://<pi-ip>:5005/bt/discoverable \
+  -H 'Content-Type: application/json' \
+  -d '{"timeout": 90}'
+```
+
+Makes the Pi visible to nearby devices and waits for an incoming pairing request. The device is automatically paired, trusted, and registered for presence detection.
+
+**Parameters:**
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `timeout` | number | `90` | Seconds to stay discoverable before giving up |
+
+Returns `200` with `{"device": {"address": "...", "name": "..."}}` on successful pairing, or `408` if no device paired within the timeout.
+
+### Add / remove tracked devices
+
+```bash
+# Add (pairs and registers)
+curl -X POST http://<pi-ip>:5005/devices/bt/add \
+  -H 'Content-Type: application/json' \
+  -d '{"address": "AA:BB:CC:DD:EE:FF", "name": "My Phone"}'
+
+# Remove (unpairs and unregisters)
+curl -X POST http://<pi-ip>:5005/devices/bt/remove \
+  -H 'Content-Type: application/json' \
+  -d '{"address": "AA:BB:CC:DD:EE:FF"}'
+```
+
 ## Storage endpoints
 
 ### Get storage status

@@ -1,5 +1,6 @@
 import logging
 import os
+import subprocess
 from flask import Flask, jsonify, send_file, request, abort, Response
 from flask_cors import CORS
 from urllib.parse import unquote
@@ -193,6 +194,30 @@ def connections():
         "wifi": {"online": wifi_online, "total": wifi_total},
         "ap_clients": ap_clients,
     })
+
+
+@app.route('/bt/discoverable', methods=['POST'])
+def bt_discoverable():
+    """Make the Pi discoverable for incoming Bluetooth pairing."""
+    timeout = request.json.get("timeout", 90) if request.json else 90
+    try:
+        device = settings_helpers.make_bt_discoverable(timeout=timeout)
+        # Auto-register the paired device
+        settings = settings_helpers.get_settings()
+        bt_list = settings.get("TARGET_BT_ADDRESSES", [])
+        addr = device["address"]
+        if not any(d["address"].lower() == addr.lower() for d in bt_list):
+            bt_list.append(device)
+            settings_helpers.update_settings({"TARGET_BT_ADDRESSES": bt_list})
+        log.info("BT discoverable: device registered: %s (%s)", device["name"], addr)
+        return jsonify({"device": device})
+    except RuntimeError as e:
+        return jsonify({"error": str(e)}), 408  # Request Timeout
+    except subprocess.TimeoutExpired:
+        return jsonify({"error": "Discoverable mode timed out"}), 408
+    except Exception as e:
+        log.error("BT discoverable failed: %s", e)
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route('/devices/bt/add', methods=['POST'])

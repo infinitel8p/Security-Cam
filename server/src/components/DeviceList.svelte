@@ -49,6 +49,10 @@
   // Inline name editing for scan results
   let editingNames = $state<Record<string, string>>({});
 
+  // Discoverable mode (BT only)
+  let discoverable = $state(false);
+  let discoverableError = $state("");
+
   function isAlreadyAdded(address: string): boolean {
     return devices.some(d => d.address.toLowerCase() === address.toLowerCase());
   }
@@ -130,11 +134,46 @@
     }
   }
 
+  async function startDiscoverable() {
+    discoverable = true;
+    discoverableError = "";
+    showManualAdd = false;
+    showScanPanel = true;
+
+    try {
+      const res = await fetch(`${getBackendUrl()}/bt/discoverable`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ timeout: 90 }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        discoverableError = data.error || t("error.connectionStatus");
+        return;
+      }
+
+      // Device was paired and auto-registered by the backend
+      const device = data.device;
+      if (device && !isAlreadyAdded(device.address)) {
+        // Refresh the device list from parent (it was already saved server-side)
+        devices = [...devices, device];
+      }
+      toast.success(t("toast.deviceAdded", { name: device?.name || "device" }));
+    } catch {
+      discoverableError = t("error.connectionStatus");
+    } finally {
+      discoverable = false;
+    }
+  }
+
   function closeScanPanel() {
     showScanPanel = false;
     showManualAdd = false;
+    discoverable = false;
     scanResults = [];
     scanError = "";
+    discoverableError = "";
   }
 </script>
 
@@ -160,13 +199,24 @@
   {#if devices.length === 0 && !showScanPanel}
     <div class="px-4 py-6 text-center sm:px-5 sm:py-8">
       <p class="text-sm text-text-muted">{t("empty.noDevicesConfigured")}</p>
-      <button
-        onclick={startScan}
-        class="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent transition-colors hover:bg-accent/15"
-      >
-        <Icon icon={searchIcon} class="h-3 w-3" />
-        {t("btn.scanForDevices")}
-      </button>
+      <div class="mt-3 flex flex-wrap items-center justify-center gap-2">
+        <button
+          onclick={startScan}
+          class="inline-flex items-center gap-1.5 rounded-lg bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent transition-colors hover:bg-accent/15"
+        >
+          <Icon icon={searchIcon} class="h-3 w-3" />
+          {t("btn.scanForDevices")}
+        </button>
+        {#if icon === "bluetooth"}
+          <button
+            onclick={startDiscoverable}
+            class="inline-flex items-center gap-1.5 rounded-lg bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent transition-colors hover:bg-accent/15"
+          >
+            <Icon icon={bluetoothIcon} class="h-3 w-3" />
+            {t("btn.makeDiscoverable")}
+          </button>
+        {/if}
+      </div>
     </div>
   {:else if devices.length > 0}
     <ul class="divide-y divide-border-subtle">
@@ -223,10 +273,10 @@
       <!-- Panel header -->
       <div class="flex items-center justify-between px-4 py-2.5 sm:px-5">
         <span class="text-xs font-semibold text-text-secondary">
-          {scanning ? t("status.scanning") : t("label.discoveredDevices")}
+          {scanning ? t("status.scanning") : discoverable ? t("status.discoverable") : t("label.discoveredDevices")}
         </span>
         <div class="flex items-center gap-2">
-          {#if !scanning}
+          {#if !scanning && !discoverable}
             <button
               onclick={() => { showManualAdd = !showManualAdd; }}
               class="text-[0.6875rem] font-medium text-text-muted transition-colors hover:text-accent"
@@ -244,7 +294,7 @@
           {/if}
           <button
             onclick={closeScanPanel}
-            disabled={scanning}
+            disabled={scanning || discoverable}
             class="text-[0.6875rem] font-medium text-text-muted transition-colors hover:text-text-primary disabled:opacity-50"
           >
             {t("btn.close")}
@@ -270,8 +320,42 @@
         </div>
       {/if}
 
+      <!-- Discoverable waiting state (BT only) -->
+      {#if discoverable}
+        <div class="flex flex-col items-center gap-3 px-4 py-6 sm:px-5">
+          <div class="relative flex h-10 w-10 items-center justify-center">
+            <div class="absolute inset-0 animate-ping rounded-full bg-accent/20" style="animation-duration: 2s;"></div>
+            <div class="absolute inset-1 animate-ping rounded-full bg-accent/15" style="animation-duration: 2s; animation-delay: 0.5s;"></div>
+            <Icon icon={bluetoothIcon} class="relative h-5 w-5 text-accent" />
+          </div>
+          <div class="text-center">
+            <p class="text-xs font-medium text-text-secondary">{t("help.discoverableWaiting")}</p>
+            <p class="mt-1 text-[0.6875rem] text-text-muted">{t("help.discoverableHint")}</p>
+          </div>
+          {#if discoverableError}
+            <p class="text-xs text-status-critical">{discoverableError}</p>
+          {/if}
+        </div>
+      {/if}
+
+      <!-- Make discoverable button (BT only, shown when not scanning/discoverable and scan results are showing) -->
+      {#if icon === "bluetooth" && !scanning && !discoverable && showScanPanel}
+        <div class="border-t border-border-subtle px-4 py-2.5 sm:px-5">
+          <button
+            onclick={startDiscoverable}
+            class="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm transition-colors hover:bg-surface-overlay"
+          >
+            <Icon icon={bluetoothIcon} class="h-4 w-4 shrink-0 text-accent" />
+            <div class="min-w-0">
+              <p class="text-xs font-medium text-text-primary">{t("btn.makeDiscoverable")}</p>
+              <p class="text-[0.6875rem] text-text-muted">{t("help.makeDiscoverable")}</p>
+            </div>
+          </button>
+        </div>
+      {/if}
+
       <!-- Manual add form -->
-      {#if showManualAdd && !scanning}
+      {#if showManualAdd && !scanning && !discoverable}
         <div class="space-y-2 px-4 pb-3 sm:px-5">
           <div class="grid grid-cols-2 gap-2">
             <input

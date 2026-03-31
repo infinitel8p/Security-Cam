@@ -1,9 +1,45 @@
 #!/bin/bash
 # Scan for nearby Bluetooth devices and pair with a selected one
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SETTINGS_FILE="$SCRIPT_DIR/../client/settings/settings.json"
+
 # Ensure Bluetooth is unblocked and powered on
 sudo rfkill unblock bluetooth > /dev/null 2>&1
 bluetoothctl power on > /dev/null 2>&1
+
+# Register a paired device in settings.json for presence detection
+register_device() {
+    local mac="$1"
+    local name="$2"
+
+    if [ ! -f "$SETTINGS_FILE" ]; then
+        echo "  (settings.json not found - device paired but not registered for presence detection)"
+        return
+    fi
+
+    # Check if already registered
+    if grep -qi "$mac" "$SETTINGS_FILE" 2>/dev/null; then
+        echo "  Device already registered in settings."
+        return
+    fi
+
+    # Add to TARGET_BT_ADDRESSES using python (safe JSON manipulation)
+    python3 -c "
+import json, sys
+try:
+    with open('$SETTINGS_FILE', 'r') as f:
+        s = json.load(f)
+    bt = s.get('TARGET_BT_ADDRESSES', [])
+    bt.append({'address': '$mac', 'name': '$name'})
+    s['TARGET_BT_ADDRESSES'] = bt
+    with open('$SETTINGS_FILE', 'w') as f:
+        json.dump(s, f, indent=4)
+    print('  Device registered for presence detection.')
+except Exception as e:
+    print(f'  Warning: could not register device: {e}', file=sys.stderr)
+"
+}
 
 run_scan_mode() {
     echo ""
@@ -94,6 +130,7 @@ PAIR_EOF
     echo ""
     if bluetoothctl info "$mac" 2>/dev/null | grep -q "Paired: yes"; then
         echo "Done! $name ($mac) is paired and trusted."
+        register_device "$mac" "$name"
         return 0
     else
         echo "Pairing may have failed. Check manually with: bluetoothctl info $mac"
@@ -160,6 +197,7 @@ WAIT_EOF
         bluetoothctl trust "$mac" > /dev/null 2>&1
         echo ""
         echo "Done! $name ($mac) is paired and trusted."
+        register_device "$mac" "$name"
         return 0
     else
         echo ""

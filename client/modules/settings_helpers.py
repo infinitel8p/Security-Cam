@@ -139,6 +139,40 @@ def unpair_bt_device(device_mac: str) -> bool:
     return True
 
 
+def make_bt_discoverable(timeout: int = 90) -> dict:
+    """Make the Pi discoverable and wait for incoming pairing.
+    Returns {"address": "...", "name": "..."} on success, or raises RuntimeError."""
+    log.info("Making Pi BT-discoverable for %ds ...", timeout)
+    current_dir = os.path.dirname(os.path.realpath(__file__))
+    script_path = os.path.join(current_dir, "shell/discoverable.sh")
+
+    if not os.path.exists(script_path):
+        log.error("discoverable.sh not found at %s", script_path)
+        raise FileNotFoundError("discoverable.sh not found")
+
+    subprocess.run(["chmod", "+x", script_path],
+                   check=True, capture_output=True, text=True)
+
+    result = subprocess.run(
+        [script_path, str(timeout)],
+        capture_output=True, text=True,
+        timeout=timeout + 15)  # extra margin for script cleanup
+
+    output = result.stdout.strip()
+    log.debug("discoverable.sh output: %s", output)
+
+    for line in output.splitlines():
+        if line.startswith("PAIRED "):
+            parts = line.split(" ", 2)
+            mac = parts[1] if len(parts) > 1 else ""
+            name = parts[2] if len(parts) > 2 else mac
+            log.info("BT discoverable: paired with %s (%s)", name, mac)
+            return {"address": mac, "name": name}
+
+    log.info("BT discoverable: no device paired within timeout")
+    raise RuntimeError("No device paired within the time limit")
+
+
 ##### Directory helper functions #####
 
 
