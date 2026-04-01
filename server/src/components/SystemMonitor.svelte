@@ -155,9 +155,15 @@
 
       <!-- CPU Load + Uptime -->
       <div class="px-3 py-2">
-        <div class="flex items-center gap-1.5">
-          <Icon icon={cpuIcon} class="h-3 w-3 text-text-muted" stroke={2} />
-          <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.cpu")}</p>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-1.5">
+            <Icon icon={cpuIcon} class="h-3 w-3 text-text-muted" stroke={2} />
+            <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.cpu")}</p>
+          </div>
+          <p class="flex items-center gap-1 text-[0.5625rem] tabular-nums text-text-muted">
+            <Icon icon={clockIcon} class="h-2.5 w-2.5" stroke={2} />
+            {formatUptime(info.uptime_seconds)}
+          </p>
         </div>
         <p class="mt-0.5 text-base font-bold tabular-nums leading-none text-text-primary">
           {loadPct}<span class="text-[0.5625rem] font-medium">%</span>
@@ -165,10 +171,6 @@
         <div class="mt-1 h-0.5 rounded-full {barTrackColor(loadPct)}">
           <div class="h-full rounded-full {barColor(loadPct)} animate-bar" style="width: {loadPct}%"></div>
         </div>
-        <p class="mt-1.5 flex items-center gap-1 text-[0.5625rem] text-text-muted">
-          <Icon icon={clockIcon} class="h-2.5 w-2.5" stroke={2} />
-          {t("label.uptime")}: {formatUptime(info.uptime_seconds)}
-        </p>
       </div>
     </div>
 
@@ -191,7 +193,7 @@
         </div>
         {#if info.sd_health}
           <p class="mt-1.5 text-[0.5625rem] tabular-nums text-text-muted">
-            {info.sd_health.name ?? "SD"}{#if info.sd_health.manufacturing_date}{" "}· {info.sd_health.manufacturing_date}{/if}{#if info.sd_health.written_since_boot_gb != null}{" "}· {info.sd_health.written_since_boot_gb.toFixed(1)} GB {t("label.written").toLowerCase()}{/if}
+            {info.sd_health.name ?? "SD"}{#if info.sd_health.manufacturing_date}{" "}· {info.sd_health.manufacturing_date}{/if}
           </p>
         {/if}
       </div>

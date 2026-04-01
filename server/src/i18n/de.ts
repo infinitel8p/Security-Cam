@@ -119,6 +119,7 @@ export default {
     uptime: "Laufzeit",
     sdCard: "SD-Karte",
     written: "Geschrieben",
+    writtenSinceBoot: "Geschrieben seit Boot",
     lifeEst: "Lebensdauer",
     throttle: "Drosselung",
     sensor: "Sensor",

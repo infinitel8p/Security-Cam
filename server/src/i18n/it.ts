@@ -120,6 +120,7 @@ export default {
     uptime: "Uptime",
     sdCard: "Scheda SD",
     written: "Scritto",
+    writtenSinceBoot: "Scritto dal boot",
     lifeEst: "Vita stim.",
     throttle: "Limitazione",
     sensor: "Sensore",

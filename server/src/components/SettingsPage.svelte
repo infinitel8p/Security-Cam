@@ -39,6 +39,9 @@
   let timelapseResolution = $state("640x480");
   let timelapseSaving = $state(false);
   let timelapseFrameCount = $state(0);
+  let sdWrittenGb = $state<number | null>(null);
+  let sdName = $state<string | null>(null);
+  let sdDate = $state<string | null>(null);
   let loading = $state(true);
   let error = $state(false);
   let activeSection = $state("appearance");
@@ -165,12 +168,25 @@
         // Silent
       }
 
-      // Fetch live disk usage
+      // Fetch live disk usage + SD health
       try {
         const storageRes = await fetch(`${getBackendUrl()}/storage/status`);
         if (storageRes.ok) {
           const st = await storageRes.json();
           storageDiskPercent = st.disk_percent ?? 0;
+        }
+      } catch { /* non-critical */ }
+
+      try {
+        const sysRes = await fetch(`${getBackendUrl()}/system_info`);
+        if (sysRes.ok) {
+          const sys = await sysRes.json();
+          const sd = sys.sd_health;
+          if (sd) {
+            sdWrittenGb = sd.written_since_boot_gb ?? null;
+            sdName = sd.name ?? null;
+            sdDate = sd.manufacturing_date ?? null;
+          }
         }
       } catch { /* non-critical */ }
     } catch {
@@ -505,6 +521,12 @@
           <h2 class="text-xs font-semibold uppercase tracking-widest text-text-secondary">{t("section.storage")}</h2>
         </div>
         <DirectoryPicker current={saveLocation} />
+
+        {#if sdName || sdWrittenGb != null}
+          <p class="px-1 text-[0.6875rem] tabular-nums text-text-muted">
+            {sdName ?? "SD"}{#if sdDate}{" "}· {sdDate}{/if}{#if sdWrittenGb != null}{" "}· {sdWrittenGb.toFixed(1)} GB {t("label.writtenSinceBoot").toLowerCase()}{/if}
+          </p>
+        {/if}
 
         <!-- Auto-delete -->
         <div class="card overflow-hidden">
