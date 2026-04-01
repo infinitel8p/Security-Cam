@@ -10,7 +10,9 @@
     "build": "astro build",
     "preview": "astro preview",
     "start": "serve dist -l 3000",
-    "astro": "astro"
+    "astro": "astro",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@astrojs/svelte": "^8.0.4",
@@ -22,5 +24,9 @@
     "svelte-5-french-toast": "^2.0.6",
     "tailwindcss": "^4.2.2",
     "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "jsdom": "^29.0.1",
+    "vitest": "^4.1.2"
   }
 }

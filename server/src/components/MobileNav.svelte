@@ -9,6 +9,7 @@
   import archiveIcon from "../icons/archive.svg?raw";
   import settingsIcon from "../icons/settings.svg?raw";
   import fileTextIcon from "../icons/file-text.svg?raw";
+  import activityIcon from "../icons/activity.svg?raw";
 
   let badgeCount = $state(0);
   let alertLevel: AlertLevel = $state("ok");
@@ -81,6 +82,16 @@
     <span class="absolute top-0 left-1/2 h-[2px] w-8 -translate-x-1/2 rounded-b-full bg-accent transition-all duration-200 {isActive('/settings') ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0'}"></span>
     <Icon icon={settingsIcon} class="h-5 w-5 shrink-0" />
     <span class="text-[0.6875rem] leading-none font-medium">{t("nav.settings")}</span>
+  </a>
+
+  <a
+    href="/stats"
+    class="group relative flex min-h-[3rem] flex-1 flex-col items-center justify-center gap-1 py-2.5 transition-colors duration-200
+      {isActive('/stats') ? 'text-accent' : 'text-text-muted'}"
+  >
+    <span class="absolute top-0 left-1/2 h-[2px] w-8 -translate-x-1/2 rounded-b-full bg-accent transition-all duration-200 {isActive('/stats') ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0'}"></span>
+    <Icon icon={activityIcon} class="h-5 w-5 shrink-0" />
+    <span class="text-[0.6875rem] leading-none font-medium">{t("nav.stats")}</span>
   </a>
 
   <a

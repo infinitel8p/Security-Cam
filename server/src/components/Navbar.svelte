@@ -9,6 +9,7 @@
   import archiveIcon from "../icons/archive.svg?raw";
   import settingsIcon from "../icons/settings.svg?raw";
   import fileTextIcon from "../icons/file-text.svg?raw";
+  import activityIcon from "../icons/activity.svg?raw";
   import brandGithubIcon from "../icons/brand-github-filled.svg?raw";
   import bookIcon from "../icons/book.svg?raw";
 
@@ -36,6 +37,7 @@
     { href: "/", labelKey: "nav.dashboard" as const, icon: layoutGridIcon },
     { href: "/archive", labelKey: "nav.archive" as const, icon: archiveIcon },
     { href: "/settings", labelKey: "nav.settings" as const, icon: settingsIcon },
+    { href: "/stats", labelKey: "nav.stats" as const, icon: activityIcon },
     { href: "/logs", labelKey: "nav.logs" as const, icon: fileTextIcon },
   ];
 

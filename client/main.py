@@ -96,7 +96,7 @@ def system_info():
 
     sd_health = system_helpers.get_sd_health()
 
-    return jsonify({
+    data = {
         "cpu_temp_celsius": cpu_temp,
         "cpu_load_percent": cpu_load,
         "storage_info_gb": storage_info,
@@ -104,7 +104,18 @@ def system_info():
         "uptime_seconds": uptime,
         "throttle": throttle,
         "sd_health": sd_health,
-    })
+    }
+
+    # Include extended stats when requested (used by /stats page)
+    if request.args.get('extended') == '1':
+        data["extended"] = system_helpers.get_extended_stats()
+
+    return jsonify(data)
+
+
+@app.route('/system_stats', methods=['GET'])
+def system_stats():
+    return jsonify(system_helpers.get_extended_stats())
 
 
 @app.route('/system_alert_state', methods=['GET'])

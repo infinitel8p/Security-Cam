@@ -179,3 +179,69 @@ def get_ram_usage():
     total = mem.total / (1024 ** 2)  # Convert bytes to MB
     used = mem.used / (1024 ** 2)    # Convert bytes to MB
     return {'total_mb': round(total), 'used_mb': round(used)}
+
+
+def get_extended_stats():
+    """
+    Returns additional system stats: process count, network I/O,
+    swap usage, CPU core count, boot timestamp, and hostname.
+    """
+    import socket
+    from datetime import datetime, timezone
+
+    stats = {}
+
+    # Process count
+    stats["process_count"] = len(psutil.pids())
+
+    # CPU cores
+    stats["cpu_count"] = psutil.cpu_count(logical=True)
+
+    # Per-core load
+    per_core = psutil.cpu_percent(interval=0, percpu=True)
+    stats["cpu_per_core"] = [round(c) for c in per_core]
+
+    # Boot timestamp (ISO 8601)
+    boot = datetime.fromtimestamp(psutil.boot_time(), tz=timezone.utc)
+    stats["boot_time"] = boot.isoformat()
+
+    # Hostname
+    stats["hostname"] = socket.gethostname()
+
+    # Network I/O (bytes sent/received since boot)
+    net = psutil.net_io_counters()
+    if net:
+        stats["network"] = {
+            "bytes_sent": net.bytes_sent,
+            "bytes_recv": net.bytes_recv,
+            "packets_sent": net.packets_sent,
+            "packets_recv": net.packets_recv,
+        }
+
+    # Swap
+    swap = psutil.swap_memory()
+    stats["swap"] = {
+        "total_mb": round(swap.total / (1024 ** 2)),
+        "used_mb": round(swap.used / (1024 ** 2)),
+        "percent": round(swap.percent),
+    }
+
+    # Load averages (1, 5, 15 min)
+    try:
+        load1, load5, load15 = psutil.getloadavg()
+        stats["load_avg"] = {
+            "1min": round(load1, 2),
+            "5min": round(load5, 2),
+            "15min": round(load15, 2),
+        }
+    except (AttributeError, OSError):
+        pass
+
+    # Python and OS info
+    import sys
+    import platform
+    stats["python_version"] = platform.python_version()
+    stats["os_info"] = platform.platform()
+    stats["arch"] = platform.machine()
+
+    return stats

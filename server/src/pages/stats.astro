@@ -1,0 +1,23 @@
+---
+import Layout from "../layouts/Layout.astro";
+import StatsPage from "../components/StatsPage.svelte";
+import I18nText from "../components/I18nText.svelte";
+import Icon from "../components/Icon.svelte";
+import activityIcon from "../icons/activity.svg?raw";
+---
+
+<Layout title="Stats - Security Cam">
+	<div class="mx-auto max-w-5xl">
+		<div class="animate-in flex items-center gap-3.5">
+			<div
+				class="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 shadow-[0_0_20px_rgba(77,148,255,0.08)]">
+				<Icon icon={activityIcon} class="size-5 text-accent" />
+			</div>
+			<h1
+				class="text-xl font-bold tracking-tight text-text-primary sm:text-2xl">
+				<I18nText key="page.stats" fallback="Stats" client:load />
+			</h1>
+		</div>
+		<StatsPage client:load />
+	</div>
+</Layout>
