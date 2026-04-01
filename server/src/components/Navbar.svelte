@@ -16,9 +16,9 @@
   const path = $derived(typeof window !== "undefined" ? window.location.pathname : "/");
 
   const links = [
-    { href: "/", labelKey: "nav.2026.04.01.8
-    { href: "/archive", labelKey: "nav.2026.04.01.8
-    { href: "/settings", labelKey: "nav.2026.04.01.8
+    { href: "/", labelKey: "nav.dashboard" as const, icon: layoutGridIcon },
+    { href: "/archive", labelKey: "nav.archive" as const, icon: archiveIcon },
+    { href: "/settings", labelKey: "nav.settings" as const, icon: settingsIcon },
   ];
 
   function isActive(href: string): boolean {
@@ -36,8 +36,8 @@
     </div>
     <div>
       <span class="text-[0.8125rem] font-bold tracking-tight text-text-primary">Security-Cam</span>
-      <p class="text-[0.625rem] leading-none font-medium uppercase tracking-widest text-text-muted">
-        v.2026.04.01.8
+      <p class="text-[0.625rem] leading-none font-medium font-mono tracking-widest text-text-muted">
+        v.2026.04.01.9
       </p>
     </div>
   </div>
@@ -67,12 +67,12 @@
     <div class="flex items-center justify-between px-1">
       <div class="flex items-center gap-1">
         <a
-          href="https://dev.2026.04.01.8
+          href="https://dev.infinitel8p.com/Security-Cam/docs/intro"
           target="_blank"
           rel="noopener noreferrer"
           class="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors duration-150 hover:bg-surface-overlay hover:text-text-secondary"
-          title={t("nav.2026.04.01.8
-          aria-label={t("nav.2026.04.01.8
+          title={t("nav.docs")}
+          aria-label={t("nav.docs")}
         >
           <Icon icon={bookIcon} class="h-4 w-4" />
         </a>

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
   import toast from "svelte-5-french-toast";
   import { t } from "../i18n";
@@ -23,10 +24,13 @@
     onRemove: (address: string) => Promise<void>;
     scanEndpoint: string;
     scanResultKey: string;
+    scanDuration?: number;
     statuses?: Record<string, boolean>;
   }
 
-  let { title, icon, devices, onAdd, onRemove, scanEndpoint, scanResultKey, statuses = {} }: Props = $props();
+  const DISCOVERABLE_TIMEOUT = 90;
+
+  let { title, icon, devices, onAdd, onRemove, scanEndpoint, scanResultKey, scanDuration = 10, statuses = {} }: Props = $props();
 
   function isOnline(address: string): boolean | undefined {
     const key = address.toUpperCase();
@@ -62,15 +66,45 @@
     // The backend request is still running (or already timed out).
     // Show the animation and clear it when the timestamp expires.
     showScanPanel = true;
-    const remaining = savedUntil - Date.now();
+    const remainingMs = savedUntil - Date.now();
+    startCountdown(Math.max(0, Math.ceil(remainingMs / 1000)));
     setTimeout(() => {
       if (discoverable) {
         discoverable = false;
         discoverableError = "";
+        stopTimer();
         sessionStorage.removeItem(DISCO_KEY);
       }
-    }, remaining);
+    }, remainingMs);
   }
+
+  // Countdown / elapsed timer for scanning / discoverable states
+  let remaining = $state(0);
+  let timerInterval: ReturnType<typeof setInterval> | undefined;
+
+  function startCountdown(seconds: number) {
+    remaining = seconds;
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      remaining = Math.max(0, remaining - 1);
+    }, 1000);
+  }
+
+  function stopTimer() {
+    clearInterval(timerInterval);
+    timerInterval = undefined;
+  }
+
+  onDestroy(() => stopTimer());
+
+  function formatTime(s: number): string {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return m > 0 ? `${m}:${String(sec).padStart(2, "0")}` : `0:${String(sec).padStart(2, "0")}`;
+  }
+
+  // Abort controller for cancellable requests
+  let abortController: AbortController | undefined;
 
   function isAlreadyAdded(address: string): boolean {
     return devices.some(d => d.address.toLowerCase() === address.toLowerCase());
@@ -82,10 +116,13 @@
     scanning = true;
     scanError = "";
     scanResults = [];
+    abortController = new AbortController();
+    startCountdown(scanDuration);
 
     try {
       const res = await fetch(`${getBackendUrl()}${scanEndpoint}`, {
         method: scanEndpoint.includes("scan") ? "POST" : "GET",
+        signal: abortController?.signal,
       });
       const data = await res.json();
 
@@ -98,10 +135,14 @@
       if (scanResults.length === 0) {
         scanError = t("status.noData");
       }
-    } catch {
-      scanError = t("error.connectionStatus");
+    } catch (e) {
+      if (!(e instanceof DOMException && e.name === "AbortError")) {
+        scanError = t("error.connectionStatus");
+      }
     } finally {
       scanning = false;
+      stopTimer();
+      abortController = undefined;
     }
   }
 
@@ -163,13 +204,16 @@
     discoverableError = "";
     showManualAdd = false;
     showScanPanel = true;
-    sessionStorage.setItem(DISCO_KEY, String(Date.now() + 90_000));
+    abortController = new AbortController();
+    startCountdown(DISCOVERABLE_TIMEOUT);
+    sessionStorage.setItem(DISCO_KEY, String(Date.now() + DISCOVERABLE_TIMEOUT * 1000));
 
     try {
       const res = await fetch(`${getBackendUrl()}/bt/discoverable`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ timeout: 90 }),
+        body: JSON.stringify({ timeout: DISCOVERABLE_TIMEOUT }),
+        signal: abortController?.signal,
       });
       const data = await res.json();
 
@@ -185,18 +229,26 @@
         devices = [...devices, device];
       }
       toast.success(t("toast.deviceAdded", { name: device?.name || "device" }));
-    } catch {
-      discoverableError = t("error.connectionStatus");
+    } catch (e) {
+      if (!(e instanceof DOMException && e.name === "AbortError")) {
+        discoverableError = t("error.connectionStatus");
+      }
     } finally {
+      stopTimer();
       discoverable = false;
+      abortController = undefined;
       sessionStorage.removeItem(DISCO_KEY);
     }
   }
 
   function closeScanPanel() {
+    abortController?.abort();
+    abortController = undefined;
+    stopTimer();
+    scanning = false;
+    discoverable = false;
     showScanPanel = false;
     showManualAdd = false;
-    discoverable = false;
     scanResults = [];
     scanError = "";
     discoverableError = "";
@@ -256,16 +308,16 @@
           {:else}
             <span class="h-2 w-2 shrink-0 rounded-full bg-text-muted/30"></span>
           {/if}
-          <div class="flex min-w-0 flex-1 items-center gap-3">
+          <div class="flex min-w-0 flex-1 items-baseline gap-3">
             <span class="truncate text-sm font-medium text-text-primary">{device.name}</span>
             {#if device.name.toLowerCase() !== device.address.toLowerCase()}
-              <code class="shrink-0 text-[0.6875rem] font-medium text-text-muted">{device.address}</code>
+              <code class="shrink-0 font-mono text-xs font-medium text-text-muted">{device.address}</code>
             {/if}
           </div>
           <button
             onclick={() => handleRemove(device.address)}
             disabled={removingAddress === device.address}
-            class="shrink-0 rounded-md p-2 text-text-muted opacity-0 transition-all hover:bg-status-critical/10 hover:text-status-critical group-hover:opacity-100 disabled:opacity-50"
+            class="shrink-0 rounded-md p-2 text-text-muted transition-all hover:bg-status-critical/10 hover:text-status-critical sm:opacity-0 sm:group-hover:opacity-100 disabled:opacity-50"
             title={t("btn.removeDevice")}
             aria-label={t("btn.removeDevice")}
           >
@@ -282,14 +334,23 @@
 
   <!-- Actions bar -->
   {#if devices.length > 0 && !showScanPanel}
-    <div class="border-t border-border-subtle px-4 py-2.5 sm:px-5">
+    <div class="flex items-center gap-3 border-t border-border-subtle px-4 py-2.5 sm:px-5">
       <button
         onclick={startScan}
         class="inline-flex items-center gap-1.5 rounded-lg text-xs font-medium text-text-muted transition-colors hover:text-accent"
       >
-        <Icon icon={plusIcon} class="h-3 w-3" />
-        {t("btn.addDevice")}
+        <Icon icon={searchIcon} class="h-3 w-3" />
+        {t("btn.scanForDevices")}
       </button>
+      {#if icon === "bluetooth"}
+        <button
+          onclick={startDiscoverable}
+          class="inline-flex items-center gap-1.5 rounded-lg text-xs font-medium text-text-muted transition-colors hover:text-accent"
+        >
+          <Icon icon={bluetoothIcon} class="h-3 w-3" />
+          {t("btn.makeDiscoverable")}
+        </button>
+      {/if}
     </div>
   {/if}
 
@@ -320,8 +381,7 @@
           {/if}
           <button
             onclick={closeScanPanel}
-            disabled={scanning || discoverable}
-            class="text-[0.6875rem] font-medium text-text-muted transition-colors hover:text-text-primary disabled:opacity-50"
+            class="text-[0.6875rem] font-medium text-text-muted transition-colors hover:text-text-primary"
           >
             {t("btn.close")}
           </button>
@@ -342,6 +402,7 @@
           </div>
           <p class="text-xs text-text-muted">
             {icon === "bluetooth" ? t("help.searchingBluetooth") : t("help.checkingWiFi")}
+            <span class="ml-1 tabular-nums text-text-muted/60">{formatTime(remaining)}</span>
           </p>
         </div>
       {/if}
@@ -355,7 +416,10 @@
             <Icon icon={bluetoothIcon} class="relative h-5 w-5 text-accent" />
           </div>
           <div class="text-center">
-            <p class="text-xs font-medium text-text-secondary">{t("help.discoverableWaiting")}</p>
+            <p class="text-xs font-medium text-text-secondary">
+              {t("help.discoverableWaiting")}
+              <span class="ml-1 tabular-nums text-text-muted/60">{formatTime(remaining)}</span>
+            </p>
             <p class="mt-1 text-[0.6875rem] text-text-muted">{t("help.discoverableHint")}</p>
           </div>
           {#if discoverableError}
@@ -369,11 +433,13 @@
         <div class="border-t border-border-subtle px-4 py-2.5 sm:px-5">
           <button
             onclick={startDiscoverable}
-            class="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm transition-colors hover:bg-surface-overlay"
+            class="btn-press flex w-full items-center gap-2.5 rounded-xl border border-accent/20 bg-accent/5 px-3 py-2.5 text-left transition-colors hover:border-accent/30 hover:bg-accent/10"
           >
-            <Icon icon={bluetoothIcon} class="h-4 w-4 shrink-0 text-accent" />
+            <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent/10">
+              <Icon icon={bluetoothIcon} class="h-3.5 w-3.5 text-accent" />
+            </div>
             <div class="min-w-0">
-              <p class="text-xs font-medium text-text-primary">{t("btn.makeDiscoverable")}</p>
+              <p class="text-xs font-semibold text-accent">{t("btn.makeDiscoverable")}</p>
               <p class="text-[0.6875rem] text-text-muted">{t("help.makeDiscoverable")}</p>
             </div>
           </button>
@@ -426,7 +492,7 @@
                   {#if device.name}
                     <span class="truncate text-sm font-medium text-text-primary">{device.name}</span>
                   {/if}
-                  <code class="shrink-0 text-[0.6875rem] font-medium text-text-muted">{device.address}</code>
+                  <code class="shrink-0 font-mono text-[0.6875rem] font-medium text-text-muted">{device.address}</code>
                 </div>
                 {#if !device.name}
                   <input

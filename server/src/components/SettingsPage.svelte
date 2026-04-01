@@ -546,6 +546,7 @@
             onRemove={removeBtDevice}
             scanEndpoint="/bt/scan"
             scanResultKey="devices"
+            scanDuration={25}
             statuses={deviceStatuses.bt}
           />
           <DeviceList
@@ -556,6 +557,7 @@
             onRemove={removeWifiDevice}
             scanEndpoint="/wifi/stations"
             scanResultKey="stations"
+            scanDuration={5}
             statuses={deviceStatuses.wifi}
           />
         </div>

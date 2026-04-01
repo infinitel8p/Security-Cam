@@ -24,6 +24,7 @@ send "default-agent\r"
 send "discoverable on\r"
 send "pairable on\r"
 
+set paired 0
 expect {
     "Confirm passkey" {
         send "yes\r"
@@ -44,6 +45,11 @@ expect {
         send "yes\r"
         set timeout 15
         exp_continue
+    }
+    -re "CHG.*Paired: yes" {
+        set paired 1
+        # Give a moment for trust/services to settle
+        sleep 2
     }
     timeout {}
 }
