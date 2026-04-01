@@ -61,6 +61,8 @@
   let snapshotsExpanded = $state(false);
   let snapLimit = $state(4);
 
+  let resizeTimer: ReturnType<typeof setTimeout> | null = null;
+
   function updateSnapLimit() {
     if (typeof window === "undefined") return;
     const w = window.innerWidth;
@@ -68,6 +70,11 @@
     else if (w >= 768) snapLimit = 4;   // md: grid-cols-4 → 1 row
     else if (w >= 640) snapLimit = 6;   // sm: grid-cols-3 → 2 rows
     else snapLimit = 4;                 // base: grid-cols-2 → 2 rows
+  }
+
+  function debouncedSnapLimit() {
+    if (resizeTimer) clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(updateSnapLimit, 250);
   }
   let deletingSnapshot: string | null = $state(null);
   let expandedSnap: Snapshot | null = $state(null);
@@ -79,6 +86,7 @@
   }
   let allTimelapses: Timelapse[] = $state([]);
   let timelapsesOpen = $state(false);
+  let timelapsesExpanded = $state(false);
   let deletingTimelapse: string | null = $state(null);
   let loading = $state(true);
   let error = $state(false);
@@ -292,7 +300,7 @@
   onMount(() => {
     initLocale();
     updateSnapLimit();
-    window.addEventListener("resize", updateSnapLimit);
+    window.addEventListener("resize", debouncedSnapLimit);
     // Read the last-seen timestamp before marking as seen
     const stored = localStorage.getItem("lastSeenArchive");
     lastSeenTs = stored ? new Date(stored).getTime() : 0;
@@ -301,7 +309,10 @@
     fetchTimelapses();
     // Mark archive as seen (clears the nav badge)
     markSeen();
-    return () => window.removeEventListener("resize", updateSnapLimit);
+    return () => {
+      window.removeEventListener("resize", debouncedSnapLimit);
+      if (resizeTimer) clearTimeout(resizeTimer);
+    };
   });
 
   function streamUrl(path: string): string {
@@ -574,9 +585,12 @@
     </button>
 
     {#if timelapsesOpen}
+      {@const TL_LIMIT = 3}
+      {@const visibleTimelapses = timelapsesExpanded ? allTimelapses : allTimelapses.slice(0, TL_LIMIT)}
+      {@const hasMoreTl = allTimelapses.length > TL_LIMIT}
       <div class="animate-slide-down border-t border-border-subtle px-4 py-3">
         <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-          {#each allTimelapses as tl}
+          {#each visibleTimelapses as tl}
             <div class="group overflow-hidden rounded-lg border border-border-subtle bg-surface-overlay">
               <video
                 src={timelapseVideoUrl(tl.path)}
@@ -610,6 +624,14 @@
             </div>
           {/each}
         </div>
+        {#if hasMoreTl}
+          <button
+            onclick={() => timelapsesExpanded = !timelapsesExpanded}
+            class="mt-2.5 w-full rounded-lg py-1.5 text-[0.75rem] font-medium text-text-muted transition-colors hover:bg-surface-overlay hover:text-text-secondary"
+          >
+            {timelapsesExpanded ? t("btn.showLess") : `${t("btn.showMore")} (${allTimelapses.length - TL_LIMIT})`}
+          </button>
+        {/if}
       </div>
     {/if}
   </div>

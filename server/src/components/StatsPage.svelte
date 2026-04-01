@@ -354,7 +354,7 @@
 {:else if info}
   <div class="mt-6">
     <!-- Uptime + Identity — compact inline row -->
-    <div class="card flex flex-wrap items-center gap-x-4 gap-y-1.5 px-4 py-3 min-w-0 sm:gap-x-6 animate-in transition-[border-color] duration-700 {allNominal ? 'border-l-2 border-l-status-ok/40' : ''}">
+    <div class="card flex flex-wrap items-center gap-x-4 gap-y-1.5 px-4 py-3 min-w-0 sm:gap-x-6 animate-in transition-shadow duration-700 {allNominal ? 'shadow-[inset_3px_0_0_0_rgba(52,217,172,0.35)]' : ''}">
       <div class="flex items-center gap-2 shrink-0">
         <Icon icon={clockIcon} class="h-3.5 w-3.5 {allNominal ? 'text-status-ok' : 'text-accent'} transition-colors duration-700" stroke={2} />
         <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.uptime")}</p>

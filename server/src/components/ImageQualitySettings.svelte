@@ -81,8 +81,8 @@
       applied = currentValues();
       toast.success(t("toast.ispApplied"), { duration: 4000 });
       preview?.reconnect();
-    } catch (e: any) {
-      toast.error(e.message || t("toast.ispFailed"), { duration: 5000 });
+    } catch (e) {
+      toast.error((e as Error).message || t("toast.ispFailed"), { duration: 5000 });
     } finally {
       saving = false;
     }
@@ -104,10 +104,12 @@
   const labelClass = "text-[0.6875rem] font-semibold text-text-muted";
   const badgeClass = "rounded bg-surface-elevated px-1.5 py-0.5 text-[0.625rem] font-semibold tabular-nums transition-colors duration-200";
 
-  /** Compute fill percentage for a slider given its value and range */
-  function fillPct(val: number, min: number, max: number): number {
-    return ((val - min) / (max - min)) * 100;
-  }
+  // Derived fill percentages for slider tracks (cached, only recompute on value change)
+  let fillB = $derived(((b - (-1)) / (1 - (-1))) * 100);
+  let fillC = $derived(((c - 0) / (16 - 0)) * 100);
+  let fillSat = $derived(((sat - 0) / (16 - 0)) * 100);
+  let fillSh = $derived(((sh - 0) / (16 - 0)) * 100);
+  let fillEv = $derived(((evVal - (-10)) / (10 - (-10))) * 100);
 
   const AWB_OPTIONS = ["auto", "daylight", "cloudy", "tungsten", "fluorescent", "indoor", "incandescent"] as const;
   const EXPOSURE_OPTIONS = ["normal", "short", "long"] as const;
@@ -151,7 +153,7 @@
           <span class="{badgeClass} {b !== DEFAULTS.brightness ? 'text-accent' : 'text-text-primary'}">{b.toFixed(1)}</span>
         </div>
         <input id="isp-brightness" type="range" class="range-slider range-fill w-full" min="-1" max="1" step="0.1" bind:value={b} disabled={saving}
-          style="--fill: {fillPct(b, -1, 1)}%" />
+          style="--fill: {fillB}%" />
       </div>
 
       <!-- Contrast -->
@@ -164,7 +166,7 @@
           <span class="{badgeClass} {c !== DEFAULTS.contrast ? 'text-accent' : 'text-text-primary'}">{c.toFixed(1)}</span>
         </div>
         <input id="isp-contrast" type="range" class="range-slider range-fill w-full" min="0" max="16" step="0.5" bind:value={c} disabled={saving}
-          style="--fill: {fillPct(c, 0, 16)}%" />
+          style="--fill: {fillC}%" />
       </div>
 
       <!-- Saturation -->
@@ -177,7 +179,7 @@
           <span class="{badgeClass} {sat !== DEFAULTS.saturation ? 'text-accent' : 'text-text-primary'}">{sat.toFixed(1)}</span>
         </div>
         <input id="isp-saturation" type="range" class="range-slider range-fill w-full" min="0" max="16" step="0.5" bind:value={sat} disabled={saving}
-          style="--fill: {fillPct(sat, 0, 16)}%" />
+          style="--fill: {fillSat}%" />
       </div>
 
       <!-- Sharpness -->
@@ -190,7 +192,7 @@
           <span class="{badgeClass} {sh !== DEFAULTS.sharpness ? 'text-accent' : 'text-text-primary'}">{sh.toFixed(1)}</span>
         </div>
         <input id="isp-sharpness" type="range" class="range-slider range-fill w-full" min="0" max="16" step="0.5" bind:value={sh} disabled={saving}
-          style="--fill: {fillPct(sh, 0, 16)}%" />
+          style="--fill: {fillSh}%" />
       </div>
 
       <!-- EV -->
@@ -203,7 +205,7 @@
           <span class="{badgeClass} {evVal !== DEFAULTS.ev ? 'text-accent' : 'text-text-primary'}">{evVal > 0 ? "+" : ""}{evVal}</span>
         </div>
         <input id="isp-ev" type="range" class="range-slider range-fill w-full" min="-10" max="10" step="1" bind:value={evVal} disabled={saving}
-          style="--fill: {fillPct(evVal, -10, 10)}%" />
+          style="--fill: {fillEv}%" />
       </div>
     </div>
 

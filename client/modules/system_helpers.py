@@ -181,6 +181,86 @@ def get_ram_usage():
     return {'total_mb': round(total), 'used_mb': round(used)}
 
 
+_static_cache: dict | None = None
+
+
+def _get_static_info() -> dict:
+    """Return platform info that never changes at runtime (cached once)."""
+    global _static_cache
+    if _static_cache is not None:
+        return _static_cache
+
+    import getpass
+    import platform
+    import shutil
+
+    info: dict = {}
+    try:
+        info["username"] = getpass.getuser()
+    except Exception:
+        pass
+    info["python_version"] = platform.python_version()
+    info["os_info"] = platform.platform()
+    info["arch"] = platform.machine()
+    info["kernel"] = platform.release()
+
+    # CPU model
+    try:
+        with open("/proc/cpuinfo", "r") as f:
+            for line in f:
+                if line.lower().startswith("model name"):
+                    info["cpu_model"] = line.split(":", 1)[1].strip()
+                    break
+            else:
+                f.seek(0)
+                for line in f:
+                    if line.lower().startswith("hardware"):
+                        info["cpu_model"] = line.split(":", 1)[1].strip()
+                        break
+    except (FileNotFoundError, PermissionError):
+        proc = platform.processor()
+        if proc:
+            info["cpu_model"] = proc
+
+    # Flask version
+    import flask
+    info["flask_version"] = flask.__version__
+    try:
+        import cv2
+        info["opencv_version"] = cv2.__version__
+    except Exception:
+        pass
+
+    # Node.js version
+    node_bin = shutil.which("node")
+    if node_bin:
+        try:
+            result = subprocess.run(
+                [node_bin, "--version"],
+                capture_output=True, text=True, timeout=2,
+            )
+            if result.returncode == 0:
+                info["node_version"] = result.stdout.strip().lstrip("v")
+        except Exception:
+            pass
+
+    # MediaMTX version
+    mtx_bin = shutil.which("mediamtx") or "/usr/local/bin/mediamtx"
+    try:
+        result = subprocess.run(
+            [mtx_bin, "--version"],
+            capture_output=True, text=True, timeout=2,
+        )
+        out = (result.stdout or result.stderr).strip()
+        if result.returncode == 0 and out:
+            info["mediamtx_version"] = out.split()[-1] if " " in out else out
+    except Exception:
+        pass
+
+    _static_cache = info
+    return _static_cache
+
+
 def get_extended_stats():
     """
     Returns additional system stats: process count, network I/O,
@@ -237,40 +317,10 @@ def get_extended_stats():
     except (AttributeError, OSError):
         pass
 
-    # User, Python, and OS info
-    import getpass
-    import platform
-    import shutil
+    # Static platform info (cached — never changes at runtime)
+    stats.update(_get_static_info())
 
-    try:
-        stats["username"] = getpass.getuser()
-    except Exception:
-        pass
-    stats["python_version"] = platform.python_version()
-    stats["os_info"] = platform.platform()
-    stats["arch"] = platform.machine()
-    stats["kernel"] = platform.release()
-
-    # CPU model (from /proc/cpuinfo or platform)
-    try:
-        with open("/proc/cpuinfo", "r") as f:
-            for line in f:
-                if line.lower().startswith("model name"):
-                    stats["cpu_model"] = line.split(":", 1)[1].strip()
-                    break
-            else:
-                # ARM Pis use "Hardware" line instead
-                f.seek(0)
-                for line in f:
-                    if line.lower().startswith("hardware"):
-                        stats["cpu_model"] = line.split(":", 1)[1].strip()
-                        break
-    except (FileNotFoundError, PermissionError):
-        proc = platform.processor()
-        if proc:
-            stats["cpu_model"] = proc
-
-    # Network interfaces — find primary IP and wifi SSID
+    # Dynamic network info (can change if WiFi reconnects)
     try:
         addrs = psutil.net_if_addrs()
         for iface in ("wlan0", "wlan1", "eth0", "end0"):
@@ -285,7 +335,8 @@ def get_extended_stats():
     except Exception:
         pass
 
-    # WiFi SSID (only on Linux with iw)
+    # WiFi SSID (dynamic — can change on reconnect)
+    import shutil
     if shutil.which("iw"):
         try:
             result = subprocess.run(
@@ -300,40 +351,5 @@ def get_extended_stats():
                         break
         except Exception:
             pass
-
-    # Key package versions
-    import flask
-    stats["flask_version"] = flask.__version__
-    try:
-        import cv2
-        stats["opencv_version"] = cv2.__version__
-    except Exception:
-        pass
-
-    # Node.js version (used by the frontend build)
-    node_bin = shutil.which("node")
-    if node_bin:
-        try:
-            result = subprocess.run(
-                [node_bin, "--version"],
-                capture_output=True, text=True, timeout=2
-            )
-            if result.returncode == 0:
-                stats["node_version"] = result.stdout.strip().lstrip("v")
-        except Exception:
-            pass
-
-    # MediaMTX version
-    mtx_bin = shutil.which("mediamtx") or "/usr/local/bin/mediamtx"
-    try:
-        result = subprocess.run(
-            [mtx_bin, "--version"],
-            capture_output=True, text=True, timeout=2,
-        )
-        out = (result.stdout or result.stderr).strip()
-        if result.returncode == 0 and out:
-            stats["mediamtx_version"] = out.split()[-1] if " " in out else out
-    except Exception:
-        pass
 
     return stats

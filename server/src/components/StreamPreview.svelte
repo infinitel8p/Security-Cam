@@ -140,6 +140,7 @@
     autoplay
     playsinline
     muted
+    aria-label="Camera preview"
     class="h-full w-full object-contain {connected ? 'animate-video-reveal' : ''}"
     class:hidden={!connected}
   ></video>

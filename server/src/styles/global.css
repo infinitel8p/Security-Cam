@@ -398,8 +398,8 @@ body {
 .range-fill {
   background: linear-gradient(
     to right,
-    color-mix(in srgb, var(--color-accent) 40%, transparent) 0%,
-    color-mix(in srgb, var(--color-accent) 40%, transparent) var(--fill, 0%),
+    rgba(77, 148, 255, 0.4) 0%,
+    rgba(77, 148, 255, 0.4) var(--fill, 0%),
     var(--color-surface-elevated) var(--fill, 0%),
     var(--color-surface-elevated) 100%
   );
@@ -407,8 +407,8 @@ body {
 .range-fill::-moz-range-track {
   background: linear-gradient(
     to right,
-    color-mix(in srgb, var(--color-accent) 40%, transparent) 0%,
-    color-mix(in srgb, var(--color-accent) 40%, transparent) var(--fill, 0%),
+    rgba(77, 148, 255, 0.4) 0%,
+    rgba(77, 148, 255, 0.4) var(--fill, 0%),
     var(--color-surface-elevated) var(--fill, 0%),
     var(--color-surface-elevated) 100%
   );
