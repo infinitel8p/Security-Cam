@@ -32,7 +32,7 @@ if [ "$1" = "--force" ]; then
 fi
 
 # --- Fix ownership so both root (service) and pi (ssh) can use the repo ---
-chown -R pi:pi "$PROJECT_DIR/.git" 2>/dev/null || true
+chown -R pi:pi "$PROJECT_DIR" 2>/dev/null || true
 
 # --- Pull latest code as pi user (skip if no internet) ---
 echo "=== Pulling latest code ==="
