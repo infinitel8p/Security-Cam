@@ -134,7 +134,7 @@ def report_bt_status(addr: str, online: bool):
 
 def _check_presence():
     """Poll device statuses and log arrive/leave transitions."""
-    global _bt_state, _wifi_state
+    global _bt_state, _wifi_state, _bt_miss_count
 
     settings = settings_helpers.get_settings()
     bt_devices = settings.get("TARGET_BT_ADDRESSES", [])
