@@ -10,3 +10,4 @@ client/settings/settings.json
 client/data/health_log.json
 client/data/event_log.json
 logs/
+.install_stamps/
