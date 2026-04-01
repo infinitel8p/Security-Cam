@@ -2,6 +2,7 @@
   import { onMount, onDestroy } from "svelte";
   import { initLocale, t } from "../i18n";
   import { initArchiveBadge, subscribe as subscribeBadge } from "../lib/archive-badge";
+  import { initSystemAlerts, subscribe as subscribeAlert, type AlertLevel } from "../lib/system-alert";
   import ThemeToggle from "./ThemeToggle.svelte";
   import Icon from "./Icon.svelte";
   import layoutGridIcon from "../icons/layout-grid.svg?raw";
@@ -10,16 +11,21 @@
   import fileTextIcon from "../icons/file-text.svg?raw";
 
   let badgeCount = $state(0);
+  let alertLevel: AlertLevel = $state("ok");
   let unsubBadge: (() => void) | null = null;
+  let unsubAlert: (() => void) | null = null;
 
   onMount(() => {
     initLocale();
     initArchiveBadge();
+    initSystemAlerts();
     unsubBadge = subscribeBadge((count) => { badgeCount = count; });
+    unsubAlert = subscribeAlert((state) => { alertLevel = state.overall; });
   });
 
   onDestroy(() => {
     unsubBadge?.();
+    unsubAlert?.();
   });
 
   const path = $derived(typeof window !== "undefined" ? window.location.pathname : "/");
@@ -41,7 +47,12 @@
       {isActive('/') ? 'text-accent' : 'text-text-muted'}"
   >
     <span class="absolute top-0 left-1/2 h-[2px] w-8 -translate-x-1/2 rounded-b-full bg-accent transition-all duration-200 {isActive('/') ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0'}"></span>
-    <Icon icon={layoutGridIcon} class="h-5 w-5 shrink-0" />
+    <span class="relative">
+      <Icon icon={layoutGridIcon} class="h-5 w-5 shrink-0" />
+      {#if alertLevel !== "ok" && !isActive('/')}
+        <span class="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full {alertLevel === 'critical' ? 'bg-status-critical animate-pulse' : 'bg-status-warning'}"></span>
+      {/if}
+    </span>
     <span class="text-[0.6875rem] leading-none font-medium">{t("nav.dashboard")}</span>
   </a>
 

@@ -2,7 +2,8 @@
 # Minimal config
 
 logLevel: info
-logDestinations: [stdout, file:/opt/security-cam/logs/mediamtx/mediamtx.log]
+logDestinations: [stdout, file]
+logFile: /opt/security-cam/logs/mediamtx/mediamtx.log
 
 readTimeout: 10s
 writeTimeout: 10s

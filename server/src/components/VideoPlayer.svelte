@@ -6,6 +6,7 @@
   import { initLocale, t } from "../i18n";
   import Icon from "./Icon.svelte";
   import cameraIcon from "../icons/camera.svg?raw";
+  import cameraBoltIcon from "../icons/camera-bolt.svg?raw";
   import alertCircleIcon from "../icons/alert-circle.svg?raw";
   import maximizeIcon from "../icons/maximize.svg?raw";
   import minimizeIcon from "../icons/minimize.svg?raw";
@@ -17,6 +18,7 @@
   let error = $state("");
   let recording = $state(false);
   let toggling = $state(false);
+  let snapping = $state(false);
   let isFullscreen = $state(false);
   let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
   let unsubRecording: (() => void) | undefined;
@@ -210,6 +212,22 @@
     }
   }
 
+  function takeSnapshot() {
+    snapping = true;
+    toast.promise(
+      fetch(`${getBackendUrl()}/snapshot`, { method: "POST" })
+        .then((res) => {
+          if (!res.ok) throw new Error();
+          return res.json();
+        }),
+      {
+        loading: t("status.saving"),
+        success: t("toast.snapshotSaved"),
+        error: t("toast.snapshotFailed"),
+      },
+    ).finally(() => { snapping = false; });
+  }
+
   function manualReconnect() {
     error = "";
     connected = false;
@@ -346,6 +364,15 @@
           </svg>
           {t("btn.record")}
         {/if}
+      </button>
+
+      <button
+        onclick={takeSnapshot}
+        disabled={snapping || !connected}
+        class="flex min-h-[2.75rem] min-w-[2.75rem] items-center justify-center rounded-lg text-text-muted transition-colors duration-150 hover:bg-surface-overlay hover:text-text-secondary disabled:opacity-40 sm:min-h-0 sm:min-w-0 sm:p-1.5"
+        title={t("btn.snapshot")}
+      >
+        <Icon icon={cameraBoltIcon} class="h-4 w-4" stroke={2} />
       </button>
 
       <button

@@ -64,6 +64,7 @@ export default {
     stop: "Ferma",
     fullscreen: "Schermo intero",
     exitFullscreen: "Esci dallo schermo intero",
+    snapshot: "Scatta istantanea",
     cancel: "Annulla",
     delete: "Elimina",
     deleting: "Eliminazione...",
@@ -235,6 +236,8 @@ export default {
     languageChanged: "Lingua aggiornata",
     rotationSaved: "Rotazione aggiornata",
     rotationFailed: "Non è stato possibile salvare la rotazione. Riprova.",
+    snapshotSaved: "Istantanea salvata",
+    snapshotFailed: "Impossibile scattare l'istantanea. Riprova.",
   },
 
   dialog: {
@@ -257,6 +260,28 @@ export default {
     sensorReleased: "Sensore rilasciato",
     sensorArmed: "Sensore armato",
     sensorDisarmed: "Sensore disarmato",
+  },
+
+  alert: {
+    cpu_temp: {
+      warn: "Temperatura CPU alta ({temp}\u00b0C)",
+      critical: "Temperatura CPU critica ({temp}\u00b0C)",
+      resolved: "Temperatura CPU tornata alla normalit\u00e0",
+    },
+    throttle: {
+      critical: "Il sistema \u00e8 in throttling",
+      resolved: "Throttling terminato",
+    },
+    storage: {
+      warn: "Lo spazio di archiviazione si sta esaurendo ({pct}%)",
+      critical: "Lo spazio di archiviazione \u00e8 quasi pieno ({pct}%)",
+      resolved: "Pressione di archiviazione ridotta",
+    },
+    sd_health: {
+      warn: "La scheda SD mostra segni di usura",
+      critical: "La scheda SD si avvicina alla fine della sua vita",
+      resolved: "Salute della scheda SD migliorata",
+    },
   },
 
   time: {

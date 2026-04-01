@@ -31,6 +31,11 @@ def get_videos():
                 if os.path.exists(thumb_path):
                     entry["thumbnail"] = thumb_path
 
+                # Check for sprite sheet
+                spr_path = os.path.splitext(filepath)[0] + ".sprite.jpg"
+                if os.path.exists(spr_path):
+                    entry["sprite"] = spr_path
+
                 videos.append(entry)
 
     # Sort newest first by modification time
@@ -104,7 +109,7 @@ def delete_video(video_path):
     try:
         os.remove(target)
         # Remove sidecar files (metadata, thumbnail) if they exist
-        for ext in (".meta.json", ".thumb.jpg"):
+        for ext in (".meta.json", ".thumb.jpg", ".sprite.jpg"):
             sidecar = os.path.splitext(target)[0] + ext
             if os.path.exists(sidecar):
                 os.remove(sidecar)

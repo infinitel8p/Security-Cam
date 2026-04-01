@@ -105,6 +105,11 @@ def system_info():
     })
 
 
+@app.route('/system_alert_state', methods=['GET'])
+def system_alert_state():
+    return jsonify(health_logger.get_current_alerts())
+
+
 @app.route('/recording_status', methods=['GET'])
 def recording_status():
     return jsonify({"recording": stream_helpers.is_recording})
@@ -127,6 +132,17 @@ def toggle_recording():
         sse.emit("recording_state", {"recording": True})
         log.info("Recording started (manual)")
         return jsonify({"message": "Recording started"})
+
+
+@app.route('/snapshot', methods=['POST'])
+def snapshot():
+    try:
+        path = stream_helpers.capture_snapshot()
+        log.info("Snapshot captured: %s", path)
+        return jsonify({"path": path})
+    except RuntimeError as e:
+        log.error("Snapshot failed: %s", e)
+        abort(500, description=str(e))
 
 
 @app.route('/settings', methods=['GET', 'POST'])
@@ -488,6 +504,21 @@ def thumbnail():
         abort(404, description="Thumbnail not found")
 
     return send_file(os.path.abspath(thumb_path), mimetype='image/jpeg',
+                     max_age=86400)
+
+
+@app.route('/sprite', methods=['GET'])
+def sprite():
+    import os
+    video_path = request.args.get('video_path')
+    if not video_path:
+        abort(400, description="video_path is required")
+
+    spr_path = os.path.splitext(video_path)[0] + ".sprite.jpg"
+    if not os.path.exists(spr_path):
+        abort(404, description="Sprite not found")
+
+    return send_file(os.path.abspath(spr_path), mimetype='image/jpeg',
                      max_age=86400)
 
 

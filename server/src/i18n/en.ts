@@ -69,6 +69,7 @@ export default {
     stop: "Stop",
     fullscreen: "Fullscreen",
     exitFullscreen: "Exit fullscreen",
+    snapshot: "Take snapshot",
     cancel: "Cancel",
     delete: "Delete",
     deleting: "Deleting...",
@@ -246,6 +247,8 @@ export default {
     languageChanged: "Language updated",
     rotationSaved: "Rotation updated",
     rotationFailed: "Couldn't save rotation. Try again.",
+    snapshotSaved: "Snapshot saved",
+    snapshotFailed: "Couldn't take snapshot. Try again.",
   },
 
   // Dialogs
@@ -270,6 +273,29 @@ export default {
     sensorReleased: "Sensor released",
     sensorArmed: "Sensor armed",
     sensorDisarmed: "Sensor disarmed",
+  },
+
+  // System alerts
+  alert: {
+    cpu_temp: {
+      warn: "CPU temperature is high ({temp}\u00b0C)",
+      critical: "CPU temperature is critical ({temp}\u00b0C)",
+      resolved: "CPU temperature back to normal",
+    },
+    throttle: {
+      critical: "System is being throttled",
+      resolved: "Throttling stopped",
+    },
+    storage: {
+      warn: "Storage is getting full ({pct}%)",
+      critical: "Storage is almost full ({pct}%)",
+      resolved: "Storage pressure relieved",
+    },
+    sd_health: {
+      warn: "SD card is showing wear",
+      critical: "SD card is nearing end of life",
+      resolved: "SD card health improved",
+    },
   },
 
   // Relative time

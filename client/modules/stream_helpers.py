@@ -266,6 +266,96 @@ def _capture_thumbnail(video_path: str) -> None:
         log.error("Thumbnail capture failed: %s", e)
 
 
+def capture_snapshot() -> str:
+    """Grab a single JPEG frame from the live RTSP stream and save to recordings.
+
+    Returns the absolute path to the saved snapshot file.
+    Raises RuntimeError on failure.
+    """
+    reload_settings()
+    save_dir = settings.get("VideoSaveLocation", "./recordings")
+    os.makedirs(save_dir, exist_ok=True)
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    out_path = os.path.join(save_dir, f"snapshot_{timestamp}.jpg")
+
+    try:
+        result = subprocess.run(
+            [
+                "ffmpeg", "-y",
+                "-rtsp_transport", "tcp",
+                "-i", RTSP_URL,
+                "-frames:v", "1",
+                "-q:v", "2",
+                out_path,
+            ],
+            capture_output=True, timeout=10,
+        )
+        if os.path.exists(out_path) and os.path.getsize(out_path) > 0:
+            log.info("Snapshot saved: %s", out_path)
+            return os.path.abspath(out_path)
+        else:
+            stderr = result.stderr.decode(errors="replace").strip()
+            raise RuntimeError(f"FFmpeg produced no output: {stderr[:200]}")
+    except subprocess.TimeoutExpired:
+        raise RuntimeError("Snapshot capture timed out")
+    except RuntimeError:
+        raise
+    except Exception as e:
+        raise RuntimeError(f"Snapshot capture failed: {e}")
+
+
+SPRITE_FRAMES = 10
+SPRITE_FRAME_W = 160
+SPRITE_FRAME_H = 90
+SPRITE_MIN_DURATION = 2.0  # Skip sprite for very short recordings
+
+
+def sprite_path(video_path: str) -> str:
+    """Return the .sprite.jpg sidecar path for a video file."""
+    return os.path.splitext(video_path)[0] + ".sprite.jpg"
+
+
+def _generate_sprite_sheet(file_path: str) -> None:
+    """Extract 10 evenly-spaced frames into a single horizontal sprite sheet.
+
+    Reads duration from .meta.json. Best-effort — failures are logged, not raised.
+    """
+    meta = _read_meta(file_path)
+    if not meta:
+        log.warning("Sprite skipped (no metadata): %s", file_path)
+        return
+
+    duration = meta.get("duration_seconds")
+    if not duration or duration < SPRITE_MIN_DURATION:
+        log.info("Sprite skipped (too short: %ss): %s", duration, file_path)
+        return
+
+    out_path = sprite_path(file_path)
+    fps_val = SPRITE_FRAMES / duration
+
+    try:
+        subprocess.run(
+            [
+                "ffmpeg", "-y",
+                "-i", file_path,
+                "-vf", f"fps={fps_val},scale={SPRITE_FRAME_W}:{SPRITE_FRAME_H},tile={SPRITE_FRAMES}x1",
+                "-frames:v", "1",
+                "-q:v", "8",
+                out_path,
+            ],
+            capture_output=True, timeout=120,
+        )
+        if os.path.exists(out_path) and os.path.getsize(out_path) > 0:
+            log.info("Sprite sheet generated: %s", out_path)
+        else:
+            log.warning("Sprite sheet produced empty file: %s", out_path)
+    except subprocess.TimeoutExpired:
+        log.warning("Sprite sheet generation timed out: %s", file_path)
+    except Exception as e:
+        log.error("Sprite sheet generation failed for %s: %s", file_path, e)
+
+
 def _fix_faststart(file_path: str) -> None:
     """Re-mux to move moov atom to start for browser playback."""
     tmp_path = file_path + ".tmp.mp4"
@@ -276,6 +366,7 @@ def _fix_faststart(file_path: str) -> None:
         )
         os.replace(tmp_path, file_path)
         log.info("Faststart applied: %s", file_path)
+        _generate_sprite_sheet(file_path)
     except Exception as e:
         log.error("Failed to apply faststart for %s: %s", file_path, e)
         if os.path.exists(tmp_path):

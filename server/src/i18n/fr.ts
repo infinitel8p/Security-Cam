@@ -64,6 +64,7 @@ export default {
     stop: "Arrêter",
     fullscreen: "Plein écran",
     exitFullscreen: "Quitter le plein écran",
+    snapshot: "Prendre un instantané",
     cancel: "Annuler",
     delete: "Supprimer",
     deleting: "Suppression...",
@@ -235,6 +236,8 @@ export default {
     languageChanged: "Langue mise à jour",
     rotationSaved: "Rotation mise à jour",
     rotationFailed: "Impossible de sauvegarder la rotation. Réessayez.",
+    snapshotSaved: "Instantané enregistré",
+    snapshotFailed: "Impossible de prendre l'instantané. Réessayez.",
   },
 
   dialog: {
@@ -257,6 +260,28 @@ export default {
     sensorReleased: "Capteur relâché",
     sensorArmed: "Capteur armé",
     sensorDisarmed: "Capteur désarmé",
+  },
+
+  alert: {
+    cpu_temp: {
+      warn: "Temp\u00e9rature CPU \u00e9lev\u00e9e ({temp}\u00b0C)",
+      critical: "Temp\u00e9rature CPU critique ({temp}\u00b0C)",
+      resolved: "Temp\u00e9rature CPU revenue \u00e0 la normale",
+    },
+    throttle: {
+      critical: "Le syst\u00e8me est en limitation",
+      resolved: "Limitation termin\u00e9e",
+    },
+    storage: {
+      warn: "Le stockage se remplit ({pct}%)",
+      critical: "Le stockage est presque plein ({pct}%)",
+      resolved: "Pression de stockage r\u00e9duite",
+    },
+    sd_health: {
+      warn: "La carte SD montre de l\u2019usure",
+      critical: "La carte SD approche de sa fin de vie",
+      resolved: "Sant\u00e9 de la carte SD am\u00e9lior\u00e9e",
+    },
   },
 
   time: {

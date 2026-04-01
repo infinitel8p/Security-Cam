@@ -151,3 +151,74 @@ def test_delete_removes_thumbnail(client, rec_dir):
     assert not os.path.exists(video)
     assert not os.path.exists(thumb)
     assert not os.path.exists(meta)
+
+
+# ---------------------------------------------------------------------------
+# /sprite endpoint tests
+# ---------------------------------------------------------------------------
+
+
+def test_sprite_returns_jpeg(client, tmp_path):
+    spr = tmp_path / "output_20260401_100000.sprite.jpg"
+    spr.write_bytes(b"\xff\xd8\xff\xe0JFIF")
+
+    res = client.get(f"/sprite?video_path={tmp_path}/output_20260401_100000.mp4")
+    assert res.status_code == 200
+    assert res.content_type.startswith("image/jpeg")
+
+
+def test_sprite_missing(client, tmp_path):
+    res = client.get(f"/sprite?video_path={tmp_path}/nonexistent.mp4")
+    assert res.status_code == 404
+
+
+def test_sprite_no_param(client):
+    res = client.get("/sprite")
+    assert res.status_code == 400
+
+
+# ---------------------------------------------------------------------------
+# Archive includes sprite path
+# ---------------------------------------------------------------------------
+
+
+def test_archive_includes_sprite(client, rec_dir):
+    """Videos with .sprite.jpg sidecar include a sprite field."""
+    video = os.path.join(rec_dir, "output_20260401_100000.mp4")
+    spr = os.path.join(rec_dir, "output_20260401_100000.sprite.jpg")
+    with open(video, "w") as f:
+        f.write("video data")
+    with open(spr, "wb") as f:
+        f.write(b"\xff\xd8\xff\xe0")
+
+    res = client.get("/archive")
+    data = res.get_json()
+    assert len(data) == 1
+    assert data[0]["sprite"] == spr
+
+
+def test_archive_no_sprite_field_when_missing(client, rec_dir):
+    """Videos without a sprite don't have the field."""
+    video = os.path.join(rec_dir, "output_20260401_100000.mp4")
+    with open(video, "w") as f:
+        f.write("video data")
+
+    res = client.get("/archive")
+    data = res.get_json()
+    assert len(data) == 1
+    assert "sprite" not in data[0]
+
+
+def test_delete_removes_sprite(client, rec_dir):
+    """Deleting a video also removes its sprite sheet."""
+    video = os.path.join(rec_dir, "output_20260401_100000.mp4")
+    spr = os.path.join(rec_dir, "output_20260401_100000.sprite.jpg")
+    for path in (video, spr):
+        with open(path, "wb") as f:
+            f.write(b"data")
+
+    res = client.post("/delete_video",
+                      json={"video_path": video},
+                      content_type="application/json")
+    assert res.status_code == 200
+    assert not os.path.exists(spr)

@@ -64,6 +64,7 @@ export default {
     stop: "Detener",
     fullscreen: "Pantalla completa",
     exitFullscreen: "Salir de pantalla completa",
+    snapshot: "Tomar captura",
     cancel: "Cancelar",
     delete: "Eliminar",
     deleting: "Eliminando...",
@@ -235,6 +236,8 @@ export default {
     languageChanged: "Idioma actualizado",
     rotationSaved: "Rotación actualizada",
     rotationFailed: "No se pudo guardar la rotación. Inténtalo de nuevo.",
+    snapshotSaved: "Captura guardada",
+    snapshotFailed: "No se pudo tomar la captura. Inténtalo de nuevo.",
   },
 
   dialog: {
@@ -257,6 +260,28 @@ export default {
     sensorReleased: "Sensor liberado",
     sensorArmed: "Sensor armado",
     sensorDisarmed: "Sensor desarmado",
+  },
+
+  alert: {
+    cpu_temp: {
+      warn: "Temperatura de CPU alta ({temp}\u00b0C)",
+      critical: "Temperatura de CPU cr\u00edtica ({temp}\u00b0C)",
+      resolved: "Temperatura de CPU normalizada",
+    },
+    throttle: {
+      critical: "El sistema est\u00e1 siendo limitado",
+      resolved: "Limitaci\u00f3n terminada",
+    },
+    storage: {
+      warn: "El almacenamiento se est\u00e1 llenando ({pct}%)",
+      critical: "El almacenamiento est\u00e1 casi lleno ({pct}%)",
+      resolved: "Presi\u00f3n de almacenamiento reducida",
+    },
+    sd_health: {
+      warn: "La tarjeta SD muestra desgaste",
+      critical: "La tarjeta SD se acerca al fin de su vida \u00fatil",
+      resolved: "Salud de la tarjeta SD mejorada",
+    },
   },
 
   time: {

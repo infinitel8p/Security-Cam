@@ -55,11 +55,12 @@ def _delete_recording(path: str) -> int:
     try:
         freed += os.path.getsize(path)
         os.remove(path)
-        # Remove sidecar metadata
-        meta_path = os.path.splitext(path)[0] + ".meta.json"
-        if os.path.exists(meta_path):
-            freed += os.path.getsize(meta_path)
-            os.remove(meta_path)
+        # Remove sidecar files
+        for ext in (".meta.json", ".thumb.jpg", ".sprite.jpg"):
+            sidecar = os.path.splitext(path)[0] + ext
+            if os.path.exists(sidecar):
+                freed += os.path.getsize(sidecar)
+                os.remove(sidecar)
         log.info("Auto-deleted oldest recording: %s (freed %d MB)",
                  os.path.basename(path), freed // (1024 * 1024))
     except Exception as e:

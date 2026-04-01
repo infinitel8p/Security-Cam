@@ -2,6 +2,7 @@
   import { onMount, onDestroy } from "svelte";
   import { initLocale, t } from "../i18n";
   import { initArchiveBadge, subscribe as subscribeBadge } from "../lib/archive-badge";
+  import { initSystemAlerts, subscribe as subscribeAlert, type AlertLevel } from "../lib/system-alert";
   import ThemeToggle from "./ThemeToggle.svelte";
   import Icon from "./Icon.svelte";
   import layoutGridIcon from "../icons/layout-grid.svg?raw";
@@ -12,16 +13,21 @@
   import bookIcon from "../icons/book.svg?raw";
 
   let badgeCount = $state(0);
+  let alertLevel: AlertLevel = $state("ok");
   let unsubBadge: (() => void) | null = null;
+  let unsubAlert: (() => void) | null = null;
 
   onMount(() => {
     initLocale();
     initArchiveBadge();
+    initSystemAlerts();
     unsubBadge = subscribeBadge((count) => { badgeCount = count; });
+    unsubAlert = subscribeAlert((state) => { alertLevel = state.overall; });
   });
 
   onDestroy(() => {
     unsubBadge?.();
+    unsubAlert?.();
   });
 
   const path = $derived(typeof window !== "undefined" ? window.location.pathname : "/");
@@ -74,6 +80,9 @@
             <span class="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-status-critical px-1 text-[0.5625rem] font-bold leading-none text-white">
               {badgeCount > 99 ? "99+" : badgeCount}
             </span>
+          {/if}
+          {#if href === "/" && alertLevel !== "ok" && !active}
+            <span class="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full {alertLevel === 'critical' ? 'bg-status-critical animate-pulse' : 'bg-status-warning'}"></span>
           {/if}
         </span>
         {t(labelKey)}

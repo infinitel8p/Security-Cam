@@ -36,6 +36,7 @@
     timestamp: number;
     meta?: VideoMeta;
     thumbnail?: string;
+    sprite?: string;
   }
 
   type SortMode = "newest" | "oldest" | "name";
@@ -55,7 +56,7 @@
   let showFilterMenu = $state(false);
   let lastSeenTs = $state(0);
 
-  function parseEntry(entry: { path: string; meta?: VideoMeta }): Video {
+  function parseEntry(entry: { path: string; meta?: VideoMeta; thumbnail?: string; sprite?: string }): Video {
     const filepath = entry.path;
     const filename = filepath.split("/").pop() ?? filepath;
     const match = filename.match(/(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/);
@@ -64,7 +65,7 @@
     const timestamp = match
       ? new Date(`${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}:${match[6]}`).getTime()
       : 0;
-    return { path: filepath, filename, date, time, timestamp, meta: entry.meta, thumbnail: entry.thumbnail };
+    return { path: filepath, filename, date, time, timestamp, meta: entry.meta, thumbnail: entry.thumbnail, sprite: entry.sprite };
   }
 
   function formatDuration(seconds: number): string {
@@ -169,6 +170,45 @@
 
   function thumbnailUrl(path: string): string {
     return `${getBackendUrl()}/thumbnail?video_path=${encodeURIComponent(path)}`;
+  }
+
+  function spriteUrl(path: string): string {
+    return `${getBackendUrl()}/sprite?video_path=${encodeURIComponent(path)}`;
+  }
+
+  // Sprite hover-scrub state
+  const SPRITE_FRAMES = 10;
+  let hoverVideo: string | null = $state(null);
+  let hoverFrame: number = $state(0);
+
+  function handleSpriteHover(e: MouseEvent, video: Video) {
+    if (!video.sprite) return;
+    hoverVideo = video.path;
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const pct = (e.clientX - rect.left) / rect.width;
+    hoverFrame = Math.min(SPRITE_FRAMES - 1, Math.max(0, Math.floor(pct * SPRITE_FRAMES)));
+  }
+
+  function handleSpriteLeave() {
+    hoverVideo = null;
+  }
+
+  // Preload sprite images when cards enter viewport
+  function preloadSprite(node: HTMLElement, src: string | undefined) {
+    if (!src) return { destroy: () => {} };
+    let observer: IntersectionObserver | null = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          const img = new Image();
+          img.src = src;
+          observer?.disconnect();
+          observer = null;
+        }
+      },
+      { rootMargin: "400px" },
+    );
+    observer.observe(node);
+    return { destroy: () => observer?.disconnect() };
   }
 
   function downloadVideo(video: Video) {
@@ -490,8 +530,16 @@
           </div>
           <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {#each group.videos as video (video.path)}
-              <div class="card-interactive group overflow-hidden">
-                <div class="relative bg-black/60">
+              <div
+                class="card-interactive group overflow-hidden"
+                use:preloadSprite={video.sprite ? spriteUrl(video.path) : undefined}
+              >
+                <!-- svelte-ignore a11y_no_static_element_interactions -->
+                <div
+                  class="relative bg-black/60"
+                  onmousemove={(e) => handleSpriteHover(e, video)}
+                  onmouseleave={handleSpriteLeave}
+                >
                   <video
                     data-src={streamUrl(video.path)}
                     use:lazyVideo
@@ -500,6 +548,17 @@
                     preload="none"
                     poster={video.thumbnail ? thumbnailUrl(video.path) : undefined}
                   ></video>
+                  <!-- Sprite hover-scrub overlay -->
+                  {#if video.sprite && hoverVideo === video.path}
+                    <div
+                      class="pointer-events-none absolute inset-0 bg-no-repeat"
+                      style="background-image: url({spriteUrl(video.path)}); background-size: {SPRITE_FRAMES * 100}% 100%; background-position-x: -{hoverFrame * (100 / SPRITE_FRAMES)}%;"
+                    ></div>
+                    <div
+                      class="pointer-events-none absolute bottom-0 left-0 h-0.5 bg-accent transition-[width] duration-75"
+                      style="width: {((hoverFrame + 1) / SPRITE_FRAMES) * 100}%"
+                    ></div>
+                  {/if}
                   <!-- Overlay badges -->
                   {#if video.time}
                     <div class="pointer-events-none absolute left-2.5 top-2.5 rounded-md bg-black/60 px-2 py-0.5 text-[0.6875rem] font-medium tabular-nums text-white/90 backdrop-blur-sm">

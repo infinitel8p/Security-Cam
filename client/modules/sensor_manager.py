@@ -141,7 +141,8 @@ def _confirmation_check():
     if filename:
         for path in [filename,
                      os.path.splitext(filename)[0] + ".meta.json",
-                     os.path.splitext(filename)[0] + ".thumb.jpg"]:
+                     os.path.splitext(filename)[0] + ".thumb.jpg",
+                     os.path.splitext(filename)[0] + ".sprite.jpg"]:
             try:
                 if os.path.exists(path):
                     os.remove(path)

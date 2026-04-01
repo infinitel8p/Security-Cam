@@ -31,6 +31,9 @@ def _start(target, **kwargs):
 # Background services — prevent threads from spawning
 _start("modules.health_logger.start")
 _start("modules.health_logger.get_history", return_value=[])
+_start("modules.health_logger.get_current_alerts", return_value={
+    "overall": "ok", "alerts": {}, "values": {},
+})
 _start("modules.presence_monitor.start")
 _start("modules.sensor_manager.start")
 _start("modules.sensor_manager.stop")

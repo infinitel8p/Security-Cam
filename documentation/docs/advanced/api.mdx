@@ -157,6 +157,35 @@ Force an immediate cleanup regardless of schedule:
 curl -X POST http://<pi-ip>:5005/storage/cleanup
 ```
 
+## System alert state
+
+### Get current alert levels
+
+```bash
+curl http://<pi-ip>:5005/system_alert_state
+```
+
+Returns the current system health alert state. The `overall` field is `"ok"`, `"warn"`, or `"critical"`. The `alerts` object maps individual metrics (`cpu_temp`, `throttle`, `storage`, `sd_health`) to their current level. The `values` object contains the raw metric values used for toast messages.
+
+| Metric | Warning | Critical |
+| --- | --- | --- |
+| CPU temperature | \u2265 65\u00b0C | \u2265 80\u00b0C |
+| Throttle | \u2014 | Any active flag |
+| Storage | \u2265 85% | \u2265 95% |
+| SD card health | life_time_est \u2265 0x03 | \u2265 0x0B |
+
+Alerts are also pushed in real-time via SSE (`system_alert` event) when a metric transitions between levels.
+
+## Snapshot endpoint
+
+### Capture a still frame
+
+```bash
+curl -X POST http://<pi-ip>:5005/snapshot
+```
+
+Grabs a single JPEG frame from the live camera feed and saves it to the recordings directory. Returns `{"path": "/path/to/snapshot_20260401_143022.jpg"}` on success, or `500` if the capture fails (camera not running, ffmpeg error, timeout).
+
 ## Thumbnail endpoint
 
 ### Get recording thumbnail
@@ -166,6 +195,16 @@ curl "http://<pi-ip>:5005/thumbnail?video_path=/path/to/output_20260401_143022.m
 ```
 
 Returns the JPEG thumbnail captured at the start of recording. The thumbnail is stored as a `.thumb.jpg` sidecar alongside the video file. Returns `404` if no thumbnail exists for that recording. Response is cached for 24 hours.
+
+## Sprite endpoint
+
+### Get recording sprite sheet
+
+```bash
+curl "http://<pi-ip>:5005/sprite?video_path=/path/to/output_20260401_143022.mp4"
+```
+
+Returns the hover-scrub sprite sheet for a recording. The sprite is a single JPEG containing 10 evenly-spaced frames in a horizontal strip (1600\u00d790 pixels). Generated automatically when recording stops. Returns `404` if no sprite exists for that recording (e.g. very short recordings under 2 seconds, or older recordings made before this feature). Response is cached for 24 hours.
 
 ## Archive badge endpoint
 

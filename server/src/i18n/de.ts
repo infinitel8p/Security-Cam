@@ -63,6 +63,7 @@ export default {
     stop: "Stopp",
     fullscreen: "Vollbild",
     exitFullscreen: "Vollbild beenden",
+    snapshot: "Schnappschuss",
     cancel: "Abbrechen",
     delete: "Löschen",
     deleting: "Löscht...",
@@ -234,6 +235,8 @@ export default {
     languageChanged: "Sprache geändert",
     rotationSaved: "Drehung aktualisiert",
     rotationFailed: "Drehung konnte nicht gespeichert werden. Versuch es nochmal.",
+    snapshotSaved: "Schnappschuss gespeichert",
+    snapshotFailed: "Schnappschuss fehlgeschlagen. Versuch es nochmal.",
   },
 
   dialog: {
@@ -256,6 +259,28 @@ export default {
     sensorReleased: "Sensor freigegeben",
     sensorArmed: "Sensor scharf",
     sensorDisarmed: "Sensor deaktiviert",
+  },
+
+  alert: {
+    cpu_temp: {
+      warn: "CPU-Temperatur ist hoch ({temp}\u00b0C)",
+      critical: "CPU-Temperatur ist kritisch ({temp}\u00b0C)",
+      resolved: "CPU-Temperatur wieder normal",
+    },
+    throttle: {
+      critical: "System wird gedrosselt",
+      resolved: "Drosselung beendet",
+    },
+    storage: {
+      warn: "Speicher wird knapp ({pct}%)",
+      critical: "Speicher ist fast voll ({pct}%)",
+      resolved: "Speicherdruck verringert",
+    },
+    sd_health: {
+      warn: "SD-Karte zeigt Verschlei\u00df",
+      critical: "SD-Karte n\u00e4hert sich dem Lebensende",
+      resolved: "SD-Karten-Zustand verbessert",
+    },
   },
 
   time: {
