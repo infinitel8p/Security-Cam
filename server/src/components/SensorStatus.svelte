@@ -115,7 +115,7 @@
     </button>
   </div>
 {:else if data}
-  <div class="card">
+  <div class="card animate-fade-in">
     <div class="grid grid-cols-3 divide-x divide-border-subtle">
       <!-- Sensor Type -->
       <div class="px-4 py-3 text-center">
@@ -142,7 +142,7 @@
       <!-- Status -->
       <div class="px-4 py-3 text-center">
         <div class="flex items-center justify-center gap-1.5">
-          <span class="h-1.5 w-1.5 rounded-full {dotColor}" class:status-live={data.armed && !data.triggered}></span>
+          <span class="h-1.5 w-1.5 rounded-full {dotColor}" class:status-live={data.armed && !data.triggered} class:animate-pulse={data.triggered}></span>
           <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.status")}</p>
         </div>
         <p class="mt-1 text-[0.8125rem] font-bold leading-none {statusColor}">

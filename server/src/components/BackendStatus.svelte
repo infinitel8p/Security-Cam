@@ -39,12 +39,12 @@
 {#if checked}
   <div class="flex items-center gap-2 rounded-lg border border-border-subtle bg-surface-overlay px-2.5 py-1.5 transition-colors duration-300">
     <span
-      class="h-1.5 w-1.5 rounded-full
+      class="h-1.5 w-1.5 rounded-full transition-all duration-500
         {online
-          ? 'bg-status-ok'
+          ? 'bg-status-ok shadow-[0_0_6px_rgba(52,217,172,0.5)]'
           : 'bg-status-critical animate-pulse'}"
     ></span>
-    <span class="text-[0.6875rem] font-medium text-text-secondary">
+    <span class="text-[0.6875rem] font-medium transition-colors duration-300 {online ? 'text-text-secondary' : 'text-status-critical'}">
       {online ? t("status.backendOnline") : t("status.backendOffline")}
     </span>
   </div>

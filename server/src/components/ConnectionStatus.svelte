@@ -69,7 +69,7 @@
       <p class="mt-0.5 text-[0.6875rem] text-text-muted">{t("help.addDevicesForPresence")}</p>
     </a>
   {:else}
-  <div class="card">
+  <div class="card animate-fade-in">
     <div class="grid grid-cols-3 divide-x divide-border-subtle">
       <!-- Bluetooth -->
       <div class="px-4 py-3 text-center">
