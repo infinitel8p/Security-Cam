@@ -7,7 +7,7 @@ def test_system_info_includes_sd_health(client):
     mock_sd = {
         "name": "SA16G",
         "serial": "0x12345678",
-        "total_bytes_written_gb": 42.5,
+        "written_since_boot_gb": 42.5,
     }
     with patch("modules.system_helpers.get_cpu_temp", return_value=45.0), \
          patch("modules.system_helpers.get_cpu_load", return_value=10), \

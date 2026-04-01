@@ -103,18 +103,19 @@ def get_sd_health():
         except ValueError:
             pass
 
-    # Total bytes written (from diskstats)
+    # Bytes written since boot (sum all mmcblk0* partitions from diskstats)
     try:
+        total_sectors = 0
         with open("/proc/diskstats", "r") as f:
             for line in f:
                 parts = line.split()
-                if len(parts) >= 10 and parts[2] == "mmcblk0":
-                    # Field 10 = sectors written, each 512 bytes
-                    sectors_written = int(parts[9])
-                    info["total_bytes_written_gb"] = round(
-                        sectors_written * 512 / (1024 ** 3), 2
-                    )
-                    break
+                if len(parts) >= 10 and parts[2].startswith("mmcblk0"):
+                    # parts[9] = sectors written (512 bytes each)
+                    total_sectors += int(parts[9])
+        if total_sectors > 0:
+            info["written_since_boot_gb"] = round(
+                total_sectors * 512 / (1024 ** 3), 2
+            )
     except (FileNotFoundError, PermissionError, ValueError):
         pass
 

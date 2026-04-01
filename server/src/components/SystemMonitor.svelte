@@ -8,7 +8,7 @@
   import databaseIcon from "../icons/database.svg?raw";
   import deviceDesktopIcon from "../icons/device-desktop.svg?raw";
   import clockIcon from "../icons/clock.svg?raw";
-  import boltIcon from "../icons/bolt.svg?raw";
+
 
   interface ThrottleInfo {
     raw: string;
@@ -22,6 +22,14 @@
     soft_temp_limit_occurred: boolean;
   }
 
+  interface SdHealth {
+    name?: string;
+    serial?: string;
+    manufacturing_date?: string;
+    written_since_boot_gb?: number;
+    life_time_est?: string;
+  }
+
   interface SystemInfo {
     cpu_temp_celsius: number;
     cpu_load_percent: number;
@@ -29,6 +37,7 @@
     ram_usage_mb: { total_mb: number; used_mb: number };
     uptime_seconds: number;
     throttle: ThrottleInfo | null;
+    sd_health: SdHealth | null;
   }
 
   let info = $state<SystemInfo | null>(null);
@@ -108,9 +117,9 @@
   </div>
 {:else if info}
   <div class="card divide-y divide-border-subtle">
-    <!-- Row 1: Temp + CPU side by side -->
+    <!-- Row 1: Temp (+ throttle) | CPU (+ uptime) -->
     <div class="grid grid-cols-2 divide-x divide-border-subtle">
-      <!-- CPU Temp -->
+      <!-- CPU Temp + Throttle -->
       <div class="px-3 py-2">
         <div class="flex items-center gap-1.5">
           <Icon icon={temperatureIcon} class="h-3 w-3 text-text-muted" stroke={2} />
@@ -119,9 +128,32 @@
         <p class="mt-0.5 text-base font-bold tabular-nums leading-none {tempColor(info.cpu_temp_celsius)}">
           {info.cpu_temp_celsius.toFixed(0)}<span class="text-[0.5625rem] font-medium">&deg;C</span>
         </p>
+        <!-- Throttle inline -->
+        {#if info.throttle}
+          {@const active = throttleActive(info.throttle)}
+          {@const history = throttleHistory(info.throttle)}
+          {#if active}
+            <div class="mt-1.5 flex flex-wrap gap-1">
+              {#if info.throttle.under_voltage_now}
+                <span class="rounded bg-status-critical/10 px-1 py-0.5 text-[0.5625rem] font-medium text-status-critical">{t("throttle.lowVoltage")}</span>
+              {/if}
+              {#if info.throttle.throttled_now}
+                <span class="rounded bg-status-critical/10 px-1 py-0.5 text-[0.5625rem] font-medium text-status-critical">{t("throttle.throttled")}</span>
+              {/if}
+              {#if info.throttle.freq_capped_now}
+                <span class="rounded bg-status-warning/10 px-1 py-0.5 text-[0.5625rem] font-medium text-status-warning">{t("throttle.freqCapped")}</span>
+              {/if}
+              {#if info.throttle.soft_temp_limit_now}
+                <span class="rounded bg-status-warning/10 px-1 py-0.5 text-[0.5625rem] font-medium text-status-warning">{t("throttle.tempLimit")}</span>
+              {/if}
+            </div>
+          {:else if history}
+            <p class="mt-1 text-[0.5625rem] text-status-warning">{t("throttle.pastEvent")}</p>
+          {/if}
+        {/if}
       </div>
 
-      <!-- CPU Load -->
+      <!-- CPU Load + Uptime -->
       <div class="px-3 py-2">
         <div class="flex items-center gap-1.5">
           <Icon icon={cpuIcon} class="h-3 w-3 text-text-muted" stroke={2} />
@@ -133,12 +165,16 @@
         <div class="mt-1 h-0.5 rounded-full {barTrackColor(loadPct)}">
           <div class="h-full rounded-full {barColor(loadPct)} animate-bar" style="width: {loadPct}%"></div>
         </div>
+        <p class="mt-1.5 flex items-center gap-1 text-[0.5625rem] text-text-muted">
+          <Icon icon={clockIcon} class="h-2.5 w-2.5" stroke={2} />
+          {t("label.uptime")}: {formatUptime(info.uptime_seconds)}
+        </p>
       </div>
     </div>
 
-    <!-- Row 2: Storage + RAM side by side -->
+    <!-- Row 2: Storage (+ SD card) | RAM -->
     <div class="grid grid-cols-2 divide-x divide-border-subtle">
-      <!-- Storage -->
+      <!-- Storage + SD info -->
       <div class="px-3 py-2">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-1.5">
@@ -153,6 +189,11 @@
         <div class="mt-1 h-0.5 rounded-full {barTrackColor(storagePct)}">
           <div class="h-full rounded-full {barColor(storagePct)} animate-bar" style="width: {storagePct}%"></div>
         </div>
+        {#if info.sd_health}
+          <p class="mt-1.5 text-[0.5625rem] tabular-nums text-text-muted">
+            {info.sd_health.name ?? "SD"}{#if info.sd_health.manufacturing_date}{" "}· {info.sd_health.manufacturing_date}{/if}{#if info.sd_health.written_since_boot_gb != null}{" "}· {info.sd_health.written_since_boot_gb.toFixed(1)} GB {t("label.written").toLowerCase()}{/if}
+          </p>
+        {/if}
       </div>
 
       <!-- RAM -->
@@ -170,56 +211,6 @@
         <div class="mt-1 h-0.5 rounded-full {barTrackColor(ramPct)}">
           <div class="h-full rounded-full {barColor(ramPct)} animate-bar" style="width: {ramPct}%"></div>
         </div>
-      </div>
-    </div>
-
-    <!-- Row 3: Uptime + Throttle -->
-    <div class="grid grid-cols-2 divide-x divide-border-subtle">
-      <!-- Uptime -->
-      <div class="px-3 py-2">
-        <div class="flex items-center gap-1.5">
-          <Icon icon={clockIcon} class="h-3 w-3 text-text-muted" stroke={2} />
-          <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.uptime")}</p>
-        </div>
-        <p class="mt-0.5 text-base font-bold tabular-nums leading-none {info.uptime_seconds ? 'text-text-primary' : 'text-text-muted'}">
-          {formatUptime(info.uptime_seconds)}
-        </p>
-      </div>
-
-      <!-- Throttle -->
-      <div class="px-3 py-2">
-        <div class="flex items-center gap-1.5">
-          <Icon icon={boltIcon} class="h-3 w-3 text-text-muted" stroke={2} />
-          <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.throttle")}</p>
-        </div>
-        {#if info.throttle}
-          {@const active = throttleActive(info.throttle)}
-          {@const history = throttleHistory(info.throttle)}
-          {#if active}
-            <p class="mt-0.5 text-sm font-bold leading-none text-status-critical">{t("status.active")}</p>
-            <div class="mt-1 flex flex-wrap gap-1">
-              {#if info.throttle.under_voltage_now}
-                <span class="rounded bg-status-critical/10 px-1 py-0.5 text-[0.5625rem] font-medium text-status-critical">{t("throttle.lowVoltage")}</span>
-              {/if}
-              {#if info.throttle.throttled_now}
-                <span class="rounded bg-status-critical/10 px-1 py-0.5 text-[0.5625rem] font-medium text-status-critical">{t("throttle.throttled")}</span>
-              {/if}
-              {#if info.throttle.freq_capped_now}
-                <span class="rounded bg-status-warning/10 px-1 py-0.5 text-[0.5625rem] font-medium text-status-warning">{t("throttle.freqCapped")}</span>
-              {/if}
-              {#if info.throttle.soft_temp_limit_now}
-                <span class="rounded bg-status-warning/10 px-1 py-0.5 text-[0.5625rem] font-medium text-status-warning">{t("throttle.tempLimit")}</span>
-              {/if}
-            </div>
-          {:else if history}
-            <p class="mt-0.5 text-sm font-bold leading-none text-status-warning">{t("status.past")}</p>
-            <p class="mt-0.5 text-[0.5625rem] text-text-muted">{t("label.sinceBoot")}</p>
-          {:else}
-            <p class="mt-0.5 text-sm font-bold leading-none text-status-ok">{t("status.ok")}</p>
-          {/if}
-        {:else}
-          <p class="mt-0.5 text-base font-bold leading-none text-text-muted">-</p>
-        {/if}
       </div>
     </div>
   </div>

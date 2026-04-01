@@ -112,6 +112,9 @@ export default {
     disk: "Disco",
     ram: "RAM",
     uptime: "Tiempo activo",
+    sdCard: "Tarjeta SD",
+    written: "Escrito",
+    lifeEst: "Vida est.",
     throttle: "Limitación",
     sensor: "Sensor",
     gpio: "GPIO",
@@ -298,6 +301,7 @@ export default {
     throttled: "Limitado",
     freqCapped: "Freq. limitada",
     tempLimit: "Límite de temp.",
+    pastEvent: "Limitado desde el arranque",
   },
 
   theme: {

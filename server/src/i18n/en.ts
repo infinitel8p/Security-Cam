@@ -118,6 +118,9 @@ export default {
     disk: "Disk",
     ram: "RAM",
     uptime: "Uptime",
+    sdCard: "SD Card",
+    written: "Written",
+    lifeEst: "Life est.",
     throttle: "Throttle",
     sensor: "Sensor",
     gpio: "GPIO",
@@ -315,6 +318,7 @@ export default {
     throttled: "Throttled",
     freqCapped: "Freq cap",
     tempLimit: "Temp limit",
+    pastEvent: "Throttled since boot",
   },
 
   // Theme labels

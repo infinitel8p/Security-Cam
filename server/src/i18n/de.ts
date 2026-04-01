@@ -111,6 +111,9 @@ export default {
     disk: "Speicher",
     ram: "RAM",
     uptime: "Laufzeit",
+    sdCard: "SD-Karte",
+    written: "Geschrieben",
+    lifeEst: "Lebensdauer",
     throttle: "Drosselung",
     sensor: "Sensor",
     gpio: "GPIO",
@@ -297,6 +300,7 @@ export default {
     throttled: "Gedrosselt",
     freqCapped: "Frequenz begrenzt",
     tempLimit: "Temp-Limit",
+    pastEvent: "Gedrosselt seit Boot",
   },
 
   theme: {
