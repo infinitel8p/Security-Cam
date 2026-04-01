@@ -78,6 +78,41 @@ def _capture_frame(output_path: str, resolution: str | None = None) -> bool:
     return False
 
 
+def _generate_thumbnail(video_path: str) -> None:
+    """Extract a frame from a few seconds into the video as a poster thumbnail."""
+    thumb_path = os.path.splitext(video_path)[0] + ".thumb.jpg"
+    try:
+        subprocess.run(
+            [
+                "ffmpeg", "-y",
+                "-ss", "3",
+                "-i", video_path,
+                "-frames:v", "1",
+                "-vf", "scale=320:-1",
+                "-q:v", "6",
+                thumb_path,
+            ],
+            capture_output=True, timeout=30,
+        )
+        if not (os.path.exists(thumb_path) and os.path.getsize(thumb_path) > 0):
+            # Very short timelapse — try first frame
+            subprocess.run(
+                [
+                    "ffmpeg", "-y",
+                    "-i", video_path,
+                    "-frames:v", "1",
+                    "-vf", "scale=320:-1",
+                    "-q:v", "6",
+                    thumb_path,
+                ],
+                capture_output=True, timeout=30,
+            )
+        if os.path.exists(thumb_path) and os.path.getsize(thumb_path) > 0:
+            log.info("Timelapse thumbnail generated: %s", thumb_path)
+    except Exception as e:
+        log.debug("Timelapse thumbnail failed for %s: %s", video_path, e)
+
+
 def _stitch_day(day_dir: str, date_str: str, output_dir: str, fps: int) -> bool:
     """Stitch all JPEGs in day_dir into an MP4. Deletes frames on success."""
     frames = sorted(glob.glob(os.path.join(day_dir, "*.jpg")))
@@ -110,6 +145,7 @@ def _stitch_day(day_dir: str, date_str: str, output_dir: str, fps: int) -> bool:
         if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
             log.info("Timelapse stitched: %s (%d frames)", output_path, len(frames))
             shutil.rmtree(day_dir, ignore_errors=True)
+            _generate_thumbnail(output_path)
             return True
         log.error("Timelapse stitch produced empty file: %s", output_path)
     except subprocess.TimeoutExpired:
@@ -258,7 +294,12 @@ def get_timelapse_videos() -> list[dict]:
                 size = os.path.getsize(filepath)
             except OSError:
                 size = 0
-            videos.append({"path": filepath, "date": date_str, "size": size})
+            entry: dict = {"path": filepath, "date": date_str, "size": size}
+            # Check for thumbnail sidecar
+            thumb_path = os.path.splitext(filepath)[0] + ".thumb.jpg"
+            if os.path.exists(thumb_path):
+                entry["thumbnail"] = thumb_path
+            videos.append(entry)
 
     videos.sort(key=lambda v: v["date"], reverse=True)
     return videos
@@ -284,6 +325,10 @@ def delete_timelapse(path: str) -> tuple[dict, int]:
 
     try:
         os.remove(target)
+        # Clean up thumbnail sidecar
+        thumb = os.path.splitext(target)[0] + ".thumb.jpg"
+        if os.path.exists(thumb):
+            os.remove(thumb)
         log.info("Timelapse deleted: %s", target)
         return {"message": "Timelapse deleted"}, 200
     except Exception as e:

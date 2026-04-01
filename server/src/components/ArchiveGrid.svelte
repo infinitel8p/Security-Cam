@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import { sseClient } from "../lib/sse";
   import { markSeen } from "../lib/archive-badge";
   import toast from "svelte-5-french-toast";
   import { initLocale, t } from "../i18n";
@@ -83,6 +84,7 @@
     path: string;
     date: string;
     size: number;
+    thumbnail?: string;
   }
   let allTimelapses: Timelapse[] = $state([]);
   let timelapsesOpen = $state(false);
@@ -259,6 +261,10 @@
     return `${getBackendUrl()}/timelapse/video?path=${encodeURIComponent(path)}`;
   }
 
+  function timelapseThumbnailUrl(path: string): string {
+    return `${getBackendUrl()}/timelapse/thumbnail?path=${encodeURIComponent(path)}`;
+  }
+
   function formatBytes(bytes: number): string {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -297,6 +303,8 @@
     return lastSeenTs > 0 && video.timestamp > lastSeenTs;
   }
 
+  let unsubArchiveUpdate: (() => void) | null = null;
+
   onMount(() => {
     initLocale();
     updateSnapLimit();
@@ -309,10 +317,21 @@
     fetchTimelapses();
     // Mark archive as seen (clears the nav badge)
     markSeen();
+
+    // Re-fetch archive when sprites/thumbnails are generated (async after recording stops)
+    const sse = sseClient();
+    unsubArchiveUpdate = sse.on("archive_updated", () => {
+      fetchArchive();
+    });
+
     return () => {
       window.removeEventListener("resize", debouncedSnapLimit);
       if (resizeTimer) clearTimeout(resizeTimer);
     };
+  });
+
+  onDestroy(() => {
+    unsubArchiveUpdate?.();
   });
 
   function streamUrl(path: string): string {
@@ -594,6 +613,7 @@
             <div class="group overflow-hidden rounded-lg border border-border-subtle bg-surface-overlay">
               <video
                 src={timelapseVideoUrl(tl.path)}
+                poster={tl.thumbnail ? timelapseThumbnailUrl(tl.path) : undefined}
                 class="aspect-video w-full object-contain bg-black/60"
                 controls
                 preload="none"

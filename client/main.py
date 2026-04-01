@@ -542,6 +542,18 @@ def timelapse_video():
     return send_file(os.path.abspath(path), mimetype='video/mp4')
 
 
+@app.route('/timelapse/thumbnail', methods=['GET'])
+def timelapse_thumbnail():
+    import os
+    path = request.args.get('path')
+    if not path:
+        abort(400, description="path is required")
+    thumb_path = os.path.splitext(path)[0] + ".thumb.jpg"
+    if not os.path.exists(thumb_path):
+        abort(404, description="Thumbnail not found")
+    return send_file(os.path.abspath(thumb_path), mimetype='image/jpeg', max_age=86400)
+
+
 @app.route('/timelapse/delete', methods=['POST'])
 def timelapse_delete():
     data = request.get_json() or {}
