@@ -23,6 +23,7 @@ MAX_ENTRIES = 864
 INTERVAL_SECONDS = 300  # 5 minutes
 
 _thread = None
+_stats_thread = None
 _lock = threading.Lock()
 
 # Alert state tracking — only emit SSE on transitions
@@ -221,6 +222,28 @@ def get_current_alerts() -> dict:
     return dict(_current_alert_state)
 
 
+STATS_EMIT_INTERVAL = 10  # seconds
+
+
+def _stats_emit_loop():
+    """Background loop that emits system_info via SSE for live dashboard."""
+    while True:
+        try:
+            data = {
+                "cpu_temp_celsius": system_helpers.get_cpu_temp(),
+                "cpu_load_percent": system_helpers.get_cpu_load(),
+                "storage_info_gb": system_helpers.get_storage_info(),
+                "ram_usage_mb": system_helpers.get_ram_usage(),
+                "uptime_seconds": system_helpers.get_uptime(),
+                "throttle": system_helpers.get_throttle_status(),
+                "sd_health": system_helpers.get_sd_health(),
+            }
+            sse.emit("system_info", data)
+        except Exception as e:
+            log.error("Stats emitter error: %s", e)
+        time.sleep(STATS_EMIT_INTERVAL)
+
+
 def _log_loop():
     """Background loop that takes snapshots at regular intervals."""
     while True:
@@ -239,13 +262,16 @@ def _log_loop():
 
 
 def start():
-    """Start the background health logger thread."""
-    global _thread
-    if _thread is not None:
-        return
-    _thread = threading.Thread(target=_log_loop, daemon=True)
-    _thread.start()
-    log.info("Health logger started (5-minute intervals)")
+    """Start the background health logger and live stats emitter threads."""
+    global _thread, _stats_thread
+    if _thread is None:
+        _thread = threading.Thread(target=_log_loop, daemon=True)
+        _thread.start()
+        log.info("Health logger started (5-minute intervals)")
+    if _stats_thread is None:
+        _stats_thread = threading.Thread(target=_stats_emit_loop, daemon=True)
+        _stats_thread.start()
+        log.info("System stats SSE emitter started (%ds intervals)", STATS_EMIT_INTERVAL)
 
 
 def get_history(hours=24):

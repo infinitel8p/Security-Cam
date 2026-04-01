@@ -305,6 +305,43 @@ body {
   animation: glow-breathe 3s ease-in-out infinite;
 }
 
+/* ── Ambient status ring (video feed) ─────────────────────────────────── */
+.feed-ring {
+  position: relative;
+}
+
+.feed-ring::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: calc(1rem + 2px);
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+  transition: opacity 0.7s ease-out;
+  background: conic-gradient(
+    from var(--border-angle),
+    var(--ring-color, transparent) 0%,
+    transparent 12%,
+    transparent 88%,
+    var(--ring-color, transparent) 100%
+  );
+  filter: blur(3px);
+  animation: border-sweep var(--ring-speed, 8s) linear infinite;
+}
+
+.feed-ring-ok::after {
+  --ring-color: rgba(52, 217, 172, 0.3);
+  --ring-speed: 8s;
+  opacity: 1;
+}
+
+.feed-ring-rec::after {
+  --ring-color: rgba(240, 104, 104, 0.45);
+  --ring-speed: 3s;
+  opacity: 1;
+}
+
 /* ── Button press feedback ──────────────────────────────────────────────── */
 .btn-press {
   transition: transform 0.1s var(--ease-out), box-shadow 0.1s var(--ease-out);
@@ -540,6 +577,7 @@ body {
   }
   .stagger-1, .stagger-2, .stagger-3, .stagger-4, .stagger-5 { animation-delay: 0ms; }
   .status-live, .shadow-glow-breathe, .recording-halo { animation: none; }
+  .feed-ring::after { animation: none; opacity: 0; }
   .terminal-cursor { animation: none; opacity: 0.5; }
   .archive-timeline-fill { animation: none; height: 100%; opacity: 0.3; }
   .card-sweep-warn::before, .card-sweep-critical::before { animation: none; opacity: 0; }

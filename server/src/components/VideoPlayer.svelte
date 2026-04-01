@@ -288,7 +288,8 @@
 
 <svelte:document on:fullscreenchange={onFullscreenChange} />
 
-<div bind:this={containerEl} class="card overflow-hidden transition-shadow duration-700 {connected ? 'shadow-glow-breathe' : ''} {recording ? 'recording-halo' : ''}" class:fullscreen={isFullscreen}>
+<div bind:this={containerEl} class="feed-ring {recording ? 'feed-ring-rec' : connected ? 'feed-ring-ok' : ''}" class:fullscreen={isFullscreen}>
+<div class="card overflow-hidden transition-shadow duration-700 {connected ? 'shadow-glow-breathe' : ''} {recording ? 'recording-halo' : ''}">
   <!-- Feed -->
   <div class="relative w-full bg-black/80 {isFullscreen ? 'min-h-0 flex-1' : 'aspect-video'}">
     <video
@@ -429,6 +430,7 @@
       </button>
     </div>
   </div>
+</div>
 </div>
 
 <style>

@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import { sseClient } from "../lib/sse";
   import { initLocale, t } from "../i18n";
   import Icon from "./Icon.svelte";
   import temperatureIcon from "../icons/temperature.svg?raw";
@@ -43,14 +44,60 @@
   let info = $state<SystemInfo | null>(null);
   let error = $state(false);
   let retrying = $state(false);
+  let unsub: (() => void) | null = null;
+
+  // ── Animated display values (start at 0, count up on first load) ──
+  let aTemp = $state(0);
+  let aLoad = $state(0);
+  let aStorageUsed = $state(0);
+  let aRamUsed = $state(0);
+
+  const ANIM_DURATION = 800; // ms
+  let rafId: number | null = null;
+  let animStart = 0;
+
+  interface AnimTarget { from: number; to: number }
+  let tgt = { temp: { from: 0, to: 0 }, load: { from: 0, to: 0 }, storageUsed: { from: 0, to: 0 }, ramUsed: { from: 0, to: 0 } };
+
+  function easeOutCubic(x: number): number {
+    return 1 - Math.pow(1 - x, 3);
+  }
+
+  function tick(now: number) {
+    const p = easeOutCubic(Math.min((now - animStart) / ANIM_DURATION, 1));
+    aTemp = tgt.temp.from + (tgt.temp.to - tgt.temp.from) * p;
+    aLoad = tgt.load.from + (tgt.load.to - tgt.load.from) * p;
+    aStorageUsed = tgt.storageUsed.from + (tgt.storageUsed.to - tgt.storageUsed.from) * p;
+    aRamUsed = tgt.ramUsed.from + (tgt.ramUsed.to - tgt.ramUsed.from) * p;
+
+    if (p < 1) rafId = requestAnimationFrame(tick);
+    else rafId = null;
+  }
+
+  function animateTo(d: SystemInfo) {
+    if (rafId != null) cancelAnimationFrame(rafId);
+    tgt = {
+      temp: { from: aTemp, to: d.cpu_temp_celsius },
+      load: { from: aLoad, to: d.cpu_load_percent },
+      storageUsed: { from: aStorageUsed, to: d.storage_info_gb.used_gb },
+      ramUsed: { from: aRamUsed, to: d.ram_usage_mb.used_mb },
+    };
+    animStart = performance.now();
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function applyInfo(d: SystemInfo) {
+    info = d;
+    error = false;
+    animateTo(d);
+  }
 
   async function fetchInfo() {
     retrying = true;
     try {
       const res = await fetch(`${getBackendUrl()}/system_info`);
       if (!res.ok) throw new Error();
-      info = await res.json();
-      error = false;
+      applyInfo(await res.json());
     } catch {
       error = true;
     } finally {
@@ -61,6 +108,19 @@
   onMount(() => {
     initLocale();
     fetchInfo();
+
+    const sse = sseClient();
+    sse.registerFallback({
+      event: "system_info",
+      endpoint: "/system_info",
+      interval: 15_000,
+    });
+    unsub = sse.on("system_info", (ev) => applyInfo(ev));
+  });
+
+  onDestroy(() => {
+    unsub?.();
+    if (rafId != null) cancelAnimationFrame(rafId);
   });
 
   function tempColor(temp: number): string {
@@ -103,9 +163,20 @@
     return t.under_voltage_occurred || t.freq_capped_occurred || t.throttled_occurred || t.soft_temp_limit_occurred;
   }
 
-  let loadPct = $derived(info ? Math.round(info.cpu_load_percent) : 0);
-  let storagePct = $derived(info ? usagePct(info.storage_info_gb.used_gb, info.storage_info_gb.total_gb) : 0);
-  let ramPct = $derived(info ? usagePct(info.ram_usage_mb.used_mb, info.ram_usage_mb.total_mb) : 0);
+  // Derived from animated values — numbers animate smoothly, colors use real target
+  let loadPct = $derived(Math.round(aLoad));
+  let storagePct = $derived(info ? usagePct(aStorageUsed, info.storage_info_gb.total_gb) : 0);
+  let ramPct = $derived(info ? usagePct(aRamUsed, info.ram_usage_mb.total_mb) : 0);
+
+  // Smooth (unrounded) percentages for bar widths
+  let loadBar = $derived(aLoad);
+  let storageBar = $derived(info && info.storage_info_gb.total_gb > 0 ? (aStorageUsed / info.storage_info_gb.total_gb) * 100 : 0);
+  let ramBar = $derived(info && info.ram_usage_mb.total_mb > 0 ? (aRamUsed / info.ram_usage_mb.total_mb) * 100 : 0);
+
+  // Colors use real (target) values so they update immediately
+  let realLoadPct = $derived(info ? Math.round(info.cpu_load_percent) : 0);
+  let realStoragePct = $derived(info ? usagePct(info.storage_info_gb.used_gb, info.storage_info_gb.total_gb) : 0);
+  let realRamPct = $derived(info ? usagePct(info.ram_usage_mb.used_mb, info.ram_usage_mb.total_mb) : 0);
 </script>
 
 {#if error}
@@ -126,7 +197,7 @@
           <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.temperature")}</p>
         </div>
         <p class="mt-0.5 text-base font-bold tabular-nums leading-none {tempColor(info.cpu_temp_celsius)}">
-          {info.cpu_temp_celsius.toFixed(0)}<span class="text-[0.5625rem] font-medium">&deg;C</span>
+          {Math.round(aTemp)}<span class="text-[0.5625rem] font-medium">&deg;C</span>
         </p>
         <!-- Throttle inline -->
         {#if info.throttle}
@@ -168,8 +239,8 @@
         <p class="mt-0.5 text-base font-bold tabular-nums leading-none text-text-primary">
           {loadPct}<span class="text-[0.5625rem] font-medium">%</span>
         </p>
-        <div class="mt-1 h-0.5 rounded-full {barTrackColor(loadPct)}">
-          <div class="h-full rounded-full {barColor(loadPct)} animate-bar" style="width: {loadPct}%"></div>
+        <div class="mt-1 h-0.5 rounded-full {barTrackColor(realLoadPct)}">
+          <div class="h-full rounded-full {barColor(realLoadPct)}" style="width: {loadBar}%"></div>
         </div>
       </div>
     </div>
@@ -183,13 +254,13 @@
             <Icon icon={databaseIcon} class="h-3 w-3 text-text-muted" stroke={2} />
             <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.disk")}</p>
           </div>
-          <p class="text-[0.5625rem] tabular-nums text-text-muted">{info.storage_info_gb.used_gb.toFixed(1)}/{info.storage_info_gb.total_gb.toFixed(0)}GB</p>
+          <p class="text-[0.5625rem] tabular-nums text-text-muted">{aStorageUsed.toFixed(1)}/{info.storage_info_gb.total_gb.toFixed(0)}GB</p>
         </div>
         <p class="mt-0.5 text-base font-bold tabular-nums leading-none text-text-primary">
           {storagePct}<span class="text-[0.5625rem] font-medium">%</span>
         </p>
-        <div class="mt-1 h-0.5 rounded-full {barTrackColor(storagePct)}">
-          <div class="h-full rounded-full {barColor(storagePct)} animate-bar" style="width: {storagePct}%"></div>
+        <div class="mt-1 h-0.5 rounded-full {barTrackColor(realStoragePct)}">
+          <div class="h-full rounded-full {barColor(realStoragePct)}" style="width: {storageBar}%"></div>
         </div>
         {#if info.sd_health}
           <p class="mt-1.5 text-[0.5625rem] tabular-nums text-text-muted">
@@ -205,13 +276,13 @@
             <Icon icon={deviceDesktopIcon} class="h-3 w-3 text-text-muted" stroke={2} />
             <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.ram")}</p>
           </div>
-          <p class="text-[0.5625rem] tabular-nums text-text-muted">{info.ram_usage_mb.used_mb.toFixed(0)}/{info.ram_usage_mb.total_mb.toFixed(0)}MB</p>
+          <p class="text-[0.5625rem] tabular-nums text-text-muted">{Math.round(aRamUsed)}/{info.ram_usage_mb.total_mb.toFixed(0)}MB</p>
         </div>
         <p class="mt-0.5 text-base font-bold tabular-nums leading-none text-text-primary">
           {ramPct}<span class="text-[0.5625rem] font-medium">%</span>
         </p>
-        <div class="mt-1 h-0.5 rounded-full {barTrackColor(ramPct)}">
-          <div class="h-full rounded-full {barColor(ramPct)} animate-bar" style="width: {ramPct}%"></div>
+        <div class="mt-1 h-0.5 rounded-full {barTrackColor(realRamPct)}">
+          <div class="h-full rounded-full {barColor(realRamPct)}" style="width: {ramBar}%"></div>
         </div>
       </div>
     </div>
