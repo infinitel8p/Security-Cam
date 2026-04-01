@@ -42,9 +42,13 @@ sudo -u pi timeout 15 git pull --ff-only 2>/dev/null || {
     echo "Warning: git pull failed (no internet or dirty tree). Continuing with current code."
 }
 
-# Merge upstream mediamtx defaults with user's camera settings
+# Merge upstream mediamtx defaults with user's camera settings.
+# Use the venv Python so we run the newly-pulled code, not stale modules.
 echo "=== Syncing MediaMTX config ==="
-python3 -c "
+VENV_PY="$PROJECT_DIR/venv/bin/python3"
+PY="${VENV_PY:-python3}"
+[ -x "$VENV_PY" ] && PY="$VENV_PY"
+$PY -c "
 import sys; sys.path.insert(0, '$PROJECT_DIR/client')
 from modules.mediamtx_helpers import sync_config; sync_config()
 " 2>&1 || echo "Warning: MediaMTX config sync failed. Continuing with existing config."
@@ -63,6 +67,13 @@ else
     echo "New code detected: $BEFORE -> $AFTER"
 fi
 
+# --- Free memory for the build ---
+# The Pi Zero 2 W has ~416MB RAM. Stop heavy services so the Astro build
+# doesn't get OOM-killed. They'll be (re)started by systemd after this
+# ExecStartPre finishes.
+echo "=== Freeing memory for build ==="
+systemctl stop mediamtx 2>/dev/null || true
+
 # --- Install dependencies ---
 echo "=== Installing dependencies ==="
 if ./install_requirements.sh; then
@@ -72,6 +83,10 @@ if ./install_requirements.sh; then
 else
     echo "Warning: install/build failed. Service will start with previous build."
 fi
+
+# Restart MediaMTX (security-cam.service depends on it via After=, but
+# stopping it above means systemd won't auto-start it for us).
+systemctl start mediamtx 2>/dev/null || true
 
 # Always exit 0 so the service starts even if update failed
 exit 0

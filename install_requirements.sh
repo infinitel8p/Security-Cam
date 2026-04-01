@@ -95,8 +95,10 @@ FRONTEND_HASH=$(find "$SCRIPT_DIR/server/src" "$SCRIPT_DIR/server/public" \
 
 if step_changed "build" "$FRONTEND_HASH"; then
     echo "=== Building frontend ==="
-    # Build to a temp directory so a failed build doesn't destroy the previous one
-    sudo -u pi npx astro build --outDir dist_new
+    # Limit Node heap to prevent OOM on Pi Zero 2 W (416MB total RAM).
+    # Build to a temp directory so a failed build doesn't destroy the previous one.
+    export NODE_OPTIONS="--max-old-space-size=256"
+    sudo -u pi -E npx astro build --outDir dist_new
     rm -rf dist
     mv dist_new dist
     stamp_step "build" "$FRONTEND_HASH"
