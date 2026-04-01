@@ -64,6 +64,11 @@ export default {
     reconnecting: "Reconnecting...",
     loading: "Loading...",
     retrying: "Retrying...",
+    copied: "Copied!",
+  },
+
+  action: {
+    copyIp: "Click to copy IP",
   },
 
   // Buttons
@@ -494,6 +499,12 @@ export default {
     fwRevision: "Firmware rev.",
     eraseBlock: "Erase block size",
     hostname: "Hostname",
+    os: "OS",
+    arch: "Arch",
+    kernel: "Kernel",
+    platform: "Platform",
+    runtime: "Runtime",
+    versions: "Versions",
     bootTime: "Boot time",
     network: "Network",
     sent: "Sent",

@@ -394,6 +394,29 @@ body {
   background: var(--color-surface-elevated);
 }
 
+/* ── Terminal cursor blink ─────────────────────────────────────────────── */
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.terminal-cursor {
+  animation: cursor-blink 1s steps(1) infinite;
+}
+
+/* ── Version pill hover ───────────────────────────────────────────────── */
+.version-pill {
+  transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.15s ease-out;
+}
+
+.version-pill:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px -2px rgba(77, 148, 255, 0.12);
+}
+
+/* ── Copy cursor ──────────────────────────────────────────────────────── */
+.cursor-copy { cursor: copy; }
+
 /* ── Sparkline data pulse ──────────────────────────────────────────────── */
 @keyframes sparkline-pulse {
   0% { opacity: 0.35; }
@@ -469,6 +492,7 @@ body {
   }
   .stagger-1, .stagger-2, .stagger-3, .stagger-4, .stagger-5 { animation-delay: 0ms; }
   .status-live, .shadow-glow-breathe, .recording-halo { animation: none; }
+  .terminal-cursor { animation: none; opacity: 0.5; }
   .card-sweep-warn::before, .card-sweep-critical::before { animation: none; opacity: 0; }
   .animate-sparkline-pulse { animation: none; opacity: 1; }
   .skeleton { animation: none; }

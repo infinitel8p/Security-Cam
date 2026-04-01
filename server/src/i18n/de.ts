@@ -60,6 +60,11 @@ export default {
     reconnecting: "Verbinde neu...",
     loading: "Laden...",
     retrying: "Wird geladen...",
+    copied: "Kopiert!",
+  },
+
+  action: {
+    copyIp: "IP kopieren",
   },
 
   btn: {
@@ -467,6 +472,12 @@ export default {
     fwRevision: "Firmware-Rev.",
     eraseBlock: "Löschblockgröße",
     hostname: "Hostname",
+    os: "BS",
+    arch: "Arch",
+    kernel: "Kernel",
+    platform: "Plattform",
+    runtime: "Laufzeit",
+    versions: "Versionen",
     bootTime: "Startzeit",
     network: "Netzwerk",
     sent: "Gesendet",

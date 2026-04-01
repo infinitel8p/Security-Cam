@@ -60,6 +60,11 @@ export default {
     reconnecting: "Reconnexion...",
     loading: "Chargement...",
     retrying: "Nouvelle tentative...",
+    copied: "Copié !",
+  },
+
+  action: {
+    copyIp: "Cliquer pour copier l'IP",
   },
 
   btn: {
@@ -467,6 +472,12 @@ export default {
     fwRevision: "Rév. firmware",
     eraseBlock: "Taille bloc effacement",
     hostname: "Nom d'hôte",
+    os: "SE",
+    arch: "Arch",
+    kernel: "Noyau",
+    platform: "Plateforme",
+    runtime: "Exécution",
+    versions: "Versions",
     bootTime: "Heure de démarrage",
     network: "Réseau",
     sent: "Envoyé",

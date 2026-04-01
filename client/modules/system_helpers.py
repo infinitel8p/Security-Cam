@@ -237,11 +237,103 @@ def get_extended_stats():
     except (AttributeError, OSError):
         pass
 
-    # Python and OS info
-    import sys
+    # User, Python, and OS info
+    import getpass
     import platform
+    import shutil
+
+    try:
+        stats["username"] = getpass.getuser()
+    except Exception:
+        pass
     stats["python_version"] = platform.python_version()
     stats["os_info"] = platform.platform()
     stats["arch"] = platform.machine()
+    stats["kernel"] = platform.release()
+
+    # CPU model (from /proc/cpuinfo or platform)
+    try:
+        with open("/proc/cpuinfo", "r") as f:
+            for line in f:
+                if line.lower().startswith("model name"):
+                    stats["cpu_model"] = line.split(":", 1)[1].strip()
+                    break
+            else:
+                # ARM Pis use "Hardware" line instead
+                f.seek(0)
+                for line in f:
+                    if line.lower().startswith("hardware"):
+                        stats["cpu_model"] = line.split(":", 1)[1].strip()
+                        break
+    except (FileNotFoundError, PermissionError):
+        proc = platform.processor()
+        if proc:
+            stats["cpu_model"] = proc
+
+    # Network interfaces — find primary IP and wifi SSID
+    try:
+        addrs = psutil.net_if_addrs()
+        for iface in ("wlan0", "wlan1", "eth0", "end0"):
+            if iface in addrs:
+                for addr in addrs[iface]:
+                    if addr.family.name == "AF_INET" and not addr.address.startswith("127."):
+                        stats["ip_address"] = addr.address
+                        stats["ip_interface"] = iface
+                        break
+            if "ip_address" in stats:
+                break
+    except Exception:
+        pass
+
+    # WiFi SSID (only on Linux with iw)
+    if shutil.which("iw"):
+        try:
+            result = subprocess.run(
+                ["iw", "dev", "wlan0", "link"],
+                capture_output=True, text=True, timeout=2,
+            )
+            if result.returncode == 0:
+                for line in result.stdout.splitlines():
+                    line = line.strip()
+                    if line.startswith("SSID:"):
+                        stats["wifi_ssid"] = line.split(":", 1)[1].strip()
+                        break
+        except Exception:
+            pass
+
+    # Key package versions
+    import flask
+    stats["flask_version"] = flask.__version__
+    try:
+        import cv2
+        stats["opencv_version"] = cv2.__version__
+    except Exception:
+        pass
+
+    # Node.js version (used by the frontend build)
+    node_bin = shutil.which("node")
+    if node_bin:
+        try:
+            result = subprocess.run(
+                [node_bin, "--version"],
+                capture_output=True, text=True, timeout=2
+            )
+            if result.returncode == 0:
+                stats["node_version"] = result.stdout.strip().lstrip("v")
+        except Exception:
+            pass
+
+    # MediaMTX version
+    mtx_bin = shutil.which("mediamtx") or "/usr/local/bin/mediamtx"
+    try:
+        result = subprocess.run(
+            [mtx_bin, "--version"],
+            capture_output=True, text=True, timeout=2,
+        )
+        out = (result.stdout or result.stderr).strip()
+        if result.returncode == 0 and out:
+            stats["mediamtx_version"] = out.split()[-1] if " " in out else out
+    except Exception:
+        pass
 
     return stats

@@ -15,6 +15,7 @@
   import cameraIcon from "../icons/camera.svg?raw";
   import shieldIcon from "../icons/shield.svg?raw";
   import bluetoothIcon from "../icons/bluetooth.svg?raw";
+  import infoCircleIcon from "../icons/info-circle.svg?raw";
 
   interface ThrottleInfo {
     raw: string;
@@ -62,6 +63,16 @@
     python_version?: string;
     os_info?: string;
     arch?: string;
+    kernel?: string;
+    username?: string;
+    cpu_model?: string;
+    ip_address?: string;
+    ip_interface?: string;
+    wifi_ssid?: string;
+    flask_version?: string;
+    opencv_version?: string;
+    node_version?: string;
+    mediamtx_version?: string;
   }
 
   interface ConnectionInfo {
@@ -219,8 +230,8 @@
   }
 
   function statusDotColor(pct: number): string {
-    if (pct >= 90) return "bg-status-critical";
-    if (pct >= 75) return "bg-status-warning";
+    if (pct >= 90) return "bg-status-critical status-live";
+    if (pct >= 75) return "bg-status-warning status-live";
     return "bg-status-ok";
   }
 
@@ -313,6 +324,24 @@
   let storagePct = $derived(info ? usagePct(num(info.storage_info_gb?.used_gb), num(info.storage_info_gb?.total_gb)) : 0);
   let ramPct = $derived(info ? usagePct(num(info.ram_usage_mb?.used_mb), num(info.ram_usage_mb?.total_mb)) : 0);
   let storageFreeGb = $derived(info ? num(info.storage_info_gb?.total_gb) - num(info.storage_info_gb?.used_gb) : 0);
+
+  /** All four core metrics in OK range — system is healthy */
+  let allNominal = $derived(
+    info != null && loadPct < 75 && ramPct < 75 && tempPctLevel === 0 && storagePct < 75
+  );
+
+  /** Uptime milestone tier */
+  let uptimeDays = $derived(info ? Math.floor(num(info.uptime_seconds) / 86400) : 0);
+
+  /** Click-to-copy with brief visual feedback */
+  let ipCopied = $state(false);
+  function copyIp() {
+    if (!extended?.ip_address) return;
+    navigator.clipboard.writeText(extended.ip_address).then(() => {
+      ipCopied = true;
+      setTimeout(() => ipCopied = false, 1500);
+    }).catch(() => {});
+  }
 </script>
 
 {#if error}
@@ -323,32 +352,41 @@
     </button>
   </div>
 {:else if info}
-  <div class="mt-6 animate-in">
-    <!-- Uptime + Host + Boot — compact inline row -->
-    <div class="card flex flex-wrap items-center gap-x-6 gap-y-1 px-4 py-3 min-w-0">
-      <div class="flex items-center gap-2">
-        <Icon icon={clockIcon} class="h-3.5 w-3.5 text-accent" stroke={2} />
+  <div class="mt-6">
+    <!-- Uptime + Identity — compact inline row -->
+    <div class="card flex flex-wrap items-center gap-x-4 gap-y-1.5 px-4 py-3 min-w-0 sm:gap-x-6 animate-in transition-[border-color] duration-700 {allNominal ? 'border-l-2 border-l-status-ok/40' : ''}">
+      <div class="flex items-center gap-2 shrink-0">
+        <Icon icon={clockIcon} class="h-3.5 w-3.5 {allNominal ? 'text-status-ok' : 'text-accent'} transition-colors duration-700" stroke={2} />
         <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.uptime")}</p>
         <p class="text-sm font-bold tabular-nums text-text-primary">{formatUptimeLong(info.uptime_seconds)}</p>
+        {#if uptimeDays >= 30}
+          <span class="rounded-full bg-status-ok/10 px-1.5 py-0.5 text-[0.5rem] font-bold uppercase tracking-wider text-status-ok">30d+</span>
+        {:else if uptimeDays >= 7}
+          <span class="rounded-full bg-accent/10 px-1.5 py-0.5 text-[0.5rem] font-bold uppercase tracking-wider text-accent">7d+</span>
+        {/if}
       </div>
       {#if extended?.hostname}
-        <div class="flex items-center gap-2">
-          <Icon icon={deviceDesktopIcon} class="h-3.5 w-3.5 text-text-muted" stroke={2} />
-          <p class="text-sm font-medium text-text-secondary truncate">{extended.hostname}</p>
+        <div class="flex items-center gap-2 min-w-0">
+          <Icon icon={deviceDesktopIcon} class="h-3.5 w-3.5 shrink-0 text-text-muted" stroke={2} />
+          <p class="font-mono text-sm font-medium text-text-secondary truncate">{extended.username ?? "pi"}@{extended.hostname}</p>
         </div>
       {/if}
-      {#if extended?.boot_time}
-        <div class="flex items-center gap-2">
-          <Icon icon={activityIcon} class="h-3.5 w-3.5 text-text-muted" stroke={2} />
-          <p class="text-sm tabular-nums text-text-secondary">{formatBootTime(extended.boot_time)}</p>
-        </div>
+      {#if extended?.ip_address}
+        <button
+          class="flex items-center gap-1.5 shrink-0 rounded-md px-1.5 py-0.5 -mx-1.5 transition-colors duration-150 hover:bg-surface-overlay active:bg-surface-overlay/80 cursor-copy"
+          onclick={copyIp}
+          title={ipCopied ? t("status.copied") : t("action.copyIp")}
+        >
+          <Icon icon={wifiIcon} class="h-3.5 w-3.5 text-text-muted transition-colors duration-150 {ipCopied ? '!text-status-ok' : ''}" stroke={2} />
+          <p class="font-mono text-sm tabular-nums transition-colors duration-150 {ipCopied ? 'text-status-ok' : 'text-text-secondary'}">{ipCopied ? t("status.copied") : extended.ip_address}</p>
+        </button>
       {/if}
     </div>
 
-    <!-- CPU + Temp row -->
+    <!-- Core metrics — unified 2×2 grid -->
     <div class="mt-4 grid gap-4 sm:grid-cols-2">
       <!-- CPU Load -->
-      <div class="card px-4 py-4 transition-shadow duration-700 {cardGlow(loadPct)} {cardSweepClass(loadPct)}">
+      <div class="card px-4 py-4 transition-shadow duration-700 animate-in stagger-1 {cardGlow(loadPct)} {cardSweepClass(loadPct)}">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-1.5">
             <Icon icon={cpuIcon} class="h-3 w-3 text-text-muted" stroke={2} />
@@ -359,8 +397,8 @@
         <p class="mt-2 text-4xl font-bold tabular-nums leading-none text-text-primary">
           {loadPct}<span class="ml-0.5 text-xs font-medium text-text-muted/60">%</span>
         </p>
-        <div class="mt-3 h-1 rounded-full {barTrackColor(loadPct)}">
-          <div class="h-full rounded-full {barColor(loadPct)} transition-all duration-500" style="width: {loadPct}%"></div>
+        <div class="mt-3 h-1 rounded-full {barTrackColor(loadPct)}" role="progressbar" aria-valuenow={loadPct} aria-valuemin={0} aria-valuemax={100} aria-label={t("label.cpu")}>
+          <div class="h-full rounded-full animate-bar {barColor(loadPct)} transition-all duration-500" style="width: {loadPct}%"></div>
         </div>
         {#if cpuHistory.length > 1}
           <svg class="mt-3 h-8 w-full" viewBox="0 0 100 24" preserveAspectRatio="none">
@@ -403,53 +441,8 @@
         {/if}
       </div>
 
-      <!-- CPU Temp -->
-      <div class="card px-4 py-4 transition-shadow duration-700 {cardGlow(tempPctLevel)} {cardSweepClass(tempPctLevel)}">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-1.5">
-            <Icon icon={temperatureIcon} class="h-3 w-3 text-text-muted" stroke={2} />
-            <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.temperature")}</p>
-          </div>
-          <span class="h-2 w-2 rounded-full {statusDotColor(tempPctLevel)}"></span>
-        </div>
-        <p class="mt-2 text-4xl font-bold tabular-nums leading-none {tempColor(cpuTemp)}">
-          {cpuTemp.toFixed(0)}<span class="ml-0.5 text-xs font-medium text-text-muted/60">&deg;C</span>
-        </p>
-        <div class="mt-3 h-1 rounded-full {barTrackColor(tempPctLevel)}">
-          <div class="h-full rounded-full {barColor(tempPctLevel)} transition-all duration-500" style="width: {Math.min(cpuTemp / 85 * 100, 100)}%"></div>
-        </div>
-        {#if tempHistory.length > 1}
-          <svg class="mt-3 h-8 w-full" viewBox="0 0 100 24" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="temp-fill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="currentColor" stop-opacity="0.12" />
-                <stop offset="100%" stop-color="currentColor" stop-opacity="0" />
-              </linearGradient>
-            </defs>
-            {#key pulseKey}
-              <polygon
-                points="{sparklinePoints(tempHistory, 85)} 100,24 0,24"
-                fill="url(#temp-fill)"
-                class="{sparklineColor(tempPctLevel)} animate-sparkline-pulse"
-              />
-            {/key}
-            <polyline
-              points={sparklinePoints(tempHistory, 85)}
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.2"
-              stroke-linejoin="round"
-              class="{sparklineColor(tempPctLevel)}"
-            />
-          </svg>
-        {/if}
-      </div>
-    </div>
-
-    <!-- RAM + Storage row -->
-    <div class="mt-4 grid gap-4 sm:grid-cols-2">
       <!-- RAM -->
-      <div class="card px-4 py-4 transition-shadow duration-700 {cardGlow(ramPct)} {cardSweepClass(ramPct)}">
+      <div class="card px-4 py-4 transition-shadow duration-700 animate-in stagger-2 {cardGlow(ramPct)} {cardSweepClass(ramPct)}">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-1.5">
             <Icon icon={deviceDesktopIcon} class="h-3 w-3 text-text-muted" stroke={2} />
@@ -460,8 +453,8 @@
         <p class="mt-2 text-4xl font-bold tabular-nums leading-none text-text-primary">
           {ramPct}<span class="ml-0.5 text-xs font-medium text-text-muted/60">%</span>
         </p>
-        <div class="mt-3 h-1 rounded-full {barTrackColor(ramPct)}">
-          <div class="h-full rounded-full {barColor(ramPct)} transition-all duration-500" style="width: {ramPct}%"></div>
+        <div class="mt-3 h-1 rounded-full {barTrackColor(ramPct)}" role="progressbar" aria-valuenow={ramPct} aria-valuemin={0} aria-valuemax={100} aria-label={t("label.ram")}>
+          <div class="h-full rounded-full animate-bar {barColor(ramPct)} transition-all duration-500" style="width: {ramPct}%"></div>
         </div>
         {#if ramHistory.length > 1}
           <svg class="mt-3 h-8 w-full" viewBox="0 0 100 24" preserveAspectRatio="none">
@@ -496,14 +489,56 @@
               <p class="text-[0.625rem] tabular-nums text-text-muted">{extended.swap.used_mb} / {extended.swap.total_mb} MB</p>
             </div>
             <div class="mt-1 h-0.5 rounded-full {barTrackColor(extended.swap.percent)}">
-              <div class="h-full rounded-full {barColor(extended.swap.percent)} transition-all duration-500" style="width: {extended.swap.percent}%"></div>
+              <div class="h-full rounded-full animate-bar {barColor(extended.swap.percent)} transition-all duration-500" style="width: {extended.swap.percent}%"></div>
             </div>
           </div>
         {/if}
       </div>
 
+      <!-- CPU Temp -->
+      <div class="card px-4 py-4 transition-shadow duration-700 animate-in stagger-3 {cardGlow(tempPctLevel)} {cardSweepClass(tempPctLevel)}">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-1.5">
+            <Icon icon={temperatureIcon} class="h-3 w-3 text-text-muted" stroke={2} />
+            <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.temperature")}</p>
+          </div>
+          <span class="h-2 w-2 rounded-full {statusDotColor(tempPctLevel)}"></span>
+        </div>
+        <p class="mt-2 text-4xl font-bold tabular-nums leading-none {tempColor(cpuTemp)}">
+          {cpuTemp.toFixed(0)}<span class="ml-0.5 text-xs font-medium text-text-muted/60">&deg;C</span>
+        </p>
+        <div class="mt-3 h-1 rounded-full {barTrackColor(tempPctLevel)}" role="progressbar" aria-valuenow={cpuTemp} aria-valuemin={0} aria-valuemax={85} aria-label={t("label.temperature")}>
+          <div class="h-full rounded-full animate-bar {barColor(tempPctLevel)} transition-all duration-500" style="width: {Math.min(cpuTemp / 85 * 100, 100)}%"></div>
+        </div>
+        {#if tempHistory.length > 1}
+          <svg class="mt-3 h-8 w-full" viewBox="0 0 100 24" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="temp-fill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="currentColor" stop-opacity="0.12" />
+                <stop offset="100%" stop-color="currentColor" stop-opacity="0" />
+              </linearGradient>
+            </defs>
+            {#key pulseKey}
+              <polygon
+                points="{sparklinePoints(tempHistory, 85)} 100,24 0,24"
+                fill="url(#temp-fill)"
+                class="{sparklineColor(tempPctLevel)} animate-sparkline-pulse"
+              />
+            {/key}
+            <polyline
+              points={sparklinePoints(tempHistory, 85)}
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.2"
+              stroke-linejoin="round"
+              class="{sparklineColor(tempPctLevel)}"
+            />
+          </svg>
+        {/if}
+      </div>
+
       <!-- Storage -->
-      <div class="card px-4 py-4 transition-shadow duration-700 {cardGlow(storagePct)} {cardSweepClass(storagePct)}">
+      <div class="card px-4 py-4 transition-shadow duration-700 animate-in stagger-4 {cardGlow(storagePct)} {cardSweepClass(storagePct)}">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-1.5">
             <Icon icon={databaseIcon} class="h-3 w-3 text-text-muted" stroke={2} />
@@ -514,8 +549,8 @@
         <p class="mt-2 text-4xl font-bold tabular-nums leading-none text-text-primary">
           {storagePct}<span class="ml-0.5 text-xs font-medium text-text-muted/60">%</span>
         </p>
-        <div class="mt-3 h-1 rounded-full {barTrackColor(storagePct)}">
-          <div class="h-full rounded-full {barColor(storagePct)} transition-all duration-500" style="width: {storagePct}%"></div>
+        <div class="mt-3 h-1 rounded-full {barTrackColor(storagePct)}" role="progressbar" aria-valuenow={storagePct} aria-valuemin={0} aria-valuemax={100} aria-label={t("label.disk")}>
+          <div class="h-full rounded-full animate-bar {barColor(storagePct)} transition-all duration-500" style="width: {storagePct}%"></div>
         </div>
         <p class="mt-3 text-[0.6875rem] tabular-nums text-text-muted">
           {storageFreeGb.toFixed(1)} GB {t("stats.free")}
@@ -523,10 +558,10 @@
       </div>
     </div>
 
-    <!-- Hardware & Network details — wider gap from metric cards above -->
-    <div class="mt-6 grid gap-4 sm:grid-cols-2">
+    <!-- Hardware & Network details -->
+    <div class="mt-8 grid gap-4 sm:grid-cols-2">
       <!-- Throttle + System (combined) -->
-      <div class="card px-4 py-4">
+      <div class="card px-4 py-4 animate-in stagger-5">
         <!-- Throttle -->
         {#if info.throttle}
           {@const active = throttleActive(info.throttle)}
@@ -584,7 +619,7 @@
         <!-- System — separated by border from throttle -->
         {#if extended}
           <div class="mt-3 border-t border-border-subtle pt-3">
-            <div class="grid grid-cols-2 gap-x-6 gap-y-2">
+            <div class="grid grid-cols-2 gap-x-4 gap-y-2 sm:gap-x-6">
               {#if extended.process_count != null}
                 <div>
                   <p class="text-[0.625rem] uppercase tracking-wider text-text-muted">{t("stats.processes")}</p>
@@ -610,12 +645,12 @@
 
       <!-- Network I/O -->
       {#if extended?.network}
-        <div class="card px-4 py-4">
+        <div class="card px-4 py-4 animate-in stagger-5">
           <div class="flex items-center gap-1.5">
             <Icon icon={wifiIcon} class="h-3 w-3 text-text-muted" stroke={2} />
             <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("stats.network")}</p>
           </div>
-          <div class="mt-3 grid grid-cols-2 gap-x-6 gap-y-2">
+          <div class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 sm:gap-x-6">
             <div>
               <p class="text-[0.625rem] uppercase tracking-wider text-text-muted">{t("stats.sent")}</p>
               <p class="text-sm font-semibold tabular-nums text-text-primary">{formatBytes(extended.network.bytes_sent)}</p>
@@ -626,11 +661,11 @@
             </div>
             <div>
               <p class="text-[0.625rem] uppercase tracking-wider text-text-muted">{t("stats.packetsSent")}</p>
-              <p class="text-sm font-semibold tabular-nums text-text-primary">{extended.network.packets_sent.toLocaleString()}</p>
+              <p class="text-sm font-semibold tabular-nums text-text-primary">{num(extended.network.packets_sent).toLocaleString()}</p>
             </div>
             <div>
               <p class="text-[0.625rem] uppercase tracking-wider text-text-muted">{t("stats.packetsRecv")}</p>
-              <p class="text-sm font-semibold tabular-nums text-text-primary">{extended.network.packets_recv.toLocaleString()}</p>
+              <p class="text-sm font-semibold tabular-nums text-text-primary">{num(extended.network.packets_recv).toLocaleString()}</p>
             </div>
           </div>
           <p class="mt-2 text-[0.625rem] uppercase tracking-wider text-text-muted">{t("label.sinceBoot")}</p>
@@ -640,13 +675,13 @@
 
     <!-- SD Card details -->
     {#if info.sd_health}
-      <div class="mt-4 card px-4 py-4">
+      <div class="mt-4 card px-4 py-4 animate-fade-in">
         <div class="flex items-center gap-1.5">
           <Icon icon={databaseIcon} class="h-3 w-3 text-text-muted" stroke={2} />
           <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.sdCard")}</p>
         </div>
 
-        <div class="mt-3 grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-3">
+        <div class="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-3 sm:gap-x-6">
           {#if info.sd_health.name}
             <div>
               <p class="text-[0.625rem] uppercase tracking-wider text-text-muted">{t("stats.cardName")}</p>
@@ -686,7 +721,7 @@
           {#if info.sd_health.written_since_boot_gb != null}
             <div>
               <p class="text-[0.625rem] uppercase tracking-wider text-text-muted">{t("label.writtenSinceBoot")}</p>
-              <p class="text-sm font-medium tabular-nums text-text-primary">{info.sd_health.written_since_boot_gb.toFixed(2)} GB</p>
+              <p class="text-sm font-medium tabular-nums text-text-primary">{num(info.sd_health.written_since_boot_gb).toFixed(2)} GB</p>
             </div>
           {/if}
           {#if info.sd_health.life_time_est}
@@ -706,15 +741,15 @@
     {/if}
 
     <!-- Camera, Recording & Connectivity -->
-    <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <!-- Camera / Stream -->
       {#if stream}
-        <div class="card px-4 py-4">
+        <div class="card px-4 py-4 animate-fade-in">
           <div class="flex items-center gap-1.5">
             <Icon icon={cameraIcon} class="h-3 w-3 text-text-muted" stroke={2} />
             <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("stats.camera")}</p>
           </div>
-          <div class="mt-3 grid grid-cols-2 gap-x-6 gap-y-2">
+          <div class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 sm:gap-x-6">
             <div>
               <p class="text-[0.625rem] uppercase tracking-wider text-text-muted">{t("stats.resolution")}</p>
               <p class="text-sm font-semibold tabular-nums text-text-primary">{stream.width}&times;{stream.height}</p>
@@ -728,7 +763,7 @@
       {/if}
 
       <!-- Recordings -->
-      <div class="card px-4 py-4">
+      <div class="card px-4 py-4 animate-fade-in">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-1.5">
             <Icon icon={videoIcon} class="h-3 w-3 text-text-muted" stroke={2} />
@@ -741,7 +776,7 @@
             </span>
           {/if}
         </div>
-        <div class="mt-3 grid grid-cols-2 gap-x-6 gap-y-2">
+        <div class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 sm:gap-x-6">
           <div>
             <p class="text-[0.625rem] uppercase tracking-wider text-text-muted">{t("stats.totalRecordings")}</p>
             <p class="text-sm font-semibold tabular-nums text-text-primary">{archiveCount ?? "-"}</p>
@@ -762,12 +797,12 @@
 
       <!-- Connectivity -->
       {#if connections}
-        <div class="card px-4 py-4">
+        <div class="card px-4 py-4 animate-fade-in">
           <div class="flex items-center gap-1.5">
             <Icon icon={bluetoothIcon} class="h-3 w-3 text-text-muted" stroke={2} />
             <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("stats.connectivity")}</p>
           </div>
-          <div class="mt-2 grid grid-cols-2 gap-x-6 gap-y-2">
+          <div class="mt-2 grid grid-cols-2 gap-x-4 gap-y-2 sm:gap-x-6">
             <div>
               <p class="text-[0.625rem] uppercase tracking-wider text-text-muted">{t("label.bluetooth")}</p>
               <p class="text-xl font-bold tabular-nums leading-none {connections.bluetooth.online > 0 ? 'text-status-ok' : 'text-text-muted'}">
@@ -803,19 +838,122 @@
       {/if}
     </div>
 
-    <!-- Platform info -->
+    <!-- System info -->
     {#if extended?.os_info || extended?.python_version}
-      <div class="mt-4 card px-4 py-3">
-        <div class="flex flex-wrap items-center gap-x-6 gap-y-1 min-w-0 text-[0.625rem] tabular-nums text-text-muted">
-          {#if extended.os_info}
-            <span class="truncate">{extended.os_info}</span>
+      <div class="mt-10 card px-4 py-4 space-y-4 animate-fade-in">
+        <!-- Terminal-style identity header -->
+        <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 min-w-0 animate-in">
+          <div class="flex items-center gap-2 min-w-0">
+            <Icon icon={infoCircleIcon} class="h-3.5 w-3.5 shrink-0 text-accent" stroke={2} />
+            <span class="font-mono text-sm font-semibold text-text-primary truncate">
+              {extended.username ?? "pi"}@{extended.hostname ?? "camera"}<span class="inline-block w-[0.5em] h-[1.1em] align-text-bottom ml-px bg-text-muted/50 terminal-cursor"></span>
+            </span>
+          </div>
+          {#if extended.ip_address}
+            <button class="flex items-center gap-1.5 shrink-0 rounded-md px-1.5 py-0.5 -mx-1.5 transition-colors duration-150 hover:bg-surface-overlay cursor-copy" onclick={copyIp} title={ipCopied ? t("status.copied") : t("action.copyIp")}>
+              <Icon icon={wifiIcon} class="h-3 w-3 transition-colors duration-150 {ipCopied ? 'text-status-ok' : 'text-status-ok'}" stroke={2} />
+              <span class="font-mono text-[0.6875rem] transition-colors duration-150 {ipCopied ? 'text-status-ok' : 'text-text-muted'}">{ipCopied ? t("status.copied") : extended.ip_address}</span>
+              {#if extended.wifi_ssid}
+                <span class="rounded-full bg-accent/10 px-2 py-0.5 text-[0.625rem] font-medium text-accent truncate max-w-[10rem]">{extended.wifi_ssid}</span>
+              {/if}
+            </button>
           {/if}
-          {#if extended.python_version}
-            <span>Python {extended.python_version}</span>
-          {/if}
-          {#if extended.arch}
-            <span>{extended.arch}</span>
-          {/if}
+        </div>
+
+        <!-- Hardware & OS section -->
+        <div class="grid gap-4 sm:grid-cols-2 animate-in stagger-1">
+          <!-- Platform -->
+          <div class="space-y-2 min-w-0">
+            <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("stats.platform")}</p>
+            <div class="space-y-1.5">
+              {#if extended.os_info}
+                <div class="flex items-start gap-2 text-[0.6875rem] min-w-0">
+                  <span class="shrink-0 text-text-muted w-10">{t("stats.os")}</span>
+                  <span class="text-text-primary truncate min-w-0" title={extended.os_info}>{extended.os_info}</span>
+                </div>
+              {/if}
+              {#if extended.kernel}
+                <div class="flex items-center gap-2 text-[0.6875rem] min-w-0">
+                  <span class="shrink-0 text-text-muted w-10">{t("stats.kernel")}</span>
+                  <span class="font-mono text-text-primary truncate min-w-0" title={extended.kernel}>{extended.kernel}</span>
+                </div>
+              {/if}
+              {#if extended.arch}
+                <div class="flex items-center gap-2 text-[0.6875rem]">
+                  <span class="shrink-0 text-text-muted w-10">{t("stats.arch")}</span>
+                  <span class="font-mono text-text-primary">{extended.arch}</span>
+                </div>
+              {/if}
+              {#if extended.cpu_model}
+                <div class="flex items-center gap-2 text-[0.6875rem] min-w-0">
+                  <span class="shrink-0 text-text-muted w-10">CPU</span>
+                  <span class="text-text-primary truncate min-w-0" title={extended.cpu_model}>{extended.cpu_model}</span>
+                </div>
+              {/if}
+            </div>
+          </div>
+
+          <!-- Runtime -->
+          <div class="space-y-2 min-w-0">
+            <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("stats.runtime")}</p>
+            <div class="space-y-1.5">
+              {#if extended.process_count}
+                <div class="flex items-center gap-2 text-[0.6875rem]">
+                  <span class="shrink-0 text-text-muted">{t("stats.processes")}</span>
+                  <span class="font-mono text-text-primary">{extended.process_count}</span>
+                </div>
+              {/if}
+              {#if extended.cpu_count}
+                <div class="flex items-center gap-2 text-[0.6875rem]">
+                  <span class="shrink-0 text-text-muted">{t("stats.cpuCores")}</span>
+                  <span class="font-mono text-text-primary">{extended.cpu_count}</span>
+                </div>
+              {/if}
+              {#if extended.boot_time}
+                <div class="flex items-center gap-2 text-[0.6875rem] min-w-0">
+                  <span class="shrink-0 text-text-muted">{t("stats.bootTime")}</span>
+                  <span class="font-mono text-text-primary truncate min-w-0" title={formatBootTime(extended.boot_time)}>{formatBootTime(extended.boot_time)}</span>
+                </div>
+              {/if}
+            </div>
+          </div>
+        </div>
+
+        <!-- Version pills -->
+        <div class="min-w-0 animate-in stagger-2">
+          <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted mb-2">{t("stats.versions")}</p>
+          <div class="flex flex-wrap gap-1.5 sm:gap-2">
+            {#if extended.python_version}
+              <span class="version-pill inline-flex items-center gap-1 rounded-lg bg-surface-overlay px-2 py-0.5 text-[0.625rem] sm:gap-1.5 sm:px-2.5 sm:py-1 sm:text-[0.6875rem]">
+                <span class="text-text-muted">Python</span>
+                <span class="font-mono font-medium text-text-primary">{extended.python_version}</span>
+              </span>
+            {/if}
+            {#if extended.node_version}
+              <span class="version-pill inline-flex items-center gap-1 rounded-lg bg-surface-overlay px-2 py-0.5 text-[0.625rem] sm:gap-1.5 sm:px-2.5 sm:py-1 sm:text-[0.6875rem]">
+                <span class="text-text-muted">Node.js</span>
+                <span class="font-mono font-medium text-text-primary">{extended.node_version}</span>
+              </span>
+            {/if}
+            {#if extended.flask_version}
+              <span class="version-pill inline-flex items-center gap-1 rounded-lg bg-surface-overlay px-2 py-0.5 text-[0.625rem] sm:gap-1.5 sm:px-2.5 sm:py-1 sm:text-[0.6875rem]">
+                <span class="text-text-muted">Flask</span>
+                <span class="font-mono font-medium text-text-primary">{extended.flask_version}</span>
+              </span>
+            {/if}
+            {#if extended.mediamtx_version}
+              <span class="version-pill inline-flex items-center gap-1 rounded-lg bg-surface-overlay px-2 py-0.5 text-[0.625rem] sm:gap-1.5 sm:px-2.5 sm:py-1 sm:text-[0.6875rem]">
+                <span class="text-text-muted">MediaMTX</span>
+                <span class="font-mono font-medium text-text-primary">{extended.mediamtx_version}</span>
+              </span>
+            {/if}
+            {#if extended.opencv_version}
+              <span class="version-pill inline-flex items-center gap-1 rounded-lg bg-surface-overlay px-2 py-0.5 text-[0.625rem] sm:gap-1.5 sm:px-2.5 sm:py-1 sm:text-[0.6875rem]">
+                <span class="text-text-muted">OpenCV</span>
+                <span class="font-mono font-medium text-text-primary">{extended.opencv_version}</span>
+              </span>
+            {/if}
+          </div>
         </div>
       </div>
     {/if}
@@ -829,28 +967,21 @@
       <div class="skeleton h-4 w-20"></div>
       <div class="skeleton h-4 w-28"></div>
     </div>
-    <!-- Metric cards skeleton -->
+    <!-- Metric cards skeleton — 2×2 grid -->
     <div class="mt-4 grid gap-4 sm:grid-cols-2">
-      {#each Array(2) as _}
+      {#each Array(4) as _, i}
         <div class="card px-4 py-4">
           <div class="skeleton h-2.5 w-12"></div>
           <div class="skeleton mt-3 h-9 w-16"></div>
           <div class="skeleton mt-3 h-1 w-full"></div>
-          <div class="skeleton mt-3 h-8 w-full"></div>
-        </div>
-      {/each}
-    </div>
-    <div class="mt-4 grid gap-4 sm:grid-cols-2">
-      {#each Array(2) as _}
-        <div class="card px-4 py-4">
-          <div class="skeleton h-2.5 w-12"></div>
-          <div class="skeleton mt-3 h-9 w-16"></div>
-          <div class="skeleton mt-3 h-1 w-full"></div>
+          {#if i < 2}
+            <div class="skeleton mt-3 h-8 w-full"></div>
+          {/if}
         </div>
       {/each}
     </div>
     <!-- Info cards skeleton -->
-    <div class="mt-6 grid gap-4 sm:grid-cols-2">
+    <div class="mt-8 grid gap-4 sm:grid-cols-2">
       {#each Array(2) as _}
         <div class="card px-4 py-4">
           <div class="skeleton h-2.5 w-16"></div>
@@ -862,7 +993,7 @@
       {/each}
     </div>
     <!-- Status cards skeleton -->
-    <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {#each Array(3) as _}
         <div class="card px-4 py-4">
           <div class="skeleton h-2.5 w-14"></div>
@@ -873,9 +1004,32 @@
         </div>
       {/each}
     </div>
-    <!-- Platform skeleton -->
-    <div class="mt-4 card px-4 py-3">
-      <div class="skeleton h-3 w-64"></div>
+    <!-- System info skeleton -->
+    <div class="mt-10 card px-4 py-4 space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="skeleton h-3.5 w-3.5 rounded"></div>
+          <div class="skeleton h-4 w-36"></div>
+        </div>
+        <div class="skeleton h-3.5 w-28"></div>
+      </div>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div class="space-y-2">
+          <div class="skeleton h-2.5 w-14"></div>
+          <div class="skeleton h-3 w-full"></div>
+          <div class="skeleton h-3 w-3/4"></div>
+        </div>
+        <div class="space-y-2">
+          <div class="skeleton h-2.5 w-12"></div>
+          <div class="skeleton h-3 w-2/3"></div>
+          <div class="skeleton h-3 w-1/2"></div>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <div class="skeleton h-7 w-24 rounded-lg"></div>
+        <div class="skeleton h-7 w-20 rounded-lg"></div>
+        <div class="skeleton h-7 w-16 rounded-lg"></div>
+      </div>
     </div>
   </div>
 {/if}
