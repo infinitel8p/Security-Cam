@@ -660,7 +660,7 @@
     {:else}
       <div class="flex flex-col gap-4 lg:flex-row">
         <!-- File list -->
-        <div class="card w-full space-y-1 p-2 lg:w-72 lg:shrink-0">
+        <div class="card w-full space-y-1 overflow-y-auto p-2 lg:max-h-[70vh] lg:w-72 lg:shrink-0">
           <p class="section-label px-2 pt-1">{t("logs.logFiles")}</p>
           {#each groupedInstallLogs as [category, files]}
             <p class="mt-2 px-2 text-[0.625rem] font-semibold uppercase tracking-wider text-text-muted first:mt-0">
