@@ -411,6 +411,7 @@ export default {
     autoRefresh: "Actualización automática",
     searchPlaceholder: "Buscar en registros...",
     all: "Todos",
+    allCategories: "Todas las categor\u00edas",
     timestamp: "Marca de tiempo",
     level: "Nivel",
     source: "Origen",

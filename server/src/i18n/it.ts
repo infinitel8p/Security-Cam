@@ -411,6 +411,7 @@ export default {
     autoRefresh: "Aggiornamento automatico",
     searchPlaceholder: "Cerca nei log...",
     all: "Tutti",
+    allCategories: "Tutte le categorie",
     timestamp: "Data e ora",
     level: "Livello",
     source: "Origine",

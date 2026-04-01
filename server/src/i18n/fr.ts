@@ -411,6 +411,7 @@ export default {
     autoRefresh: "Actualisation auto",
     searchPlaceholder: "Rechercher dans les journaux...",
     all: "Tous",
+    allCategories: "Toutes les cat\u00e9gories",
     timestamp: "Horodatage",
     level: "Niveau",
     source: "Source",

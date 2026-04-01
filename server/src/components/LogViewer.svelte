@@ -32,6 +32,7 @@
   let levelFilter = $state<string>("");
   let searchQuery = $state("");
   let searchInput = $state("");
+  let sourceFilter = $state("");
   let autoRefresh = $state(true);
   let refreshTimer: ReturnType<typeof setInterval> | null = null;
   let displayLimit = $state(200);
@@ -51,6 +52,7 @@
   let mtxLevelFilter = $state<string>("");
   let mtxSearchQuery = $state("");
   let mtxSearchInput = $state("");
+  let mtxSourceFilter = $state("");
   let mtxDisplayLimit = $state(200);
 
   const REFRESH_INTERVAL = 5000;
@@ -246,12 +248,17 @@
     return [...groups.entries()];
   });
 
-  let displayedLogs = $derived(logs.slice(0, displayLimit));
-  let hasMore = $derived(logs.length > displayLimit);
+  let filteredLogs = $derived(sourceFilter ? logs.filter((l) => l.source === sourceFilter) : logs);
+  let displayedLogs = $derived(filteredLogs.slice(0, displayLimit));
+  let hasMore = $derived(filteredLogs.length > displayLimit);
+
+  // Unique source categories from loaded logs
+  let sourcesApi = $derived([...new Set(logs.map((l) => l.source))].sort());
+  let sourcesMtx = $derived([...new Set(mtxLogs.map((l) => l.source))].sort());
 
   // Count by level for filter badges
   let levelCounts = $derived.by(() => {
-    if (levelFilter || searchQuery) return null; // Counts only meaningful for unfiltered
+    if (levelFilter || searchQuery || sourceFilter) return null;
     const counts: Record<string, number> = {};
     for (const l of logs) {
       counts[l.level] = (counts[l.level] || 0) + 1;
@@ -362,6 +369,20 @@
         {/if}
       </form>
 
+      <!-- Category filter -->
+      {#if sourcesApi.length > 1}
+        <select
+          value={sourceFilter}
+          onchange={(e) => { sourceFilter = (e.target as HTMLSelectElement).value; displayLimit = 200; }}
+          class="h-9 rounded-lg border border-border-subtle bg-surface-overlay px-2.5 text-[0.75rem] font-medium text-text-secondary outline-none transition-colors focus:border-accent/50 focus:ring-1 focus:ring-accent/25"
+        >
+          <option value="">{t("logs.allCategories")}</option>
+          {#each sourcesApi as src}
+            <option value={src}>{src}</option>
+          {/each}
+        </select>
+      {/if}
+
       <!-- Level filter -->
       <div class="flex gap-1">
         {#each [
@@ -379,7 +400,7 @@
                 : 'text-text-muted hover:bg-surface-overlay hover:text-text-secondary'}"
           >
             {label}
-            {#if !levelFilter && !searchQuery && levelCounts && value && levelCounts[value]}
+            {#if !levelFilter && !searchQuery && !sourceFilter && levelCounts && value && levelCounts[value]}
               <span class="ml-1 text-[0.625rem] opacity-60">{levelCounts[value]}</span>
             {/if}
           </button>
@@ -451,13 +472,13 @@
               class="inline-flex items-center gap-1.5 text-[0.75rem] font-medium text-accent transition-colors hover:text-accent/80"
             >
               <Icon icon={chevronDownIcon} class="h-3.5 w-3.5" />
-              {t("btn.showMore")} ({logs.length - displayLimit} {t("logs.remaining")})
+              {t("btn.showMore")} ({filteredLogs.length - displayLimit} {t("logs.remaining")})
             </button>
           </div>
         {/if}
 
         <div class="border-t border-border-subtle px-4 py-2 text-[0.6875rem] text-text-muted">
-          {t("logs.showing", { n: String(displayedLogs.length), total: String(logs.length) })}
+          {t("logs.showing", { n: String(displayedLogs.length), total: String(filteredLogs.length) })}
           {#if autoRefresh}
             <span class="ml-2 inline-flex items-center gap-1">
               <span class="h-1.5 w-1.5 rounded-full bg-status-ok animate-pulse"></span>
@@ -492,6 +513,20 @@
           </button>
         {/if}
       </form>
+
+      <!-- Category filter -->
+      {#if sourcesMtx.length > 1}
+        <select
+          value={mtxSourceFilter}
+          onchange={(e) => { mtxSourceFilter = (e.target as HTMLSelectElement).value; mtxDisplayLimit = 200; }}
+          class="h-9 rounded-lg border border-border-subtle bg-surface-overlay px-2.5 text-[0.75rem] font-medium text-text-secondary outline-none transition-colors focus:border-accent/50 focus:ring-1 focus:ring-accent/25"
+        >
+          <option value="">{t("logs.allCategories")}</option>
+          {#each sourcesMtx as src}
+            <option value={src}>{src}</option>
+          {/each}
+        </select>
+      {/if}
 
       <div class="flex gap-1">
         {#each [
@@ -543,8 +578,9 @@
         <p class="text-[0.8125rem] text-text-muted">{t("logs.empty")}</p>
       </div>
     {:else}
-      {@const displayed = mtxLogs.slice(0, mtxDisplayLimit)}
-      {@const hasMoreMtx = mtxLogs.length > mtxDisplayLimit}
+      {@const mtxFiltered = mtxSourceFilter ? mtxLogs.filter((l) => l.source === mtxSourceFilter) : mtxLogs}
+      {@const displayed = mtxFiltered.slice(0, mtxDisplayLimit)}
+      {@const hasMoreMtx = mtxFiltered.length > mtxDisplayLimit}
       <div class="card overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full min-w-[640px]">
@@ -580,13 +616,13 @@
               class="inline-flex items-center gap-1.5 text-[0.75rem] font-medium text-accent transition-colors hover:text-accent/80"
             >
               <Icon icon={chevronDownIcon} class="h-3.5 w-3.5" />
-              {t("btn.showMore")} ({mtxLogs.length - mtxDisplayLimit} {t("logs.remaining")})
+              {t("btn.showMore")} ({mtxFiltered.length - mtxDisplayLimit} {t("logs.remaining")})
             </button>
           </div>
         {/if}
 
         <div class="border-t border-border-subtle px-4 py-2 text-[0.6875rem] text-text-muted">
-          {t("logs.showing", { n: String(displayed.length), total: String(mtxLogs.length) })}
+          {t("logs.showing", { n: String(displayed.length), total: String(mtxFiltered.length) })}
           {#if autoRefresh}
             <span class="ml-2 inline-flex items-center gap-1">
               <span class="h-1.5 w-1.5 rounded-full bg-status-ok animate-pulse"></span>

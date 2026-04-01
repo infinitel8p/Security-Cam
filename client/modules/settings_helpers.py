@@ -1,11 +1,14 @@
 import logging
 import os
 import json
+import re
 import subprocess
 import tempfile
 
 log = logging.getLogger("settings")
 bt_log = logging.getLogger("bt.pair")
+
+_ANSI_RE = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
 
 _SETTINGS_DIR = os.path.join(os.path.dirname(os.path.dirname(
     os.path.realpath(__file__))), "settings")
@@ -100,8 +103,8 @@ def pair_bt_device(device_mac: str) -> bool:
     result = subprocess.run(
         [script_path, device_mac], capture_output=True, text=True)
 
-    stdout = result.stdout.strip()
-    stderr = result.stderr.strip()
+    stdout = _ANSI_RE.sub("", result.stdout).strip()
+    stderr = _ANSI_RE.sub("", result.stderr).strip()
     bt_log.info("pair.sh stdout: %s", stdout or "(empty)")
     if stderr:
         bt_log.info("pair.sh stderr: %s", stderr)
@@ -132,8 +135,8 @@ def unpair_bt_device(device_mac: str) -> bool:
     result = subprocess.run(
         [script_path, device_mac], capture_output=True, text=True)
 
-    stdout = result.stdout.strip()
-    stderr = result.stderr.strip()
+    stdout = _ANSI_RE.sub("", result.stdout).strip()
+    stderr = _ANSI_RE.sub("", result.stderr).strip()
     bt_log.info("unpair.sh stdout: %s", stdout or "(empty)")
     if stderr:
         bt_log.info("unpair.sh stderr: %s", stderr)
@@ -167,8 +170,8 @@ def make_bt_discoverable(timeout: int = 90) -> dict:
         capture_output=True, text=True,
         timeout=timeout + 15)  # extra margin for script cleanup
 
-    stdout = result.stdout.strip()
-    stderr = result.stderr.strip()
+    stdout = _ANSI_RE.sub("", result.stdout).strip()
+    stderr = _ANSI_RE.sub("", result.stderr).strip()
     bt_log.info("discoverable.sh stdout: %s", stdout or "(empty)")
     if stderr:
         bt_log.info("discoverable.sh stderr: %s", stderr)

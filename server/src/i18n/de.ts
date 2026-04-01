@@ -410,6 +410,7 @@ export default {
     autoRefresh: "Automatisch aktualisieren",
     searchPlaceholder: "Protokolle durchsuchen...",
     all: "Alle",
+    allCategories: "Alle Kategorien",
     timestamp: "Zeitstempel",
     level: "Stufe",
     source: "Quelle",

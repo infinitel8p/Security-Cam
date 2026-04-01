@@ -436,6 +436,7 @@ export default {
     autoRefresh: "Auto-refresh",
     searchPlaceholder: "Search logs...",
     all: "All",
+    allCategories: "All categories",
     timestamp: "Timestamp",
     level: "Level",
     source: "Source",
