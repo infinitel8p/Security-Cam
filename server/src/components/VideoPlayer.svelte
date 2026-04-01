@@ -20,6 +20,8 @@
   let toggling = $state(false);
   let snapping = $state(false);
   let isFullscreen = $state(false);
+  let recSeconds = $state(0);
+  let recTimer: ReturnType<typeof setInterval> | undefined;
   let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
   let unsubRecording: (() => void) | undefined;
   let destroyed = false;
@@ -257,9 +259,28 @@
     });
   });
 
+  // Recording duration timer
+  $effect(() => {
+    if (recording) {
+      recSeconds = 0;
+      recTimer = setInterval(() => { recSeconds++; }, 1000);
+    } else {
+      clearInterval(recTimer);
+      recSeconds = 0;
+    }
+    return () => clearInterval(recTimer);
+  });
+
+  function formatRecTime(s: number): string {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m}:${String(sec).padStart(2, "0")}`;
+  }
+
   onDestroy(() => {
     destroyed = true;
     clearTimeout(reconnectTimer);
+    clearInterval(recTimer);
     unsubRecording?.();
     cleanup();
   });
@@ -269,7 +290,7 @@
 
 <div bind:this={containerEl} class="card overflow-hidden transition-shadow duration-700 {connected ? 'shadow-glow-breathe' : ''} {recording ? 'recording-halo' : ''}" class:fullscreen={isFullscreen}>
   <!-- Feed -->
-  <div class="relative w-full bg-black/80 {isFullscreen ? 'h-full' : 'aspect-video'}">
+  <div class="relative w-full bg-black/80 {isFullscreen ? 'min-h-0 flex-1' : 'aspect-video'}">
     <video
       bind:this={videoEl}
       autoplay
@@ -338,38 +359,36 @@
   </div>
 
   <!-- Controls -->
-  <div class="controls-bar relative flex items-center justify-between border-t border-border-subtle px-3 py-2 sm:px-4 sm:py-2.5" class:controls-bar-rec={recording}>
-    <div class="flex items-center gap-2">
-      <Icon icon={cameraIcon} class="h-4 w-4 text-text-muted" stroke={2} />
-      <span class="hidden text-[0.8125rem] font-medium text-text-secondary sm:inline">{t("label.liveFeed")}</span>
+  <div
+    class="controls-bar relative flex items-center justify-between px-3 py-2 sm:px-4 sm:py-2.5
+      {isFullscreen
+        ? 'fullscreen-controls absolute bottom-0 left-0 right-0 z-20 border-0'
+        : 'border-t border-border-subtle'}"
+    class:controls-bar-rec={recording}
+  >
+    <div class="flex items-center gap-1.5">
+      {#if connected}
+        <span class="inline-flex items-center gap-1.5 rounded-lg bg-surface-overlay px-2 py-1.5 text-[0.625rem] font-semibold uppercase tracking-wider text-text-muted">
+          <span class="h-1.5 w-1.5 rounded-full {recording ? 'bg-status-critical animate-pulse' : 'bg-status-ok'}"></span>
+          {streamMode === "hls" ? "HLS" : "WebRTC"}
+        </span>
+      {:else}
+        <span class="inline-flex items-center gap-1.5 rounded-lg bg-surface-overlay px-2 py-1.5 text-[0.625rem] font-semibold uppercase tracking-wider text-text-muted/50">
+          <span class="h-1.5 w-1.5 rounded-full bg-text-muted/30"></span>
+          {t("status.offline")}
+        </span>
+      {/if}
+      {#if recording}
+        <span class="tabular-nums text-[0.75rem] font-medium text-status-critical">
+          {formatRecTime(recSeconds)}
+        </span>
+      {/if}
     </div>
     <div class="flex items-center gap-1">
       <button
-        onclick={toggleRecording}
-        disabled={toggling}
-        class="btn-press flex min-h-[2.75rem] items-center gap-1.5 rounded-lg px-3.5 text-[0.8125rem] font-medium transition-colors duration-150 sm:min-h-0 sm:py-1.5
-          {recording
-            ? 'bg-status-critical/10 text-status-critical hover:bg-status-critical/15'
-            : 'bg-accent/10 text-accent hover:bg-accent/15'}
-          disabled:opacity-40"
-      >
-        {#if recording}
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-            <rect x="6" y="6" width="12" height="12" rx="2" />
-          </svg>
-          {t("btn.stop")}
-        {:else}
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-            <circle cx="12" cy="12" r="6" />
-          </svg>
-          {t("btn.record")}
-        {/if}
-      </button>
-
-      <button
         onclick={takeSnapshot}
         disabled={snapping || !connected}
-        class="flex min-h-[2.75rem] min-w-[2.75rem] items-center justify-center rounded-lg text-text-muted transition-colors duration-150 hover:bg-surface-overlay hover:text-text-secondary disabled:opacity-40 sm:min-h-0 sm:min-w-0 sm:p-1.5"
+        class="flex h-8 w-8 items-center justify-center rounded-lg bg-surface-overlay text-text-muted transition-colors duration-150 hover:bg-surface-raised hover:text-text-secondary disabled:opacity-40"
         title={t("btn.snapshot")}
       >
         <Icon icon={cameraBoltIcon} class="h-4 w-4" stroke={2} />
@@ -377,13 +396,35 @@
 
       <button
         onclick={toggleFullscreen}
-        class="flex min-h-[2.75rem] min-w-[2.75rem] items-center justify-center rounded-lg text-text-muted transition-colors duration-150 hover:bg-surface-overlay hover:text-text-secondary sm:min-h-0 sm:min-w-0 sm:p-1.5"
+        class="flex h-8 w-8 items-center justify-center rounded-lg bg-surface-overlay text-text-muted transition-colors duration-150 hover:bg-surface-raised hover:text-text-secondary"
         title={isFullscreen ? t("btn.exitFullscreen") : t("btn.fullscreen")}
       >
         {#if isFullscreen}
           <Icon icon={minimizeIcon} class="h-4 w-4" stroke={2} />
         {:else}
           <Icon icon={maximizeIcon} class="h-4 w-4" stroke={2} />
+        {/if}
+      </button>
+
+      <button
+        onclick={toggleRecording}
+        disabled={toggling}
+        class="btn-press flex h-8 items-center gap-1.5 rounded-lg px-3 text-[0.8125rem] font-medium transition-colors duration-150
+          {recording
+            ? 'bg-status-critical/15 text-status-critical hover:bg-status-critical/20'
+            : 'bg-accent/15 text-accent hover:bg-accent/20'}
+          disabled:opacity-40"
+      >
+        {#if recording}
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="6" y="6" width="12" height="12" rx="2" />
+          </svg>
+          {t("btn.stop")}
+        {:else}
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="12" cy="12" r="6" />
+          </svg>
+          {t("btn.record")}
         {/if}
       </button>
     </div>
@@ -398,6 +439,17 @@
   }
   .fullscreen video {
     object-fit: contain;
+  }
+
+  /* Controls bar overlays the bottom in fullscreen, fades in on hover */
+  .fullscreen-controls {
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .fullscreen:hover .fullscreen-controls,
+  .fullscreen-controls:focus-within {
+    opacity: 1;
   }
 
   /* ── Scan line overlay ─────────────────────────────────────────────── */

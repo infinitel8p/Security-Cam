@@ -32,6 +32,8 @@ export default {
   status: {
     online: "En ligne",
     offline: "Hors ligne",
+    backendOnline: "Backend en ligne",
+    backendOffline: "Backend hors ligne",
     armed: "Armé",
     starting: "Démarrage...",
     disabled: "Désactivé",
