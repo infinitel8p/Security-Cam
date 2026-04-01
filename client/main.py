@@ -18,6 +18,7 @@ from modules import sensor_manager
 from modules import storage_manager
 from modules import sse
 from modules import log_reader
+from modules import timelapse_manager
 from modules.sensors import available_types as sensor_available_types
 
 # --- Logging setup ---
@@ -70,6 +71,7 @@ health_logger.start()
 presence_monitor.start()
 sensor_manager.start()
 storage_manager.start()
+timelapse_manager.start()
 
 def _on_ffmpeg_crash():
     sensor_manager.notify_manual_recording_stopped()
@@ -490,6 +492,51 @@ def archive_new_count():
 def archive():
     video_list = archive_helpers.get_videos()
     return jsonify(video_list)
+
+
+# ── Timelapse ────────────────────────────────────────────────────────────
+
+@app.route('/timelapse/status', methods=['GET'])
+def timelapse_status():
+    return jsonify(timelapse_manager.get_status())
+
+
+@app.route('/timelapse/configure', methods=['POST'])
+def timelapse_configure():
+    data = request.get_json() or {}
+    settings = settings_helpers.get_settings()
+    tl = settings.get("Timelapse", {})
+    for key in ("enabled", "interval_minutes", "fps", "resolution"):
+        if key in data:
+            tl[key] = data[key]
+    settings_helpers.update_settings({"Timelapse": tl})
+    timelapse_manager.restart()
+    log.info("Timelapse configured: %s", tl)
+    return jsonify({"message": "Timelapse settings saved"})
+
+
+@app.route('/timelapse', methods=['GET'])
+def timelapse_list():
+    return jsonify(timelapse_manager.get_timelapse_videos())
+
+
+@app.route('/timelapse/video', methods=['GET'])
+def timelapse_video():
+    import os
+    path = request.args.get('path')
+    if not path:
+        abort(400, description="path is required")
+    if not os.path.exists(path):
+        abort(404, description="Timelapse not found")
+    return send_file(os.path.abspath(path), mimetype='video/mp4')
+
+
+@app.route('/timelapse/delete', methods=['POST'])
+def timelapse_delete():
+    data = request.get_json() or {}
+    path = data.get("path")
+    result, status_code = timelapse_manager.delete_timelapse(path)
+    return jsonify(result), status_code
 
 
 @app.route('/snapshots', methods=['GET'])

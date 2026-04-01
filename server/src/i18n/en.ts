@@ -30,6 +30,7 @@ export default {
     triggerSensors: "Recording Sensors",
     cameraRotation: "Camera Rotation",
     streamQuality: "Stream Quality",
+    timelapse: "Timelapse",
   },
 
   // Status labels
@@ -168,6 +169,10 @@ export default {
     autoDelete: "Auto-delete old recordings",
     storageThreshold: "Maximum disk usage",
     currentUsage: "Current disk usage",
+    timelapse: "Daily timelapse",
+    timelapseInterval: "Capture interval",
+    timelapseFps: "Playback speed",
+    timelapseResolution: "Frame resolution",
   },
 
   // Input placeholders
@@ -255,11 +260,17 @@ export default {
     snapshotFailed: "Couldn't take snapshot. Try again.",
     snapshotDeleted: "Snapshot deleted",
     deleteSnapshotFailed: "Couldn't delete snapshot. Try again.",
+    timelapseConfigured: "Timelapse settings saved",
+    timelapseEnabled: "Timelapse capture enabled",
+    timelapseDisabled: "Timelapse capture disabled",
+    timelapseDeleted: "Timelapse deleted",
+    deleteTimelapseFailed: "Couldn't delete timelapse. Try again.",
   },
 
   // Archive
   archive: {
     snapshots: "Snapshots",
+    timelapse: "Timelapse",
   },
 
   // Dialogs
@@ -333,6 +344,8 @@ export default {
     scanLines: "Adds a subtle retro scan line effect over the live feed",
     autoDelete: "Automatically removes the oldest recordings when disk space gets low",
     storageThreshold: "When disk usage exceeds this limit, the oldest recordings are deleted. Checked before each new recording and every 5 minutes.",
+    timelapse: "Captures a frame every few minutes and stitches them into a daily video at midnight",
+    timelapseInterval: "How often a frame is captured. Lower values produce smoother timelapses but use more storage.",
     presenceGating: "When a tracked device (phone, laptop) is connected, sensor triggers are ignored — the camera assumes someone is home. You can always start a manual recording from the dashboard regardless.",
     makeDiscoverable: "Can't find your device? Let your phone find the Pi instead",
     discoverableWaiting: "The Pi is now visible to nearby devices",

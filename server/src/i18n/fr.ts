@@ -27,6 +27,7 @@ export default {
     triggerSensors: "Capteurs d'enregistrement",
     cameraRotation: "Rotation de la caméra",
     streamQuality: "Qualité du flux",
+    timelapse: "Timelapse",
   },
 
   status: {
@@ -162,6 +163,10 @@ export default {
     autoDelete: "Supprimer les anciens enregistrements automatiquement",
     storageThreshold: "Utilisation maximale du disque",
     currentUsage: "Utilisation actuelle",
+    timelapse: "Timelapse quotidien",
+    timelapseInterval: "Intervalle de capture",
+    timelapseFps: "Vitesse de lecture",
+    timelapseResolution: "Résolution des images",
   },
 
   input: {
@@ -244,10 +249,16 @@ export default {
     snapshotFailed: "Impossible de prendre l'instantan\u00e9. R\u00e9essayez.",
     snapshotDeleted: "Instantan\u00e9 supprim\u00e9",
     deleteSnapshotFailed: "Impossible de supprimer l'instantan\u00e9. R\u00e9essayez.",
+    timelapseConfigured: "Paramètres du timelapse enregistrés",
+    timelapseEnabled: "Capture timelapse activée",
+    timelapseDisabled: "Capture timelapse désactivée",
+    timelapseDeleted: "Timelapse supprimé",
+    deleteTimelapseFailed: "Impossible de supprimer le timelapse. Réessayez.",
   },
 
   archive: {
     snapshots: "Instantan\u00e9s",
+    timelapse: "Timelapse",
   },
 
   dialog: {
@@ -316,6 +327,8 @@ export default {
     scanLines: "Ajoute un effet rétro subtil de scanlines sur le flux en direct",
     autoDelete: "Supprime automatiquement les enregistrements les plus anciens quand l'espace disque devient insuffisant",
     storageThreshold: "Les enregistrements les plus anciens sont supprimés quand l'utilisation dépasse cette limite. Vérifié avant chaque nouvel enregistrement et toutes les 5 minutes.",
+    timelapse: "Capture une image toutes les quelques minutes et les assemble en vidéo quotidienne à minuit",
+    timelapseInterval: "Fréquence de capture. Des valeurs plus basses produisent des timelapses plus fluides mais utilisent plus de stockage.",
     presenceGating: "Quand un appareil suivi (téléphone, ordinateur) est connecté, les déclenchements du capteur sont ignorés — la caméra considère que quelqu'un est à la maison. Vous pouvez toujours lancer un enregistrement manuel depuis le tableau de bord.",
     makeDiscoverable: "Votre appareil est introuvable ? Laissez votre téléphone trouver le Pi",
     discoverableWaiting: "Le Pi est maintenant visible par les appareils à proximité",

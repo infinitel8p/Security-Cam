@@ -19,6 +19,7 @@
   import chevronDownIcon from "../icons/chevron-down.svg?raw";
   import cameraBoltIcon from "../icons/camera-bolt.svg?raw";
   import chevronRightIcon from "../icons/chevron-right.svg?raw";
+  import clockIcon from "../icons/clock.svg?raw";
 
   let deleteButtonEl: HTMLButtonElement | null = null;
 
@@ -57,6 +58,15 @@
   let allSnapshots: Snapshot[] = $state([]);
   let snapshotsOpen = $state(false);
   let deletingSnapshot: string | null = $state(null);
+
+  interface Timelapse {
+    path: string;
+    date: string;
+    size: number;
+  }
+  let allTimelapses: Timelapse[] = $state([]);
+  let timelapsesOpen = $state(false);
+  let deletingTimelapse: string | null = $state(null);
   let loading = $state(true);
   let error = $state(false);
   let deleteTarget: Video | null = $state(null);
@@ -213,6 +223,55 @@
     a.click();
   }
 
+  async function fetchTimelapses() {
+    try {
+      const res = await fetch(`${getBackendUrl()}/timelapse`);
+      if (!res.ok) return;
+      allTimelapses = await res.json();
+      if (allTimelapses.length > 0) timelapsesOpen = true;
+    } catch {
+      // Non-critical
+    }
+  }
+
+  function timelapseVideoUrl(path: string): string {
+    return `${getBackendUrl()}/timelapse/video?path=${encodeURIComponent(path)}`;
+  }
+
+  function formatBytes(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  async function deleteTimelapse(tl: Timelapse) {
+    deletingTimelapse = tl.path;
+    try {
+      const res = await fetch(`${getBackendUrl()}/timelapse/delete`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: tl.path }),
+      });
+      if (res.ok) {
+        allTimelapses = allTimelapses.filter((t) => t.path !== tl.path);
+        toast.success(t("toast.timelapseDeleted"));
+      } else {
+        toast.error(t("toast.deleteTimelapseFailed"));
+      }
+    } catch {
+      toast.error(t("toast.deleteTimelapseFailed"));
+    } finally {
+      deletingTimelapse = null;
+    }
+  }
+
+  function downloadTimelapse(tl: Timelapse) {
+    const a = document.createElement("a");
+    a.href = timelapseVideoUrl(tl.path);
+    a.download = `timelapse_${tl.date}.mp4`;
+    a.click();
+  }
+
   function isNewRecording(video: Video): boolean {
     return lastSeenTs > 0 && video.timestamp > lastSeenTs;
   }
@@ -224,6 +283,7 @@
     lastSeenTs = stored ? new Date(stored).getTime() : 0;
     fetchArchive();
     fetchSnapshots();
+    fetchTimelapses();
     // Mark archive as seen (clears the nav badge)
     markSeen();
   });
@@ -453,6 +513,68 @@
                 >
                   <Icon icon={trashIcon} class="h-3.5 w-3.5" />
                 </button>
+              </div>
+            </div>
+          {/each}
+        </div>
+      </div>
+    {/if}
+  </div>
+{/if}
+
+<!-- Timelapse section -->
+{#if allTimelapses.length > 0}
+  <div class="card overflow-hidden">
+    <button
+      onclick={() => { timelapsesOpen = !timelapsesOpen; }}
+      class="flex w-full items-center gap-2.5 px-4 py-3 text-left transition-colors hover:bg-surface-overlay"
+    >
+      <Icon
+        icon={chevronRightIcon}
+        class="h-4 w-4 text-text-muted transition-transform duration-200 {timelapsesOpen ? 'rotate-90' : ''}"
+      />
+      <Icon icon={clockIcon} class="h-4 w-4 text-text-muted" />
+      <span class="text-[0.8125rem] font-medium text-text-primary">
+        {t("archive.timelapse")}
+      </span>
+      <span class="rounded-md bg-surface-overlay px-1.5 py-0.5 text-[0.625rem] font-semibold tabular-nums text-text-muted">
+        {allTimelapses.length}
+      </span>
+    </button>
+
+    {#if timelapsesOpen}
+      <div class="border-t border-border-subtle px-4 py-3">
+        <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+          {#each allTimelapses as tl}
+            <div class="group overflow-hidden rounded-lg border border-border-subtle bg-surface-overlay">
+              <video
+                src={timelapseVideoUrl(tl.path)}
+                class="aspect-video w-full object-contain bg-black/60"
+                controls
+                preload="none"
+              ></video>
+              <div class="flex items-center justify-between px-3 py-2">
+                <div>
+                  <p class="text-[0.8125rem] font-medium text-text-primary">{tl.date}</p>
+                  <p class="text-[0.625rem] text-text-muted">{formatBytes(tl.size)}</p>
+                </div>
+                <div class="flex items-center gap-1">
+                  <button
+                    onclick={() => downloadTimelapse(tl)}
+                    class="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-surface-raised hover:text-text-secondary"
+                    title={t("btn.download")}
+                  >
+                    <Icon icon={downloadIcon} class="h-4 w-4" />
+                  </button>
+                  <button
+                    onclick={() => deleteTimelapse(tl)}
+                    disabled={deletingTimelapse === tl.path}
+                    class="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-status-critical/8 hover:text-status-critical disabled:opacity-40"
+                    title={t("btn.delete")}
+                  >
+                    <Icon icon={trashIcon} class="h-4 w-4" />
+                  </button>
+                </div>
               </div>
             </div>
           {/each}

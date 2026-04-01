@@ -33,6 +33,11 @@
   let storageLimitPercent = $state(85);
   let storageDiskPercent = $state(0);
   let storageSaving = $state(false);
+  let timelapseEnabled = $state(false);
+  let timelapseInterval = $state(5);
+  let timelapseFps = $state(24);
+  let timelapseResolution = $state("640x480");
+  let timelapseSaving = $state(false);
   let loading = $state(true);
   let error = $state(false);
   let activeSection = $state("appearance");
@@ -142,6 +147,11 @@
       const sl = settings.StorageLimit ?? {};
       storageLimitEnabled = sl.enabled ?? false;
       storageLimitPercent = sl.max_percent ?? 85;
+      const tl = settings.Timelapse ?? {};
+      timelapseEnabled = tl.enabled ?? false;
+      timelapseInterval = tl.interval_minutes ?? 5;
+      timelapseFps = tl.fps ?? 24;
+      timelapseResolution = tl.resolution ?? "640x480";
 
       // Fetch live disk usage
       try {
@@ -218,6 +228,33 @@
         error: t("toast.saveFailed"),
       },
     ).finally(() => { storageSaving = false; });
+  }
+
+  function saveTimelapse() {
+    timelapseSaving = true;
+    const enabled = timelapseEnabled;
+
+    toast.promise(
+      (async () => {
+        const res = await fetch(`${getBackendUrl()}/timelapse/configure`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            enabled: timelapseEnabled,
+            interval_minutes: timelapseInterval,
+            fps: timelapseFps,
+            resolution: timelapseResolution,
+          }),
+        });
+        if (!res.ok) throw new Error();
+        return enabled;
+      })(),
+      {
+        loading: t("status.saving"),
+        success: (on) => on ? t("toast.timelapseEnabled") : t("toast.timelapseDisabled"),
+        error: t("toast.saveFailed"),
+      },
+    ).finally(() => { timelapseSaving = false; });
   }
 
   async function addBtDevice(device: Device) {
@@ -523,6 +560,93 @@
                     class="btn-press rounded-lg bg-accent px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-accent/90 disabled:opacity-50"
                   >
                     {storageSaving ? t("btn.saving") : t("btn.save")}
+                  </button>
+                </div>
+              </div>
+            {/if}
+          </div>
+        </div>
+
+        <!-- Timelapse -->
+        <div class="card overflow-hidden">
+          <div class="px-4 py-4 sm:px-5 sm:py-5">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-text-primary">{t("label.timelapse")}</p>
+                <p class="mt-0.5 text-xs text-text-muted">{t("help.timelapse")}</p>
+              </div>
+              <ToggleSpring
+                checked={timelapseEnabled}
+                onToggle={() => { timelapseEnabled = !timelapseEnabled; saveTimelapse(); }}
+                label={t("label.timelapse")}
+              />
+            </div>
+
+            {#if timelapseEnabled}
+              <div class="mt-4 space-y-3 animate-slide-down">
+                <div>
+                  <div class="flex items-center justify-between mb-1.5">
+                    <label class="text-xs font-medium text-text-secondary" for="tl-interval">{t("label.timelapseInterval")}</label>
+                    <span class="rounded-md bg-surface-elevated px-2 py-0.5 text-[0.6875rem] font-semibold tabular-nums text-text-primary">{timelapseInterval} min</span>
+                  </div>
+                  <div class="flex items-center gap-2.5">
+                    <span class="text-[0.625rem] text-text-muted w-8 shrink-0 text-right">1</span>
+                    <input
+                      id="tl-interval"
+                      type="range"
+                      min="1"
+                      max="60"
+                      step="1"
+                      bind:value={timelapseInterval}
+                      aria-label={t("label.timelapseInterval")}
+                      class="range-slider flex-1"
+                    />
+                    <span class="text-[0.625rem] text-text-muted w-8 shrink-0">60</span>
+                  </div>
+                  <p class="mt-1 text-[0.6875rem] text-text-muted">{t("help.timelapseInterval")}</p>
+                </div>
+
+                <div>
+                  <div class="flex items-center justify-between mb-1.5">
+                    <label class="text-xs font-medium text-text-secondary" for="tl-fps">{t("label.timelapseFps")}</label>
+                    <span class="rounded-md bg-surface-elevated px-2 py-0.5 text-[0.6875rem] font-semibold tabular-nums text-text-primary">{timelapseFps} fps</span>
+                  </div>
+                  <div class="flex items-center gap-2.5">
+                    <span class="text-[0.625rem] text-text-muted w-8 shrink-0 text-right">1</span>
+                    <input
+                      id="tl-fps"
+                      type="range"
+                      min="1"
+                      max="60"
+                      step="1"
+                      bind:value={timelapseFps}
+                      aria-label={t("label.timelapseFps")}
+                      class="range-slider flex-1"
+                    />
+                    <span class="text-[0.625rem] text-text-muted w-8 shrink-0">60</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="text-xs font-medium text-text-secondary" for="tl-res">{t("label.timelapseResolution")}</label>
+                  <select
+                    id="tl-res"
+                    bind:value={timelapseResolution}
+                    class="mt-1 block h-9 w-full rounded-lg border border-border-subtle bg-surface-overlay px-2.5 text-[0.8125rem] text-text-primary outline-none transition-colors focus:border-accent/50 focus:ring-1 focus:ring-accent/25"
+                  >
+                    <option value="original">Original</option>
+                    <option value="640:480">640 x 480</option>
+                    <option value="320:240">320 x 240</option>
+                  </select>
+                </div>
+
+                <div class="flex justify-end">
+                  <button
+                    onclick={saveTimelapse}
+                    disabled={timelapseSaving}
+                    class="btn-press rounded-lg bg-accent px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-accent/90 disabled:opacity-50"
+                  >
+                    {timelapseSaving ? t("btn.saving") : t("btn.save")}
                   </button>
                 </div>
               </div>

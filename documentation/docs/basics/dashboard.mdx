@@ -57,6 +57,7 @@ Browse and manage recorded videos:
 - **Hover scrub** — hover over a video card in grid view to scrub through the recording. A sprite sheet of 10 evenly-spaced frames is generated automatically when recording stops. Move the mouse left/right to preview different moments without opening the video
 - **New recording badges** — the Archive nav icon shows a red badge with the count of recordings created since your last visit. Inside the archive, new recordings are highlighted with a "NEW" label. The badge clears automatically when you open the archive page
 - **Snapshots** — still frames captured from the live feed via the snapshot button appear in a collapsible section at the top of the archive. Each snapshot shows a thumbnail with the capture time, and can be downloaded or deleted individually
+- **Timelapse** — daily timelapse videos appear in their own collapsible section. Each video compresses a full day into a short clip. Enable timelapse capture in Settings > Storage to start generating them automatically
 
 ## Settings
 
@@ -64,7 +65,7 @@ Configure the system without touching config files. The settings page has a side
 
 - **Appearance** - switch between dark, light, and system theme. Choose the dashboard language (English, German, French, Spanish, Italian). Toggle the scan line overlay on the live feed.
 - **Camera** - adjust stream resolution, framerate, and rotation (display-only or hardware via MediaMTX). Pick from quality presets tuned for the Pi Zero 2 W, or set custom resolution and FPS.
-- **Storage** - choose where recorded videos are stored on the Pi. Enable [auto-delete](./storage) to prevent the SD card from filling up.
+- **Storage** - choose where recorded videos are stored on the Pi. Enable [auto-delete](./storage) to prevent the SD card from filling up. Enable **timelapse** to automatically capture a frame every few minutes and stitch them into a daily video at midnight — great for seeing activity patterns.
 - **Devices** - add or remove tracked Bluetooth and WiFi devices. Three ways to add a Bluetooth device: scan for nearby devices, [make the Pi discoverable](#bluetooth-pairing-from-the-dashboard) so your phone can find it, or enter a MAC address manually. Online/offline status is shown per device. Tracked devices are used for presence detection — if any are nearby, sensor triggers are ignored.
 - **Recording Sensors** - select and configure the active sensor type, set the GPIO pin and hold timeout, adjust [calibration](./calibration), test wiring with a live sparkline, and enable/disable auto-recording. See the [sensors guide](./sensors) for details.
 

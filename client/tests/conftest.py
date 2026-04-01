@@ -53,6 +53,16 @@ _start("modules.storage_manager.check_and_cleanup", return_value={
 })
 _start("modules.storage_manager.ensure_storage")
 
+# Timelapse — prevent background thread
+_start("modules.timelapse_manager.start")
+_start("modules.timelapse_manager.stop")
+_start("modules.timelapse_manager.restart")
+_start("modules.timelapse_manager.get_status", return_value={
+    "enabled": False, "interval_minutes": 5, "fps": 24,
+    "resolution": "640x480", "today_frame_count": 0, "last_capture": None,
+})
+_start("modules.timelapse_manager.get_timelapse_videos", return_value=[])
+
 # Stream helpers — no camera / ffmpeg
 _start("modules.stream_helpers.set_on_crash")
 _start("modules.stream_helpers.start_recording")

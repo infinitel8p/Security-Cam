@@ -10,7 +10,7 @@
 
 
 <link rel="search" type="application/opensearchdescription+xml" title="Security-Cam" href="/Security-Cam/opensearch.xml"><link rel="stylesheet" href="/Security-Cam/assets/css/styles.36674e39.css">
-<script src="/Security-Cam/assets/js/runtime~main.f5a02249.js" defer="defer"></script>
+<script src="/Security-Cam/assets/js/runtime~main.04be8f4a.js" defer="defer"></script>
 <script src="/Security-Cam/assets/js/main.0582351e.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -49,13 +49,14 @@
 <li class=""><strong>Hover scrub</strong> — hover over a video card in grid view to scrub through the recording. A sprite sheet of 10 evenly-spaced frames is generated automatically when recording stops. Move the mouse left/right to preview different moments without opening the video</li>
 <li class=""><strong>New recording badges</strong> — the Archive nav icon shows a red badge with the count of recordings created since your last visit. Inside the archive, new recordings are highlighted with a &quot;NEW&quot; label. The badge clears automatically when you open the archive page</li>
 <li class=""><strong>Snapshots</strong> — still frames captured from the live feed via the snapshot button appear in a collapsible section at the top of the archive. Each snapshot shows a thumbnail with the capture time, and can be downloaded or deleted individually</li>
+<li class=""><strong>Timelapse</strong> — daily timelapse videos appear in their own collapsible section. Each video compresses a full day into a short clip. Enable timelapse capture in Settings &gt; Storage to start generating them automatically</li>
 </ul>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="settings">Settings<a href="#settings" class="hash-link" aria-label="Direct link to Settings" title="Direct link to Settings" translate="no">​</a></h2>
 <p>Configure the system without touching config files. The settings page has a sidebar with five sections:</p>
 <ul>
 <li class=""><strong>Appearance</strong> - switch between dark, light, and system theme. Choose the dashboard language (English, German, French, Spanish, Italian). Toggle the scan line overlay on the live feed.</li>
 <li class=""><strong>Camera</strong> - adjust stream resolution, framerate, and rotation (display-only or hardware via MediaMTX). Pick from quality presets tuned for the Pi Zero 2 W, or set custom resolution and FPS.</li>
-<li class=""><strong>Storage</strong> - choose where recorded videos are stored on the Pi. Enable <a class="" href="/Security-Cam/docs/basics/storage">auto-delete</a> to prevent the SD card from filling up.</li>
+<li class=""><strong>Storage</strong> - choose where recorded videos are stored on the Pi. Enable <a class="" href="/Security-Cam/docs/basics/storage">auto-delete</a> to prevent the SD card from filling up. Enable <strong>timelapse</strong> to automatically capture a frame every few minutes and stitch them into a daily video at midnight — great for seeing activity patterns.</li>
 <li class=""><strong>Devices</strong> - add or remove tracked Bluetooth and WiFi devices. Three ways to add a Bluetooth device: scan for nearby devices, <a href="#bluetooth-pairing-from-the-dashboard" class="">make the Pi discoverable</a> so your phone can find it, or enter a MAC address manually. Online/offline status is shown per device. Tracked devices are used for presence detection — if any are nearby, sensor triggers are ignored.</li>
 <li class=""><strong>Recording Sensors</strong> - select and configure the active sensor type, set the GPIO pin and hold timeout, adjust <a class="" href="/Security-Cam/docs/basics/calibration">calibration</a>, test wiring with a live sparkline, and enable/disable auto-recording. See the <a class="" href="/Security-Cam/docs/basics/sensors">sensors guide</a> for details.</li>
 </ul>

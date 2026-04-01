@@ -176,6 +176,55 @@ Returns the current system health alert state. The `overall` field is `"ok"`, `"
 
 Alerts are also pushed in real-time via SSE (`system_alert` event) when a metric transitions between levels.
 
+## Timelapse endpoints
+
+### Get timelapse status
+
+```bash
+curl http://<pi-ip>:5005/timelapse/status
+```
+
+Returns the current timelapse capture state: `enabled`, `interval_minutes`, `fps`, `resolution`, `today_frame_count`, and `last_capture` timestamp.
+
+### Configure timelapse
+
+```bash
+curl -X POST http://<pi-ip>:5005/timelapse/configure \
+  -H 'Content-Type: application/json' \
+  -d '{"enabled": true, "interval_minutes": 5, "fps": 24, "resolution": "640:480"}'
+```
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `enabled` | boolean | `false` | Start/stop timelapse capture |
+| `interval_minutes` | number | `5` | Minutes between frame captures (1-60) |
+| `fps` | number | `24` | Playback framerate of the stitched video |
+| `resolution` | string | `"640x480"` | Frame resolution: `"original"`, `"640:480"`, or `"320:240"` |
+
+### List timelapse videos
+
+```bash
+curl http://<pi-ip>:5005/timelapse
+```
+
+Returns a JSON array of stitched timelapse MP4s, newest first. Each entry contains `path`, `date` (YYYY-MM-DD), and `size` (bytes).
+
+### Stream timelapse video
+
+```bash
+curl "http://<pi-ip>:5005/timelapse/video?path=/path/to/timelapse_20260401.mp4"
+```
+
+### Delete timelapse video
+
+```bash
+curl -X POST http://<pi-ip>:5005/timelapse/delete \
+  -H 'Content-Type: application/json' \
+  -d '{"path": "/path/to/timelapse_20260401.mp4"}'
+```
+
+Only files named `timelapse_*.mp4` inside the timelapse directory can be deleted.
+
 ## Snapshot endpoint
 
 ### Capture a still frame

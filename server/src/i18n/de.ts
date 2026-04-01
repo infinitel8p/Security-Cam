@@ -27,6 +27,7 @@ export default {
     triggerSensors: "Aufnahme-Sensoren",
     cameraRotation: "Kameradrehung",
     streamQuality: "Streamqualität",
+    timelapse: "Zeitraffer",
   },
 
   status: {
@@ -161,6 +162,10 @@ export default {
     autoDelete: "Alte Aufnahmen automatisch löschen",
     storageThreshold: "Maximale Speichernutzung",
     currentUsage: "Aktuelle Nutzung",
+    timelapse: "Täglicher Zeitraffer",
+    timelapseInterval: "Aufnahmeintervall",
+    timelapseFps: "Wiedergabegeschwindigkeit",
+    timelapseResolution: "Bildauflösung",
   },
 
   input: {
@@ -243,10 +248,16 @@ export default {
     snapshotFailed: "Schnappschuss fehlgeschlagen. Versuch es nochmal.",
     snapshotDeleted: "Schnappschuss gel\u00f6scht",
     deleteSnapshotFailed: "Schnappschuss konnte nicht gel\u00f6scht werden. Versuch es nochmal.",
+    timelapseConfigured: "Zeitraffer-Einstellungen gespeichert",
+    timelapseEnabled: "Zeitraffer-Aufnahme aktiviert",
+    timelapseDisabled: "Zeitraffer-Aufnahme deaktiviert",
+    timelapseDeleted: "Zeitraffer gelöscht",
+    deleteTimelapseFailed: "Zeitraffer konnte nicht gelöscht werden. Versuch es nochmal.",
   },
 
   archive: {
     snapshots: "Schnappsch\u00fcsse",
+    timelapse: "Zeitraffer",
   },
 
   dialog: {
@@ -315,6 +326,8 @@ export default {
     scanLines: "Dezenter Retro-Scanlinien-Effekt über dem Live-Bild",
     autoDelete: "Löscht automatisch die ältesten Aufnahmen, wenn der Speicher knapp wird",
     storageThreshold: "Ab diesem Füllstand werden die ältesten Aufnahmen gelöscht. Wird vor jeder Aufnahme und alle 5 Minuten geprüft.",
+    timelapse: "Nimmt alle paar Minuten ein Bild auf und fügt sie um Mitternacht zu einem Tagesvideo zusammen",
+    timelapseInterval: "Aufnahmefrequenz. Niedrigere Werte erzeugen flüssigere Zeitraffer, verbrauchen aber mehr Speicher.",
     presenceGating: "Wenn ein überwachtes Gerät (Handy, Laptop) verbunden ist, werden Sensorauslöser ignoriert – es ist ja jemand zu Hause. Manuelle Aufnahme vom Dashboard geht immer.",
     makeDiscoverable: "Gerät nicht gefunden? Lass dein Handy stattdessen den Pi finden",
     discoverableWaiting: "Der Pi ist jetzt für Geräte in der Nähe sichtbar",

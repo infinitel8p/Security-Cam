@@ -16,5 +16,11 @@
         "gpio": 22,
         "enabled": false,
         "hold_seconds": 10
+    },
+    "Timelapse": {
+        "enabled": false,
+        "interval_minutes": 5,
+        "fps": 24,
+        "resolution": "640x480"
     }
 }

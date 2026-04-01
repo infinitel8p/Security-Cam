@@ -27,6 +27,7 @@ export default {
     triggerSensors: "Sensores de grabación",
     cameraRotation: "Rotación de cámara",
     streamQuality: "Calidad del stream",
+    timelapse: "Timelapse",
   },
 
   status: {
@@ -162,6 +163,10 @@ export default {
     autoDelete: "Borrar grabaciones antiguas automáticamente",
     storageThreshold: "Uso máximo de disco",
     currentUsage: "Uso actual del disco",
+    timelapse: "Timelapse diario",
+    timelapseInterval: "Intervalo de captura",
+    timelapseFps: "Velocidad de reproducción",
+    timelapseResolution: "Resolución de imagen",
   },
 
   input: {
@@ -244,10 +249,16 @@ export default {
     snapshotFailed: "No se pudo tomar la captura. Int\u00e9ntalo de nuevo.",
     snapshotDeleted: "Captura eliminada",
     deleteSnapshotFailed: "No se pudo eliminar la captura. Int\u00e9ntalo de nuevo.",
+    timelapseConfigured: "Configuración del timelapse guardada",
+    timelapseEnabled: "Captura de timelapse activada",
+    timelapseDisabled: "Captura de timelapse desactivada",
+    timelapseDeleted: "Timelapse eliminado",
+    deleteTimelapseFailed: "No se pudo eliminar el timelapse. Inténtalo de nuevo.",
   },
 
   archive: {
     snapshots: "Capturas",
+    timelapse: "Timelapse",
   },
 
   dialog: {
@@ -316,6 +327,8 @@ export default {
     scanLines: "Añade un sutil efecto retro de líneas de escaneo sobre la imagen en vivo",
     autoDelete: "Borra automáticamente las grabaciones más antiguas cuando quede poco espacio en disco",
     storageThreshold: "Cuando el uso de disco supere este límite, se borran las grabaciones más antiguas. Se comprueba antes de cada grabación y cada 5 minutos.",
+    timelapse: "Captura una imagen cada pocos minutos y las une en un video diario a medianoche",
+    timelapseInterval: "Frecuencia de captura. Valores más bajos producen timelapses más suaves pero usan más almacenamiento.",
     presenceGating: "Si hay un dispositivo rastreado (teléfono, portátil) conectado, se ignoran los sensores — la cámara asume que hay alguien en casa. Siempre puedes iniciar una grabación manual desde el panel.",
     makeDiscoverable: "¿No encuentras tu dispositivo? Deja que tu teléfono encuentre el Pi",
     discoverableWaiting: "El Pi ahora es visible para dispositivos cercanos",

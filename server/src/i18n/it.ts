@@ -27,6 +27,7 @@ export default {
     triggerSensors: "Sensori di registrazione",
     cameraRotation: "Rotazione telecamera",
     streamQuality: "Qualità dello stream",
+    timelapse: "Timelapse",
   },
 
   status: {
@@ -162,6 +163,10 @@ export default {
     autoDelete: "Elimina automaticamente le registrazioni vecchie",
     storageThreshold: "Utilizzo massimo del disco",
     currentUsage: "Utilizzo attuale del disco",
+    timelapse: "Timelapse giornaliero",
+    timelapseInterval: "Intervallo di cattura",
+    timelapseFps: "Velocità di riproduzione",
+    timelapseResolution: "Risoluzione immagine",
   },
 
   input: {
@@ -244,10 +249,16 @@ export default {
     snapshotFailed: "Impossibile scattare l'istantanea. Riprova.",
     snapshotDeleted: "Istantanea eliminata",
     deleteSnapshotFailed: "Impossibile eliminare l'istantanea. Riprova.",
+    timelapseConfigured: "Impostazioni timelapse salvate",
+    timelapseEnabled: "Cattura timelapse attivata",
+    timelapseDisabled: "Cattura timelapse disattivata",
+    timelapseDeleted: "Timelapse eliminato",
+    deleteTimelapseFailed: "Impossibile eliminare il timelapse. Riprova.",
   },
 
   archive: {
     snapshots: "Istantanee",
+    timelapse: "Timelapse",
   },
 
   dialog: {
@@ -316,6 +327,8 @@ export default {
     scanLines: "Aggiunge un effetto scan line retrò sul video in diretta",
     autoDelete: "Elimina automaticamente le registrazioni più vecchie quando lo spazio su disco sta per esaurirsi",
     storageThreshold: "Quando il disco supera questo limite, le registrazioni più vecchie vengono eliminate. Controllato prima di ogni registrazione e ogni 5 minuti.",
+    timelapse: "Cattura un fotogramma ogni pochi minuti e li unisce in un video giornaliero a mezzanotte",
+    timelapseInterval: "Frequenza di cattura. Valori più bassi producono timelapse più fluidi ma usano più spazio.",
     presenceGating: "Se un dispositivo monitorato (telefono, portatile) è connesso, il sensore viene ignorato - si presume che ci sia qualcuno in casa. La registrazione manuale dal pannello funziona sempre.",
     makeDiscoverable: "Non trovi il tuo dispositivo? Fai trovare il Pi dal telefono",
     discoverableWaiting: "Il Pi è ora visibile ai dispositivi vicini",
