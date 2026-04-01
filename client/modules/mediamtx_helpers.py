@@ -35,16 +35,29 @@ def read_config():
     }
 
 
+def _format_yaml_val(val) -> str:
+    """Format a Python value for inline YAML output."""
+    if isinstance(val, bool):
+        return "true" if val else "false"
+    if isinstance(val, str):
+        return f"'{val}'"
+    return str(val)
+
+
 def _patch_cam_values(overrides: dict) -> None:
     """Patch key: value pairs in the paths.cam section of mediamtx.yml.
 
     Uses line-level replacement to preserve the original YAML formatting
     (MediaMTX is sensitive to flow vs block style for lists).
+    Appends keys that don't already exist in the file.
     """
     with open(CONFIG_PATH, "r") as f:
         lines = f.readlines()
 
+    remaining = dict(overrides)
+    cam_end_idx = None
     in_cam = False
+
     for i, line in enumerate(lines):
         stripped = line.rstrip()
         if stripped == "  cam:":
@@ -54,17 +67,20 @@ def _patch_cam_values(overrides: dict) -> None:
             if stripped and not stripped.startswith("    "):
                 in_cam = False
                 continue
-            for key, val in overrides.items():
+            if stripped:
+                cam_end_idx = i
+            for key, val in list(remaining.items()):
                 prefix = f"    {key}: "
                 if stripped.startswith(prefix) or stripped == f"    {key}:":
-                    if isinstance(val, bool):
-                        yaml_val = "true" if val else "false"
-                    elif isinstance(val, str):
-                        yaml_val = f"'{val}'"
-                    else:
-                        yaml_val = str(val)
-                    lines[i] = f"    {key}: {yaml_val}\n"
+                    lines[i] = f"    {key}: {_format_yaml_val(val)}\n"
+                    del remaining[key]
                     break
+
+    if remaining and cam_end_idx is not None:
+        insert_at = cam_end_idx + 1
+        for key, val in remaining.items():
+            lines.insert(insert_at, f"    {key}: {_format_yaml_val(val)}\n")
+            insert_at += 1
 
     with open(CONFIG_PATH, "w") as f:
         f.writelines(lines)
@@ -170,38 +186,40 @@ def sync_config():
         log.info("MediaMTX config synced (defaults only, no user camera overrides)")
         return
 
-    # Patch user camera values into the copied default via YAML load/dump.
-    # We only modify paths.cam keys, then write back — but we must preserve
-    # the original formatting.  Read the file as lines, do targeted
-    # key: value replacements within the cam section.
+    # Patch user camera values into the copied default.
+    # Replace existing lines in-place; append any keys not present in the default
+    # at the end of the cam section.
     with open(CONFIG_PATH, "r") as f:
         lines = f.readlines()
 
+    remaining = dict(overrides)  # Track which keys still need inserting
+    cam_end_idx = None  # Last line index inside the cam section
     in_cam = False
+
     for i, line in enumerate(lines):
         stripped = line.rstrip()
-        # Detect "  cam:" section start (2-space indent under paths:)
         if stripped == "  cam:":
             in_cam = True
             continue
         if in_cam:
-            # End of cam section: line with <= 2-space indent (or less)
             if stripped and not stripped.startswith("    "):
                 in_cam = False
                 continue
-            # Check if this line sets a key we want to override
-            for key, val in overrides.items():
+            if stripped:
+                cam_end_idx = i
+            for key, val in list(remaining.items()):
                 prefix = f"    {key}: "
                 if stripped.startswith(prefix) or stripped == f"    {key}:":
-                    # Format the value appropriately
-                    if isinstance(val, bool):
-                        yaml_val = "true" if val else "false"
-                    elif isinstance(val, str):
-                        yaml_val = f"'{val}'"
-                    else:
-                        yaml_val = str(val)
-                    lines[i] = f"    {key}: {yaml_val}\n"
+                    lines[i] = f"    {key}: {_format_yaml_val(val)}\n"
+                    del remaining[key]
                     break
+
+    # Append keys that weren't in the default file (e.g. rpiCameraHFlip)
+    if remaining and cam_end_idx is not None:
+        insert_at = cam_end_idx + 1
+        for key, val in remaining.items():
+            lines.insert(insert_at, f"    {key}: {_format_yaml_val(val)}\n")
+            insert_at += 1
 
     with open(CONFIG_PATH, "w") as f:
         f.writelines(lines)
