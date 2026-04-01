@@ -241,7 +241,13 @@ export default {
     rotationSaved: "Rotation mise à jour",
     rotationFailed: "Impossible de sauvegarder la rotation. Réessayez.",
     snapshotSaved: "Instantané enregistré",
-    snapshotFailed: "Impossible de prendre l'instantané. Réessayez.",
+    snapshotFailed: "Impossible de prendre l'instantan\u00e9. R\u00e9essayez.",
+    snapshotDeleted: "Instantan\u00e9 supprim\u00e9",
+    deleteSnapshotFailed: "Impossible de supprimer l'instantan\u00e9. R\u00e9essayez.",
+  },
+
+  archive: {
+    snapshots: "Instantan\u00e9s",
   },
 
   dialog: {

@@ -492,6 +492,31 @@ def archive():
     return jsonify(video_list)
 
 
+@app.route('/snapshots', methods=['GET'])
+def snapshots():
+    return jsonify(archive_helpers.get_snapshots())
+
+
+@app.route('/delete_snapshot', methods=['POST'])
+def delete_snapshot():
+    data = request.get_json() or {}
+    snapshot_path = data.get("snapshot_path")
+    result, status_code = archive_helpers.delete_snapshot(snapshot_path)
+    return jsonify(result), status_code
+
+
+@app.route('/snapshot_image', methods=['GET'])
+def snapshot_image():
+    import os
+    path = request.args.get('path')
+    if not path:
+        abort(400, description="path is required")
+    if not os.path.exists(path):
+        abort(404, description="Snapshot not found")
+    return send_file(os.path.abspath(path), mimetype='image/jpeg',
+                     max_age=86400)
+
+
 @app.route('/thumbnail', methods=['GET'])
 def thumbnail():
     import os

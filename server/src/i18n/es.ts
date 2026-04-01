@@ -241,11 +241,17 @@ export default {
     rotationSaved: "Rotación actualizada",
     rotationFailed: "No se pudo guardar la rotación. Inténtalo de nuevo.",
     snapshotSaved: "Captura guardada",
-    snapshotFailed: "No se pudo tomar la captura. Inténtalo de nuevo.",
+    snapshotFailed: "No se pudo tomar la captura. Int\u00e9ntalo de nuevo.",
+    snapshotDeleted: "Captura eliminada",
+    deleteSnapshotFailed: "No se pudo eliminar la captura. Int\u00e9ntalo de nuevo.",
+  },
+
+  archive: {
+    snapshots: "Capturas",
   },
 
   dialog: {
-    deleteTitle: "¿Eliminar grabación?",
+    deleteTitle: "\u00bfEliminar grabaci\u00f3n?",
     deleteMessage: "{filename} se eliminará permanentemente.",
     selectDirectory: "Elegir carpeta de guardado",
   },

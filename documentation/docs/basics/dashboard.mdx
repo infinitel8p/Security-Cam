@@ -56,6 +56,7 @@ Browse and manage recorded videos:
 - **Thumbnails** — a JPEG snapshot is captured from the live feed the moment recording starts. This provides instant preview images in both grid and list view, without waiting for the browser to decode the video (fixes blank thumbnails on iOS Safari)
 - **Hover scrub** — hover over a video card in grid view to scrub through the recording. A sprite sheet of 10 evenly-spaced frames is generated automatically when recording stops. Move the mouse left/right to preview different moments without opening the video
 - **New recording badges** — the Archive nav icon shows a red badge with the count of recordings created since your last visit. Inside the archive, new recordings are highlighted with a "NEW" label. The badge clears automatically when you open the archive page
+- **Snapshots** — still frames captured from the live feed via the snapshot button appear in a collapsible section at the top of the archive. Each snapshot shows a thumbnail with the capture time, and can be downloaded or deleted individually
 
 ## Settings
 
@@ -75,12 +76,13 @@ View system logs directly from the dashboard without needing SSH access. The log
 
 - **API Logs** — shows parsed entries from the Flask backend log (`security-cam.log`), including rotated backups. Each entry shows timestamp, log level, source module, and message. Features:
   - Filter by level (Error, Warning, Info, Debug)
+  - Filter by category (e.g. `bt.pair` for Bluetooth, `sensor.mgr` for sensors, `stream` for recording) via a dropdown that lists all source modules found in the current logs
   - Full-text search across all log fields
   - Auto-refresh every 5 seconds (toggleable)
   - Paginated display with "show more" for large logs
   - Download the current view as a text file
 
-- **MediaMTX** — shows parsed entries from the MediaMTX RTSP/WebRTC server log. Same filtering, search, and auto-refresh features as API logs. Useful for diagnosing stream issues.
+- **MediaMTX** — shows parsed entries from the MediaMTX RTSP/WebRTC server log. Same filtering, search, category dropdown, and auto-refresh features as API logs. Useful for diagnosing stream issues.
 
 - **Script Logs** — browse log files from all setup and maintenance scripts, grouped by category:
   - **Install** — `install_requirements.sh` and `install_mediamtx.sh` output

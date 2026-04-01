@@ -242,6 +242,12 @@ export default {
     rotationFailed: "Non è stato possibile salvare la rotazione. Riprova.",
     snapshotSaved: "Istantanea salvata",
     snapshotFailed: "Impossibile scattare l'istantanea. Riprova.",
+    snapshotDeleted: "Istantanea eliminata",
+    deleteSnapshotFailed: "Impossibile eliminare l'istantanea. Riprova.",
+  },
+
+  archive: {
+    snapshots: "Istantanee",
   },
 
   dialog: {

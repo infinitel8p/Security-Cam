@@ -10,7 +10,7 @@
 
 
 <link rel="search" type="application/opensearchdescription+xml" title="Security-Cam" href="/Security-Cam/opensearch.xml"><link rel="stylesheet" href="/Security-Cam/assets/css/styles.36674e39.css">
-<script src="/Security-Cam/assets/js/runtime~main.05213ca7.js" defer="defer"></script>
+<script src="/Security-Cam/assets/js/runtime~main.f5a02249.js" defer="defer"></script>
 <script src="/Security-Cam/assets/js/main.0582351e.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -28,11 +28,11 @@
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="home">Home<a href="#home" class="hash-link" aria-label="Direct link to Home" title="Direct link to Home" translate="no">​</a></h2>
 <p>The main page shows everything at a glance:</p>
 <ul>
-<li class=""><strong>Live Feed</strong> - real-time camera view via WebRTC, with manual recording controls (start/stop)</li>
+<li class=""><strong>Live Feed</strong> - real-time camera view via WebRTC, with manual recording controls (start/stop) and a snapshot button to save a still frame as JPEG</li>
 <li class=""><strong>Backend Status</strong> - online/offline indicator for the Flask backend, polled every 10 seconds</li>
 <li class=""><strong>Sensor Status</strong> - current sensor type, state (Armed / Triggered / Suppressed / Disabled), and GPIO pin. See <a class="" href="/Security-Cam/docs/basics/sensors#sensor-states">sensor states</a> for what each means</li>
 <li class=""><strong>Connection Status</strong> - how many tracked Bluetooth and WiFi devices are online</li>
-<li class=""><strong>System Health</strong> - CPU temperature, load, RAM usage, storage, uptime, and throttle status</li>
+<li class=""><strong>System Health</strong> - CPU temperature, load, RAM usage, storage, uptime, and throttle status. When metrics cross warning or critical thresholds, a toast notification appears and an alert dot shows on the Dashboard nav icon</li>
 <li class=""><strong>Activity Timeline</strong> - last 7 days of events: sensor triggers, recording events, stream disconnects. Rapid sensor pulses within 5 minutes are collapsed into a single entry with a count</li>
 <li class=""><strong>Access Log</strong> - last 72 hours of device arrivals and departures</li>
 <li class=""><strong>Health Tracker</strong> - 72-hour system health chart (48 time slots, colour-coded ok/warn/critical)</li>
@@ -46,7 +46,9 @@
 <li class="">Click a video to stream it directly in the browser</li>
 <li class="">Download or delete individual recordings</li>
 <li class=""><strong>Thumbnails</strong> — a JPEG snapshot is captured from the live feed the moment recording starts. This provides instant preview images in both grid and list view, without waiting for the browser to decode the video (fixes blank thumbnails on iOS Safari)</li>
+<li class=""><strong>Hover scrub</strong> — hover over a video card in grid view to scrub through the recording. A sprite sheet of 10 evenly-spaced frames is generated automatically when recording stops. Move the mouse left/right to preview different moments without opening the video</li>
 <li class=""><strong>New recording badges</strong> — the Archive nav icon shows a red badge with the count of recordings created since your last visit. Inside the archive, new recordings are highlighted with a &quot;NEW&quot; label. The badge clears automatically when you open the archive page</li>
+<li class=""><strong>Snapshots</strong> — still frames captured from the live feed via the snapshot button appear in a collapsible section at the top of the archive. Each snapshot shows a thumbnail with the capture time, and can be downloaded or deleted individually</li>
 </ul>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="settings">Settings<a href="#settings" class="hash-link" aria-label="Direct link to Settings" title="Direct link to Settings" translate="no">​</a></h2>
 <p>Configure the system without touching config files. The settings page has a sidebar with five sections:</p>
@@ -65,6 +67,7 @@
 <p><strong>API Logs</strong> — shows parsed entries from the Flask backend log (<code>security-cam.log</code>), including rotated backups. Each entry shows timestamp, log level, source module, and message. Features:</p>
 <ul>
 <li class="">Filter by level (Error, Warning, Info, Debug)</li>
+<li class="">Filter by category (e.g. <code>bt.pair</code> for Bluetooth, <code>sensor.mgr</code> for sensors, <code>stream</code> for recording) via a dropdown that lists all source modules found in the current logs</li>
 <li class="">Full-text search across all log fields</li>
 <li class="">Auto-refresh every 5 seconds (toggleable)</li>
 <li class="">Paginated display with &quot;show more&quot; for large logs</li>
@@ -72,7 +75,7 @@
 </ul>
 </li>
 <li class="">
-<p><strong>MediaMTX</strong> — shows parsed entries from the MediaMTX RTSP/WebRTC server log. Same filtering, search, and auto-refresh features as API logs. Useful for diagnosing stream issues.</p>
+<p><strong>MediaMTX</strong> — shows parsed entries from the MediaMTX RTSP/WebRTC server log. Same filtering, search, category dropdown, and auto-refresh features as API logs. Useful for diagnosing stream issues.</p>
 </li>
 <li class="">
 <p><strong>Script Logs</strong> — browse log files from all setup and maintenance scripts, grouped by category:</p>

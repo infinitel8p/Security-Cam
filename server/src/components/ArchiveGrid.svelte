@@ -17,6 +17,8 @@
   import alertCircleIcon from "../icons/alert-circle.svg?raw";
   import checkIcon from "../icons/check.svg?raw";
   import chevronDownIcon from "../icons/chevron-down.svg?raw";
+  import cameraBoltIcon from "../icons/camera-bolt.svg?raw";
+  import chevronRightIcon from "../icons/chevron-right.svg?raw";
 
   let deleteButtonEl: HTMLButtonElement | null = null;
 
@@ -43,7 +45,18 @@
   type FilterMode = "all" | "today" | "week" | "month";
   type ViewMode = "grid" | "list";
 
+  interface Snapshot {
+    path: string;
+    filename: string;
+    date: string;
+    time: string;
+    size: number;
+  }
+
   let allVideos: Video[] = $state([]);
+  let allSnapshots: Snapshot[] = $state([]);
+  let snapshotsOpen = $state(false);
+  let deletingSnapshot: string | null = $state(null);
   let loading = $state(true);
   let error = $state(false);
   let deleteTarget: Video | null = $state(null);
@@ -150,6 +163,56 @@
     }
   }
 
+  async function fetchSnapshots() {
+    try {
+      const res = await fetch(`${getBackendUrl()}/snapshots`);
+      if (!res.ok) return;
+      const entries: { path: string; size: number }[] = await res.json();
+      allSnapshots = entries.map((s) => {
+        const filename = s.path.split("/").pop() ?? s.path;
+        const match = filename.match(/(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/);
+        const date = match ? `${match[1]}-${match[2]}-${match[3]}` : "";
+        const time = match ? `${match[4]}:${match[5]}:${match[6]}` : "";
+        return { ...s, filename, date, time };
+      });
+      if (allSnapshots.length > 0) snapshotsOpen = true;
+    } catch {
+      // Non-critical
+    }
+  }
+
+  function snapshotUrl(path: string): string {
+    return `${getBackendUrl()}/snapshot_image?path=${encodeURIComponent(path)}`;
+  }
+
+  async function deleteSnapshot(snapshot: Snapshot) {
+    deletingSnapshot = snapshot.path;
+    try {
+      const res = await fetch(`${getBackendUrl()}/delete_snapshot`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ snapshot_path: snapshot.path }),
+      });
+      if (res.ok) {
+        allSnapshots = allSnapshots.filter((s) => s.path !== snapshot.path);
+        toast.success(t("toast.snapshotDeleted"));
+      } else {
+        toast.error(t("toast.deleteSnapshotFailed"));
+      }
+    } catch {
+      toast.error(t("toast.deleteSnapshotFailed"));
+    } finally {
+      deletingSnapshot = null;
+    }
+  }
+
+  function downloadSnapshot(snapshot: Snapshot) {
+    const a = document.createElement("a");
+    a.href = snapshotUrl(snapshot.path);
+    a.download = snapshot.filename;
+    a.click();
+  }
+
   function isNewRecording(video: Video): boolean {
     return lastSeenTs > 0 && video.timestamp > lastSeenTs;
   }
@@ -160,6 +223,7 @@
     const stored = localStorage.getItem("lastSeenArchive");
     lastSeenTs = stored ? new Date(stored).getTime() : 0;
     fetchArchive();
+    fetchSnapshots();
     // Mark archive as seen (clears the nav badge)
     markSeen();
   });
@@ -335,6 +399,68 @@
 </script>
 
 <svelte:window on:click={handleGlobalClick} />
+
+<!-- Snapshots section -->
+{#if allSnapshots.length > 0}
+  <div class="card overflow-hidden">
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <button
+      onclick={() => { snapshotsOpen = !snapshotsOpen; }}
+      class="flex w-full items-center gap-2.5 px-4 py-3 text-left transition-colors hover:bg-surface-overlay"
+    >
+      <Icon
+        icon={chevronRightIcon}
+        class="h-4 w-4 text-text-muted transition-transform duration-200 {snapshotsOpen ? 'rotate-90' : ''}"
+      />
+      <Icon icon={cameraBoltIcon} class="h-4 w-4 text-text-muted" />
+      <span class="text-[0.8125rem] font-medium text-text-primary">
+        {t("archive.snapshots")}
+      </span>
+      <span class="rounded-md bg-surface-overlay px-1.5 py-0.5 text-[0.625rem] font-semibold tabular-nums text-text-muted">
+        {allSnapshots.length}
+      </span>
+    </button>
+
+    {#if snapshotsOpen}
+      <div class="border-t border-border-subtle px-4 py-3">
+        <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          {#each allSnapshots as snap}
+            <div class="group relative overflow-hidden rounded-lg border border-border-subtle bg-black/40">
+              <img
+                src={snapshotUrl(snap.path)}
+                alt={snap.filename}
+                class="aspect-video w-full object-cover"
+                loading="lazy"
+              />
+              <!-- Date/time badge -->
+              <div class="pointer-events-none absolute left-1.5 top-1.5 rounded bg-black/60 px-1.5 py-0.5 text-[0.5625rem] font-medium tabular-nums text-white/90 backdrop-blur-sm">
+                {snap.time}
+              </div>
+              <!-- Actions (visible on hover) -->
+              <div class="absolute bottom-0 left-0 right-0 flex items-center justify-end gap-1 bg-gradient-to-t from-black/60 to-transparent px-1.5 py-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+                <button
+                  onclick={() => downloadSnapshot(snap)}
+                  class="flex h-7 w-7 items-center justify-center rounded-md bg-black/40 text-white/80 backdrop-blur-sm transition-colors hover:bg-black/60 hover:text-white"
+                  title={t("btn.download")}
+                >
+                  <Icon icon={downloadIcon} class="h-3.5 w-3.5" />
+                </button>
+                <button
+                  onclick={() => deleteSnapshot(snap)}
+                  disabled={deletingSnapshot === snap.path}
+                  class="flex h-7 w-7 items-center justify-center rounded-md bg-black/40 text-white/80 backdrop-blur-sm transition-colors hover:bg-status-critical/60 hover:text-white disabled:opacity-40"
+                  title={t("btn.delete")}
+                >
+                  <Icon icon={trashIcon} class="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
+          {/each}
+        </div>
+      </div>
+    {/if}
+  </div>
+{/if}
 
 {#if loading}
   <div class="space-y-4 animate-in">

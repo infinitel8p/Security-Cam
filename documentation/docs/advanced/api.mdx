@@ -186,6 +186,32 @@ curl -X POST http://<pi-ip>:5005/snapshot
 
 Grabs a single JPEG frame from the live camera feed and saves it to the recordings directory. Returns `{"path": "/path/to/snapshot_20260401_143022.jpg"}` on success, or `500` if the capture fails (camera not running, ffmpeg error, timeout).
 
+### List snapshots
+
+```bash
+curl http://<pi-ip>:5005/snapshots
+```
+
+Returns a JSON array of all snapshot files in the recordings directory, newest first. Each entry contains `path` and `size` (bytes). Only files matching `snapshot_*.jpg` are included.
+
+### Get snapshot image
+
+```bash
+curl "http://<pi-ip>:5005/snapshot_image?path=/path/to/snapshot_20260401_143022.jpg"
+```
+
+Returns the JPEG image for a snapshot. Response is cached for 24 hours. Returns `404` if the file doesn't exist.
+
+### Delete snapshot
+
+```bash
+curl -X POST http://<pi-ip>:5005/delete_snapshot \
+  -H 'Content-Type: application/json' \
+  -d '{"snapshot_path": "/path/to/snapshot_20260401_143022.jpg"}'
+```
+
+Deletes a snapshot file. Only files named `snapshot_*.jpg` inside the configured recordings directory can be deleted (path traversal is blocked). Returns `200` on success, `400` for invalid paths, `404` if the file doesn't exist.
+
 ## Thumbnail endpoint
 
 ### Get recording thumbnail

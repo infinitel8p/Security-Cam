@@ -70,10 +70,66 @@ def count_videos_since(since_iso: str) -> int:
     return count
 
 
+def get_snapshots():
+    """List all snapshot JPEG files in the recordings directory."""
+    reload_settings()
+    video_dir = settings["VideoSaveLocation"]
+    snapshots = []
+
+    for root, dirs, files in os.walk(video_dir):
+        for file in files:
+            if file.startswith("snapshot_") and file.endswith(".jpg"):
+                filepath = os.path.join(root, file)
+                try:
+                    size = os.path.getsize(filepath)
+                except OSError:
+                    size = 0
+                snapshots.append({"path": filepath, "size": size})
+
+    snapshots.sort(key=lambda s: os.path.getmtime(s["path"]), reverse=True)
+    return snapshots
+
+
+def delete_snapshot(snapshot_path):
+    """Delete a snapshot JPEG. Same safety checks as delete_video."""
+    reload_settings()
+    video_dir = settings.get("VideoSaveLocation")
+    if not video_dir:
+        return {"error": "Video storage location not configured"}, 500
+
+    if not snapshot_path:
+        return {"error": "Snapshot not found"}, 404
+
+    base_dir = os.path.realpath(video_dir)
+    target = os.path.realpath(snapshot_path)
+
+    try:
+        if os.path.commonpath([base_dir, target]) != base_dir:
+            log.warning("Delete blocked - path outside VideoSaveLocation: %s", snapshot_path)
+            return {"error": "Invalid snapshot path"}, 400
+    except ValueError:
+        return {"error": "Invalid snapshot path"}, 400
+
+    if not target.endswith(".jpg") or not os.path.basename(target).startswith("snapshot_"):
+        log.warning("Delete blocked - not a snapshot file: %s", snapshot_path)
+        return {"error": "Invalid snapshot file"}, 400
+
+    if not os.path.isfile(target):
+        return {"error": "Snapshot not found"}, 404
+
+    try:
+        os.remove(target)
+        log.info("Snapshot deleted: %s", target)
+        return {"message": "Snapshot deleted"}, 200
+    except Exception as e:
+        log.error("Failed to delete snapshot %s: %s", target, e)
+        return {"error": str(e)}, 500
+
+
 def reload_settings():
     global settings
     settings = settings_helpers.get_settings()
-        
+
 def delete_video(video_path):
     reload_settings()
     video_dir = settings.get("VideoSaveLocation")

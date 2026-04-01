@@ -241,10 +241,16 @@ export default {
     rotationFailed: "Drehung konnte nicht gespeichert werden. Versuch es nochmal.",
     snapshotSaved: "Schnappschuss gespeichert",
     snapshotFailed: "Schnappschuss fehlgeschlagen. Versuch es nochmal.",
+    snapshotDeleted: "Schnappschuss gel\u00f6scht",
+    deleteSnapshotFailed: "Schnappschuss konnte nicht gel\u00f6scht werden. Versuch es nochmal.",
+  },
+
+  archive: {
+    snapshots: "Schnappsch\u00fcsse",
   },
 
   dialog: {
-    deleteTitle: "Aufnahme löschen?",
+    deleteTitle: "Aufnahme l\u00f6schen?",
     deleteMessage: "{filename} wird unwiderruflich gelöscht.",
     selectDirectory: "Speicherordner auswählen",
   },

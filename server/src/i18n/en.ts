@@ -253,6 +253,13 @@ export default {
     rotationFailed: "Couldn't save rotation. Try again.",
     snapshotSaved: "Snapshot saved",
     snapshotFailed: "Couldn't take snapshot. Try again.",
+    snapshotDeleted: "Snapshot deleted",
+    deleteSnapshotFailed: "Couldn't delete snapshot. Try again.",
+  },
+
+  // Archive
+  archive: {
+    snapshots: "Snapshots",
   },
 
   // Dialogs
