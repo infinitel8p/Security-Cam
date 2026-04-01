@@ -1,0 +1,150 @@
+---
+sidebar_position: 3
+description: "Tune brightness, contrast, white balance, and more using the camera's hardware ISP"
+last_update:
+  date: 2026-04-01
+  author: Ludo
+---
+
+# Image Quality
+
+The Raspberry Pi camera has a built-in **Image Signal Processor (ISP)** that handles brightness, contrast, white balance, and other adjustments in hardware — with zero CPU cost. Security-Cam exposes these controls on the Settings page under **Camera > Image Quality**.
+
+## Parameter Reference
+
+### Brightness
+
+**Range:** -1 to 1 &nbsp;|&nbsp; **Default:** 0
+
+Controls the overall luminosity of the image. At `0`, the ISP uses its default processing. Negative values darken the image, positive values brighten it. Unlike EV compensation (which changes exposure time/gain), brightness is applied after capture — it shifts the entire tonal range up or down without affecting how the sensor captures light.
+
+**When to use:** Fine-tune when the auto-exposure is close but the image feels slightly too dark or bright overall. For larger corrections, use EV instead.
+
+### Contrast
+
+**Range:** 0 to 16 &nbsp;|&nbsp; **Default:** 1
+
+Controls the difference between the darkest and lightest parts of the image. At `1`, the ISP applies its standard tone curve. Values below 1 produce a flatter, more washed-out look. Values above 1 make darks darker and lights lighter, giving the image more punch and depth.
+
+**When to use:** Increase to 1.5–2 if the image looks flat or hazy (common in overcast or indoor lighting). Reduce toward 0.5 if shadows are too crushed and you need to see detail in dark areas.
+
+### Saturation
+
+**Range:** 0 to 16 &nbsp;|&nbsp; **Default:** 1
+
+Controls colour intensity. At `0`, the image is completely desaturated (black and white). At `1`, colours are natural. Higher values make colours more vivid and punchy.
+
+**When to use:** Bump to 1.2–1.5 for a more vibrant security feed. Set to `0` if you want a greyscale feed (can make it easier to spot movement in some lighting conditions).
+
+### Sharpness
+
+**Range:** 0 to 16 &nbsp;|&nbsp; **Default:** 1
+
+Applies edge-enhancement to make fine details crisper. At `0`, no sharpening is applied (softer image). Higher values increase the contrast along edges, making text, faces, and textures more defined.
+
+**When to use:** Increase to 2–3 for a crisper feed, especially at lower resolutions. Be careful above 4 — over-sharpening amplifies sensor noise and creates visible halos around edges. If the image looks noisy, try reducing sharpness before enabling denoise.
+
+### Exposure Compensation (EV)
+
+**Range:** -10 to +10 &nbsp;|&nbsp; **Default:** 0
+
+Tells the auto-exposure algorithm to aim brighter or darker than it normally would. Each step of +1 roughly doubles the brightness (by allowing longer exposure or higher gain). Negative values do the opposite.
+
+**When to use:** Set to +2 or +3 in dark environments where auto-exposure isn't going bright enough. Set to -1 or -2 when a bright light source (window, lamp) causes the rest of the scene to be too dark. Unlike brightness, EV changes how the sensor captures light — it affects noise levels and motion blur.
+
+### White Balance
+
+**Options:** Auto, Daylight, Cloudy, Tungsten, Fluorescent, Indoor, Incandescent &nbsp;|&nbsp; **Default:** Auto
+
+Corrects the colour temperature of the light source so whites look white. In **Auto** mode, the ISP continuously analyses the scene and adjusts. Fixed presets lock the correction to a specific light type:
+
+| Preset | Colour Temperature | Best for |
+|--------|-------------------|----------|
+| Daylight | ~5500K | Outdoor sunlight |
+| Cloudy | ~6500K | Overcast sky, shade |
+| Tungsten | ~3200K | Traditional incandescent bulbs |
+| Fluorescent | ~4000K | Office / strip lighting |
+| Indoor | ~3500K | Mixed warm indoor lighting |
+| Incandescent | ~2700K | Warm yellow bulbs |
+
+**When to use:** Auto works well in most cases. Switch to a fixed preset if the camera is in a room with constant lighting (avoids colour shifts). If you use IR LEDs for night vision, set a fixed preset like Daylight — Auto will fight the IR illumination and produce colour casts.
+
+### Exposure Mode
+
+**Options:** Normal, Short, Long &nbsp;|&nbsp; **Default:** Normal
+
+Controls how the auto-exposure algorithm balances shutter speed and gain:
+
+- **Normal** — balanced, suitable for most scenarios
+- **Short** — prefers faster shutter speeds, reducing motion blur but potentially increasing noise in low light
+- **Long** — allows slower shutter speeds, capturing more light but with more motion blur
+
+**When to use:** Use Short if you need to capture fast movement (e.g., camera faces a road or entrance). Use Long for static scenes in dim lighting where blur isn't a concern.
+
+### Denoise
+
+**Options:** Off, Fast, High Quality &nbsp;|&nbsp; **Default:** Off
+
+Reduces sensor noise (grainy speckle visible in low light). **Fast** applies spatial denoising within each frame. **High Quality** adds temporal denoising (compares across multiple frames) for better results but higher CPU usage.
+
+:::warning Performance on Pi Zero 2 W
+**High Quality** denoise runs partly on the CPU and can cause frame drops on the Pi Zero 2 W. Use **Fast** or **Off** for reliable performance. On a Pi 4 or 5, High Quality runs fine.
+:::
+
+**When to use:** Enable Fast if the image is visibly noisy (especially at night or with high EV). Only use High Quality if you're on more powerful Pi hardware.
+
+### Metering
+
+**Options:** Centre-weighted, Spot, Matrix &nbsp;|&nbsp; **Default:** Centre-weighted
+
+Controls which part of the frame the auto-exposure uses to calculate brightness:
+
+- **Centre-weighted** — prioritises the middle of the frame, fading toward edges. Good general-purpose choice.
+- **Spot** — measures brightness from a small area in the centre only. Everything else is ignored.
+- **Matrix** — divides the frame into zones and balances across all of them. Handles mixed lighting best.
+
+**When to use:** Use Spot if the camera points at a bright window or light source — it'll expose for the centre subject instead of the bright background. Use Matrix for wide-angle views of rooms with mixed lighting (bright window + dim interior).
+
+## How It Works
+
+1. Open **Settings > Camera > Image Quality**
+2. Click **Show preview** to see the live feed while adjusting
+3. Move sliders or change dropdowns
+4. Click **Apply** — the stream restarts briefly (~3 seconds) with new settings
+5. The preview auto-reconnects showing the result
+
+Settings are saved to both `settings.json` (UI state) and `mediamtx.yml` (runtime config), so they persist across reboots.
+
+:::tip Reset anytime
+Click **Reset to defaults** to return all values to their factory settings. This is non-destructive — you can always readjust.
+:::
+
+## Performance {#performance}
+
+All ISP adjustments are processed by the camera's hardware — they don't use CPU at all. The one exception:
+
+:::warning Denoise on Pi Zero 2 W
+**High Quality** denoise uses additional CPU for temporal noise reduction. On the Pi Zero 2 W, this can cause frame drops. Prefer **Fast** or **Off** for smooth performance.
+:::
+
+## Tips
+
+- **Night / low light**: Increase brightness (+0.3 to +0.5), set exposure to Long, and bump EV to +2 or +3
+- **Washed-out daylight**: Increase contrast to 1.5–2, set white balance to Daylight or Cloudy
+- **IR camera with IR LEDs**: Set white balance to a fixed preset (Daylight works well) to avoid auto-WB fighting the IR illumination
+- **High-noise image**: Try denoise Fast. If that's not enough, reduce sharpness to 0.5 to soften noise artifacts
+- **Metering**: Use Spot if the camera points at a bright window — it'll expose for the center subject, not the window
+
+## API Reference
+
+```bash
+# Get current ISP settings
+curl http://your-pi:5005/isp_settings
+
+# Update ISP settings (any subset of params)
+curl -X POST http://your-pi:5005/isp_settings \
+  -H "Content-Type: application/json" \
+  -d '{"brightness": 0.3, "contrast": 1.5, "awb": "daylight"}'
+```
+
+The endpoint validates all values against their allowed ranges and returns `400` with an error message for invalid input.

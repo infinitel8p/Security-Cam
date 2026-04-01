@@ -19,6 +19,44 @@ STREAM_KEYS = {
     "fps": "rpiCameraFPS",
 }
 
+# ISP image-quality keys (hardware ISP — zero CPU cost)
+ISP_KEYS = {
+    "brightness":  "rpiCameraBrightness",
+    "contrast":    "rpiCameraContrast",
+    "saturation":  "rpiCameraSaturation",
+    "sharpness":   "rpiCameraSharpness",
+    "ev":          "rpiCameraEV",
+    "awb":         "rpiCameraAWB",
+    "exposure":    "rpiCameraExposure",
+    "denoise":     "rpiCameraDenoise",
+    "metering":    "rpiCameraMetering",
+}
+
+# ISP defaults (match mediamtx.default.yml)
+ISP_DEFAULTS = {
+    "brightness": 0, "contrast": 1, "saturation": 1, "sharpness": 1,
+    "ev": 0, "awb": "auto", "exposure": "normal", "denoise": "off",
+    "metering": "centre",
+}
+
+# Valid enum values for ISP string params
+_ISP_ENUMS = {
+    "awb": {"auto", "incandescent", "tungsten", "fluorescent",
+            "indoor", "daylight", "cloudy"},
+    "exposure": {"normal", "short", "long"},
+    "denoise": {"off", "cdn_fast", "cdn_hq"},
+    "metering": {"centre", "spot", "matrix"},
+}
+
+# Numeric ranges for ISP slider params: key → (min, max)
+_ISP_RANGES = {
+    "brightness": (-1, 1),
+    "contrast":   (0, 16),
+    "saturation": (0, 16),
+    "sharpness":  (0, 16),
+    "ev":         (-10, 10),
+}
+
 
 def read_config():
     """Read mediamtx.yml and return the cam path's rpiCamera params."""
@@ -26,13 +64,17 @@ def read_config():
         cfg = yaml.safe_load(f)
 
     cam = cfg.get("paths", {}).get("cam", {})
-    return {
+    result = {
         "width": cam.get("rpiCameraWidth", 1296),
         "height": cam.get("rpiCameraHeight", 972),
         "fps": cam.get("rpiCameraFPS", 30),
         "hflip": cam.get("rpiCameraHFlip", False),
         "vflip": cam.get("rpiCameraVFlip", False),
     }
+    # ISP image-quality params
+    for key, yml_key in ISP_KEYS.items():
+        result[key] = cam.get(yml_key, ISP_DEFAULTS[key])
+    return result
 
 
 def _format_yaml_val(val) -> str:
@@ -117,6 +159,47 @@ def update_stream_params(params):
     return restart_service()
 
 
+def update_isp_params(params):
+    """Update rpiCamera ISP image-quality params and restart MediaMTX.
+
+    params may contain any subset of ISP_KEYS.
+    Returns (success: bool, error: str | None).
+    """
+    overrides = {}
+
+    for key, yml_key in ISP_KEYS.items():
+        if key not in params:
+            continue
+        val = params[key]
+
+        # Validate enum params
+        if key in _ISP_ENUMS:
+            if val not in _ISP_ENUMS[key]:
+                return False, f"Invalid {key}: {val!r}. Allowed: {sorted(_ISP_ENUMS[key])}"
+            overrides[yml_key] = val
+
+        # Validate numeric params
+        elif key in _ISP_RANGES:
+            try:
+                val = float(val)
+            except (TypeError, ValueError):
+                return False, f"Invalid {key}: must be a number"
+            lo, hi = _ISP_RANGES[key]
+            if not (lo <= val <= hi):
+                return False, f"Invalid {key}: must be between {lo} and {hi}"
+            # Use int if the value is whole
+            overrides[yml_key] = int(val) if val == int(val) else round(val, 2)
+
+        log.info("ISP param %s → %s", yml_key, overrides.get(yml_key, val))
+
+    if not overrides:
+        return False, "No valid ISP parameters provided"
+
+    _patch_cam_values(overrides)
+    log.info("ISP config written, restarting MediaMTX...")
+    return restart_service()
+
+
 def restart_service():
     """Restart the mediamtx systemd service. Returns (success, error)."""
     try:
@@ -144,6 +227,10 @@ _USER_CAM_KEYS = {
     "rpiCameraBitrate", "rpiCameraCodec", "rpiCameraIDRPeriod",
     "rpiCameraHFlip", "rpiCameraVFlip", "rpiCameraDenoise",
     "rpiCameraTextOverlayEnable", "rpiCameraTextOverlay",
+    # ISP image-quality params
+    "rpiCameraBrightness", "rpiCameraContrast", "rpiCameraSaturation",
+    "rpiCameraSharpness", "rpiCameraEV", "rpiCameraAWB",
+    "rpiCameraExposure", "rpiCameraMetering",
 }
 
 

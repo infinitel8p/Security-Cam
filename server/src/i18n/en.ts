@@ -32,6 +32,7 @@ export default {
     triggerSensors: "Recording Sensors",
     cameraRotation: "Camera Rotation",
     streamQuality: "Stream Quality",
+    imageQuality: "Image Quality",
     timelapse: "Timelapse",
   },
 
@@ -61,6 +62,7 @@ export default {
     discoverable: "Waiting for pairing...",
     added: "Added",
     connectingToCamera: "Connecting to camera...",
+    reconnectingFeed: "Reconnecting...",
     reconnecting: "Reconnecting...",
     loading: "Loading...",
     retrying: "Retrying...",
@@ -119,6 +121,10 @@ export default {
     hideWiring: "Hide wiring guide",
     downloadRecording: "Download recording",
     deleteRecording: "Delete recording",
+    showPreview: "Show preview",
+    hidePreview: "Hide preview",
+    resetDefaults: "Reset to defaults",
+    learnMore: "Learn more",
   },
 
   // Labels
@@ -182,6 +188,15 @@ export default {
     timelapseFps: "Playback speed",
     timelapseResolution: "Frame resolution",
     timelapseCapturing: "Capturing \u2014 {n} frames today",
+    brightness: "Brightness",
+    contrast: "Contrast",
+    saturation: "Saturation",
+    sharpness: "Sharpness",
+    ev: "Exposure Compensation",
+    awb: "White Balance",
+    exposureMode: "Exposure Mode",
+    denoise: "Denoise",
+    metering: "Metering",
   },
 
   // Input placeholders
@@ -274,6 +289,9 @@ export default {
     timelapseDisabled: "Timelapse capture disabled",
     timelapseDeleted: "Timelapse deleted",
     deleteTimelapseFailed: "Couldn't delete timelapse. Try again.",
+    ispApplied: "Image quality updated. Feed will reconnect shortly.",
+    ispFailed: "Couldn't update image quality. Try again.",
+    ispReset: "Image quality reset to defaults.",
   },
 
   // Archive
@@ -363,6 +381,29 @@ export default {
     pairingCheckPhone: "A pairing request may appear on your phone — please accept it",
     checkingWiFi: "Checking connected WiFi devices...",
     addDevicesForPresence: "Add a phone or laptop in Settings for presence detection",
+    imageQuality: "The live feed will briefly disconnect while the camera restarts with new settings.",
+    ispPerformance: "Denoise 'High Quality' uses more CPU. On Pi Zero 2 W, prefer 'Fast' or 'Off'.",
+    ispDocsLink: "What does each setting do?",
+  },
+
+  // ISP image quality option labels
+  isp: {
+    awb_auto: "Auto",
+    awb_daylight: "Daylight",
+    awb_cloudy: "Cloudy",
+    awb_tungsten: "Tungsten",
+    awb_fluorescent: "Fluorescent",
+    awb_indoor: "Indoor",
+    awb_incandescent: "Incandescent",
+    exposure_normal: "Normal",
+    exposure_short: "Short",
+    exposure_long: "Long",
+    denoise_off: "Off",
+    denoise_cdn_fast: "Fast",
+    denoise_cdn_hq: "High Quality",
+    metering_centre: "Centre-weighted",
+    metering_spot: "Spot",
+    metering_matrix: "Matrix",
   },
 
   // Rotation options

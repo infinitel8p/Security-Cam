@@ -5,6 +5,7 @@
   import toast from "svelte-5-french-toast";
   import DeviceList from "./DeviceList.svelte";
   import CameraSettings from "./CameraSettings.svelte";
+  import ImageQualitySettings from "./ImageQualitySettings.svelte";
   import DirectoryPicker from "./DirectoryPicker.svelte";
   import SensorSettings from "./SensorSettings.svelte";
   import Icon from "./Icon.svelte";
@@ -28,6 +29,15 @@
   let streamHeight = $state(972);
   let streamFPS = $state(30);
   let saveLocation = $state("");
+  let ispBrightness = $state(0);
+  let ispContrast = $state(1);
+  let ispSaturation = $state(1);
+  let ispSharpness = $state(1);
+  let ispEv = $state(0);
+  let ispAwb = $state("auto");
+  let ispExposure = $state("normal");
+  let ispDenoise = $state("off");
+  let ispMetering = $state("centre");
   let scanLinesEnabled = $state(true);
   let storageLimitEnabled = $state(false);
   let storageLimitPercent = $state(85);
@@ -151,6 +161,16 @@
       const sl = settings.StorageLimit ?? {};
       storageLimitEnabled = sl.enabled ?? false;
       storageLimitPercent = sl.max_percent ?? 85;
+      const isp = settings.ISP ?? {};
+      ispBrightness = isp.brightness ?? 0;
+      ispContrast = isp.contrast ?? 1;
+      ispSaturation = isp.saturation ?? 1;
+      ispSharpness = isp.sharpness ?? 1;
+      ispEv = isp.ev ?? 0;
+      ispAwb = isp.awb ?? "auto";
+      ispExposure = isp.exposure ?? "normal";
+      ispDenoise = isp.denoise ?? "off";
+      ispMetering = isp.metering ?? "centre";
       const tl = settings.Timelapse ?? {};
       timelapseEnabled = tl.enabled ?? false;
       timelapseInterval = tl.interval_minutes ?? 5;
@@ -511,6 +531,17 @@
           {streamWidth}
           {streamHeight}
           {streamFPS}
+        />
+        <ImageQualitySettings
+          brightness={ispBrightness}
+          contrast={ispContrast}
+          saturation={ispSaturation}
+          sharpness={ispSharpness}
+          ev={ispEv}
+          awb={ispAwb}
+          exposure={ispExposure}
+          denoise={ispDenoise}
+          metering={ispMetering}
         />
       </section>
 

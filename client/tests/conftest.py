@@ -73,8 +73,13 @@ _sh.is_recording = False
 # MediaMTX
 _start("modules.mediamtx_helpers.read_config", return_value={
     "width": 1296, "height": 972, "fps": 30,
+    "brightness": 0, "contrast": 1, "saturation": 1, "sharpness": 1,
+    "ev": 0, "awb": "auto", "exposure": "normal", "denoise": "off",
+    "metering": "centre",
 })
 _start("modules.mediamtx_helpers.update_stream_params",
+       return_value=(True, None))
+_start("modules.mediamtx_helpers.update_isp_params",
        return_value=(True, None))
 
 # Bluetooth / WiFi (subprocess-heavy)

@@ -29,6 +29,7 @@ export default {
     triggerSensors: "Aufnahme-Sensoren",
     cameraRotation: "Kameradrehung",
     streamQuality: "Streamqualität",
+    imageQuality: "Bildqualität",
     timelapse: "Zeitraffer",
   },
 
@@ -57,6 +58,7 @@ export default {
     discoverable: "Warte auf Kopplung...",
     added: "Hinzugefügt",
     connectingToCamera: "Verbinde mit Kamera...",
+    reconnectingFeed: "Verbindung wird hergestellt...",
     reconnecting: "Verbinde neu...",
     loading: "Laden...",
     retrying: "Wird geladen...",
@@ -114,6 +116,10 @@ export default {
     hideWiring: "Verkabelung ausblenden",
     downloadRecording: "Aufnahme herunterladen",
     deleteRecording: "Aufnahme löschen",
+    showPreview: "Vorschau anzeigen",
+    hidePreview: "Vorschau ausblenden",
+    resetDefaults: "Auf Standard zurücksetzen",
+    learnMore: "Mehr erfahren",
   },
 
   label: {
@@ -176,6 +182,15 @@ export default {
     timelapseFps: "Wiedergabegeschwindigkeit",
     timelapseResolution: "Bildauflösung",
     timelapseCapturing: "Aufnahme läuft — {n} Bilder heute",
+    brightness: "Helligkeit",
+    contrast: "Kontrast",
+    saturation: "Sättigung",
+    sharpness: "Schärfe",
+    ev: "Belichtungskorrektur",
+    awb: "Weißabgleich",
+    exposureMode: "Belichtungsmodus",
+    denoise: "Rauschunterdrückung",
+    metering: "Messmethode",
   },
 
   input: {
@@ -263,6 +278,9 @@ export default {
     timelapseDisabled: "Zeitraffer-Aufnahme deaktiviert",
     timelapseDeleted: "Zeitraffer gelöscht",
     deleteTimelapseFailed: "Zeitraffer konnte nicht gelöscht werden. Versuch es nochmal.",
+    ispApplied: "Bildqualität aktualisiert. Feed wird kurz neu verbunden.",
+    ispFailed: "Bildqualität konnte nicht aktualisiert werden.",
+    ispReset: "Bildqualität auf Standard zurückgesetzt.",
   },
 
   archive: {
@@ -346,6 +364,28 @@ export default {
     pairingCheckPhone: "Auf deinem Handy erscheint eventuell eine Kopplungsanfrage – bitte bestätigen",
     checkingWiFi: "Prüfe verbundene WiFi-Geräte...",
     addDevicesForPresence: "Füge ein Handy oder Laptop in den Einstellungen hinzu, um Anwesenheit zu erkennen",
+    imageQuality: "Das Live-Bild wird kurz unterbrochen, während die Kamera mit neuen Einstellungen neu startet.",
+    ispPerformance: "Rauschunterdrückung 'Hohe Qualität' verbraucht mehr CPU. Auf dem Pi Zero 2 W 'Schnell' oder 'Aus' bevorzugen.",
+    ispDocsLink: "Was bewirkt jede Einstellung?",
+  },
+
+  isp: {
+    awb_auto: "Automatisch",
+    awb_daylight: "Tageslicht",
+    awb_cloudy: "Bewölkt",
+    awb_tungsten: "Glühlampe",
+    awb_fluorescent: "Neonlicht",
+    awb_indoor: "Innenraum",
+    awb_incandescent: "Glühlicht",
+    exposure_normal: "Normal",
+    exposure_short: "Kurz",
+    exposure_long: "Lang",
+    denoise_off: "Aus",
+    denoise_cdn_fast: "Schnell",
+    denoise_cdn_hq: "Hohe Qualität",
+    metering_centre: "Mittenbetont",
+    metering_spot: "Spot",
+    metering_matrix: "Matrix",
   },
 
   rotation: {

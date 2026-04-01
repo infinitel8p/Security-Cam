@@ -653,6 +653,55 @@ def stream_settings():
         return jsonify({"message": error}), 400
 
 
+@app.route('/isp_settings', methods=['GET', 'POST'])
+def isp_settings():
+    """Get or update camera ISP image-quality parameters."""
+    if request.method == 'GET':
+        try:
+            cfg = mediamtx_helpers.read_config()
+            return jsonify({
+                k: cfg[k] for k in mediamtx_helpers.ISP_KEYS if k in cfg
+            })
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    data = request.json or {}
+    params = {k: data[k] for k in mediamtx_helpers.ISP_KEYS if k in data}
+
+    if not params:
+        return jsonify({"message": "No ISP parameters provided"}), 400
+
+    # Validate before calling helper (so tests with mocked helper still catch errors)
+    for key, val in params.items():
+        if key in mediamtx_helpers._ISP_ENUMS:
+            if val not in mediamtx_helpers._ISP_ENUMS[key]:
+                return jsonify({"message": f"Invalid {key}: {val!r}"}), 400
+        elif key in mediamtx_helpers._ISP_RANGES:
+            try:
+                num_val = float(val)
+            except (TypeError, ValueError):
+                return jsonify({"message": f"Invalid {key}: must be a number"}), 400
+            lo, hi = mediamtx_helpers._ISP_RANGES[key]
+            if not (lo <= num_val <= hi):
+                return jsonify({"message": f"Invalid {key}: must be between {lo} and {hi}"}), 400
+
+    success, error = mediamtx_helpers.update_isp_params(params)
+    if not success:
+        return jsonify({"message": error}), 400
+
+    # Persist to settings.json for UI state
+    try:
+        settings = settings_helpers.get_settings()
+        isp = settings.get("ISP", {})
+        isp.update(params)
+        settings_helpers.update_settings({"ISP": isp})
+    except Exception:
+        pass  # non-critical — MediaMTX already updated
+
+    log.info("ISP settings applied: %s", list(params.keys()))
+    return jsonify({"message": "Image quality updated, MediaMTX restarted"})
+
+
 @app.route('/health_history', methods=['GET'])
 def health_history():
     hours = request.args.get('hours', 24, type=int)

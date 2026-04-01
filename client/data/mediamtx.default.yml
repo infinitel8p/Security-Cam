@@ -89,3 +89,11 @@ paths:
     rpiCameraTextOverlayEnable: true
     rpiCameraTextOverlay: '%Y-%m-%d %H:%M:%S'
     rpiCameraDenoise: "off"
+    rpiCameraBrightness: 0
+    rpiCameraContrast: 1
+    rpiCameraSaturation: 1
+    rpiCameraSharpness: 1
+    rpiCameraEV: 0
+    rpiCameraAWB: 'auto'
+    rpiCameraExposure: 'normal'
+    rpiCameraMetering: 'centre'

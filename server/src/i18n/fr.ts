@@ -29,6 +29,7 @@ export default {
     triggerSensors: "Capteurs d'enregistrement",
     cameraRotation: "Rotation de la caméra",
     streamQuality: "Qualité du flux",
+    imageQuality: "Qualité d'image",
     timelapse: "Timelapse",
   },
 
@@ -57,6 +58,7 @@ export default {
     discoverable: "En attente d'appairage...",
     added: "Ajouté",
     connectingToCamera: "Connexion à la caméra...",
+    reconnectingFeed: "Reconnexion...",
     reconnecting: "Reconnexion...",
     loading: "Chargement...",
     retrying: "Nouvelle tentative...",
@@ -114,6 +116,10 @@ export default {
     hideWiring: "Masquer le câblage",
     downloadRecording: "Télécharger l'enregistrement",
     deleteRecording: "Supprimer l'enregistrement",
+    showPreview: "Afficher l'aperçu",
+    hidePreview: "Masquer l'aperçu",
+    resetDefaults: "Réinitialiser",
+    learnMore: "En savoir plus",
   },
 
   label: {
@@ -176,6 +182,15 @@ export default {
     timelapseFps: "Vitesse de lecture",
     timelapseResolution: "Résolution des images",
     timelapseCapturing: "En cours — {n} images aujourd’hui",
+    brightness: "Luminosité",
+    contrast: "Contraste",
+    saturation: "Saturation",
+    sharpness: "Netteté",
+    ev: "Compensation d’exposition",
+    awb: "Balance des blancs",
+    exposureMode: "Mode d’exposition",
+    denoise: "Réduction du bruit",
+    metering: "Mesure de lumière",
   },
 
   input: {
@@ -263,6 +278,9 @@ export default {
     timelapseDisabled: "Capture timelapse désactivée",
     timelapseDeleted: "Timelapse supprimé",
     deleteTimelapseFailed: "Impossible de supprimer le timelapse. Réessayez.",
+    ispApplied: "Qualité d'image mise à jour. Le flux se reconnectera.",
+    ispFailed: "Impossible de mettre à jour la qualité d'image.",
+    ispReset: "Qualité d'image réinitialisée.",
   },
 
   archive: {
@@ -346,6 +364,28 @@ export default {
     pairingCheckPhone: "Une demande d'appairage peut apparaître sur votre téléphone — acceptez-la",
     checkingWiFi: "Recherche des appareils WiFi connectés...",
     addDevicesForPresence: "Ajoutez un téléphone ou un ordinateur dans les Paramètres pour la détection de présence",
+    imageQuality: "Le flux en direct sera brièvement interrompu pendant le redémarrage de la caméra.",
+    ispPerformance: "Le mode 'Haute qualité' de réduction du bruit utilise plus de CPU. Sur le Pi Zero 2 W, préférez 'Rapide' ou 'Désactivé'.",
+    ispDocsLink: "Que fait chaque réglage ?",
+  },
+
+  isp: {
+    awb_auto: "Automatique",
+    awb_daylight: "Lumière du jour",
+    awb_cloudy: "Nuageux",
+    awb_tungsten: "Tungstène",
+    awb_fluorescent: "Fluorescent",
+    awb_indoor: "Intérieur",
+    awb_incandescent: "Incandescent",
+    exposure_normal: "Normal",
+    exposure_short: "Court",
+    exposure_long: "Long",
+    denoise_off: "Désactivé",
+    denoise_cdn_fast: "Rapide",
+    denoise_cdn_hq: "Haute qualité",
+    metering_centre: "Pondéré central",
+    metering_spot: "Spot",
+    metering_matrix: "Matriciel",
   },
 
   rotation: {

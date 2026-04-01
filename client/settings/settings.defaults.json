@@ -22,5 +22,16 @@
         "interval_minutes": 5,
         "fps": 24,
         "resolution": "640x480"
+    },
+    "ISP": {
+        "brightness": 0,
+        "contrast": 1,
+        "saturation": 1,
+        "sharpness": 1,
+        "ev": 0,
+        "awb": "auto",
+        "exposure": "normal",
+        "denoise": "off",
+        "metering": "centre"
     }
 }
