@@ -26,11 +26,43 @@ def get_videos():
                     except (json.JSONDecodeError, IOError):
                         pass
 
+                # Check for thumbnail
+                thumb_path = os.path.splitext(filepath)[0] + ".thumb.jpg"
+                if os.path.exists(thumb_path):
+                    entry["thumbnail"] = thumb_path
+
                 videos.append(entry)
 
     # Sort newest first by modification time
     videos.sort(key=lambda v: os.path.getmtime(v["path"]), reverse=True)
     return videos
+
+
+def count_videos_since(since_iso: str) -> int:
+    """Count recordings created after the given ISO timestamp."""
+    from datetime import datetime, timezone
+    try:
+        since = datetime.fromisoformat(since_iso)
+        if since.tzinfo is None:
+            since = since.replace(tzinfo=timezone.utc)
+    except (ValueError, TypeError):
+        return 0
+
+    reload_settings()
+    video_dir = settings["VideoSaveLocation"]
+    count = 0
+    since_ts = since.timestamp()
+
+    for root, dirs, files in os.walk(video_dir):
+        for file in files:
+            if file.endswith(".mp4") and not file.endswith(".tmp.mp4"):
+                filepath = os.path.join(root, file)
+                try:
+                    if os.path.getmtime(filepath) > since_ts:
+                        count += 1
+                except OSError:
+                    pass
+    return count
 
 
 def reload_settings():
@@ -71,10 +103,11 @@ def delete_video(video_path):
 
     try:
         os.remove(target)
-        # Remove sidecar metadata file if it exists
-        meta_path = os.path.splitext(target)[0] + ".meta.json"
-        if os.path.exists(meta_path):
-            os.remove(meta_path)
+        # Remove sidecar files (metadata, thumbnail) if they exist
+        for ext in (".meta.json", ".thumb.jpg"):
+            sidecar = os.path.splitext(target)[0] + ext
+            if os.path.exists(sidecar):
+                os.remove(sidecar)
         log.info("Video deleted: %s", target)
         return {"message": "Video deleted successfully"}, 200
     except Exception as e:

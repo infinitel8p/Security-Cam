@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import { initLocale, t } from "../i18n";
+  import { initArchiveBadge, subscribe as subscribeBadge } from "../lib/archive-badge";
   import ThemeToggle from "./ThemeToggle.svelte";
   import Icon from "./Icon.svelte";
   import layoutGridIcon from "../icons/layout-grid.svg?raw";
@@ -10,8 +11,17 @@
   import brandGithubIcon from "../icons/brand-github-filled.svg?raw";
   import bookIcon from "../icons/book.svg?raw";
 
+  let badgeCount = $state(0);
+  let unsubBadge: (() => void) | null = null;
+
   onMount(() => {
     initLocale();
+    initArchiveBadge();
+    unsubBadge = subscribeBadge((count) => { badgeCount = count; });
+  });
+
+  onDestroy(() => {
+    unsubBadge?.();
   });
 
   const path = $derived(typeof window !== "undefined" ? window.location.pathname : "/");
@@ -58,7 +68,14 @@
         {#if active}
           <span class="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-accent"></span>
         {/if}
-        <Icon {icon} class="h-[18px] w-[18px] shrink-0" />
+        <span class="relative">
+          <Icon {icon} class="h-[18px] w-[18px] shrink-0" />
+          {#if href === "/archive" && badgeCount > 0 && !active}
+            <span class="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-status-critical px-1 text-[0.5625rem] font-bold leading-none text-white">
+              {badgeCount > 99 ? "99+" : badgeCount}
+            </span>
+          {/if}
+        </span>
         {t(labelKey)}
       </a>
     {/each}

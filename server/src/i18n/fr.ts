@@ -315,6 +315,7 @@ export default {
   badge: {
     rec: "ENR",
     live: "DIRECT",
+    new: "NOUV",
   },
 
   setup: {

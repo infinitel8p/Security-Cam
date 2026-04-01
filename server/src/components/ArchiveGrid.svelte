@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import { markSeen } from "../lib/archive-badge";
   import toast from "svelte-5-french-toast";
   import { initLocale, t } from "../i18n";
   import Icon from "./Icon.svelte";
@@ -34,6 +35,7 @@
     time: string;
     timestamp: number;
     meta?: VideoMeta;
+    thumbnail?: string;
   }
 
   type SortMode = "newest" | "oldest" | "name";
@@ -51,6 +53,7 @@
   let viewMode: ViewMode = $state("grid");
   let showSortMenu = $state(false);
   let showFilterMenu = $state(false);
+  let lastSeenTs = $state(0);
 
   function parseEntry(entry: { path: string; meta?: VideoMeta }): Video {
     const filepath = entry.path;
@@ -61,7 +64,7 @@
     const timestamp = match
       ? new Date(`${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}:${match[6]}`).getTime()
       : 0;
-    return { path: filepath, filename, date, time, timestamp, meta: entry.meta };
+    return { path: filepath, filename, date, time, timestamp, meta: entry.meta, thumbnail: entry.thumbnail };
   }
 
   function formatDuration(seconds: number): string {
@@ -146,13 +149,26 @@
     }
   }
 
+  function isNewRecording(video: Video): boolean {
+    return lastSeenTs > 0 && video.timestamp > lastSeenTs;
+  }
+
   onMount(() => {
     initLocale();
+    // Read the last-seen timestamp before marking as seen
+    const stored = localStorage.getItem("lastSeenArchive");
+    lastSeenTs = stored ? new Date(stored).getTime() : 0;
     fetchArchive();
+    // Mark archive as seen (clears the nav badge)
+    markSeen();
   });
 
   function streamUrl(path: string): string {
     return `${getBackendUrl()}/stream_video?video_path=${encodeURIComponent(path)}&cache_buster=${Date.now()}`;
+  }
+
+  function thumbnailUrl(path: string): string {
+    return `${getBackendUrl()}/thumbnail?video_path=${encodeURIComponent(path)}`;
   }
 
   function downloadVideo(video: Video) {
@@ -482,6 +498,7 @@
                     class="aspect-video w-full object-contain"
                     controls
                     preload="none"
+                    poster={video.thumbnail ? thumbnailUrl(video.path) : undefined}
                   ></video>
                   <!-- Overlay badges -->
                   {#if video.time}
@@ -499,6 +516,11 @@
                   <div class="min-w-0">
                     <div class="flex items-center gap-2">
                       <p class="text-[0.8125rem] font-medium text-text-primary">{formatDate(video.date)}</p>
+                      {#if isNewRecording(video)}
+                        <span class="rounded-full bg-status-critical/10 px-1.5 py-0.5 text-[0.5625rem] font-semibold uppercase tracking-wide text-status-critical">
+                          {t("badge.new")}
+                        </span>
+                      {/if}
                       {#if triggerLabel(video.meta)}
                         <span class="rounded-full px-1.5 py-0.5 text-[0.5625rem] font-semibold uppercase tracking-wide
                           {video.meta?.reason === 'sensor'
@@ -562,18 +584,32 @@
               >
                 <!-- Thumbnail -->
                 <div class="relative h-16 w-28 shrink-0 overflow-hidden rounded-lg bg-black/60">
-                  <video
-                    data-src={streamUrl(video.path)}
-                    use:lazyVideo
-                    class="h-full w-full object-contain"
-                    preload="none"
-                  ></video>
+                  {#if video.thumbnail}
+                    <img
+                      src={thumbnailUrl(video.path)}
+                      alt=""
+                      class="h-full w-full object-contain"
+                      loading="lazy"
+                    />
+                  {:else}
+                    <video
+                      data-src={streamUrl(video.path)}
+                      use:lazyVideo
+                      class="h-full w-full object-contain"
+                      preload="none"
+                    ></video>
+                  {/if}
                 </div>
 
                 <!-- Info -->
                 <div class="min-w-0 flex-1">
                   <div class="flex items-center gap-2">
                     <p class="truncate text-[0.8125rem] font-medium text-text-primary">{video.filename}</p>
+                    {#if isNewRecording(video)}
+                      <span class="shrink-0 rounded-full bg-status-critical/10 px-1.5 py-0.5 text-[0.5625rem] font-semibold uppercase tracking-wide text-status-critical">
+                        {t("badge.new")}
+                      </span>
+                    {/if}
                     {#if triggerLabel(video.meta)}
                       <span class="shrink-0 rounded-full px-1.5 py-0.5 text-[0.5625rem] font-semibold uppercase tracking-wide
                         {video.meta?.reason === 'sensor'

@@ -157,6 +157,26 @@ Force an immediate cleanup regardless of schedule:
 curl -X POST http://<pi-ip>:5005/storage/cleanup
 ```
 
+## Thumbnail endpoint
+
+### Get recording thumbnail
+
+```bash
+curl "http://<pi-ip>:5005/thumbnail?video_path=/path/to/output_20260401_143022.mp4"
+```
+
+Returns the JPEG thumbnail captured at the start of recording. The thumbnail is stored as a `.thumb.jpg` sidecar alongside the video file. Returns `404` if no thumbnail exists for that recording. Response is cached for 24 hours.
+
+## Archive badge endpoint
+
+### Count new recordings
+
+```bash
+curl "http://<pi-ip>:5005/archive/new_count?since=2026-04-01T10:00:00%2B00:00"
+```
+
+Returns `{"count": N}` — the number of recordings created after the given ISO timestamp. Used by the dashboard to show notification badges on the Archive nav link. Returns `0` if `since` is missing or invalid.
+
 ## Log endpoints
 
 ### Get API logs

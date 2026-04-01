@@ -315,6 +315,7 @@ export default {
   badge: {
     rec: "GRAB",
     live: "VIVO",
+    new: "NUEVO",
   },
 
   setup: {

@@ -177,6 +177,9 @@ def start_recording(reason: str = "manual", sensor_type: str | None = None) -> N
         log.info("Recording started: %s (pid=%d, reason=%s)",
                  recorded_filename, _ffmpeg_process.pid, reason)
 
+    # Capture a thumbnail from the live stream (non-blocking)
+    threading.Thread(target=_capture_thumbnail, args=(recorded_filename,), daemon=True).start()
+
     # Start watchdog outside the lock
     global _watchdog_thread
     _watchdog_thread = threading.Thread(target=_watchdog, daemon=True)
@@ -231,6 +234,36 @@ def stop_recording() -> None:
         threading.Thread(target=_fix_faststart, args=(filename,)).start()
 
     log.info("Recording stopped: %s", filename)
+
+
+def thumbnail_path(video_path: str) -> str:
+    """Return the .thumb.jpg sidecar path for a video file."""
+    return os.path.splitext(video_path)[0] + ".thumb.jpg"
+
+
+def _capture_thumbnail(video_path: str) -> None:
+    """Grab a single JPEG frame from the RTSP stream as a thumbnail."""
+    out_path = thumbnail_path(video_path)
+    try:
+        subprocess.run(
+            [
+                "ffmpeg", "-y",
+                "-rtsp_transport", "tcp",
+                "-i", RTSP_URL,
+                "-frames:v", "1",
+                "-q:v", "2",
+                out_path,
+            ],
+            capture_output=True, timeout=10,
+        )
+        if os.path.exists(out_path) and os.path.getsize(out_path) > 0:
+            log.info("Thumbnail captured: %s", out_path)
+        else:
+            log.warning("Thumbnail capture produced empty file: %s", out_path)
+    except subprocess.TimeoutExpired:
+        log.warning("Thumbnail capture timed out")
+    except Exception as e:
+        log.error("Thumbnail capture failed: %s", e)
 
 
 def _fix_faststart(file_path: str) -> None:

@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import { initLocale, t } from "../i18n";
+  import { initArchiveBadge, subscribe as subscribeBadge } from "../lib/archive-badge";
   import ThemeToggle from "./ThemeToggle.svelte";
   import Icon from "./Icon.svelte";
   import layoutGridIcon from "../icons/layout-grid.svg?raw";
@@ -8,8 +9,17 @@
   import settingsIcon from "../icons/settings.svg?raw";
   import fileTextIcon from "../icons/file-text.svg?raw";
 
+  let badgeCount = $state(0);
+  let unsubBadge: (() => void) | null = null;
+
   onMount(() => {
     initLocale();
+    initArchiveBadge();
+    unsubBadge = subscribeBadge((count) => { badgeCount = count; });
+  });
+
+  onDestroy(() => {
+    unsubBadge?.();
   });
 
   const path = $derived(typeof window !== "undefined" ? window.location.pathname : "/");
@@ -41,7 +51,14 @@
       {isActive('/archive') ? 'text-accent' : 'text-text-muted'}"
   >
     <span class="absolute top-0 left-1/2 h-[2px] w-8 -translate-x-1/2 rounded-b-full bg-accent transition-all duration-200 {isActive('/archive') ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0'}"></span>
-    <Icon icon={archiveIcon} class="h-5 w-5 shrink-0" />
+    <span class="relative">
+      <Icon icon={archiveIcon} class="h-5 w-5 shrink-0" />
+      {#if badgeCount > 0 && !isActive('/archive')}
+        <span class="absolute -right-1.5 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-status-critical px-1 text-[0.5625rem] font-bold leading-none text-white">
+          {badgeCount > 99 ? "99+" : badgeCount}
+        </span>
+      {/if}
+    </span>
     <span class="text-[0.6875rem] leading-none font-medium">{t("nav.archive")}</span>
   </a>
 

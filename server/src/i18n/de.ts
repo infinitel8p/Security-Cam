@@ -314,6 +314,7 @@ export default {
   badge: {
     rec: "AUFN",
     live: "LIVE",
+    new: "NEU",
   },
 
   setup: {

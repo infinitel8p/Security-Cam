@@ -139,7 +139,9 @@ def _confirmation_check():
 
     # Delete the short false-alarm recording and its metadata
     if filename:
-        for path in [filename, os.path.splitext(filename)[0] + ".meta.json"]:
+        for path in [filename,
+                     os.path.splitext(filename)[0] + ".meta.json",
+                     os.path.splitext(filename)[0] + ".thumb.jpg"]:
             try:
                 if os.path.exists(path):
                     os.remove(path)

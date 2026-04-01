@@ -315,6 +315,7 @@ export default {
   badge: {
     rec: "REC",
     live: "LIVE",
+    new: "NUOVO",
   },
 
   setup: {

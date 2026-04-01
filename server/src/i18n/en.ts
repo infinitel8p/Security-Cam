@@ -334,6 +334,7 @@ export default {
   badge: {
     rec: "REC",
     live: "LIVE",
+    new: "NEW",
   },
 
   // Setup checklist

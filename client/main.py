@@ -460,10 +460,35 @@ def sensor_test():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/archive/new_count', methods=['GET'])
+def archive_new_count():
+    """Return the number of recordings created after a given timestamp."""
+    since = request.args.get('since')
+    if not since:
+        return jsonify({"count": 0})
+    count = archive_helpers.count_videos_since(since)
+    return jsonify({"count": count})
+
+
 @app.route('/archive', methods=['GET'])
 def archive():
     video_list = archive_helpers.get_videos()
     return jsonify(video_list)
+
+
+@app.route('/thumbnail', methods=['GET'])
+def thumbnail():
+    import os
+    video_path = request.args.get('video_path')
+    if not video_path:
+        abort(400, description="video_path is required")
+
+    thumb_path = os.path.splitext(video_path)[0] + ".thumb.jpg"
+    if not os.path.exists(thumb_path):
+        abort(404, description="Thumbnail not found")
+
+    return send_file(os.path.abspath(thumb_path), mimetype='image/jpeg',
+                     max_age=86400)
 
 
 @app.route('/stream_video', methods=['GET'])
