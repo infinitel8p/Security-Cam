@@ -18,6 +18,7 @@
   import checkIcon from "../icons/check.svg?raw";
   import chevronDownIcon from "../icons/chevron-down.svg?raw";
   import cameraBoltIcon from "../icons/camera-bolt.svg?raw";
+  import chevronLeftIcon from "../icons/chevron-left.svg?raw";
   import chevronRightIcon from "../icons/chevron-right.svg?raw";
   import clockIcon from "../icons/clock.svg?raw";
 
@@ -57,7 +58,19 @@
   let allVideos: Video[] = $state([]);
   let allSnapshots: Snapshot[] = $state([]);
   let snapshotsOpen = $state(false);
+  let snapshotsExpanded = $state(false);
+  let snapLimit = $state(4);
+
+  function updateSnapLimit() {
+    if (typeof window === "undefined") return;
+    const w = window.innerWidth;
+    if (w >= 1024) snapLimit = 5;       // lg: grid-cols-5 → 1 row
+    else if (w >= 768) snapLimit = 4;   // md: grid-cols-4 → 1 row
+    else if (w >= 640) snapLimit = 6;   // sm: grid-cols-3 → 2 rows
+    else snapLimit = 4;                 // base: grid-cols-2 → 2 rows
+  }
   let deletingSnapshot: string | null = $state(null);
+  let expandedSnap: Snapshot | null = $state(null);
 
   interface Timelapse {
     path: string;
@@ -278,6 +291,8 @@
 
   onMount(() => {
     initLocale();
+    updateSnapLimit();
+    window.addEventListener("resize", updateSnapLimit);
     // Read the last-seen timestamp before marking as seen
     const stored = localStorage.getItem("lastSeenArchive");
     lastSeenTs = stored ? new Date(stored).getTime() : 0;
@@ -286,6 +301,7 @@
     fetchTimelapses();
     // Mark archive as seen (clears the nav badge)
     markSeen();
+    return () => window.removeEventListener("resize", updateSnapLimit);
   });
 
   function streamUrl(path: string): string {
@@ -482,15 +498,22 @@
     </button>
 
     {#if snapshotsOpen}
-      <div class="border-t border-border-subtle px-4 py-3">
+      {@const visibleSnaps = snapshotsExpanded ? allSnapshots : allSnapshots.slice(0, snapLimit)}
+      {@const hasMore = allSnapshots.length > snapLimit}
+      <div class="animate-slide-down border-t border-border-subtle px-4 py-3">
         <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {#each allSnapshots as snap}
-            <div class="group relative overflow-hidden rounded-lg border border-border-subtle bg-black/40">
+          {#each visibleSnaps as snap}
+            <div class="group relative overflow-hidden rounded-lg border border-border-subtle bg-black/40 transition-transform duration-200 hover:scale-[1.02]">
+              <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
               <img
                 src={snapshotUrl(snap.path)}
                 alt={snap.filename}
-                class="aspect-video w-full object-cover"
+                class="aspect-video w-full cursor-zoom-in object-cover"
                 loading="lazy"
+                onclick={() => expandedSnap = snap}
+                onkeydown={(e) => { if (e.key === 'Enter') expandedSnap = snap; }}
+                tabindex="0"
+                role="button"
               />
               <!-- Date/time badge -->
               <div class="pointer-events-none absolute left-1.5 top-1.5 rounded bg-black/60 px-1.5 py-0.5 text-[0.5625rem] font-medium tabular-nums text-white/90 backdrop-blur-sm">
@@ -517,6 +540,14 @@
             </div>
           {/each}
         </div>
+        {#if hasMore}
+          <button
+            onclick={() => snapshotsExpanded = !snapshotsExpanded}
+            class="mt-2.5 w-full rounded-lg py-1.5 text-[0.75rem] font-medium text-text-muted transition-colors hover:bg-surface-overlay hover:text-text-secondary"
+          >
+            {snapshotsExpanded ? t("btn.showLess") : `${t("btn.showMore")} (${allSnapshots.length - snapLimit})`}
+          </button>
+        {/if}
       </div>
     {/if}
   </div>
@@ -543,7 +574,7 @@
     </button>
 
     {#if timelapsesOpen}
-      <div class="border-t border-border-subtle px-4 py-3">
+      <div class="animate-slide-down border-t border-border-subtle px-4 py-3">
         <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
           {#each allTimelapses as tl}
             <div class="group overflow-hidden rounded-lg border border-border-subtle bg-surface-overlay">
@@ -765,11 +796,19 @@
       </button>
     </div>
   {:else if viewMode === "grid"}
-    <!-- Grid view grouped by date -->
-    <div class="space-y-6">
-      {#each groupedVideos as group (group.date)}
+    <!-- Grid view grouped by date — with timeline -->
+    <div class="archive-timeline relative space-y-6 pl-6 sm:pl-8">
+      <!-- Timeline track — translate -50% to center the 1px line on the dot center -->
+      <div class="absolute left-3 top-1 bottom-1 w-px -translate-x-1/2 bg-border-subtle sm:left-4" aria-hidden="true">
+        <div class="archive-timeline-fill absolute inset-x-0 top-0 bg-accent/40 rounded-full"></div>
+      </div>
+      {#each groupedVideos as group, gi (group.date)}
         <div>
-          <div class="mb-3 flex items-center gap-3">
+          <div class="relative mb-3 flex items-center gap-3">
+            <!-- Timeline dot — first is larger -->
+            <div class="absolute -left-6 sm:-left-8 flex items-center justify-center w-6 sm:w-8">
+              <div class="rounded-full border-2 border-surface-base transition-colors {gi === 0 ? 'h-3 w-3 bg-accent ring-2 ring-accent/20' : 'h-2.5 w-2.5 bg-accent/60 ring-2 ring-accent/10'}"></div>
+            </div>
             <h3 class="text-[0.8125rem] font-semibold text-text-primary">{group.label}</h3>
             <div class="h-px flex-1 bg-border-subtle"></div>
             <span class="text-[0.6875rem] tabular-nums text-text-muted">
@@ -814,7 +853,7 @@
                     </div>
                   {/if}
                   {#if video.meta?.duration_seconds}
-                    <div class="pointer-events-none absolute right-2.5 bottom-2.5 rounded-md bg-black/60 px-2 py-0.5 text-[0.6875rem] font-medium tabular-nums text-white/90 backdrop-blur-sm">
+                    <div class="pointer-events-none absolute right-2.5 top-2.5 rounded-md bg-black/60 px-2 py-0.5 text-[0.6875rem] font-medium tabular-nums text-white/90 backdrop-blur-sm">
                       {formatDuration(video.meta.duration_seconds)}
                     </div>
                   {/if}
@@ -824,7 +863,7 @@
                     <div class="flex items-center gap-2">
                       <p class="text-[0.8125rem] font-medium text-text-primary">{formatDate(video.date)}</p>
                       {#if isNewRecording(video)}
-                        <span class="rounded-full bg-status-critical/10 px-1.5 py-0.5 text-[0.5625rem] font-semibold uppercase tracking-wide text-status-critical">
+                        <span class="animate-pop rounded-full bg-status-critical/10 px-1.5 py-0.5 text-[0.5625rem] font-semibold uppercase tracking-wide text-status-critical">
                           {t("badge.new")}
                         </span>
                       {/if}
@@ -871,11 +910,19 @@
       {/each}
     </div>
   {:else}
-    <!-- List view grouped by date -->
-    <div class="space-y-5">
-      {#each groupedVideos as group (group.date)}
+    <!-- List view grouped by date — with timeline -->
+    <div class="archive-timeline relative space-y-5 pl-6 sm:pl-8">
+      <!-- Timeline track — translate -50% to center the 1px line on the dot center -->
+      <div class="absolute left-3 top-1 bottom-1 w-px -translate-x-1/2 bg-border-subtle sm:left-4" aria-hidden="true">
+        <div class="archive-timeline-fill absolute inset-x-0 top-0 bg-accent/40 rounded-full"></div>
+      </div>
+      {#each groupedVideos as group, gi (group.date)}
         <div>
-          <div class="mb-2 flex items-center gap-3">
+          <div class="relative mb-2 flex items-center gap-3">
+            <!-- Timeline dot — first is larger -->
+            <div class="absolute -left-6 sm:-left-8 flex items-center justify-center w-6 sm:w-8">
+              <div class="rounded-full border-2 border-surface-base transition-colors {gi === 0 ? 'h-3 w-3 bg-accent ring-2 ring-accent/20' : 'h-2.5 w-2.5 bg-accent/60 ring-2 ring-accent/10'}"></div>
+            </div>
             <h3 class="text-[0.8125rem] font-semibold text-text-primary">{group.label}</h3>
             <div class="h-px flex-1 bg-border-subtle"></div>
             <span class="text-[0.6875rem] tabular-nums text-text-muted">
@@ -1002,6 +1049,68 @@
           {deleting ? t("btn.deleting") : t("btn.delete")}
         </button>
       </div>
+    </div>
+  </div>
+{/if}
+
+<!-- Snapshot lightbox -->
+{#if expandedSnap}
+  {@const snapIdx = allSnapshots.indexOf(expandedSnap)}
+  {@const hasPrev = snapIdx > 0}
+  {@const hasNext = snapIdx < allSnapshots.length - 1}
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <div
+    class="animate-overlay fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+    role="dialog"
+    aria-modal="true"
+    tabindex="-1"
+    onkeydown={(e) => {
+      if (e.key === "Escape") expandedSnap = null;
+      else if (e.key === "ArrowLeft" && hasPrev) expandedSnap = allSnapshots[snapIdx - 1];
+      else if (e.key === "ArrowRight" && hasNext) expandedSnap = allSnapshots[snapIdx + 1];
+    }}
+  >
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <div class="absolute inset-0 cursor-zoom-out" onclick={() => expandedSnap = null}></div>
+
+    <!-- Prev/Next arrows -->
+    {#if hasPrev}
+      <button
+        onclick={() => expandedSnap = allSnapshots[snapIdx - 1]}
+        class="absolute left-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white/70 backdrop-blur-sm transition-colors hover:bg-white/20 hover:text-white sm:left-6"
+        aria-label="Previous snapshot"
+      >
+        <Icon icon={chevronLeftIcon} class="h-5 w-5" />
+      </button>
+    {/if}
+    {#if hasNext}
+      <button
+        onclick={() => expandedSnap = allSnapshots[snapIdx + 1]}
+        class="absolute right-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white/70 backdrop-blur-sm transition-colors hover:bg-white/20 hover:text-white sm:right-6"
+        aria-label="Next snapshot"
+      >
+        <Icon icon={chevronRightIcon} class="h-5 w-5" />
+      </button>
+    {/if}
+
+    {#key expandedSnap.path}
+      <img
+        src={snapshotUrl(expandedSnap.path)}
+        alt={expandedSnap.filename}
+        class="animate-fade-in relative max-h-[85vh] max-w-[90vw] cursor-zoom-out rounded-lg object-contain shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+        onclick={() => expandedSnap = null}
+      />
+    {/key}
+    <div class="relative mt-3 flex items-center gap-3 animate-in stagger-2">
+      <span class="text-[0.625rem] tabular-nums text-white/50">{snapIdx + 1} / {allSnapshots.length}</span>
+      <p class="text-sm font-medium text-white/90">{expandedSnap.filename}</p>
+      <button
+        onclick={() => { if (expandedSnap) downloadSnapshot(expandedSnap); }}
+        class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-white/80 backdrop-blur-sm transition-colors hover:bg-white/20 hover:text-white"
+        title={t("btn.download")}
+      >
+        <Icon icon={downloadIcon} class="h-4 w-4" />
+      </button>
     </div>
   </div>
 {/if}

@@ -437,6 +437,34 @@ body {
 /* ── Copy cursor ──────────────────────────────────────────────────────── */
 .cursor-copy { cursor: copy; }
 
+/* ── Archive scroll-driven timeline ────────────────────────────────────── */
+@keyframes timeline-fill {
+  from { height: 0; }
+  to { height: 100%; }
+}
+
+.archive-timeline-fill {
+  height: 0;
+}
+
+@supports (animation-timeline: scroll()) {
+  .archive-timeline {
+    timeline-scope: --archive-scroll;
+  }
+  .archive-timeline-fill {
+    animation: timeline-fill linear both;
+    animation-timeline: scroll(nearest block);
+  }
+}
+
+/* Static fallback: show full line when scroll-driven not supported */
+@supports not (animation-timeline: scroll()) {
+  .archive-timeline-fill {
+    height: 100%;
+    opacity: 0.3;
+  }
+}
+
 /* ── Sparkline data pulse ──────────────────────────────────────────────── */
 @keyframes sparkline-pulse {
   0% { opacity: 0.35; }
@@ -513,6 +541,7 @@ body {
   .stagger-1, .stagger-2, .stagger-3, .stagger-4, .stagger-5 { animation-delay: 0ms; }
   .status-live, .shadow-glow-breathe, .recording-halo { animation: none; }
   .terminal-cursor { animation: none; opacity: 0.5; }
+  .archive-timeline-fill { animation: none; height: 100%; opacity: 0.3; }
   .card-sweep-warn::before, .card-sweep-critical::before { animation: none; opacity: 0; }
   .animate-sparkline-pulse { animation: none; opacity: 1; }
   .skeleton { animation: none; }
