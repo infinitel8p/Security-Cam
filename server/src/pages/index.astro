@@ -13,6 +13,7 @@ import BackendStatus from "../components/BackendStatus.svelte";
 import LiveClock from "../components/LiveClock.svelte";
 import SetupChecklist from "../components/SetupChecklist.svelte";
 import I18nText from "../components/I18nText.svelte";
+import DashboardGreeting from "../components/DashboardGreeting.svelte";
 import Icon from "../components/Icon.svelte";
 import videoIcon from "../icons/device-tv-old.svg?raw";
 ---
@@ -28,11 +29,7 @@ import videoIcon from "../icons/device-tv-old.svg?raw";
 				</div>
 				<h1
 					class="text-xl font-bold tracking-tight text-text-primary sm:text-2xl">
-					<I18nText
-						key="page.dashboard"
-						fallback="Dashboard"
-						client:load
-					/>
+					<DashboardGreeting client:load />
 				</h1>
 			</div>
 			<div class="flex items-center gap-3">

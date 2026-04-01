@@ -9,6 +9,14 @@ export default {
     docs: "Docs",
   },
 
+  // Time-of-day greetings (dashboard)
+  greeting: {
+    morning: "Good morning",
+    afternoon: "Good afternoon",
+    evening: "Good evening",
+    night: "Dashboard",
+  },
+
   // Page titles
   page: {
     dashboard: "Dashboard",

@@ -8,6 +8,13 @@ export default {
     docs: "Doku",
   },
 
+  greeting: {
+    morning: "Guten Morgen",
+    afternoon: "Guten Tag",
+    evening: "Guten Abend",
+    night: "Dashboard",
+  },
+
   page: {
     dashboard: "Dashboard",
     archive: "Archiv",
