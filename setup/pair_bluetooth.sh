@@ -2,7 +2,15 @@
 # Scan for nearby Bluetooth devices and pair with a selected one
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 SETTINGS_FILE="$SCRIPT_DIR/../client/settings/settings.json"
+
+# --- Set up logging ---
+LOG_DIR="$REPO_ROOT/logs/bluetooth-pairing"
+mkdir -p "$LOG_DIR"
+LOG_FILE="$LOG_DIR/$(date '+%Y-%m-%d_%H-%M-%S').log"
+exec > >(tee -a "$LOG_FILE") 2>&1
+ls -1t "$LOG_DIR"/*.log 2>/dev/null | tail -n +21 | xargs rm -f 2>/dev/null || true
 
 # Ensure Bluetooth is unblocked and powered on
 sudo rfkill unblock bluetooth > /dev/null 2>&1

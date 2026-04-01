@@ -22,6 +22,13 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 DATA_DIR="$REPO_ROOT/client/data"
 
+# --- Set up logging ---
+LOG_DIR="$REPO_ROOT/logs/ap-setup"
+mkdir -p "$LOG_DIR"
+LOG_FILE="$LOG_DIR/$(date '+%Y-%m-%d_%H-%M-%S').log"
+exec > >(tee -a "$LOG_FILE") 2>&1
+ls -1t "$LOG_DIR"/*.log 2>/dev/null | tail -n +21 | xargs rm -f 2>/dev/null || true
+
 AP_INTERFACE="ap0"
 AP_IP="192.168.4.1"
 AP_NETMASK="24"

@@ -20,7 +20,7 @@ from modules import sse
 from modules.sensors import available_types as sensor_available_types
 
 # --- Logging setup ---
-LOG_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data")
+LOG_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "logs", "api")
 os.makedirs(LOG_DIR, exist_ok=True)
 LOG_FILE = os.path.join(LOG_DIR, "security-cam.log")
 

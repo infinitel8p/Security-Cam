@@ -15,6 +15,13 @@ SERVICE_FILE="/etc/systemd/system/mediamtx.service"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
+# --- Set up logging ---
+LOG_DIR="$REPO_ROOT/logs/mediamtx-install"
+mkdir -p "$LOG_DIR"
+LOG_FILE="$LOG_DIR/$(date '+%Y-%m-%d_%H-%M-%S').log"
+exec > >(tee -a "$LOG_FILE") 2>&1
+ls -1t "$LOG_DIR"/*.log 2>/dev/null | tail -n +21 | xargs rm -f 2>/dev/null || true
+
 # Known SHA256 checksums for v1.17.0
 declare -A CHECKSUMS=(
     ["linux_arm64"]="09610ea1d4a6489a97bedd9cabd62e0ef7ce2d040389d270c31ba51727732b5b"

@@ -33,8 +33,10 @@ On every start (including boot), it runs `setup/update.sh` before launching the 
 
 1. Runs `git pull` to fetch the latest code
 2. Compares the current commit with the last successful build
-3. If the code changed, runs `install_requirements.sh` (installs deps + rebuilds frontend)
+3. If the code changed (or the frontend `dist/` directory is missing), runs `install_requirements.sh` (installs deps + rebuilds frontend)
 4. Saves a stamp so it skips the rebuild on next boot if nothing changed
+
+Each run is logged to `logs/update/` with a timestamped filename. The last 20 logs are kept.
 
 Then it starts:
 - **Flask API** on port `5005` - recording, system monitoring, device detection, sensor management
@@ -75,7 +77,7 @@ cd /opt/security-cam
 To follow the application log in real-time:
 
 ```bash
-tail -f /opt/security-cam/client/data/security-cam.log
+tail -f /opt/security-cam/logs/api/security-cam.log
 ```
 
 You can filter by subsystem using grep — see [Troubleshooting > Checking logs](../basics/troubleshooting#checking-logs) for the full list of logger names.

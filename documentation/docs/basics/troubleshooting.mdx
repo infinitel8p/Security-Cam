@@ -11,7 +11,25 @@ Common issues and how to resolve them. Most problems can be diagnosed by checkin
 
 ## Checking logs
 
-The backend writes to a rotating log file at `client/data/security-cam.log` (2 MB max, 3 backups kept). Each line includes a timestamp, level, and **logger name** that tells you which subsystem produced it:
+All logs are stored in the `logs/` directory at the project root:
+
+```
+logs/
+├── api/                     # Flask backend (rotating, 8 MB max, 3 backups)
+│   └── security-cam.log
+├── update/                  # Auto-update on boot
+├── install/                 # install_requirements.sh
+├── mediamtx-install/        # setup/install_mediamtx.sh
+├── ap-setup/                # setup/setup_ap.sh
+└── bluetooth-pairing/       # setup/pair_bluetooth.sh
+    └── 2026-04-01_09-27-32.log   (example)
+```
+
+Except for `api/`, each folder stores timestamped logs (one per run, last 20 kept).
+
+### API logs
+
+The backend writes to a rotating log file at `logs/api/security-cam.log` (8 MB max, 3 backups kept). Each line includes a timestamp, level, and **logger name** that tells you which subsystem produced it:
 
 ```
 2026-03-31 23:44:30 [INFO] bt.pair: Pairing device AA:BB:CC:DD:EE:FF ...
@@ -23,16 +41,16 @@ Logger names use dot-separated namespaces, so you can filter by subsystem with g
 
 ```bash
 # All Bluetooth activity
-grep "bt\." /opt/security-cam/client/data/security-cam.log
+grep "bt\." /opt/security-cam/logs/api/security-cam.log
 
 # Just pairing issues
-grep "bt.pair" /opt/security-cam/client/data/security-cam.log
+grep "bt.pair" /opt/security-cam/logs/api/security-cam.log
 
 # Only errors and warnings
-grep -E "WARNING|ERROR" /opt/security-cam/client/data/security-cam.log
+grep -E "WARNING|ERROR" /opt/security-cam/logs/api/security-cam.log
 
 # Follow live (useful while reproducing an issue)
-tail -f /opt/security-cam/client/data/security-cam.log | grep "bt\."
+tail -f /opt/security-cam/logs/api/security-cam.log | grep "bt\."
 ```
 
 | Grep pattern | What you get |
@@ -87,21 +105,28 @@ journalctl -u security-cam --no-pager -n 50
 ## API errors in the dashboard
 
 - Check Flask is running: `curl http://localhost:5005/system_info`
-- Check the application log: `tail -50 /opt/security-cam/client/data/security-cam.log`
-- Or filter to just API errors: `grep "api:" /opt/security-cam/client/data/security-cam.log | grep -i "error\|warning"`
+- Check the application log: `tail -50 /opt/security-cam/logs/api/security-cam.log`
+- Or filter to just API errors: `grep "api:" /opt/security-cam/logs/api/security-cam.log | grep -i "error\|warning"`
 
 ## Service fails on boot
 
 Check the logs:
 
 ```bash
+# systemd service output
 journalctl -u security-cam --no-pager -n 50
-tail -50 /opt/security-cam/client/data/security-cam.log
+
+# API log
+tail -50 /opt/security-cam/logs/api/security-cam.log
+
+# Auto-update log (shows git pull, dependency install, and frontend build)
+ls -1t /opt/security-cam/logs/update/ | head -1 | xargs -I{} cat /opt/security-cam/logs/update/{}
 ```
 
 Common causes:
 - **No internet** - `git pull` fails. The service continues with the current code, but if this is the first run and deps aren't installed, it will fail. Run `install_requirements.sh` manually once.
-- **Build fails** - check Node.js is installed: `node --version`
+- **Build fails** - check the update log for errors. The frontend build runs in a temp directory (`dist_new/`) and only replaces `dist/` on success, so a failed build won't break a working dashboard.
+- **OOM during build** - the Pi Zero 2 W has limited RAM. If the build is killed, check `dmesg | grep -i killed`. The previous `dist/` is preserved.
 
 ## Sensor not triggering
 
