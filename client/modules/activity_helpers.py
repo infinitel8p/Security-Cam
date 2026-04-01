@@ -1,7 +1,11 @@
 import logging
 import re
-import bluetooth
 import subprocess
+
+try:
+    import bluetooth
+except ImportError:
+    bluetooth = None  # type: ignore[assignment]
 from . import settings_helpers
 
 log = logging.getLogger("wifi")
@@ -10,6 +14,9 @@ bt_log = logging.getLogger("bt.scan")
 
 def is_device_connected_to_bt() -> bool:
     """Check if any of the target Bluetooth addresses are visible."""
+    if bluetooth is None:
+        bt_log.warning("pybluez not installed — BT presence check unavailable")
+        return False
     settings = settings_helpers.get_settings()
     for addr in settings.get("TARGET_BT_ADDRESSES", []):
         status = bluetooth.lookup_name(addr["address"], timeout=3)
@@ -89,6 +96,8 @@ def scan_bt_devices(duration: int = 20) -> list[dict]:
 
 def get_bt_device_status(address: str) -> bool:
     """Check if a specific Bluetooth device is reachable."""
+    if bluetooth is None:
+        return False
     try:
         status = bluetooth.lookup_name(address, timeout=3)
         return status is not None
