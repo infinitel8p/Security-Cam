@@ -167,6 +167,7 @@ export default {
     timelapseInterval: "Intervalo de captura",
     timelapseFps: "Velocidad de reproducción",
     timelapseResolution: "Resolución de imagen",
+    timelapseCapturing: "Capturando — {n} fotogramas hoy",
   },
 
   input: {
@@ -217,10 +218,10 @@ export default {
   },
 
   toast: {
-    recordingStarting: "Iniciando grabaci\u00f3n...",
-    recordingStopping: "Deteniendo grabaci\u00f3n...",
-    recordingStarted: "Grabaci\u00f3n iniciada",
-    recordingStopped: "Grabaci\u00f3n detenida",
+    recordingStarting: "Iniciando grabación...",
+    recordingStopping: "Deteniendo grabación...",
+    recordingStarted: "Grabación iniciada",
+    recordingStopped: "Grabación detenida",
     toggleRecordingFailed: "No se pudo cambiar el estado de grabación. Inténtalo de nuevo.",
     recordingDeleted: "Grabación eliminada",
     deleteRecordingFailed: "No se pudo eliminar la grabación. Inténtalo de nuevo.",
@@ -246,9 +247,9 @@ export default {
     rotationSaved: "Rotación actualizada",
     rotationFailed: "No se pudo guardar la rotación. Inténtalo de nuevo.",
     snapshotSaved: "Captura guardada",
-    snapshotFailed: "No se pudo tomar la captura. Int\u00e9ntalo de nuevo.",
+    snapshotFailed: "No se pudo tomar la captura. Inténtalo de nuevo.",
     snapshotDeleted: "Captura eliminada",
-    deleteSnapshotFailed: "No se pudo eliminar la captura. Int\u00e9ntalo de nuevo.",
+    deleteSnapshotFailed: "No se pudo eliminar la captura. Inténtalo de nuevo.",
     timelapseConfigured: "Configuración del timelapse guardada",
     timelapseEnabled: "Captura de timelapse activada",
     timelapseDisabled: "Captura de timelapse desactivada",
@@ -262,7 +263,7 @@ export default {
   },
 
   dialog: {
-    deleteTitle: "\u00bfEliminar grabaci\u00f3n?",
+    deleteTitle: "¿Eliminar grabación?",
     deleteMessage: "{filename} se eliminará permanentemente.",
     selectDirectory: "Elegir carpeta de guardado",
   },
@@ -285,22 +286,22 @@ export default {
 
   alert: {
     cpu_temp: {
-      warn: "Temperatura de CPU alta ({temp}\u00b0C)",
-      critical: "Temperatura de CPU cr\u00edtica ({temp}\u00b0C)",
+      warn: "Temperatura de CPU alta ({temp}°C)",
+      critical: "Temperatura de CPU crítica ({temp}°C)",
       resolved: "Temperatura de CPU normalizada",
     },
     throttle: {
-      critical: "El sistema est\u00e1 siendo limitado",
-      resolved: "Limitaci\u00f3n terminada",
+      critical: "El sistema está siendo limitado",
+      resolved: "Limitación terminada",
     },
     storage: {
-      warn: "El almacenamiento se est\u00e1 llenando ({pct}%)",
-      critical: "El almacenamiento est\u00e1 casi lleno ({pct}%)",
-      resolved: "Presi\u00f3n de almacenamiento reducida",
+      warn: "El almacenamiento se está llenando ({pct}%)",
+      critical: "El almacenamiento está casi lleno ({pct}%)",
+      resolved: "Presión de almacenamiento reducida",
     },
     sd_health: {
       warn: "La tarjeta SD muestra desgaste",
-      critical: "La tarjeta SD se acerca al fin de su vida \u00fatil",
+      critical: "La tarjeta SD se acerca al fin de su vida útil",
       resolved: "Salud de la tarjeta SD mejorada",
     },
   },
@@ -434,7 +435,7 @@ export default {
     autoRefresh: "Actualización automática",
     searchPlaceholder: "Buscar en registros...",
     all: "Todos",
-    allCategories: "Todas las categor\u00edas",
+    allCategories: "Todas las categorías",
     timestamp: "Marca de tiempo",
     level: "Nivel",
     source: "Origen",

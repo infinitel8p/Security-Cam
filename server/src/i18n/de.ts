@@ -166,6 +166,7 @@ export default {
     timelapseInterval: "Aufnahmeintervall",
     timelapseFps: "Wiedergabegeschwindigkeit",
     timelapseResolution: "Bildauflösung",
+    timelapseCapturing: "Aufnahme läuft — {n} Bilder heute",
   },
 
   input: {
@@ -246,8 +247,8 @@ export default {
     rotationFailed: "Drehung konnte nicht gespeichert werden. Versuch es nochmal.",
     snapshotSaved: "Schnappschuss gespeichert",
     snapshotFailed: "Schnappschuss fehlgeschlagen. Versuch es nochmal.",
-    snapshotDeleted: "Schnappschuss gel\u00f6scht",
-    deleteSnapshotFailed: "Schnappschuss konnte nicht gel\u00f6scht werden. Versuch es nochmal.",
+    snapshotDeleted: "Schnappschuss gelöscht",
+    deleteSnapshotFailed: "Schnappschuss konnte nicht gelöscht werden. Versuch es nochmal.",
     timelapseConfigured: "Zeitraffer-Einstellungen gespeichert",
     timelapseEnabled: "Zeitraffer-Aufnahme aktiviert",
     timelapseDisabled: "Zeitraffer-Aufnahme deaktiviert",
@@ -256,12 +257,12 @@ export default {
   },
 
   archive: {
-    snapshots: "Schnappsch\u00fcsse",
+    snapshots: "Schnappschüsse",
     timelapse: "Zeitraffer",
   },
 
   dialog: {
-    deleteTitle: "Aufnahme l\u00f6schen?",
+    deleteTitle: "Aufnahme löschen?",
     deleteMessage: "{filename} wird unwiderruflich gelöscht.",
     selectDirectory: "Speicherordner auswählen",
   },
@@ -284,8 +285,8 @@ export default {
 
   alert: {
     cpu_temp: {
-      warn: "CPU-Temperatur ist hoch ({temp}\u00b0C)",
-      critical: "CPU-Temperatur ist kritisch ({temp}\u00b0C)",
+      warn: "CPU-Temperatur ist hoch ({temp}°C)",
+      critical: "CPU-Temperatur ist kritisch ({temp}°C)",
       resolved: "CPU-Temperatur wieder normal",
     },
     throttle: {
@@ -298,8 +299,8 @@ export default {
       resolved: "Speicherdruck verringert",
     },
     sd_health: {
-      warn: "SD-Karte zeigt Verschlei\u00df",
-      critical: "SD-Karte n\u00e4hert sich dem Lebensende",
+      warn: "SD-Karte zeigt Verschleiß",
+      critical: "SD-Karte nähert sich dem Lebensende",
       resolved: "SD-Karten-Zustand verbessert",
     },
   },

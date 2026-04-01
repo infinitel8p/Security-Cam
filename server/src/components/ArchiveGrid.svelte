@@ -462,7 +462,7 @@
 
 <!-- Snapshots section -->
 {#if allSnapshots.length > 0}
-  <div class="card overflow-hidden">
+  <div class="card overflow-hidden mb-5">
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <button
       onclick={() => { snapshotsOpen = !snapshotsOpen; }}
@@ -524,7 +524,7 @@
 
 <!-- Timelapse section -->
 {#if allTimelapses.length > 0}
-  <div class="card overflow-hidden">
+  <div class="card overflow-hidden mb-5">
     <button
       onclick={() => { timelapsesOpen = !timelapsesOpen; }}
       class="flex w-full items-center gap-2.5 px-4 py-3 text-left transition-colors hover:bg-surface-overlay"

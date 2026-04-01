@@ -167,6 +167,7 @@ export default {
     timelapseInterval: "Intervalle de capture",
     timelapseFps: "Vitesse de lecture",
     timelapseResolution: "Résolution des images",
+    timelapseCapturing: "En cours — {n} images aujourd’hui",
   },
 
   input: {
@@ -217,10 +218,10 @@ export default {
   },
 
   toast: {
-    recordingStarting: "D\u00e9marrage de l\u2019enregistrement...",
-    recordingStopping: "Arr\u00eat de l\u2019enregistrement...",
-    recordingStarted: "Enregistrement d\u00e9marr\u00e9",
-    recordingStopped: "Enregistrement arr\u00eat\u00e9",
+    recordingStarting: "Démarrage de l’enregistrement...",
+    recordingStopping: "Arrêt de l’enregistrement...",
+    recordingStarted: "Enregistrement démarré",
+    recordingStopped: "Enregistrement arrêté",
     toggleRecordingFailed: "Impossible de changer l'état de l'enregistrement. Réessayez.",
     recordingDeleted: "Enregistrement supprimé",
     deleteRecordingFailed: "Impossible de supprimer l'enregistrement. Réessayez.",
@@ -246,9 +247,9 @@ export default {
     rotationSaved: "Rotation mise à jour",
     rotationFailed: "Impossible de sauvegarder la rotation. Réessayez.",
     snapshotSaved: "Instantané enregistré",
-    snapshotFailed: "Impossible de prendre l'instantan\u00e9. R\u00e9essayez.",
-    snapshotDeleted: "Instantan\u00e9 supprim\u00e9",
-    deleteSnapshotFailed: "Impossible de supprimer l'instantan\u00e9. R\u00e9essayez.",
+    snapshotFailed: "Impossible de prendre l'instantané. Réessayez.",
+    snapshotDeleted: "Instantané supprimé",
+    deleteSnapshotFailed: "Impossible de supprimer l'instantané. Réessayez.",
     timelapseConfigured: "Paramètres du timelapse enregistrés",
     timelapseEnabled: "Capture timelapse activée",
     timelapseDisabled: "Capture timelapse désactivée",
@@ -257,7 +258,7 @@ export default {
   },
 
   archive: {
-    snapshots: "Instantan\u00e9s",
+    snapshots: "Instantanés",
     timelapse: "Timelapse",
   },
 
@@ -285,23 +286,23 @@ export default {
 
   alert: {
     cpu_temp: {
-      warn: "Temp\u00e9rature CPU \u00e9lev\u00e9e ({temp}\u00b0C)",
-      critical: "Temp\u00e9rature CPU critique ({temp}\u00b0C)",
-      resolved: "Temp\u00e9rature CPU revenue \u00e0 la normale",
+      warn: "Température CPU élevée ({temp}°C)",
+      critical: "Température CPU critique ({temp}°C)",
+      resolved: "Température CPU revenue à la normale",
     },
     throttle: {
-      critical: "Le syst\u00e8me est en limitation",
-      resolved: "Limitation termin\u00e9e",
+      critical: "Le système est en limitation",
+      resolved: "Limitation terminée",
     },
     storage: {
       warn: "Le stockage se remplit ({pct}%)",
       critical: "Le stockage est presque plein ({pct}%)",
-      resolved: "Pression de stockage r\u00e9duite",
+      resolved: "Pression de stockage réduite",
     },
     sd_health: {
-      warn: "La carte SD montre de l\u2019usure",
+      warn: "La carte SD montre de l’usure",
       critical: "La carte SD approche de sa fin de vie",
-      resolved: "Sant\u00e9 de la carte SD am\u00e9lior\u00e9e",
+      resolved: "Santé de la carte SD améliorée",
     },
   },
 
@@ -434,7 +435,7 @@ export default {
     autoRefresh: "Actualisation auto",
     searchPlaceholder: "Rechercher dans les journaux...",
     all: "Tous",
-    allCategories: "Toutes les cat\u00e9gories",
+    allCategories: "Toutes les catégories",
     timestamp: "Horodatage",
     level: "Niveau",
     source: "Source",

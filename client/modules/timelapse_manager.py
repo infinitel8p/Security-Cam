@@ -136,8 +136,29 @@ def _stitch_pending() -> None:
             _stitch_day(day_dir, entry, tl_dir, fps)
 
 
+def _restore_today_count() -> None:
+    """Restore the frame count for today from existing files on disk."""
+    global _today_frame_count, _last_date, _last_capture
+    tl_dir = _timelapse_dir()
+    today = datetime.now().strftime("%Y-%m-%d")
+    today_dir = os.path.join(tl_dir, today)
+    _last_date = today
+    if os.path.isdir(today_dir):
+        frames = [f for f in os.listdir(today_dir) if f.endswith(".jpg")]
+        _today_frame_count = len(frames)
+        if frames:
+            _last_capture = datetime.now().isoformat()
+            log.info("Restored timelapse state: %d frames for %s", _today_frame_count, today)
+
+
 def _background_loop() -> None:
     global _last_date, _today_frame_count, _last_capture
+
+    # Restore count from existing frames on disk
+    try:
+        _restore_today_count()
+    except Exception as e:
+        log.error("Timelapse state restore failed: %s", e)
 
     # Stitch any leftover days from before this boot
     try:

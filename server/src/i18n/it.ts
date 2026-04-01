@@ -167,6 +167,7 @@ export default {
     timelapseInterval: "Intervallo di cattura",
     timelapseFps: "Velocità di riproduzione",
     timelapseResolution: "Risoluzione immagine",
+    timelapseCapturing: "In corso — {n} fotogrammi oggi",
   },
 
   input: {
@@ -285,17 +286,17 @@ export default {
 
   alert: {
     cpu_temp: {
-      warn: "Temperatura CPU alta ({temp}\u00b0C)",
-      critical: "Temperatura CPU critica ({temp}\u00b0C)",
-      resolved: "Temperatura CPU tornata alla normalit\u00e0",
+      warn: "Temperatura CPU alta ({temp}°C)",
+      critical: "Temperatura CPU critica ({temp}°C)",
+      resolved: "Temperatura CPU tornata alla normalità",
     },
     throttle: {
-      critical: "Il sistema \u00e8 in throttling",
+      critical: "Il sistema è in throttling",
       resolved: "Throttling terminato",
     },
     storage: {
       warn: "Lo spazio di archiviazione si sta esaurendo ({pct}%)",
-      critical: "Lo spazio di archiviazione \u00e8 quasi pieno ({pct}%)",
+      critical: "Lo spazio di archiviazione è quasi pieno ({pct}%)",
       resolved: "Pressione di archiviazione ridotta",
     },
     sd_health: {

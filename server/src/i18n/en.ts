@@ -173,6 +173,7 @@ export default {
     timelapseInterval: "Capture interval",
     timelapseFps: "Playback speed",
     timelapseResolution: "Frame resolution",
+    timelapseCapturing: "Capturing \u2014 {n} frames today",
   },
 
   // Input placeholders

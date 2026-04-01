@@ -38,6 +38,7 @@
   let timelapseFps = $state(24);
   let timelapseResolution = $state("640x480");
   let timelapseSaving = $state(false);
+  let timelapseFrameCount = $state(0);
   let loading = $state(true);
   let error = $state(false);
   let activeSection = $state("appearance");
@@ -152,6 +153,17 @@
       timelapseInterval = tl.interval_minutes ?? 5;
       timelapseFps = tl.fps ?? 24;
       timelapseResolution = tl.resolution ?? "640x480";
+
+      // Fetch live timelapse status
+      try {
+        const tlRes = await fetch(`${getBackendUrl()}/timelapse/status`);
+        if (tlRes.ok) {
+          const tlStatus = await tlRes.json();
+          timelapseFrameCount = tlStatus.today_frame_count ?? 0;
+        }
+      } catch {
+        // Silent
+      }
 
       // Fetch live disk usage
       try {
@@ -584,6 +596,16 @@
 
             {#if timelapseEnabled}
               <div class="mt-4 space-y-3 animate-slide-down">
+                <!-- Status indicator -->
+                {#if timelapseFrameCount > 0}
+                  <div class="flex items-center gap-2 rounded-lg border border-border-default bg-surface-base px-3 py-2">
+                    <span class="h-1.5 w-1.5 rounded-full bg-status-ok animate-pulse"></span>
+                    <span class="text-[0.75rem] font-medium text-text-secondary">
+                      {t("label.timelapseCapturing", { n: String(timelapseFrameCount) })}
+                    </span>
+                  </div>
+                {/if}
+
                 <div>
                   <div class="flex items-center justify-between mb-1.5">
                     <label class="text-xs font-medium text-text-secondary" for="tl-interval">{t("label.timelapseInterval")}</label>
