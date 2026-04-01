@@ -91,6 +91,8 @@ def system_info():
     uptime = system_helpers.get_uptime()
     throttle = system_helpers.get_throttle_status()
 
+    sd_health = system_helpers.get_sd_health()
+
     return jsonify({
         "cpu_temp_celsius": cpu_temp,
         "cpu_load_percent": cpu_load,
@@ -98,6 +100,7 @@ def system_info():
         "ram_usage_mb": ram_usage,
         "uptime_seconds": uptime,
         "throttle": throttle,
+        "sd_health": sd_health,
     })
 
 
@@ -522,6 +525,34 @@ def event_history():
     hours = request.args.get('hours', 168, type=int)
     hours = min(hours, 4380)  # ~6 months max
     return jsonify(event_logger.get_events(hours))
+
+
+@app.route('/event_history/csv', methods=['GET'])
+def event_history_csv():
+    """Export event log as CSV for offline analysis."""
+    import csv
+    import io
+
+    hours = request.args.get('hours', 4380, type=int)
+    hours = min(hours, 4380)
+    events = event_logger.get_events(hours)
+
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow(["timestamp", "type", "severity", "detail"])
+    for e in events:
+        writer.writerow([
+            e.get("ts", ""),
+            e.get("type", ""),
+            e.get("severity", ""),
+            e.get("detail", ""),
+        ])
+
+    return Response(
+        buf.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": "attachment; filename=events.csv"},
+    )
 
 
 if __name__ == "__main__":

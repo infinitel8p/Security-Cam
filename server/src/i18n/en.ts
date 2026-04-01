@@ -78,6 +78,7 @@ export default {
     add: "Add",
     adding: "Adding...",
     close: "Close",
+    exportCsv: "Export CSV",
     dismiss: "Dismiss",
     browse: "Browse",
     select: "Select",

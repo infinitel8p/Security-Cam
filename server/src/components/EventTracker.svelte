@@ -4,6 +4,7 @@
   import { initLocale, t } from "../i18n";
   import Icon from "./Icon.svelte";
   import shieldIcon from "../icons/shield.svg?raw";
+  import downloadIcon from "../icons/download.svg?raw";
 
   interface EventEntry {
     ts: string;
@@ -94,6 +95,13 @@
     }
   }
 
+  function exportCsv() {
+    const a = document.createElement("a");
+    a.href = `${getBackendUrl()}/event_history/csv`;
+    a.download = "events.csv";
+    a.click();
+  }
+
   onMount(() => {
     initLocale();
     fetchEvents();
@@ -106,6 +114,14 @@
       <Icon icon={shieldIcon} class="h-3 w-3 text-text-muted" />
       <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.eventsLast7Days")}</p>
     </div>
+    <button
+      onclick={exportCsv}
+      class="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-text-muted transition-colors hover:bg-surface-overlay hover:text-text-secondary"
+      title={t("btn.exportCsv")}
+      aria-label={t("btn.exportCsv")}
+    >
+      <Icon icon={downloadIcon} class="h-3 w-3" />
+    </button>
     {#if hoveredIndex >= 0 && slots[hoveredIndex]}
       <span class="truncate text-[0.625rem] tabular-nums text-text-muted">
         {slots[hoveredIndex].label} · <span class="{slots[hoveredIndex].severity === 'critical' ? 'text-status-critical' : slots[hoveredIndex].severity === 'warn' ? 'text-status-warning' : slots[hoveredIndex].severity === 'ok' ? 'text-status-ok' : 'text-text-muted'}">{hoveredSummary(slots[hoveredIndex])}</span>

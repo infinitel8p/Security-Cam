@@ -73,6 +73,7 @@ export default {
     add: "Aggiungi",
     adding: "Aggiunta...",
     close: "Chiudi",
+    exportCsv: "Esporta CSV",
     dismiss: "Ignora",
     browse: "Sfoglia",
     select: "Seleziona",

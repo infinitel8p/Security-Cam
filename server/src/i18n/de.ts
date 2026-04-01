@@ -72,6 +72,7 @@ export default {
     add: "Hinzufügen",
     adding: "Wird hinzugefügt...",
     close: "Schließen",
+    exportCsv: "CSV exportieren",
     dismiss: "Ausblenden",
     browse: "Durchsuchen",
     select: "Auswählen",

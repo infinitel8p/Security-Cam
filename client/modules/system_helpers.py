@@ -47,6 +47,80 @@ def get_throttle_status():
         return None
 
 
+def get_sd_health():
+    """
+    Returns SD card health info from /sys/block/mmcblk0.
+
+    Returns:
+        dict | None: SD card info, or None if not available.
+    """
+    import os
+
+    base = "/sys/block/mmcblk0"
+    if not os.path.isdir(base):
+        return None
+
+    def _read(path):
+        try:
+            with open(path, "r") as f:
+                return f.read().strip()
+        except (FileNotFoundError, PermissionError):
+            return None
+
+    device = base + "/device"
+    info = {}
+
+    # Card identification
+    name = _read(f"{device}/name")
+    if name:
+        info["name"] = name
+    oemid = _read(f"{device}/oemid")
+    if oemid:
+        info["oemid"] = oemid
+    serial = _read(f"{device}/serial")
+    if serial:
+        info["serial"] = serial
+    mfg_date = _read(f"{device}/date")
+    if mfg_date:
+        info["manufacturing_date"] = mfg_date
+    hw_rev = _read(f"{device}/hwrev")
+    if hw_rev:
+        info["hw_revision"] = hw_rev
+    fw_rev = _read(f"{device}/fwrev")
+    if fw_rev:
+        info["fw_revision"] = fw_rev
+
+    # Life time estimation (eMMC / some SD cards)
+    life_a = _read(f"{device}/life_time")
+    if life_a:
+        info["life_time_est"] = life_a
+
+    # Preferred erase size — can hint at wear leveling block size
+    pref_erase = _read(f"{device}/preferred_erase_size")
+    if pref_erase:
+        try:
+            info["preferred_erase_size_mb"] = int(pref_erase) // (1024 * 1024)
+        except ValueError:
+            pass
+
+    # Total bytes written (from diskstats)
+    try:
+        with open("/proc/diskstats", "r") as f:
+            for line in f:
+                parts = line.split()
+                if len(parts) >= 10 and parts[2] == "mmcblk0":
+                    # Field 10 = sectors written, each 512 bytes
+                    sectors_written = int(parts[9])
+                    info["total_bytes_written_gb"] = round(
+                        sectors_written * 512 / (1024 ** 3), 2
+                    )
+                    break
+    except (FileNotFoundError, PermissionError, ValueError):
+        pass
+
+    return info if info else None
+
+
 def get_cpu_temp():
     """
     Returns the CPU temperature of the Raspberry Pi.
