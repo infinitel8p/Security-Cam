@@ -211,6 +211,8 @@ export default {
   },
 
   toast: {
+    recordingStarting: "Aufnahme wird gestartet...",
+    recordingStopping: "Aufnahme wird beendet...",
     recordingStarted: "Aufnahme gestartet",
     recordingStopped: "Aufnahme beendet",
     toggleRecordingFailed: "Aufnahme konnte nicht geändert werden. Versuch es nochmal.",

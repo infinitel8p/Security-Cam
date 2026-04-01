@@ -183,7 +183,7 @@
         return recording;
       })(),
       {
-        loading: t("status.saving"),
+        loading: recording ? t("toast.recordingStopping") : t("toast.recordingStarting"),
         success: (started) => started ? t("toast.recordingStarted") : t("toast.recordingStopped"),
         error: t("toast.toggleRecordingFailed"),
       },

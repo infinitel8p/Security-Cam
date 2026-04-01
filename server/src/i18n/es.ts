@@ -212,8 +212,10 @@ export default {
   },
 
   toast: {
-    recordingStarted: "Grabación iniciada",
-    recordingStopped: "Grabación detenida",
+    recordingStarting: "Iniciando grabaci\u00f3n...",
+    recordingStopping: "Deteniendo grabaci\u00f3n...",
+    recordingStarted: "Grabaci\u00f3n iniciada",
+    recordingStopped: "Grabaci\u00f3n detenida",
     toggleRecordingFailed: "No se pudo cambiar el estado de grabación. Inténtalo de nuevo.",
     recordingDeleted: "Grabación eliminada",
     deleteRecordingFailed: "No se pudo eliminar la grabación. Inténtalo de nuevo.",

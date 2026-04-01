@@ -223,6 +223,8 @@ export default {
 
   // Toast messages
   toast: {
+    recordingStarting: "Starting recording...",
+    recordingStopping: "Stopping recording...",
     recordingStarted: "Recording started",
     recordingStopped: "Recording stopped",
     toggleRecordingFailed: "Couldn't change recording state. Try again.",

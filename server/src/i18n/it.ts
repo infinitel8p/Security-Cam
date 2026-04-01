@@ -212,6 +212,8 @@ export default {
   },
 
   toast: {
+    recordingStarting: "Avvio registrazione...",
+    recordingStopping: "Arresto registrazione...",
     recordingStarted: "Registrazione avviata",
     recordingStopped: "Registrazione fermata",
     toggleRecordingFailed: "Non è stato possibile cambiare lo stato della registrazione. Riprova.",
