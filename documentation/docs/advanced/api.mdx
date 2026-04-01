@@ -2,7 +2,7 @@
 sidebar_position: 1
 description: "REST API reference for sensor configuration and storage management"
 last_update:
-  date: 2026-03-31
+  date: 2026-04-01
   author: Ludo
 ---
 
@@ -156,6 +156,52 @@ Force an immediate cleanup regardless of schedule:
 ```bash
 curl -X POST http://<pi-ip>:5005/storage/cleanup
 ```
+
+## Log endpoints
+
+### Get API logs
+
+```bash
+curl "http://<pi-ip>:5005/logs/api?limit=500&level=ERROR&search=presence"
+```
+
+Returns parsed log entries from the backend log file (newest first). All query parameters are optional.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `limit` | number | `500` | Max entries to return (capped at 2000) |
+| `level` | string | *(all)* | Filter by level: `ERROR`, `WARNING`, `INFO`, `DEBUG` |
+| `search` | string | *(none)* | Case-insensitive full-text search |
+
+Each entry contains `ts`, `level`, `source`, and `message` fields.
+
+### Get MediaMTX logs
+
+```bash
+curl "http://<pi-ip>:5005/logs/mediamtx?limit=500&level=ERROR&search=RTSP"
+```
+
+Returns parsed MediaMTX log entries (newest first). Same parameters as `/logs/api`. MediaMTX level codes (`INF`, `WAR`, `ERR`, `DBG`) are normalized to standard levels (`INFO`, `WARNING`, `ERROR`, `DEBUG`).
+
+### List script logs
+
+```bash
+curl http://<pi-ip>:5005/logs/install
+```
+
+Returns all script/setup log files from every log subdirectory (newest first). Each entry contains `name` (e.g. `install/2026-04-01_09-51-07.log`), `size`, and `category` (e.g. `install`, `update`, `ap-setup`, `bluetooth-pairing`).
+
+Directories `api/` and `mediamtx/` are excluded (they have dedicated parsed endpoints above). Any other subdirectory under `logs/` is automatically discovered.
+
+### Get script log content
+
+```bash
+curl http://<pi-ip>:5005/logs/script/install/2026-04-01_09-51-07.log
+curl http://<pi-ip>:5005/logs/script/update/2026-04-01_10-00-00.log
+curl http://<pi-ip>:5005/logs/script/ap-setup/2026-03-28_14-30-00.log
+```
+
+Returns the raw text content of a specific script log file. The URL path is `logs/script/<category>/<filename>`.
 
 ## Settings file
 

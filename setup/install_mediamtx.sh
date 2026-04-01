@@ -16,9 +16,9 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # --- Set up logging ---
-LOG_DIR="$REPO_ROOT/logs/mediamtx-install"
+LOG_DIR="$REPO_ROOT/logs/install"
 mkdir -p "$LOG_DIR"
-LOG_FILE="$LOG_DIR/$(date '+%Y-%m-%d_%H-%M-%S').log"
+LOG_FILE="$LOG_DIR/mediamtx_$(date '+%Y-%m-%d_%H-%M-%S').log"
 exec > >(tee -a "$LOG_FILE") 2>&1
 ls -1t "$LOG_DIR"/*.log 2>/dev/null | tail -n +21 | xargs rm -f 2>/dev/null || true
 

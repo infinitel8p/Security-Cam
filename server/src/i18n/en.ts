@@ -4,6 +4,7 @@ export default {
     dashboard: "Dashboard",
     archive: "Archive",
     settings: "Settings",
+    logs: "Logs",
     docs: "Docs",
   },
 
@@ -12,6 +13,7 @@ export default {
     dashboard: "Dashboard",
     archive: "Archive",
     settings: "Settings",
+    logs: "Logs",
   },
 
   // Section headings
@@ -398,5 +400,30 @@ export default {
     power5v: "5V Power",
     ground: "Ground",
     signal: "Signal",
+  },
+  // Log viewer
+  logs: {
+    apiLogs: "API Logs",
+    mediamtxLogs: "MediaMTX",
+    installLogs: "Script Logs",
+    autoRefresh: "Auto-refresh",
+    searchPlaceholder: "Search logs...",
+    all: "All",
+    timestamp: "Timestamp",
+    level: "Level",
+    source: "Source",
+    message: "Message",
+    errorLoading: "Unable to load logs",
+    empty: "No log entries found",
+    noInstallLogs: "No script logs found",
+    catInstall: "Install",
+    catUpdate: "Update",
+    catApSetup: "AP Setup",
+    catBluetooth: "Bluetooth Pairing",
+    logFiles: "Log files",
+    selectFile: "Select a log file to view",
+    remaining: "remaining",
+    showing: "Showing {n} of {total} entries",
+    live: "Live",
   },
 } as const;

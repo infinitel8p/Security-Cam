@@ -3,6 +3,7 @@ export default {
     dashboard: "Tableau de bord",
     archive: "Archives",
     settings: "Paramètres",
+    logs: "Journaux",
     docs: "Docs",
   },
 
@@ -10,6 +11,7 @@ export default {
     dashboard: "Tableau de bord",
     archive: "Archives",
     settings: "Paramètres",
+    logs: "Journaux",
   },
 
   section: {
@@ -374,5 +376,30 @@ export default {
     power5v: "Alimentation 5V",
     ground: "Masse",
     signal: "Signal",
+  },
+
+  logs: {
+    apiLogs: "Journaux API",
+    mediamtxLogs: "MediaMTX",
+    installLogs: "Journaux de scripts",
+    autoRefresh: "Actualisation auto",
+    searchPlaceholder: "Rechercher dans les journaux...",
+    all: "Tous",
+    timestamp: "Horodatage",
+    level: "Niveau",
+    source: "Source",
+    message: "Message",
+    errorLoading: "Impossible de charger les journaux",
+    empty: "Aucune entrée trouvée",
+    noInstallLogs: "Aucun journal de scripts trouvé",
+    catInstall: "Installation",
+    catUpdate: "Mise à jour",
+    catApSetup: "Config. AP",
+    catBluetooth: "Appairage Bluetooth",
+    logFiles: "Fichiers journaux",
+    selectFile: "Sélectionnez un fichier journal",
+    remaining: "restants",
+    showing: "{n} sur {total} entrées",
+    live: "En direct",
   },
 } as const;

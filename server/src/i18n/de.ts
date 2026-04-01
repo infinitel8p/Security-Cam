@@ -3,6 +3,7 @@ export default {
     dashboard: "Dashboard",
     archive: "Archiv",
     settings: "Einstellungen",
+    logs: "Protokolle",
     docs: "Doku",
   },
 
@@ -10,6 +11,7 @@ export default {
     dashboard: "Dashboard",
     archive: "Archiv",
     settings: "Einstellungen",
+    logs: "Protokolle",
   },
 
   section: {
@@ -373,5 +375,30 @@ export default {
     power5v: "5V Strom",
     ground: "Masse",
     signal: "Signal",
+  },
+
+  logs: {
+    apiLogs: "API-Protokolle",
+    mediamtxLogs: "MediaMTX",
+    installLogs: "Skriptprotokolle",
+    autoRefresh: "Automatisch aktualisieren",
+    searchPlaceholder: "Protokolle durchsuchen...",
+    all: "Alle",
+    timestamp: "Zeitstempel",
+    level: "Stufe",
+    source: "Quelle",
+    message: "Nachricht",
+    errorLoading: "Protokolle konnten nicht geladen werden",
+    empty: "Keine Protokolleinträge gefunden",
+    noInstallLogs: "Keine Skriptprotokolle gefunden",
+    catInstall: "Installation",
+    catUpdate: "Update",
+    catApSetup: "AP-Einrichtung",
+    catBluetooth: "Bluetooth-Kopplung",
+    logFiles: "Protokolldateien",
+    selectFile: "Protokolldatei zum Anzeigen auswählen",
+    remaining: "verbleibend",
+    showing: "{n} von {total} Einträgen",
+    live: "Live",
   },
 } as const;

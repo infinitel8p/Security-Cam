@@ -3,6 +3,7 @@ Description=MediaMTX RTSP/WebRTC Server
 After=network.target
 
 [Service]
+ExecStartPre=/bin/mkdir -p /opt/security-cam/logs/mediamtx
 ExecStart=/usr/local/bin/mediamtx /opt/security-cam/client/data/mediamtx.yml
 Restart=always
 RestartSec=5

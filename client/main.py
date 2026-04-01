@@ -17,6 +17,7 @@ from modules import presence_monitor
 from modules import sensor_manager
 from modules import storage_manager
 from modules import sse
+from modules import log_reader
 from modules.sensors import available_types as sensor_available_types
 
 # --- Logging setup ---
@@ -553,6 +554,44 @@ def event_history_csv():
         mimetype="text/csv",
         headers={"Content-Disposition": "attachment; filename=events.csv"},
     )
+
+
+# --- Log viewer endpoints ---
+
+
+@app.route('/logs/api', methods=['GET'])
+def logs_api():
+    """Return parsed API log entries (newest first)."""
+    limit = request.args.get('limit', 500, type=int)
+    limit = min(limit, 2000)
+    level = request.args.get('level')
+    search = request.args.get('search')
+    return jsonify(log_reader.get_api_logs(limit=limit, level=level, search=search))
+
+
+@app.route('/logs/mediamtx', methods=['GET'])
+def logs_mediamtx():
+    """Return parsed MediaMTX log entries (newest first)."""
+    limit = request.args.get('limit', 500, type=int)
+    limit = min(limit, 2000)
+    level = request.args.get('level')
+    search = request.args.get('search')
+    return jsonify(log_reader.get_mediamtx_logs(limit=limit, level=level, search=search))
+
+
+@app.route('/logs/install', methods=['GET'])
+def logs_install_list():
+    """List available script/setup log files from all log subdirectories."""
+    return jsonify(log_reader.get_install_logs())
+
+
+@app.route('/logs/script/<subdir>/<filename>', methods=['GET'])
+def logs_script_content(subdir, filename):
+    """Return the content of a specific script log file."""
+    content = log_reader.get_install_log_content(f"{subdir}/{filename}")
+    if content is None:
+        abort(404, description="Log file not found")
+    return Response(content, mimetype="text/plain")
 
 
 if __name__ == "__main__":

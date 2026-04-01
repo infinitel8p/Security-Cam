@@ -1,7 +1,7 @@
 ---
 sidebar_position: 1
 last_update:
-  date: 2026-03-31
+  date: 2026-04-01
   author: Ludo
 ---
 
@@ -29,7 +29,7 @@ If you're connected to the Pi's Access Point, you can use any of these:
 The frontend auto-detects the backend and MediaMTX URLs from the hostname you're visiting. No `.env` configuration is needed on the Pi. Only set `PUBLIC_BACKEND_URL` and `PUBLIC_MEDIAMTX_URL` in `server/.env` if you're running the frontend dev server on a separate machine.
 :::
 
-The dashboard is organized into three pages.
+The dashboard is organized into four pages.
 
 ## Home
 
@@ -65,6 +65,27 @@ Configure the system without touching config files. The settings page has a side
 - **Recording Sensors** - select and configure the active sensor type, set the GPIO pin and hold timeout, adjust [calibration](./calibration), test wiring with a live sparkline, and enable/disable auto-recording. See the [sensors guide](./sensors) for details.
 
 All settings changes show a toast confirmation when saved successfully.
+
+## Logs
+
+View system logs directly from the dashboard without needing SSH access. The logs page has two tabs:
+
+- **API Logs** — shows parsed entries from the Flask backend log (`security-cam.log`), including rotated backups. Each entry shows timestamp, log level, source module, and message. Features:
+  - Filter by level (Error, Warning, Info, Debug)
+  - Full-text search across all log fields
+  - Auto-refresh every 5 seconds (toggleable)
+  - Paginated display with "show more" for large logs
+  - Download the current view as a text file
+
+- **MediaMTX** — shows parsed entries from the MediaMTX RTSP/WebRTC server log. Same filtering, search, and auto-refresh features as API logs. Useful for diagnosing stream issues.
+
+- **Script Logs** — browse log files from all setup and maintenance scripts, grouped by category:
+  - **Install** — `install_requirements.sh` and `install_mediamtx.sh` output
+  - **Update** — auto-update (`update.sh`) output
+  - **AP Setup** — WiFi Access Point setup (`setup_ap.sh`) output
+  - **Bluetooth Pairing** — Bluetooth pairing (`pair_bluetooth.sh`) output
+
+  Select a file from the sidebar to view its full output. New log directories are discovered automatically.
 
 ## Bluetooth pairing from the dashboard
 

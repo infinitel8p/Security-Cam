@@ -3,6 +3,7 @@ export default {
     dashboard: "Panel",
     archive: "Archivo",
     settings: "Ajustes",
+    logs: "Registros",
     docs: "Docs",
   },
 
@@ -10,6 +11,7 @@ export default {
     dashboard: "Panel",
     archive: "Archivo",
     settings: "Ajustes",
+    logs: "Registros",
   },
 
   section: {
@@ -374,5 +376,30 @@ export default {
     power5v: "Alimentación 5V",
     ground: "Masa",
     signal: "Señal",
+  },
+
+  logs: {
+    apiLogs: "Registros API",
+    mediamtxLogs: "MediaMTX",
+    installLogs: "Registros de scripts",
+    autoRefresh: "Actualización automática",
+    searchPlaceholder: "Buscar en registros...",
+    all: "Todos",
+    timestamp: "Marca de tiempo",
+    level: "Nivel",
+    source: "Origen",
+    message: "Mensaje",
+    errorLoading: "No se pudieron cargar los registros",
+    empty: "No se encontraron entradas",
+    noInstallLogs: "No se encontraron registros de scripts",
+    catInstall: "Instalación",
+    catUpdate: "Actualización",
+    catApSetup: "Config. AP",
+    catBluetooth: "Emparejamiento BT",
+    logFiles: "Archivos de registro",
+    selectFile: "Seleccione un archivo de registro",
+    remaining: "restantes",
+    showing: "{n} de {total} entradas",
+    live: "En vivo",
   },
 } as const;
