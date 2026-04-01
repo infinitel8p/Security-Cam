@@ -115,7 +115,8 @@ sudo systemctl enable mediamtx.service
 
 echo ""
 echo "=== MediaMTX installed ==="
-echo "Config:  $REPO_ROOT/client/data/mediamtx.yml"
+echo "Config:  $REPO_ROOT/client/data/mediamtx.yml (runtime, gitignored)"
+echo "Default: $REPO_ROOT/client/data/mediamtx.default.yml (template, tracked)"
 echo "Service: $SERVICE_FILE"
 echo ""
 echo "Commands:"

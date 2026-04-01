@@ -5,10 +5,12 @@ import yaml
 
 log = logging.getLogger("stream.mtx")
 
-CONFIG_PATH = os.path.join(
+_DATA_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
-    "data", "mediamtx.yml"
+    "data",
 )
+CONFIG_PATH = os.path.join(_DATA_DIR, "mediamtx.yml")
+DEFAULT_CONFIG_PATH = os.path.join(_DATA_DIR, "mediamtx.default.yml")
 
 # Keys we allow the dashboard to modify
 STREAM_KEYS = {
@@ -87,3 +89,50 @@ def restart_service():
     except FileNotFoundError:
         log.error("systemctl not found - not running on Pi?")
         return False, "systemctl not found (not running on the Pi?)"
+
+
+# Keys under paths.cam that belong to the user (preserved across updates)
+_USER_CAM_KEYS = {
+    "rpiCameraWidth", "rpiCameraHeight", "rpiCameraFPS",
+    "rpiCameraBitrate", "rpiCameraCodec", "rpiCameraIDRPeriod",
+    "rpiCameraHFlip", "rpiCameraVFlip", "rpiCameraDenoise",
+    "rpiCameraTextOverlayEnable", "rpiCameraTextOverlay",
+}
+
+
+def sync_config():
+    """Merge upstream defaults with user's camera settings.
+
+    Called during update to pick up new config keys (e.g. logDestinations)
+    without overwriting the user's camera-specific tuning.
+    """
+    if not os.path.exists(DEFAULT_CONFIG_PATH):
+        log.warning("No default config at %s, skipping sync", DEFAULT_CONFIG_PATH)
+        return
+
+    with open(DEFAULT_CONFIG_PATH, "r") as f:
+        defaults = yaml.safe_load(f)
+
+    if not os.path.exists(CONFIG_PATH):
+        log.info("No runtime config found, copying defaults")
+        with open(CONFIG_PATH, "w") as f:
+            yaml.dump(defaults, f, default_flow_style=False, sort_keys=False)
+        return
+
+    with open(CONFIG_PATH, "r") as f:
+        user_cfg = yaml.safe_load(f) or {}
+
+    # Start from the upstream defaults
+    merged = dict(defaults)
+
+    # Preserve user's camera-specific settings
+    user_cam = user_cfg.get("paths", {}).get("cam", {})
+    if user_cam:
+        merged_cam = merged.setdefault("paths", {}).setdefault("cam", {})
+        for key in _USER_CAM_KEYS:
+            if key in user_cam:
+                merged_cam[key] = user_cam[key]
+
+    with open(CONFIG_PATH, "w") as f:
+        yaml.dump(merged, f, default_flow_style=False, sort_keys=False)
+    log.info("MediaMTX config synced (defaults + user camera settings)")

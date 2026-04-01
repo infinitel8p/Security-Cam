@@ -38,15 +38,16 @@ chown -R pi:pi "$PROJECT_DIR/.git" 2>/dev/null || true
 echo "=== Pulling latest code ==="
 BEFORE=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
 
-# Stash any local changes (e.g. runtime-modified files not yet in .gitignore)
-sudo -u pi git stash -q 2>/dev/null || true
-
 sudo -u pi timeout 15 git pull --ff-only 2>/dev/null || {
     echo "Warning: git pull failed (no internet or dirty tree). Continuing with current code."
 }
 
-# Restore stashed changes (local settings take priority over repo)
-sudo -u pi git stash pop -q 2>/dev/null || true
+# Merge upstream mediamtx defaults with user's camera settings
+echo "=== Syncing MediaMTX config ==="
+python3 -c "
+import sys; sys.path.insert(0, '$PROJECT_DIR/client')
+from modules.mediamtx_helpers import sync_config; sync_config()
+" 2>&1 || echo "Warning: MediaMTX config sync failed. Continuing with existing config."
 
 AFTER=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
 

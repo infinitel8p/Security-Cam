@@ -6,6 +6,7 @@ __pycache__
 dump/
 
 # Runtime data (written by the app)
+client/data/mediamtx.yml
 client/settings/settings.json
 client/data/health_log.json
 client/data/event_log.json
