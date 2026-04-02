@@ -35,6 +35,8 @@ _start("modules.health_logger.get_current_alerts", return_value={
     "overall": "ok", "alerts": {}, "values": {},
 })
 _start("modules.presence_monitor.start")
+_start("modules.presence_monitor.is_someone_home", return_value=False)
+_start("modules.presence_monitor.poll_now")
 _start("modules.sensor_manager.start")
 _start("modules.sensor_manager.stop")
 _start("modules.sensor_manager.restart")

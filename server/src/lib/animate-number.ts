@@ -54,7 +54,10 @@ export function animatedNumber(initial = 0, onUpdate?: () => void) {
       duration = getDuration(target - from);
       if (duration === 0) {
         current = target;
-        onUpdate?.();
+        // Schedule via rAF to avoid synchronous $state mutation inside
+        // Svelte $effect (which causes effect_update_depth_exceeded when
+        // multiple animated numbers snap in the same reactive flush).
+        if (onUpdate) rafId = requestAnimationFrame(() => { rafId = null; onUpdate(); });
         return;
       }
       startTime = performance.now();

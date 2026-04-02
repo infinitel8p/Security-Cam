@@ -121,6 +121,19 @@ def _read_meta(video_path: str) -> dict | None:
         return None
 
 
+def get_recording_info() -> dict:
+    """Return current recording status including start time.
+
+    Used by /recording_status endpoint and recording_state SSE events
+    so the frontend can show accurate elapsed time.
+    """
+    with lock:
+        info: dict = {"recording": is_recording}
+        if is_recording and _recording_start_time:
+            info["started_at"] = _recording_start_time.isoformat()
+        return info
+
+
 def start_recording(reason: str = "manual", sensor_type: str | None = None) -> None:
     global _ffmpeg_process, is_recording, recorded_filename
     global _recording_start_time, _recording_reason
