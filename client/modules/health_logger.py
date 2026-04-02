@@ -62,6 +62,9 @@ def _snapshot():
             throttle["soft_temp_limit_now"]
         )
 
+    mem = psutil.virtual_memory()
+    ram_pct = round(mem.percent, 1)
+
     info = {
         "cpu_temp": temp,
         "cpu_load": load,
@@ -73,6 +76,7 @@ def _snapshot():
         "status": _classify(info),
         "temp": temp,
         "load": load,
+        "ram_pct": ram_pct,
         "throttle_active": throttle_active,
     }
 

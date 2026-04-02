@@ -188,10 +188,11 @@
     try {
       const res = await fetch(`${getBackendUrl()}/health_history?hours=1`);
       if (!res.ok) return;
-      const entries: { temp: number | null; load: number | null }[] = await res.json();
+      const entries: { temp: number | null; load: number | null; ram_pct?: number | null }[] = await res.json();
       if (entries.length > 0) {
         cpuHistory = entries.filter((e) => e.load != null).map((e) => Math.round(e.load!)).slice(-HISTORY_LEN);
         tempHistory = entries.filter((e) => e.temp != null).map((e) => e.temp!).slice(-HISTORY_LEN);
+        ramHistory = entries.filter((e) => e.ram_pct != null).map((e) => Math.round(e.ram_pct!)).slice(-HISTORY_LEN);
       }
     } catch {
       // non-critical
