@@ -74,6 +74,12 @@
     opencv_version?: string;
     node_version?: string;
     mediamtx_version?: string;
+    camera_sensor?: {
+      model: string;
+      native_width: number;
+      native_height: number;
+      modes: { width: number; height: number; max_fps: number }[];
+    };
   }
 
   interface ConnectionInfo {
@@ -745,22 +751,40 @@
     <!-- Camera, Recording & Connectivity -->
     <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <!-- Camera / Stream -->
-      {#if stream}
+      {#if stream || extended?.camera_sensor}
         <div class="card px-4 py-4 animate-fade-in">
           <div class="flex items-center gap-1.5">
             <Icon icon={cameraIcon} class="h-3 w-3 text-text-muted" stroke={2} />
             <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("stats.camera")}</p>
           </div>
-          <div class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 sm:gap-x-6">
-            <div>
-              <p class="text-[0.625rem] uppercase tracking-wider text-text-muted">{t("stats.resolution")}</p>
-              <p class="text-sm font-semibold tabular-nums text-text-primary">{stream.width}&times;{stream.height}</p>
+          {#if extended?.camera_sensor}
+            {@const cam = extended.camera_sensor}
+            <div class="mt-3 space-y-2">
+              <div class="flex items-baseline gap-2">
+                <span class="text-sm font-bold uppercase text-text-primary">{cam.model}</span>
+                <span class="text-[0.625rem] tabular-nums text-text-muted">{cam.native_width}&times;{cam.native_height}</span>
+              </div>
+              {#if cam.modes.length > 0}
+                <div class="flex flex-wrap gap-1">
+                  {#each cam.modes as mode}
+                    <span class="rounded bg-surface-overlay px-1.5 py-0.5 text-[0.5625rem] tabular-nums text-text-muted">{mode.width}&times;{mode.height} <span class="text-text-primary">{mode.max_fps}</span>fps</span>
+                  {/each}
+                </div>
+              {/if}
             </div>
-            <div>
-              <p class="text-[0.625rem] uppercase tracking-wider text-text-muted">{t("label.fps")}</p>
-              <p class="text-sm font-semibold tabular-nums text-text-primary">{stream.fps}</p>
+          {/if}
+          {#if stream}
+            <div class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 sm:gap-x-6 {extended?.camera_sensor ? 'border-t border-border-subtle pt-3' : ''}">
+              <div>
+                <p class="text-[0.625rem] uppercase tracking-wider text-text-muted">{t("stats.resolution")}</p>
+                <p class="text-sm font-semibold tabular-nums text-text-primary">{stream.width}&times;{stream.height}</p>
+              </div>
+              <div>
+                <p class="text-[0.625rem] uppercase tracking-wider text-text-muted">{t("label.fps")}</p>
+                <p class="text-sm font-semibold tabular-nums text-text-primary">{stream.fps}</p>
+              </div>
             </div>
-          </div>
+          {/if}
         </div>
       {/if}
 
