@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import { apiFetch } from "../lib/fetch";
   import toast from "svelte-5-french-toast";
   import { initLocale, t } from "../i18n";
   import Note from "./Note.svelte";
@@ -96,8 +97,8 @@
     loadError = false;
     try {
       const [typesRes, statusRes] = await Promise.all([
-        fetch(`${getBackendUrl()}/sensor/types`),
-        fetch(`${getBackendUrl()}/sensor/status`),
+        apiFetch(`${getBackendUrl()}/sensor/types`),
+        apiFetch(`${getBackendUrl()}/sensor/status`),
       ]);
       if (!typesRes.ok || !statusRes.ok) throw new Error();
       sensorTypes = await typesRes.json();
@@ -159,7 +160,7 @@
 
     toast.promise(
       (async () => {
-        const res = await fetch(`${getBackendUrl()}/sensor/configure`, {
+        const res = await apiFetch(`${getBackendUrl()}/sensor/configure`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -175,7 +176,7 @@
           const data = await res.json();
           throw new Error(data.error || t("toast.saveFailed"));
         }
-        const statusRes = await fetch(`${getBackendUrl()}/sensor/status`);
+        const statusRes = await apiFetch(`${getBackendUrl()}/sensor/status`);
         status = await statusRes.json();
       })(),
       {
@@ -193,9 +194,9 @@
 
     toast.promise(
       (async () => {
-        const res = await fetch(`${getBackendUrl()}${endpoint}`, { method: "POST" });
+        const res = await apiFetch(`${getBackendUrl()}${endpoint}`, { method: "POST" });
         if (!res.ok) throw new Error(t("toast.saveFailed"));
-        const statusRes = await fetch(`${getBackendUrl()}/sensor/status`);
+        const statusRes = await apiFetch(`${getBackendUrl()}/sensor/status`);
         status = await statusRes.json();
         return status?.enabled;
       })(),
@@ -209,21 +210,21 @@
 
   async function mockTrigger() {
     testingTrigger = true;
-    try { await fetch(`${getBackendUrl()}/sensor/mock/trigger`, { method: "POST" }); }
+    try { await apiFetch(`${getBackendUrl()}/sensor/mock/trigger`, { method: "POST" }); }
     catch { /* silent */ }
     finally { testingTrigger = false; }
   }
 
   async function mockRelease() {
     testingRelease = true;
-    try { await fetch(`${getBackendUrl()}/sensor/mock/release`, { method: "POST" }); }
+    try { await apiFetch(`${getBackendUrl()}/sensor/mock/release`, { method: "POST" }); }
     catch { /* silent */ }
     finally { testingRelease = false; }
   }
 
   async function testRead() {
     try {
-      const res = await fetch(`${getBackendUrl()}/sensor/test`, {
+      const res = await apiFetch(`${getBackendUrl()}/sensor/test`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type: selectedType, gpio }),

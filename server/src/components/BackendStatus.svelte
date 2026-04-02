@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import { apiFetch } from "../lib/fetch";
   import { sseClient } from "../lib/sse";
   import { initLocale, t } from "../i18n";
 
@@ -10,7 +11,7 @@
 
   async function check() {
     try {
-      const res = await fetch(`${getBackendUrl()}/recording_status`, {
+      const res = await apiFetch(`${getBackendUrl()}/recording_status`, {
         signal: AbortSignal.timeout(5000),
       });
       online = res.ok;

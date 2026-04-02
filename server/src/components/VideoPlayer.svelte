@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl, getMediaMtxUrl, getHlsUrl } from "../lib/api";
+  import { apiFetch } from "../lib/fetch";
   import { sseClient } from "../lib/sse";
   import toast from "svelte-5-french-toast";
   import { initLocale, t } from "../i18n";
@@ -174,7 +175,7 @@
 
     toast.promise(
       (async () => {
-        const res = await fetch(`${getBackendUrl()}/toggle_recording`, {
+        const res = await apiFetch(`${getBackendUrl()}/toggle_recording`, {
           method: "POST",
         });
         if (!res.ok) throw new Error();
@@ -192,7 +193,7 @@
 
   async function fetchRecordingStatus() {
     try {
-      const res = await fetch(`${getBackendUrl()}/recording_status`);
+      const res = await apiFetch(`${getBackendUrl()}/recording_status`);
       if (!res.ok) return;
       const data = await res.json();
       recording = data.recording ?? false;
@@ -203,7 +204,7 @@
 
   async function fetchRotation() {
     try {
-      const res = await fetch(`${getBackendUrl()}/settings`);
+      const res = await apiFetch(`${getBackendUrl()}/settings`);
       if (!res.ok) return;
       const settings = await res.json();
       rotationAngle = Number(settings.RotationAngle) || 0;
@@ -217,7 +218,7 @@
   function takeSnapshot() {
     snapping = true;
     toast.promise(
-      fetch(`${getBackendUrl()}/snapshot`, { method: "POST" })
+      apiFetch(`${getBackendUrl()}/snapshot`, { method: "POST" })
         .then((res) => {
           if (!res.ok) throw new Error();
           return res.json();

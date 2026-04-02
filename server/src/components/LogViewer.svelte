@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import { apiFetch } from "../lib/fetch";
   import { initLocale, t } from "../i18n";
   import Icon from "./Icon.svelte";
   import searchIcon from "../icons/search.svg?raw";
@@ -62,7 +63,7 @@
       const params = new URLSearchParams({ limit: "2000" });
       if (mtxLevelFilter) params.set("level", mtxLevelFilter);
       if (mtxSearchQuery) params.set("search", mtxSearchQuery);
-      const res = await fetch(`${getBackendUrl()}/logs/mediamtx?${params}`);
+      const res = await apiFetch(`${getBackendUrl()}/logs/mediamtx?${params}`);
       if (!res.ok) throw new Error();
       mtxLogs = await res.json();
       mtxError = false;
@@ -78,7 +79,7 @@
       const params = new URLSearchParams({ limit: "2000" });
       if (levelFilter) params.set("level", levelFilter);
       if (searchQuery) params.set("search", searchQuery);
-      const res = await fetch(`${getBackendUrl()}/logs/api?${params}`);
+      const res = await apiFetch(`${getBackendUrl()}/logs/api?${params}`);
       if (!res.ok) throw new Error();
       logs = await res.json();
       error = false;
@@ -93,7 +94,7 @@
     installLoading = true;
     installError = false;
     try {
-      const res = await fetch(`${getBackendUrl()}/logs/install`);
+      const res = await apiFetch(`${getBackendUrl()}/logs/install`);
       if (!res.ok) throw new Error();
       installLogs = await res.json();
       // Auto-select newest
@@ -111,7 +112,7 @@
   async function fetchInstallContent(name: string) {
     installContentLoading = true;
     try {
-      const res = await fetch(`${getBackendUrl()}/logs/script/${name}`);
+      const res = await apiFetch(`${getBackendUrl()}/logs/script/${name}`);
       if (!res.ok) throw new Error();
       installContent = await res.text();
     } catch {

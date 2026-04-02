@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import { apiFetch } from "../lib/fetch";
   import { sseClient } from "../lib/sse";
   import { initLocale, t } from "../i18n";
   import Icon from "./Icon.svelte";
@@ -22,7 +23,7 @@
   async function fetchConnections() {
     retrying = true;
     try {
-      const res = await fetch(`${getBackendUrl()}/connections`);
+      const res = await apiFetch(`${getBackendUrl()}/connections`);
       if (!res.ok) throw new Error();
       data = await res.json();
       error = false;

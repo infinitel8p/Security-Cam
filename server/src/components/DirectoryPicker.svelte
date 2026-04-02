@@ -1,5 +1,6 @@
 <script lang="ts">
   import { getBackendUrl } from "../lib/api";
+  import { apiFetch } from "../lib/fetch";
   import toast from "svelte-5-french-toast";
   import { t } from "../i18n";
   import Icon from "./Icon.svelte";
@@ -24,7 +25,7 @@
     loading = true;
     dirError = false;
     try {
-      const res = await fetch(
+      const res = await apiFetch(
         `${getBackendUrl()}/list_directories?path=${encodeURIComponent(path)}`
       );
       const data = await res.json();
@@ -94,7 +95,7 @@
 
     toast.promise(
       (async () => {
-        const res = await fetch(`${getBackendUrl()}/settings`, {
+        const res = await apiFetch(`${getBackendUrl()}/settings`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ VideoSaveLocation: browsePath }),

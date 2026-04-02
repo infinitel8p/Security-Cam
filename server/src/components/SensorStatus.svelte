@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import { apiFetch } from "../lib/fetch";
   import { sseClient } from "../lib/sse";
   import { initLocale, t } from "../i18n";
   import Icon from "./Icon.svelte";
@@ -37,7 +38,7 @@
   async function fetchStatus() {
     retrying = true;
     try {
-      const res = await fetch(`${getBackendUrl()}/sensor/status`);
+      const res = await apiFetch(`${getBackendUrl()}/sensor/status`);
       if (!res.ok) throw new Error();
       data = await res.json();
       error = false;

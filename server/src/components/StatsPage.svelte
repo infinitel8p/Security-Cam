@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import { apiFetch } from "../lib/fetch";
   import { animatedNumber } from "../lib/animate-number";
   import { initLocale, t } from "../i18n";
   import Icon from "./Icon.svelte";
@@ -141,7 +142,7 @@
 
     retrying = true;
     try {
-      const res = await fetch(`${getBackendUrl()}/system_info?extended=1`);
+      const res = await apiFetch(`${getBackendUrl()}/system_info?extended=1`);
       if (!res.ok) throw new Error();
       const data = await res.json();
       info = data;
@@ -183,19 +184,19 @@
   async function fetchSecondary() {
     const base = getBackendUrl();
     const fetches = [
-      fetch(`${base}/connections`).then(r => r.ok ? r.json() : null).then(d => { if (d) connections = d; }).catch(() => {}),
-      fetch(`${base}/stream_settings`).then(r => r.ok ? r.json() : null).then(d => { if (d) stream = d; }).catch(() => {}),
-      fetch(`${base}/sensor/status`).then(r => r.ok ? r.json() : null).then(d => { if (d) sensor = d; }).catch(() => {}),
-      fetch(`${base}/timelapse/status`).then(r => r.ok ? r.json() : null).then(d => { if (d) timelapse = d; }).catch(() => {}),
-      fetch(`${base}/recording_status`).then(r => r.ok ? r.json() : null).then(d => { if (d) recording = d.recording ?? false; }).catch(() => {}),
-      fetch(`${base}/archive`).then(r => r.ok ? r.json() : null).then(d => { if (Array.isArray(d)) archiveCount = d.length; }).catch(() => {}),
+      apiFetch(`${base}/connections`).then(r => r.ok ? r.json() : null).then(d => { if (d) connections = d; }).catch(() => {}),
+      apiFetch(`${base}/stream_settings`).then(r => r.ok ? r.json() : null).then(d => { if (d) stream = d; }).catch(() => {}),
+      apiFetch(`${base}/sensor/status`).then(r => r.ok ? r.json() : null).then(d => { if (d) sensor = d; }).catch(() => {}),
+      apiFetch(`${base}/timelapse/status`).then(r => r.ok ? r.json() : null).then(d => { if (d) timelapse = d; }).catch(() => {}),
+      apiFetch(`${base}/recording_status`).then(r => r.ok ? r.json() : null).then(d => { if (d) recording = d.recording ?? false; }).catch(() => {}),
+      apiFetch(`${base}/archive`).then(r => r.ok ? r.json() : null).then(d => { if (Array.isArray(d)) archiveCount = d.length; }).catch(() => {}),
     ];
     await Promise.allSettled(fetches);
   }
 
   async function loadHistory() {
     try {
-      const res = await fetch(`${getBackendUrl()}/health_history?hours=1`);
+      const res = await apiFetch(`${getBackendUrl()}/health_history?hours=1`);
       if (!res.ok) return;
       const entries: { temp: number | null; load: number | null; ram_pct?: number | null }[] = await res.json();
       if (entries.length > 0) {

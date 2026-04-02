@@ -2,6 +2,7 @@
   import { onMount, onDestroy } from "svelte";
   import { initLocale, t } from "../i18n";
   import { getBackendUrl } from "../lib/api";
+  import { apiFetch } from "../lib/fetch";
   import { sseClient } from "../lib/sse";
   import Icon from "./Icon.svelte";
   import usersIcon from "../icons/users.svg?raw";
@@ -30,7 +31,7 @@
   async function fetchEvents() {
     loading = true;
     try {
-      const res = await fetch(`${getBackendUrl()}/event_history?hours=72`);
+      const res = await apiFetch(`${getBackendUrl()}/event_history?hours=72`);
       if (!res.ok) throw new Error();
       const all: AccessEvent[] = await res.json();
       events = all

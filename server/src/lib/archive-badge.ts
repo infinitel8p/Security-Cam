@@ -8,6 +8,7 @@
  */
 
 import { getBackendUrl } from "./api";
+import { apiFetch } from "./fetch";
 import { sseClient } from "./sse";
 
 const STORAGE_KEY = "lastSeenArchive";
@@ -38,8 +39,8 @@ async function _fetchCount() {
 
     // Count new recordings
     const [recRes, snapRes] = await Promise.all([
-      fetch(`${getBackendUrl()}/archive/new_count?since=${encodeURIComponent(since)}`),
-      fetch(`${getBackendUrl()}/snapshots`),
+      apiFetch(`${getBackendUrl()}/archive/new_count?since=${encodeURIComponent(since)}`),
+      apiFetch(`${getBackendUrl()}/snapshots`),
     ]);
 
     let total = 0;

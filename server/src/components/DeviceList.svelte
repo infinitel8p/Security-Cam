@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import { apiFetch } from "../lib/fetch";
   import toast from "svelte-5-french-toast";
   import { t } from "../i18n";
   import Icon from "./Icon.svelte";
