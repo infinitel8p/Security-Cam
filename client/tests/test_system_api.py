@@ -43,6 +43,8 @@ def test_event_history(client):
 
 def test_deploy_info(client):
     """deploy_info returns git branch and commit when inside a git repo."""
+    import modules.system_helpers as sh
+    sh._static_cache = None
     res = client.get("/deploy_info")
     assert res.status_code == 200
     data = res.get_json()

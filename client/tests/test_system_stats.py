@@ -5,6 +5,10 @@ from unittest.mock import patch, MagicMock
 
 def test_system_stats(client):
     """GET /system_stats returns extended system information."""
+    # Clear the static info cache so mocks take effect
+    import modules.system_helpers as sh
+    sh._static_cache = None
+
     mock_net = MagicMock()
     mock_net.bytes_sent = 123456
     mock_net.bytes_recv = 654321
