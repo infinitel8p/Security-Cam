@@ -523,6 +523,7 @@ export default {
     distro: "Distro",
     arch: "Arch",
     kernel: "Kernel",
+    branch: "Branch",
     platform: "Piattaforma",
     runtime: "Esecuzione",
     versions: "Versioni",

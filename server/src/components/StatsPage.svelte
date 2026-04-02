@@ -78,6 +78,8 @@
     opencv_version?: string;
     node_version?: string;
     mediamtx_version?: string;
+    git_branch?: string;
+    git_commit?: string;
     camera_sensor?: {
       model: string;
       native_width: number;
@@ -986,6 +988,12 @@
                 <div class="flex items-center gap-2 text-[0.6875rem] min-w-0">
                   <span class="shrink-0 text-text-muted w-10">CPU</span>
                   <span class="text-text-primary truncate min-w-0" title={extended.cpu_model}>{extended.cpu_model}</span>
+                </div>
+              {/if}
+              {#if extended.git_branch}
+                <div class="flex items-center gap-2 text-[0.6875rem] min-w-0">
+                  <span class="shrink-0 text-text-muted w-10">{t("stats.branch")}</span>
+                  <span class="font-mono text-text-primary truncate min-w-0" title="{extended.git_branch}{extended.git_commit ? ` @ ${extended.git_commit}` : ''}">{extended.git_branch}{#if extended.git_commit}<span class="text-text-muted"> @ {extended.git_commit}</span>{/if}</span>
                 </div>
               {/if}
             </div>

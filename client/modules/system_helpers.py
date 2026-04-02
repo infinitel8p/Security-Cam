@@ -1,3 +1,4 @@
+import os
 import subprocess
 import psutil
 
@@ -304,6 +305,27 @@ def _get_static_info() -> dict:
             except Exception:
                 pass
             break
+
+    # Git deploy info (branch + short commit hash)
+    git_bin = shutil.which("git")
+    if git_bin:
+        try:
+            branch = subprocess.run(
+                [git_bin, "rev-parse", "--abbrev-ref", "HEAD"],
+                capture_output=True, text=True, timeout=2,
+                cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            )
+            commit = subprocess.run(
+                [git_bin, "rev-parse", "--short", "HEAD"],
+                capture_output=True, text=True, timeout=2,
+                cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            )
+            if branch.returncode == 0 and branch.stdout.strip():
+                info["git_branch"] = branch.stdout.strip()
+            if commit.returncode == 0 and commit.stdout.strip():
+                info["git_commit"] = commit.stdout.strip()
+        except Exception:
+            pass
 
     # MediaMTX version
     mtx_bin = shutil.which("mediamtx") or "/usr/local/bin/mediamtx"

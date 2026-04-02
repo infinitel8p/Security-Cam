@@ -281,6 +281,16 @@ curl "http://<pi-ip>:5005/sprite?video_path=/path/to/output_20260401_143022.mp4"
 
 Returns the hover-scrub sprite sheet for a recording. The sprite is a single JPEG containing 10 evenly-spaced frames in a horizontal strip (1600\u00d790 pixels). Generated automatically when recording stops. Returns `404` if no sprite exists for that recording (e.g. very short recordings under 2 seconds, or older recordings made before this feature). Response is cached for 24 hours.
 
+## Deploy info endpoint
+
+### Get deployment info
+
+```bash
+curl http://<pi-ip>:5005/deploy_info
+```
+
+Returns `{"git_branch": "main", "git_commit": "a1b2c3d"}` if the project directory is a git repository. Either field may be `null` if `.git` is not present or git is not installed. The same fields are also included in the `/system_stats` response under the platform info. The branch and commit are displayed in the navbar version pill and on the stats page.
+
 ## Archive badge endpoint
 
 ### Count new recordings
