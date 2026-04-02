@@ -43,8 +43,46 @@ The main page shows everything at a glance:
 - **Activity Timeline** - last 7 days of events: sensor triggers, recording events, stream disconnects. Rapid sensor pulses within 5 minutes are collapsed into a single entry with a count
 - **Access Log** - last 72 hours of device arrivals and departures
 - **Health Tracker** - 72-hour system health chart (48 time slots, colour-coded ok/warn/critical)
-- **Event Heatmap** - ~6-month activity heatmap showing event intensity by day of week
+- **Event Heatmap** - ~6-month activity heatmap showing event intensity by day of week. Colour reflects the overall character of the day (see [heatmap colour coding](#heatmap-colour-coding) below)
 - **Setup Checklist** - first-run onboarding guide (add devices, enable sensor). Dismissible once complete
+
+### Heatmap colour coding
+
+Each cell in the heatmap represents one day. The colour is determined by a **weighted average** of all events that day — not the single worst event. This means a handful of warnings among many normal events won't turn the whole day orange.
+
+**Severity weights:** each event type has a numeric weight based on its severity. The day's colour comes from the average weight across all events:
+
+| Weight | Severity | Colour | Events |
+| --- | --- | --- | --- |
+| 1 | OK | <span style={{color: '#34d9ac'}}>Green</span> | Device arrived/left, sensor triggered/released/armed/disarmed, recording stopped, stream reconnected, system boot |
+| 3 | Warning | <span style={{color: '#f0b93a'}}>Amber</span> | Recording started, motion detected |
+| 10 | Critical | <span style={{color: '#f06868'}}>Red</span> | Stream disconnected, unauthorized access |
+
+**Colour thresholds** — the weighted average maps to a colour:
+
+| Average | Result | Meaning |
+| --- | --- | --- |
+| < 1.5 | <span style={{color: '#34d9ac'}}>Green</span> | Mostly normal activity |
+| 1.5 – 5.0 | <span style={{color: '#f0b93a'}}>Amber</span> | Notable proportion of warnings or some critical events |
+| &ge; 5.0 | <span style={{color: '#f06868'}}>Red</span> | Heavily concerning — many warnings or critical events |
+
+Within each colour, **opacity scales with event count** relative to the busiest day — so a quiet green day looks faint while a busy green day looks solid.
+
+<div style={{display: 'flex', alignItems: 'center', gap: '4px', marginTop: '0.5rem', marginBottom: '0.5rem'}}>
+  <span style={{fontSize: '0.75rem', color: '#888'}}>Less</span>
+  <div style={{width: 14, height: 14, borderRadius: 2, background: '#1e1b2e'}} title="No events" />
+  <div style={{width: 14, height: 14, borderRadius: 2, background: 'rgba(52,217,172,0.3)'}} title="Few OK events" />
+  <div style={{width: 14, height: 14, borderRadius: 2, background: 'rgba(52,217,172,0.6)'}} title="Some OK events" />
+  <div style={{width: 14, height: 14, borderRadius: 2, background: '#34d9ac'}} title="Many OK events" />
+  <div style={{width: 14, height: 14, borderRadius: 2, background: '#f0b93a'}} title="Warning-level day" />
+  <div style={{width: 14, height: 14, borderRadius: 2, background: '#f06868'}} title="Critical-level day" />
+  <span style={{fontSize: '0.75rem', color: '#888'}}>More</span>
+</div>
+
+**Examples:**
+- 50 normal events + 2 warnings → average 1.08 → <span style={{color: '#34d9ac'}}>green</span> (warnings barely move the needle)
+- 10 normal events + 5 warnings → average 1.67 → <span style={{color: '#f0b93a'}}>amber</span> (a third of the day was warnings)
+- Any day dominated by critical events → <span style={{color: '#f06868'}}>red</span>
 
 ## Archive
 

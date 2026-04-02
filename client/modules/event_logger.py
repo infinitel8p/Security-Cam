@@ -28,7 +28,7 @@ EVENT_TYPES = {
     "recording_started": "warn",
     "recording_stopped": "ok",
     "motion_detected": "warn",
-    "sensor_triggered": "warn",
+    "sensor_triggered": "ok",
     "sensor_released": "ok",
     "sensor_armed": "ok",
     "sensor_disarmed": "ok",
