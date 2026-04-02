@@ -366,4 +366,28 @@ def get_extended_stats():
         except Exception:
             pass
 
+        # AP client signal strengths (when Pi is running as access point)
+        try:
+            result = subprocess.run(
+                ["iw", "dev", "ap0", "station", "dump"],
+                capture_output=True, text=True, timeout=2,
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                ap_clients = []
+                current_mac = None
+                for line in result.stdout.splitlines():
+                    line = line.strip()
+                    if line.startswith("Station "):
+                        current_mac = line.split()[1]
+                    elif line.startswith("signal:") and current_mac:
+                        try:
+                            dbm = int(line.split(":", 1)[1].strip().split()[0])
+                            ap_clients.append({"mac": current_mac, "signal_dbm": dbm})
+                        except (ValueError, IndexError):
+                            pass
+                if ap_clients:
+                    stats["ap_clients_signal"] = ap_clients
+        except Exception:
+            pass
+
     return stats

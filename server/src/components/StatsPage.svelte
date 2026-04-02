@@ -71,6 +71,7 @@
     ip_interface?: string;
     wifi_ssid?: string;
     wifi_signal_dbm?: number;
+    ap_clients_signal?: { mac: string; signal_dbm: number }[];
     flask_version?: string;
     opencv_version?: string;
     node_version?: string;
@@ -819,6 +820,20 @@
               </p>
             </div>
           </div>
+          {#if extended?.ap_clients_signal?.length}
+            <div class="mt-3 border-t border-border-subtle pt-3">
+              <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("stats.apSignal")}</p>
+              <div class="mt-1.5 space-y-1">
+                {#each extended.ap_clients_signal as client}
+                  {@const sigColor = client.signal_dbm > -50 ? 'text-status-ok' : client.signal_dbm > -70 ? 'text-status-warn' : 'text-status-critical'}
+                  <div class="flex items-center justify-between text-[0.625rem]">
+                    <span class="font-mono text-text-muted truncate">{client.mac}</span>
+                    <span class="tabular-nums font-medium {sigColor}">{client.signal_dbm} dBm</span>
+                  </div>
+                {/each}
+              </div>
+            </div>
+          {/if}
           {#if sensor}
             <div class="mt-3 border-t border-border-subtle pt-3">
               <div class="flex items-center gap-1.5">
