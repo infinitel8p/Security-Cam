@@ -293,6 +293,15 @@ export default {
   archive: {
     snapshots: "Istantanee",
     timelapse: "Timelapse",
+    player: "Lettore video",
+    play: "Riproduci",
+    pause: "Pausa",
+    mute: "Disattiva audio",
+    unmute: "Attiva audio",
+    speed: "Velocità di riproduzione",
+    seek: "Cerca",
+    prevVideo: "Video precedente",
+    nextVideo: "Video successivo",
   },
 
   dialog: {

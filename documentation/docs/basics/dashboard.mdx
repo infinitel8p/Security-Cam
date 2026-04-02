@@ -88,11 +88,13 @@ Within each colour, **opacity scales with event count** relative to the busiest 
 
 Browse and manage recorded videos:
 
-- Videos are displayed in a grid, grouped by date, and can be filtered by time range or sorted
-- Click a video to stream it directly in the browser
-- Download or delete individual recordings
-- **Thumbnails** — a JPEG snapshot is captured from the live feed the moment recording starts. This provides instant preview images in both grid and list view, without waiting for the browser to decode the video (fixes blank thumbnails on iOS Safari)
-- **Hover scrub** — hover over a video card in grid view to scrub through the recording. A sprite sheet of 10 evenly-spaced frames is generated automatically when recording stops. Move the mouse left/right to preview different moments without opening the video
+- **Thumbnail cards** — video cards show a JPEG thumbnail captured from the live feed the moment recording starts. No `<video>` element is loaded in the grid, so thumbnails display reliably on every browser and device (including iOS Safari). Cards show a centered play button that fades in on hover
+- **Hover scrub** — hover over a video card in grid view to scrub through the recording. A sprite sheet of 10 evenly-spaced frames is generated automatically when recording stops. Move the mouse left/right to preview different moments. The sprite overlay now renders above the thumbnail image, fixing the previous z-order issue where it was hidden behind the native video element
+- **Click to play** — clicking a video card opens a full-screen modal player with custom controls. No native browser `<video controls>` are used, so the experience is consistent across Chrome, Safari, Firefox, and mobile. The player includes a seek bar, time display, volume toggle, fullscreen, and download. Use arrow keys to navigate: left/right to seek 10 seconds, up/down for volume, Space or K to play/pause, F for fullscreen, M to mute
+- **Playback speed** — the modal player has a speed selector (0.5x, 1x, 2x, 4x, 8x) for reviewing long recordings quickly. Speed resets to 1x when navigating to a different video
+- **Previous/next navigation** — arrow buttons on the sides of the player let you step through filtered recordings without closing the modal. A counter shows your position (e.g. "3 / 12")
+- Videos are displayed in a grid, grouped by date, and can be filtered by time range or sorted. In list view, clicking the thumbnail or filename opens the same player modal
+- Download or delete individual recordings from the card footer (grid view) or the row actions (list view)
 - **New recording badges** — the Archive nav icon shows a red badge with the count of recordings created since your last visit. Inside the archive, new recordings are highlighted with a "NEW" label. The badge clears automatically when you open the archive page
 - **Snapshots** — still frames captured from the live feed via the snapshot button appear in a collapsible section at the top of the archive. Each snapshot shows a thumbnail with the capture time, and can be downloaded or deleted individually
 - **Timelapse** — daily timelapse videos appear in their own collapsible section. Each video compresses a full day into a short clip. Enable timelapse capture in Settings > Storage to start generating them automatically
