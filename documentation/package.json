@@ -1,6 +1,6 @@
 {
   "name": "documentation",
-  "version": "2026.04.02.5",
+  "version": "2026.04.02.6",
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",

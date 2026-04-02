@@ -238,6 +238,8 @@
     return labels[category] || category;
   }
 
+  let expandedCategories = $state<Set<string>>(new Set());
+
   let groupedInstallLogs = $derived.by(() => {
     const groups = new Map<string, InstallLog[]>();
     for (const log of installLogs) {
@@ -247,6 +249,29 @@
     }
     return [...groups.entries()];
   });
+
+  // Auto-expand the category that contains the selected log
+  $effect(() => {
+    if (selectedInstallLog) {
+      const match = installLogs.find((l) => l.name === selectedInstallLog);
+      if (match) {
+        const cat = match.category || "install";
+        if (!expandedCategories.has(cat)) {
+          expandedCategories = new Set([...expandedCategories, cat]);
+        }
+      }
+    }
+  });
+
+  function toggleCategory(category: string) {
+    const next = new Set(expandedCategories);
+    if (next.has(category)) {
+      next.delete(category);
+    } else {
+      next.add(category);
+    }
+    expandedCategories = next;
+  }
 
   let filteredLogs = $derived(sourceFilter ? logs.filter((l) => l.source === sourceFilter) : logs);
   let displayedLogs = $derived(filteredLogs.slice(0, displayLimit));
@@ -660,24 +685,36 @@
     {:else}
       <div class="flex flex-col gap-4 lg:flex-row">
         <!-- File list -->
-        <div class="card w-full space-y-1 overflow-y-auto p-2 lg:max-h-[70vh] lg:w-72 lg:shrink-0">
+        <div class="card w-full overflow-y-auto p-2 lg:max-h-[70vh] lg:w-72 lg:shrink-0">
           <p class="section-label px-2 pt-1">{t("logs.logFiles")}</p>
           {#each groupedInstallLogs as [category, files]}
-            <p class="mt-2 px-2 text-[0.625rem] font-semibold uppercase tracking-wider text-text-muted first:mt-0">
+            <button
+              onclick={() => toggleCategory(category)}
+              class="mt-1 flex w-full items-center gap-1.5 rounded-lg px-2 py-1.5 text-left text-[0.625rem] font-semibold uppercase tracking-wider text-text-muted transition-colors hover:bg-surface-overlay first:mt-0"
+            >
+              <Icon
+                icon={chevronDownIcon}
+                class="h-3 w-3 shrink-0 transition-transform duration-200 {expandedCategories.has(category) ? '' : '-rotate-90'}"
+              />
               {categoryLabel(category)}
-            </p>
-            {#each files as log}
-              <button
-                onclick={() => handleInstallLogSelect(log.name)}
-                class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-[0.8125rem] transition-colors
-                  {selectedInstallLog === log.name
-                    ? 'bg-accent/10 text-accent'
-                    : 'text-text-secondary hover:bg-surface-overlay'}"
-              >
-                <span class="truncate font-mono text-[0.75rem]">{log.name.split("/").pop()}</span>
-                <span class="ml-2 shrink-0 text-[0.625rem] text-text-muted">{formatSize(log.size)}</span>
-              </button>
-            {/each}
+              <span class="ml-auto text-[0.625rem] font-normal tabular-nums opacity-60">{files.length}</span>
+            </button>
+            {#if expandedCategories.has(category)}
+              <div class="space-y-0.5 pb-1">
+                {#each files as log}
+                  <button
+                    onclick={() => handleInstallLogSelect(log.name)}
+                    class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-[0.8125rem] transition-colors
+                      {selectedInstallLog === log.name
+                        ? 'bg-accent/10 text-accent'
+                        : 'text-text-secondary hover:bg-surface-overlay'}"
+                  >
+                    <span class="truncate font-mono text-[0.75rem]">{log.name.split("/").pop()}</span>
+                    <span class="ml-2 shrink-0 text-[0.625rem] text-text-muted">{formatSize(log.size)}</span>
+                  </button>
+                {/each}
+              </div>
+            {/if}
           {/each}
         </div>
 

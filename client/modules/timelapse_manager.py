@@ -45,18 +45,30 @@ def _timelapse_dir() -> str:
 def _capture_frame(output_path: str, resolution: str | None = None) -> bool:
     """Capture a single JPEG frame from the RTSP stream.
 
-    Returns True on success, False on failure (logged at DEBUG).
+    Burns a timestamp overlay into the frame and returns True on success,
+    False on failure (logged at DEBUG).
     """
-    vf = f"scale={resolution}" if resolution and resolution != "original" else None
+    now = datetime.now()
+    timestamp_text = now.strftime("%Y-%m-%d  %H\\:%M\\:%S")
+
+    filters = []
+    if resolution and resolution != "original":
+        filters.append(f"scale={resolution}")
+    filters.append(
+        f"drawtext=text='{timestamp_text}'"
+        ":fontsize=16:fontcolor=white:borderw=2:bordercolor=black"
+        ":x=8:y=h-th-8"
+    )
+    vf = ",".join(filters)
+
     cmd = [
         "ffmpeg", "-y",
         "-rtsp_transport", "tcp",
         "-i", RTSP_URL,
         "-frames:v", "1",
         "-q:v", "6",
+        "-vf", vf,
     ]
-    if vf:
-        cmd += ["-vf", vf]
     cmd.append(output_path)
 
     try:
@@ -233,7 +245,7 @@ def _background_loop() -> None:
         if _capture_frame(frame_path, resolution):
             _today_frame_count += 1
             _last_capture = datetime.now().isoformat()
-            log.debug("Timelapse frame %d: %s", _today_frame_count, frame_name)
+            log.info("Timelapse frame %d captured: %s", _today_frame_count, frame_name)
 
         _stop_event.wait(interval)
 
