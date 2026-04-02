@@ -309,6 +309,16 @@
     return lastSeenTs > 0 && video.timestamp > lastSeenTs;
   }
 
+  function isNewSnapshot(snap: Snapshot): boolean {
+    if (lastSeenTs <= 0 || !snap.date || !snap.time) return false;
+    return new Date(`${snap.date}T${snap.time}`).getTime() > lastSeenTs;
+  }
+
+  function isNewTimelapse(tl: Timelapse): boolean {
+    if (lastSeenTs <= 0 || !tl.date) return false;
+    return new Date(tl.date).getTime() > lastSeenTs;
+  }
+
   let newSnapshotCount = $derived(
     lastSeenTs > 0 ? allSnapshots.filter((s) => new Date(`${s.date}T${s.time}`).getTime() > lastSeenTs).length : 0
   );
@@ -564,8 +574,15 @@
                 role="button"
               />
               <!-- Date/time badge -->
-              <div class="pointer-events-none absolute left-1.5 top-1.5 rounded bg-black/60 px-1.5 py-0.5 text-[0.5625rem] font-medium tabular-nums text-white/90 backdrop-blur-sm">
-                {snap.time}
+              <div class="pointer-events-none absolute left-1.5 top-1.5 flex items-center gap-1">
+                <span class="rounded bg-black/60 px-1.5 py-0.5 text-[0.5625rem] font-medium tabular-nums text-white/90 backdrop-blur-sm">
+                  {snap.time}
+                </span>
+                {#if isNewSnapshot(snap)}
+                  <span class="animate-pop rounded-full bg-status-critical/90 px-1.5 py-0.5 text-[0.5rem] font-bold uppercase text-white backdrop-blur-sm">
+                    {t("badge.new")}
+                  </span>
+                {/if}
               </div>
               <!-- Actions (visible on hover) -->
               <div class="absolute bottom-0 left-0 right-0 flex items-center justify-end gap-1 bg-gradient-to-t from-black/60 to-transparent px-1.5 py-1.5 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100">

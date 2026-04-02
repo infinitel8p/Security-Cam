@@ -34,14 +34,36 @@ function _getLastSeen(): string {
 async function _fetchCount() {
   try {
     const since = _getLastSeen();
-    const res = await fetch(`${getBackendUrl()}/archive/new_count?since=${encodeURIComponent(since)}`);
-    if (res.ok) {
-      const data = await res.json();
-      _count = data.count ?? 0;
-      _notify();
+    const sinceTs = new Date(since).getTime();
+
+    // Count new recordings
+    const [recRes, snapRes] = await Promise.all([
+      fetch(`${getBackendUrl()}/archive/new_count?since=${encodeURIComponent(since)}`),
+      fetch(`${getBackendUrl()}/snapshots`),
+    ]);
+
+    let total = 0;
+    if (recRes.ok) {
+      const data = await recRes.json();
+      total += data.count ?? 0;
     }
+
+    // Count new snapshots by timestamp in filename
+    if (snapRes.ok) {
+      const snaps: { path: string }[] = await snapRes.json();
+      for (const s of snaps) {
+        const match = s.path.match(/(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/);
+        if (match) {
+          const ts = new Date(`${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}:${match[6]}`).getTime();
+          if (ts > sinceTs) total++;
+        }
+      }
+    }
+
+    _count = total;
+    _notify();
   } catch {
-    // Silently fail — badge is non-critical
+    // Silently fail - badge is non-critical
   }
 }
 
