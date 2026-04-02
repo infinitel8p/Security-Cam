@@ -39,3 +39,24 @@ def test_event_history(client):
     res = client.get("/event_history?hours=24")
     assert res.status_code == 200
     assert isinstance(res.get_json(), list)
+
+
+def test_deploy_info(client):
+    """deploy_info returns git branch and commit when inside a git repo."""
+    res = client.get("/deploy_info")
+    assert res.status_code == 200
+    data = res.get_json()
+    assert "git_branch" in data
+    assert "git_commit" in data
+    # Running inside the repo, so both should be populated
+    assert isinstance(data["git_branch"], str)
+    assert isinstance(data["git_commit"], str)
+
+
+def test_deploy_info_included_in_extended_stats(client):
+    """git info should also appear in /system_stats (via _get_static_info)."""
+    res = client.get("/system_stats")
+    assert res.status_code == 200
+    data = res.get_json()
+    assert "git_branch" in data
+    assert "git_commit" in data

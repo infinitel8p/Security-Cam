@@ -119,6 +119,16 @@ def system_stats():
     return jsonify(system_helpers.get_extended_stats())
 
 
+@app.route('/deploy_info', methods=['GET'])
+def deploy_info():
+    from modules.system_helpers import _get_static_info
+    info = _get_static_info()
+    return jsonify({
+        "git_branch": info.get("git_branch"),
+        "git_commit": info.get("git_commit"),
+    })
+
+
 @app.route('/system_alert_state', methods=['GET'])
 def system_alert_state():
     return jsonify(health_logger.get_current_alerts())

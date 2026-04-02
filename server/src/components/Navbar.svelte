@@ -1,6 +1,8 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { initLocale, t } from "../i18n";
+  import { getBackendUrl } from "../lib/api";
+  import { apiFetch } from "../lib/fetch";
   import { initArchiveBadge, subscribe as subscribeBadge } from "../lib/archive-badge";
   import { initSystemAlerts, subscribe as subscribeAlert, type AlertLevel } from "../lib/system-alert";
   import ThemeToggle from "./ThemeToggle.svelte";
@@ -15,6 +17,8 @@
 
   let badgeCount = $state(0);
   let alertLevel: AlertLevel = $state("ok");
+  let gitBranch = $state("");
+  let gitCommit = $state("");
   let unsubBadge: (() => void) | null = null;
   let unsubAlert: (() => void) | null = null;
 
@@ -24,6 +28,10 @@
     initSystemAlerts();
     unsubBadge = subscribeBadge((count) => { badgeCount = count; });
     unsubAlert = subscribeAlert((state) => { alertLevel = state.overall; });
+    apiFetch(`${getBackendUrl()}/deploy_info`).then(r => r.json()).then(d => {
+      gitBranch = d.git_branch ?? "";
+      gitCommit = d.git_commit ?? "";
+    }).catch(() => {});
   });
 
   onDestroy(() => {
@@ -59,6 +67,11 @@
       <p class="text-[0.625rem] leading-none font-medium font-mono tracking-widest text-text-muted">
         v.2026.04.03.2
       </p>
+      {#if gitBranch}
+        <p class="mt-0.5 text-[0.5625rem] leading-none font-mono text-text-muted/60 truncate max-w-[7.5rem]" title="{gitBranch}{gitCommit ? ` @ ${gitCommit}` : ''}">
+          {gitBranch}{#if gitCommit}<span class="text-text-muted/40"> @ {gitCommit}</span>{/if}
+        </p>
+      {/if}
     </div>
   </div>
 
