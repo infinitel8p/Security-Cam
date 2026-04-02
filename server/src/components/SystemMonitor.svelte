@@ -2,6 +2,7 @@
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
   import { sseClient } from "../lib/sse";
+  import { animatedNumber } from "../lib/animate-number";
   import { initLocale, t } from "../i18n";
   import Icon from "./Icon.svelte";
   import temperatureIcon from "../icons/temperature.svg?raw";
@@ -47,49 +48,26 @@
   let unsub: (() => void) | null = null;
 
   // ── Animated display values (start at 0, count up on first load) ──
-  let aTemp = $state(0);
-  let aLoad = $state(0);
-  let aStorageUsed = $state(0);
-  let aRamUsed = $state(0);
+  let animTick = $state(0);
+  const bump = () => { animTick++; };
+  const aTemp = animatedNumber(0, bump);
+  const aLoad = animatedNumber(0, bump);
+  const aStorageUsed = animatedNumber(0, bump);
+  const aRamUsed = animatedNumber(0, bump);
 
-  const ANIM_DURATION = 800; // ms
-  let rafId: number | null = null;
-  let animStart = 0;
-
-  interface AnimTarget { from: number; to: number }
-  let tgt = { temp: { from: 0, to: 0 }, load: { from: 0, to: 0 }, storageUsed: { from: 0, to: 0 }, ramUsed: { from: 0, to: 0 } };
-
-  function easeOutCubic(x: number): number {
-    return 1 - Math.pow(1 - x, 3);
-  }
-
-  function tick(now: number) {
-    const p = easeOutCubic(Math.min((now - animStart) / ANIM_DURATION, 1));
-    aTemp = tgt.temp.from + (tgt.temp.to - tgt.temp.from) * p;
-    aLoad = tgt.load.from + (tgt.load.to - tgt.load.from) * p;
-    aStorageUsed = tgt.storageUsed.from + (tgt.storageUsed.to - tgt.storageUsed.from) * p;
-    aRamUsed = tgt.ramUsed.from + (tgt.ramUsed.to - tgt.ramUsed.from) * p;
-
-    if (p < 1) rafId = requestAnimationFrame(tick);
-    else rafId = null;
-  }
-
-  function animateTo(d: SystemInfo) {
-    if (rafId != null) cancelAnimationFrame(rafId);
-    tgt = {
-      temp: { from: aTemp, to: d.cpu_temp_celsius },
-      load: { from: aLoad, to: d.cpu_load_percent },
-      storageUsed: { from: aStorageUsed, to: d.storage_info_gb.used_gb },
-      ramUsed: { from: aRamUsed, to: d.ram_usage_mb.used_mb },
-    };
-    animStart = performance.now();
-    rafId = requestAnimationFrame(tick);
-  }
+  // Reactive wrappers
+  let dTemp = $derived((animTick, aTemp.value));
+  let dLoad = $derived((animTick, aLoad.value));
+  let dStorageUsed = $derived((animTick, aStorageUsed.value));
+  let dRamUsed = $derived((animTick, aRamUsed.value));
 
   function applyInfo(d: SystemInfo) {
     info = d;
     error = false;
-    animateTo(d);
+    aTemp.set(d.cpu_temp_celsius);
+    aLoad.set(d.cpu_load_percent);
+    aStorageUsed.set(d.storage_info_gb.used_gb);
+    aRamUsed.set(d.ram_usage_mb.used_mb);
   }
 
   async function fetchInfo() {
@@ -120,7 +98,7 @@
 
   onDestroy(() => {
     unsub?.();
-    if (rafId != null) cancelAnimationFrame(rafId);
+    aTemp.destroy(); aLoad.destroy(); aStorageUsed.destroy(); aRamUsed.destroy();
   });
 
   function tempColor(temp: number): string {
@@ -164,14 +142,14 @@
   }
 
   // Derived from animated values — numbers animate smoothly, colors use real target
-  let loadPct = $derived(Math.round(aLoad));
-  let storagePct = $derived(info ? usagePct(aStorageUsed, info.storage_info_gb.total_gb) : 0);
-  let ramPct = $derived(info ? usagePct(aRamUsed, info.ram_usage_mb.total_mb) : 0);
+  let loadPct = $derived(Math.round(dLoad));
+  let storagePct = $derived(info ? usagePct(dStorageUsed, info.storage_info_gb.total_gb) : 0);
+  let ramPct = $derived(info ? usagePct(dRamUsed, info.ram_usage_mb.total_mb) : 0);
 
   // Smooth (unrounded) percentages for bar widths
-  let loadBar = $derived(aLoad);
-  let storageBar = $derived(info && info.storage_info_gb.total_gb > 0 ? (aStorageUsed / info.storage_info_gb.total_gb) * 100 : 0);
-  let ramBar = $derived(info && info.ram_usage_mb.total_mb > 0 ? (aRamUsed / info.ram_usage_mb.total_mb) * 100 : 0);
+  let loadBar = $derived(dLoad);
+  let storageBar = $derived(info && info.storage_info_gb.total_gb > 0 ? (dStorageUsed / info.storage_info_gb.total_gb) * 100 : 0);
+  let ramBar = $derived(info && info.ram_usage_mb.total_mb > 0 ? (dRamUsed / info.ram_usage_mb.total_mb) * 100 : 0);
 
   // Colors use real (target) values so they update immediately
   let realLoadPct = $derived(info ? Math.round(info.cpu_load_percent) : 0);
@@ -197,7 +175,7 @@
           <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.temperature")}</p>
         </div>
         <p class="mt-0.5 text-base font-bold tabular-nums leading-none {tempColor(info.cpu_temp_celsius)}">
-          {Math.round(aTemp)}<span class="text-[0.5625rem] font-medium">&deg;C</span>
+          {Math.round(dTemp)}<span class="text-[0.5625rem] font-medium">&deg;C</span>
         </p>
         <!-- Throttle inline -->
         {#if info.throttle}
@@ -254,7 +232,7 @@
             <Icon icon={databaseIcon} class="h-3 w-3 text-text-muted" stroke={2} />
             <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.disk")}</p>
           </div>
-          <p class="text-[0.5625rem] tabular-nums text-text-muted">{aStorageUsed.toFixed(1)}/{info.storage_info_gb.total_gb.toFixed(0)}GB</p>
+          <p class="text-[0.5625rem] tabular-nums text-text-muted">{dStorageUsed.toFixed(1)}/{info.storage_info_gb.total_gb.toFixed(0)}GB</p>
         </div>
         <p class="mt-0.5 text-base font-bold tabular-nums leading-none text-text-primary">
           {storagePct}<span class="text-[0.5625rem] font-medium">%</span>
@@ -276,7 +254,7 @@
             <Icon icon={deviceDesktopIcon} class="h-3 w-3 text-text-muted" stroke={2} />
             <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.ram")}</p>
           </div>
-          <p class="text-[0.5625rem] tabular-nums text-text-muted">{Math.round(aRamUsed)}/{info.ram_usage_mb.total_mb.toFixed(0)}MB</p>
+          <p class="text-[0.5625rem] tabular-nums text-text-muted">{Math.round(dRamUsed)}/{info.ram_usage_mb.total_mb.toFixed(0)}MB</p>
         </div>
         <p class="mt-0.5 text-base font-bold tabular-nums leading-none text-text-primary">
           {ramPct}<span class="text-[0.5625rem] font-medium">%</span>
