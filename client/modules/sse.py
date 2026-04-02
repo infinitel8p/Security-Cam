@@ -33,6 +33,10 @@ _clients_lock = threading.Lock()
 _event_id = 0
 _event_id_lock = threading.Lock()
 
+# Optional hook called when a new SSE client connects.
+# Set via set_on_connect() to avoid circular imports.
+_on_client_connect = None
+
 
 def emit(event: str, data: dict | None = None) -> None:
     """Broadcast an event to all connected SSE clients.
@@ -71,6 +75,17 @@ def emit(event: str, data: dict | None = None) -> None:
     log.debug("SSE emit: %s (%d clients)", event, count)
 
 
+def set_on_connect(callback):
+    """Register a callback invoked when a new SSE client connects.
+
+    Used to trigger an immediate presence poll so device statuses
+    are fresh when the dashboard loads.  Avoids circular imports
+    by letting main.py wire the callback after all modules load.
+    """
+    global _on_client_connect
+    _on_client_connect = callback
+
+
 def stream():
     """Generator that yields SSE-formatted events for one client.
 
@@ -84,6 +99,13 @@ def stream():
         _clients.append(client_queue)
 
     log.info("SSE client connected (%d total)", len(_clients))
+
+    # Notify hook (e.g. trigger immediate presence poll)
+    if _on_client_connect:
+        try:
+            _on_client_connect()
+        except Exception:
+            pass
 
     try:
         # Send initial heartbeat so the client knows we're alive

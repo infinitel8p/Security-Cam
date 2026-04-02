@@ -17,6 +17,7 @@
   let connected = $state(false);
   let error = $state("");
   let recording = $state(false);
+  let recordingStartedAt: string | null = $state(null);
   let toggling = $state(false);
   let snapping = $state(false);
   let isFullscreen = $state(false);
@@ -196,6 +197,7 @@
       if (!res.ok) return;
       const data = await res.json();
       recording = data.recording ?? false;
+      recordingStartedAt = data.started_at ?? null;
     } catch {
       // Keep default
     }
@@ -256,14 +258,21 @@
     });
     unsubRecording = sse.on("recording_state", (ev) => {
       recording = ev.recording ?? false;
+      recordingStartedAt = ev.started_at ?? null;
     });
   });
 
-  // Recording duration timer
+  // Recording duration timer - uses backend start timestamp for accuracy
   $effect(() => {
     if (recording) {
-      recSeconds = 0;
-      recTimer = setInterval(() => { recSeconds++; }, 1000);
+      const calcElapsed = () => {
+        if (recordingStartedAt) {
+          return Math.max(0, Math.floor((Date.now() - new Date(recordingStartedAt).getTime()) / 1000));
+        }
+        return 0;
+      };
+      recSeconds = calcElapsed();
+      recTimer = setInterval(() => { recSeconds = calcElapsed(); }, 1000);
     } else {
       clearInterval(recTimer);
       recSeconds = 0;

@@ -1,5 +1,7 @@
 """Tests for recording and stream settings endpoints."""
 
+from datetime import datetime, timezone
+
 import modules.stream_helpers as sh
 
 
@@ -9,6 +11,23 @@ def test_recording_status(client):
     data = res.get_json()
     assert "recording" in data
     assert data["recording"] is False
+    assert "started_at" not in data
+
+
+def test_recording_status_includes_started_at(client):
+    """When recording is active, /recording_status includes started_at."""
+    now = datetime.now(timezone.utc)
+    sh.is_recording = True
+    sh._recording_start_time = now
+    try:
+        res = client.get("/recording_status")
+        assert res.status_code == 200
+        data = res.get_json()
+        assert data["recording"] is True
+        assert data["started_at"] == now.isoformat()
+    finally:
+        sh.is_recording = False
+        sh._recording_start_time = None
 
 
 def test_toggle_recording_start(client):

@@ -14,11 +14,8 @@ system - this module only controls *automatic* sensor-triggered recording.
 
 import atexit
 import logging
-import os
 import threading
-import time
 
-from . import activity_helpers
 from . import event_logger
 from . import presence_monitor
 from . import settings_helpers
@@ -38,12 +35,6 @@ _armed = False  # True when sensor is running and will auto-record
 _sensor_recording = False  # True only when this module started the recording
 _suppressed = False  # True when trigger was ignored due to presence
 
-# Rate-limit presence checks for pulse-based sensors (vibration, knock).
-# Avoids hammering BT scanning on every rapid pulse.
-_last_presence_check_time = 0.0
-_last_presence_result = False
-_PRESENCE_CHECK_INTERVAL = 5.0  # seconds
-_CONFIRM_DELAY = 2.0  # seconds between first and confirmation check
 
 
 def _emit_state():
@@ -57,98 +48,15 @@ def _emit_state():
     })
 
 
-def _check_presence_once() -> tuple[bool, dict]:
-    """Run a single presence check. Returns (someone_home, raw_statuses)."""
-    settings = settings_helpers.get_settings()
-    bt_addrs = settings.get("TARGET_BT_ADDRESSES", [])
-    wifi_addrs = settings.get("TARGET_AP_MAC_ADDRESSES", [])
-
-    if not bt_addrs and not wifi_addrs:
-        return False, {"bt": {}, "wifi": {}}
-
-    statuses = activity_helpers.get_device_statuses()
-
-    someone_home = (any(statuses["bt"].values())
-                    or any(statuses["wifi"].values()))
-    return someone_home, statuses
-
-
-def _report_to_presence_monitor(statuses: dict):
-    """Feed BT check results back to the presence monitor for the timeline."""
-    for addr, online in statuses["bt"].items():
-        presence_monitor.report_bt_status(addr, online)
-
-
 def _is_someone_home() -> bool:
     """Return True if any tracked device is present (BT or WiFi).
 
-    Uses a rate-limit cache for rapid sensor pulses.
-    Results are fed back to the presence monitor for the activity timeline.
+    Queries the presence monitor's cached state instead of running
+    synchronous BT scans.  The presence monitor polls every 30s with
+    hysteresis (3 consecutive misses before declaring 'left'), so
+    cached state is reliable and this call is non-blocking.
     """
-    global _last_presence_check_time, _last_presence_result
-
-    now = time.monotonic()
-    if now - _last_presence_check_time < _PRESENCE_CHECK_INTERVAL:
-        return _last_presence_result
-
-    someone_home, statuses = _check_presence_once()
-    _report_to_presence_monitor(statuses)
-
-    _last_presence_check_time = time.monotonic()
-    _last_presence_result = someone_home
-    return someone_home
-
-
-def _confirmation_check():
-    """Background confirmation: if someone is actually home, roll back the recording.
-
-    Runs after _CONFIRM_DELAY seconds. If the second presence check finds
-    a device, stops the recording and deletes the file since it was a
-    false alarm caused by a flaky first BT lookup.
-    """
-    global _sensor_recording, _suppressed
-
-    time.sleep(_CONFIRM_DELAY)
-
-    someone_home, statuses = _check_presence_once()
-    _report_to_presence_monitor(statuses)
-
-    if not someone_home:
-        log.debug("Presence confirmation: confirmed nobody home, recording continues")
-        return
-
-    # False alarm — someone IS home, first check was a flaky BT miss
-    log.info("Presence confirmation: device found on second lookup — "
-             "rolling back sensor recording (false alarm)")
-
-    with _lock:
-        if not _sensor_recording:
-            # Recording was already stopped by release/manual/other
-            return
-
-        # Grab the filename before stopping
-        filename = stream_helpers.recorded_filename
-
-        _sensor_recording = False
-        _suppressed = True
-        stream_helpers.stop_recording()
-        event_logger.log_event("recording_stopped", "presence confirmation (false alarm)")
-
-    _emit_state()
-    sse.emit("recording_state", {"recording": False})
-
-    # Delete the short false-alarm recording and its metadata
-    if filename:
-        for path in [filename,
-                     os.path.splitext(filename)[0] + ".meta.json",
-                     os.path.splitext(filename)[0] + ".thumb.jpg",
-                     os.path.splitext(filename)[0] + ".sprite.jpg"]:
-            try:
-                if os.path.exists(path):
-                    os.remove(path)
-                    log.info("Deleted false-alarm file: %s", path)
-            except OSError as e:
-                log.warning("Could not delete false-alarm file %s: %s", path, e)
+    return presence_monitor.is_someone_home()
 
 
 def _on_trigger():
@@ -188,13 +96,7 @@ def _on_trigger():
         event_logger.log_event("recording_started", "sensor trigger")
 
     _emit_state()
-    sse.emit("recording_state", {"recording": True})
-
-    # Run a background confirmation check — if the first BT lookup was
-    # a false negative (device IS home), roll back the recording.
-    settings = settings_helpers.get_settings()
-    if settings.get("TARGET_BT_ADDRESSES") or settings.get("TARGET_AP_MAC_ADDRESSES"):
-        threading.Thread(target=_confirmation_check, daemon=True).start()
+    sse.emit("recording_state", stream_helpers.get_recording_info())
 
 
 def _on_release():

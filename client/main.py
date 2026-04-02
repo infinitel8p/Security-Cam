@@ -79,6 +79,7 @@ def _on_ffmpeg_crash():
     log.warning("FFmpeg crashed - recording state reset")
 
 stream_helpers.set_on_crash(_on_ffmpeg_crash)
+sse.set_on_connect(presence_monitor.poll_now)
 
 event_logger.log_event("system_boot")
 log.info("Security Cam backend started")
@@ -125,7 +126,7 @@ def system_alert_state():
 
 @app.route('/recording_status', methods=['GET'])
 def recording_status():
-    return jsonify({"recording": stream_helpers.is_recording})
+    return jsonify(stream_helpers.get_recording_info())
 
 
 @app.route('/toggle_recording', methods=['POST'])
@@ -134,7 +135,7 @@ def toggle_recording():
         stream_helpers.stop_recording()
         sensor_manager.notify_manual_recording_stopped()
         event_logger.log_event("recording_stopped")
-        sse.emit("recording_state", {"recording": False})
+        sse.emit("recording_state", stream_helpers.get_recording_info())
         log.info("Recording stopped (manual)")
         return jsonify({"message": "Recording stopped"})
     else:
@@ -142,7 +143,7 @@ def toggle_recording():
         # applies to automatic sensor-triggered recording (sensor_manager).
         stream_helpers.start_recording()
         event_logger.log_event("recording_started")
-        sse.emit("recording_state", {"recording": True})
+        sse.emit("recording_state", stream_helpers.get_recording_info())
         log.info("Recording started (manual)")
         return jsonify({"message": "Recording started"})
 
@@ -800,4 +801,5 @@ if __name__ == "__main__":
     # pin first and the child (which serves HTTP) can never arm the sensor.
     # Disabling the reloader keeps a single process that owns both the
     # GPIO and the HTTP server.
-    app.run(host='0.0.0.0', port=5005, debug=False, use_reloader=False)
+    app.run(host='0.0.0.0', port=5005, debug=False, use_reloader=False,
+            threaded=True)

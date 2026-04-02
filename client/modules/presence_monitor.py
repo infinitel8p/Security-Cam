@@ -23,6 +23,11 @@ _bt_miss_count: dict[str, int] = {}
 # Track last event time per (address, event_type) to debounce flapping
 _last_event: dict[tuple[str, str], float] = {}
 
+# Interruptible sleep for poll_now() support
+_poll_event = threading.Event()
+_last_poll_time = 0.0
+_POLL_DEBOUNCE = 5.0  # seconds - ignore poll_now if polled recently
+
 
 def _device_name(address: str, device_list: list[dict]) -> str:
     """Look up the friendly name for a device address."""
@@ -171,12 +176,41 @@ def _check_presence():
 
 def _monitor_loop():
     """Background loop that checks presence at regular intervals."""
+    global _last_poll_time
     while True:
         try:
             _check_presence()
+            _last_poll_time = time.monotonic()
         except Exception as e:
             log.error("Presence monitor error: %s", e)
-        time.sleep(POLL_INTERVAL)
+        _poll_event.wait(POLL_INTERVAL)
+        _poll_event.clear()
+
+
+def is_someone_home() -> bool:
+    """Query cached presence state. Thread-safe, non-blocking.
+
+    Returns True if any tracked BT or WiFi device was last seen as online.
+    Used by sensor_manager to avoid blocking BT scans in the trigger path.
+    """
+    with _state_lock:
+        if any(_bt_state.values()) or any(_wifi_state.values()):
+            return True
+    return False
+
+
+def poll_now():
+    """Request an immediate presence poll (debounced).
+
+    Multiple calls within _POLL_DEBOUNCE seconds are coalesced.
+    Safe to call from any thread (e.g. SSE client connect handler).
+    """
+    now = time.monotonic()
+    if now - _last_poll_time < _POLL_DEBOUNCE:
+        log.debug("poll_now debounced (last poll %.1fs ago)", now - _last_poll_time)
+        return
+    log.info("Immediate presence poll requested")
+    _poll_event.set()
 
 
 def start():
