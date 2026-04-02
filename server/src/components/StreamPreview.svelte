@@ -151,7 +151,7 @@
         <div class="flex h-8 w-8 items-center justify-center rounded-full bg-status-warning/10">
           <Icon icon={alertCircleIcon} class="h-4 w-4 text-status-warning" stroke={2} />
         </div>
-        <span class="text-xs text-text-secondary">{error}</span>
+        <span class="text-xs text-center text-text-secondary">{error}</span>
         <div class="flex items-center gap-3">
           <span class="text-[0.625rem] text-text-muted">{t("status.reconnecting")}</span>
           <button onclick={manualReconnect} class="text-[0.625rem] font-medium text-accent hover:text-accent-hover">{t("btn.retryNow")}</button>
