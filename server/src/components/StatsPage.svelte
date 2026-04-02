@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import { animatedNumber } from "../lib/animate-number";
   import { initLocale, t } from "../i18n";
   import Icon from "./Icon.svelte";
   import temperatureIcon from "../icons/temperature.svg?raw";
@@ -215,6 +216,9 @@
   onDestroy(() => {
     destroyed = true;
     if (pollTimer) clearTimeout(pollTimer);
+    aLoad.destroy(); aTemp.destroy(); aRam.destroy(); aStorage.destroy();
+    aStorageFree.destroy(); aRamUsed.destroy(); aRamTotal.destroy();
+    aStorageUsed.destroy(); aStorageTotal.destroy();
   });
 
   function usagePct(used: number, total: number): number {
@@ -335,6 +339,25 @@
   let ramPct = $derived(info ? usagePct(num(info.ram_usage_mb?.used_mb), num(info.ram_usage_mb?.total_mb)) : 0);
   let storageFreeGb = $derived(info ? num(info.storage_info_gb?.total_gb) - num(info.storage_info_gb?.used_gb) : 0);
 
+  // Animated display values
+  const aLoad = animatedNumber();
+  const aTemp = animatedNumber();
+  const aRam = animatedNumber();
+  const aStorage = animatedNumber();
+  const aStorageFree = animatedNumber();
+  const aRamUsed = animatedNumber();
+  const aRamTotal = animatedNumber();
+  const aStorageUsed = animatedNumber();
+  const aStorageTotal = animatedNumber();
+
+  $effect(() => { aLoad.set(loadPct); });
+  $effect(() => { aTemp.set(cpuTemp); });
+  $effect(() => { aRam.set(ramPct); });
+  $effect(() => { aStorage.set(storagePct); });
+  $effect(() => { aStorageFree.set(storageFreeGb); });
+  $effect(() => { if (info) { aRamUsed.set(num(info.ram_usage_mb?.used_mb)); aRamTotal.set(num(info.ram_usage_mb?.total_mb)); } });
+  $effect(() => { if (info) { aStorageUsed.set(num(info.storage_info_gb?.used_gb)); aStorageTotal.set(num(info.storage_info_gb?.total_gb)); } });
+
   /** All four core metrics in OK range — system is healthy */
   let allNominal = $derived(
     info != null && loadPct < 75 && ramPct < 75 && tempPctLevel === 0 && storagePct < 75
@@ -405,7 +428,7 @@
           <span class="h-2 w-2 rounded-full {statusDotColor(loadPct)}"></span>
         </div>
         <p class="mt-2 text-4xl font-bold tabular-nums leading-none text-text-primary">
-          {loadPct}<span class="ml-0.5 text-xs font-medium text-text-muted/60">%</span>
+          {Math.round(aLoad.value)}<span class="ml-0.5 text-xs font-medium text-text-muted/60">%</span>
         </p>
         <div class="mt-3 h-1 rounded-full {barTrackColor(loadPct)}" role="progressbar" aria-valuenow={loadPct} aria-valuemin={0} aria-valuemax={100} aria-label={t("label.cpu")}>
           <div class="h-full rounded-full animate-bar {barColor(loadPct)} transition-all duration-500" style="width: {loadPct}%"></div>
@@ -458,10 +481,10 @@
             <Icon icon={deviceDesktopIcon} class="h-3 w-3 text-text-muted" stroke={2} />
             <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.ram")}</p>
           </div>
-          <p class="text-[0.6875rem] tabular-nums text-text-muted">{num(info.ram_usage_mb?.used_mb).toFixed(0)} / {num(info.ram_usage_mb?.total_mb).toFixed(0)} MB</p>
+          <p class="text-[0.6875rem] tabular-nums text-text-muted">{aRamUsed.value.toFixed(0)} / {aRamTotal.value.toFixed(0)} MB</p>
         </div>
         <p class="mt-2 text-4xl font-bold tabular-nums leading-none text-text-primary">
-          {ramPct}<span class="ml-0.5 text-xs font-medium text-text-muted/60">%</span>
+          {Math.round(aRam.value)}<span class="ml-0.5 text-xs font-medium text-text-muted/60">%</span>
         </p>
         <div class="mt-3 h-1 rounded-full {barTrackColor(ramPct)}" role="progressbar" aria-valuenow={ramPct} aria-valuemin={0} aria-valuemax={100} aria-label={t("label.ram")}>
           <div class="h-full rounded-full animate-bar {barColor(ramPct)} transition-all duration-500" style="width: {ramPct}%"></div>
@@ -515,7 +538,7 @@
           <span class="h-2 w-2 rounded-full {statusDotColor(tempPctLevel)}"></span>
         </div>
         <p class="mt-2 text-4xl font-bold tabular-nums leading-none {tempColor(cpuTemp)}">
-          {cpuTemp.toFixed(0)}<span class="ml-0.5 text-xs font-medium text-text-muted/60">&deg;C</span>
+          {aTemp.value.toFixed(0)}<span class="ml-0.5 text-xs font-medium text-text-muted/60">&deg;C</span>
         </p>
         <div class="mt-3 h-1 rounded-full {barTrackColor(tempPctLevel)}" role="progressbar" aria-valuenow={cpuTemp} aria-valuemin={0} aria-valuemax={85} aria-label={t("label.temperature")}>
           <div class="h-full rounded-full animate-bar {barColor(tempPctLevel)} transition-all duration-500" style="width: {Math.min(cpuTemp / 85 * 100, 100)}%"></div>
@@ -554,16 +577,16 @@
             <Icon icon={databaseIcon} class="h-3 w-3 text-text-muted" stroke={2} />
             <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.disk")}</p>
           </div>
-          <p class="text-[0.6875rem] tabular-nums text-text-muted">{num(info.storage_info_gb?.used_gb).toFixed(1)} / {num(info.storage_info_gb?.total_gb).toFixed(0)} GB</p>
+          <p class="text-[0.6875rem] tabular-nums text-text-muted">{aStorageUsed.value.toFixed(1)} / {aStorageTotal.value.toFixed(0)} GB</p>
         </div>
         <p class="mt-2 text-4xl font-bold tabular-nums leading-none text-text-primary">
-          {storagePct}<span class="ml-0.5 text-xs font-medium text-text-muted/60">%</span>
+          {Math.round(aStorage.value)}<span class="ml-0.5 text-xs font-medium text-text-muted/60">%</span>
         </p>
         <div class="mt-3 h-1 rounded-full {barTrackColor(storagePct)}" role="progressbar" aria-valuenow={storagePct} aria-valuemin={0} aria-valuemax={100} aria-label={t("label.disk")}>
           <div class="h-full rounded-full animate-bar {barColor(storagePct)} transition-all duration-500" style="width: {storagePct}%"></div>
         </div>
         <p class="mt-3 text-[0.6875rem] tabular-nums text-text-muted">
-          {storageFreeGb.toFixed(1)} GB {t("stats.free")}
+          {aStorageFree.value.toFixed(1)} GB {t("stats.free")}
         </p>
       </div>
     </div>
