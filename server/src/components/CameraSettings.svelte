@@ -1,6 +1,7 @@
 <script lang="ts">
 
   import { getBackendUrl } from "../lib/api";
+  import { apiFetch } from "../lib/fetch";
   import toast from "svelte-5-french-toast";
   import { t } from "../i18n";
   import Note from "./Note.svelte";
@@ -143,7 +144,7 @@
 
   async function doSaveRotation() {
     // Always save angle + mode to settings.json
-    await fetch(`${getBackendUrl()}/settings`, {
+    await apiFetch(`${getBackendUrl()}/settings`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ RotationAngle: angle, RotationMode: mode }),
@@ -152,7 +153,7 @@
     // If stream mode, also apply to MediaMTX (only 0/180 allowed)
     if (mode === "stream") {
       const effectiveAngle = (angle === 90 || angle === 270) ? 0 : angle;
-      const res = await fetch(`${getBackendUrl()}/stream_settings`, {
+      const res = await apiFetch(`${getBackendUrl()}/stream_settings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rotation_angle: effectiveAngle }),
@@ -202,7 +203,7 @@
 
   async function doSaveStreamParams() {
     // Save to settings.json
-    await fetch(`${getBackendUrl()}/settings`, {
+    await apiFetch(`${getBackendUrl()}/settings`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -213,7 +214,7 @@
     });
 
     // Apply to MediaMTX
-    const res = await fetch(`${getBackendUrl()}/stream_settings`, {
+    const res = await apiFetch(`${getBackendUrl()}/stream_settings`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ width, height, fps }),

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import { apiFetch } from "../lib/fetch";
   import { initLocale, t } from "../i18n";
   import Icon from "./Icon.svelte";
   import shieldIcon from "../icons/shield.svg?raw";
@@ -84,7 +85,7 @@
     loading = true;
     error = false;
     try {
-      const res = await fetch(`${getBackendUrl()}/event_history?hours=${HOURS}`);
+      const res = await apiFetch(`${getBackendUrl()}/event_history?hours=${HOURS}`);
       if (!res.ok) throw new Error();
       events = await res.json();
       slots = buildSlots(events);

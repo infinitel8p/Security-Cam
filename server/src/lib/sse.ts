@@ -21,6 +21,7 @@
  */
 
 import { getBackendUrl } from "./api";
+import { apiFetch } from "./fetch";
 
 type Listener = (data: any) => void;
 
@@ -105,7 +106,7 @@ export function sseClient(): SSEClient {
   /** Poll a single fallback endpoint once. */
   async function pollOnce(config: FallbackConfig) {
     try {
-      const res = await fetch(`${getBackendUrl()}${config.endpoint}`);
+      const res = await apiFetch(`${getBackendUrl()}${config.endpoint}`);
       if (!res.ok) return;
       let json = await res.json();
       if (config.transform) json = config.transform(json);

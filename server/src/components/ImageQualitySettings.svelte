@@ -1,5 +1,6 @@
 <script lang="ts">
   import { getBackendUrl } from "../lib/api";
+  import { apiFetch } from "../lib/fetch";
   import { t } from "../i18n";
   import toast from "svelte-5-french-toast";
   import Icon from "./Icon.svelte";
@@ -69,7 +70,7 @@
   async function apply() {
     saving = true;
     try {
-      const res = await fetch(`${getBackendUrl()}/isp_settings`, {
+      const res = await apiFetch(`${getBackendUrl()}/isp_settings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(currentValues()),

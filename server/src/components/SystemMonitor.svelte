@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import { apiFetch } from "../lib/fetch";
   import { sseClient } from "../lib/sse";
   import { animatedNumber } from "../lib/animate-number";
   import { initLocale, t } from "../i18n";
@@ -73,7 +74,7 @@
   async function fetchInfo() {
     retrying = true;
     try {
-      const res = await fetch(`${getBackendUrl()}/system_info`);
+      const res = await apiFetch(`${getBackendUrl()}/system_info`);
       if (!res.ok) throw new Error();
       applyInfo(await res.json());
     } catch {

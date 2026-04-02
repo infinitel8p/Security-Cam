@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import { apiFetch } from "../lib/fetch";
   import { sseClient } from "../lib/sse";
   import toast from "svelte-5-french-toast";
   import DeviceList from "./DeviceList.svelte";
@@ -103,7 +104,7 @@
 
   async function fetchDeviceStatuses() {
     try {
-      const res = await fetch(`${getBackendUrl()}/devices/status`);
+      const res = await apiFetch(`${getBackendUrl()}/devices/status`);
       if (res.ok) deviceStatuses = await res.json();
     } catch {
       // Silent fail - status is supplementary
@@ -146,7 +147,7 @@
     loading = true;
     error = false;
     try {
-      const res = await fetch(`${getBackendUrl()}/settings`);
+      const res = await apiFetch(`${getBackendUrl()}/settings`);
       if (!res.ok) throw new Error();
       const settings = await res.json();
       btDevices = settings.TARGET_BT_ADDRESSES ?? [];
@@ -179,7 +180,7 @@
 
       // Fetch live timelapse status
       try {
-        const tlRes = await fetch(`${getBackendUrl()}/timelapse/status`);
+        const tlRes = await apiFetch(`${getBackendUrl()}/timelapse/status`);
         if (tlRes.ok) {
           const tlStatus = await tlRes.json();
           timelapseFrameCount = tlStatus.today_frame_count ?? 0;
@@ -190,7 +191,7 @@
 
       // Fetch live disk usage + SD health
       try {
-        const storageRes = await fetch(`${getBackendUrl()}/storage/status`);
+        const storageRes = await apiFetch(`${getBackendUrl()}/storage/status`);
         if (storageRes.ok) {
           const st = await storageRes.json();
           storageDiskPercent = st.disk_percent ?? 0;
@@ -198,7 +199,7 @@
       } catch { /* non-critical */ }
 
       try {
-        const sysRes = await fetch(`${getBackendUrl()}/system_info`);
+        const sysRes = await apiFetch(`${getBackendUrl()}/system_info`);
         if (sysRes.ok) {
           const sys = await sysRes.json();
           const sd = sys.sd_health;
@@ -259,7 +260,7 @@
 
     toast.promise(
       (async () => {
-        const res = await fetch(`${getBackendUrl()}/storage/configure`, {
+        const res = await apiFetch(`${getBackendUrl()}/storage/configure`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -284,7 +285,7 @@
 
     toast.promise(
       (async () => {
-        const res = await fetch(`${getBackendUrl()}/timelapse/configure`, {
+        const res = await apiFetch(`${getBackendUrl()}/timelapse/configure`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -306,7 +307,7 @@
   }
 
   async function addBtDevice(device: Device) {
-    const res = await fetch(`${getBackendUrl()}/devices/bt/add`, {
+    const res = await apiFetch(`${getBackendUrl()}/devices/bt/add`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(device),
@@ -321,7 +322,7 @@
   }
 
   async function removeBtDevice(address: string) {
-    await fetch(`${getBackendUrl()}/devices/bt/remove`, {
+    await apiFetch(`${getBackendUrl()}/devices/bt/remove`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ address }),
@@ -330,7 +331,7 @@
   }
 
   async function addWifiDevice(device: Device) {
-    const res = await fetch(`${getBackendUrl()}/devices/wifi/add`, {
+    const res = await apiFetch(`${getBackendUrl()}/devices/wifi/add`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(device),
@@ -353,7 +354,7 @@
 
     toast.promise(
       (async () => {
-        const res = await fetch(`${getBackendUrl()}/settings`, {
+        const res = await apiFetch(`${getBackendUrl()}/settings`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ScanLines: enabled }),
@@ -373,7 +374,7 @@
   }
 
   async function removeWifiDevice(address: string) {
-    await fetch(`${getBackendUrl()}/devices/wifi/remove`, {
+    await apiFetch(`${getBackendUrl()}/devices/wifi/remove`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ address }),

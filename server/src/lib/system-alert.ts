@@ -7,6 +7,7 @@
  */
 
 import { getBackendUrl } from "./api";
+import { apiFetch } from "./fetch";
 import { sseClient } from "./sse";
 import toast from "svelte-5-french-toast";
 import { t } from "../i18n";
@@ -64,7 +65,7 @@ function _alertMessage(metric: string, level: string, values: Record<string, num
 
 async function _fetchState() {
   try {
-    const res = await fetch(`${getBackendUrl()}/system_alert_state`);
+    const res = await apiFetch(`${getBackendUrl()}/system_alert_state`);
     if (res.ok) {
       const data = await res.json();
       _state = {

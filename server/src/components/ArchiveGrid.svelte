@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import { apiFetch } from "../lib/fetch";
   import { sseClient } from "../lib/sse";
   import { markSeen } from "../lib/archive-badge";
   import toast from "svelte-5-french-toast";
@@ -186,7 +187,7 @@
     loading = true;
     error = false;
     try {
-      const res = await fetch(`${getBackendUrl()}/archive`);
+      const res = await apiFetch(`${getBackendUrl()}/archive`);
       if (!res.ok) throw new Error();
       const entries: { path: string; meta?: VideoMeta }[] = await res.json();
       allVideos = entries.map(parseEntry);
@@ -199,7 +200,7 @@
 
   async function fetchSnapshots() {
     try {
-      const res = await fetch(`${getBackendUrl()}/snapshots`);
+      const res = await apiFetch(`${getBackendUrl()}/snapshots`);
       if (!res.ok) return;
       const entries: { path: string; size: number }[] = await res.json();
       allSnapshots = entries.map((s) => {
@@ -225,7 +226,7 @@
   async function deleteSnapshot(snapshot: Snapshot) {
     deletingSnapshot = snapshot.path;
     try {
-      const res = await fetch(`${getBackendUrl()}/delete_snapshot`, {
+      const res = await apiFetch(`${getBackendUrl()}/delete_snapshot`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ snapshot_path: snapshot.path }),
@@ -252,7 +253,7 @@
 
   async function fetchTimelapses() {
     try {
-      const res = await fetch(`${getBackendUrl()}/timelapse`);
+      const res = await apiFetch(`${getBackendUrl()}/timelapse`);
       if (!res.ok) return;
       allTimelapses = await res.json();
       // Auto-open if new timelapses since last visit
@@ -281,7 +282,7 @@
   async function deleteTimelapse(tl: Timelapse) {
     deletingTimelapse = tl.path;
     try {
-      const res = await fetch(`${getBackendUrl()}/timelapse/delete`, {
+      const res = await apiFetch(`${getBackendUrl()}/timelapse/delete`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ path: tl.path }),
@@ -444,7 +445,7 @@
 
     toast.promise(
       (async () => {
-        const res = await fetch(`${getBackendUrl()}${action.url}`, {
+        const res = await apiFetch(`${getBackendUrl()}${action.url}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(action.body),

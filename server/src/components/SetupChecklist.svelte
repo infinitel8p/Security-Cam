@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { initLocale, t } from "../i18n";
   import { getBackendUrl } from "../lib/api";
+  import { apiFetch } from "../lib/fetch";
   import Icon from "./Icon.svelte";
   import shieldIcon from "../icons/shield.svg?raw";
   import xIcon from "../icons/x.svg?raw";
@@ -34,8 +35,8 @@
 
     try {
       const [settingsRes, archiveRes] = await Promise.all([
-        fetch(`${getBackendUrl()}/settings`),
-        fetch(`${getBackendUrl()}/archive`),
+        apiFetch(`${getBackendUrl()}/settings`),
+        apiFetch(`${getBackendUrl()}/archive`),
       ]);
       if (!settingsRes.ok) throw new Error();
       const settings = await settingsRes.json();
