@@ -366,7 +366,7 @@ def get_extended_stats():
         except Exception:
             pass
 
-        # AP client signal strengths (when Pi is running as access point)
+        # AP client info (when Pi is running as access point)
         try:
             result = subprocess.run(
                 ["iw", "dev", "ap0", "station", "dump"],
@@ -374,17 +374,26 @@ def get_extended_stats():
             )
             if result.returncode == 0 and result.stdout.strip():
                 ap_clients = []
-                current_mac = None
+                current = None
                 for line in result.stdout.splitlines():
                     line = line.strip()
                     if line.startswith("Station "):
-                        current_mac = line.split()[1]
-                    elif line.startswith("signal:") and current_mac:
-                        try:
-                            dbm = int(line.split(":", 1)[1].strip().split()[0])
-                            ap_clients.append({"mac": current_mac, "signal_dbm": dbm})
-                        except (ValueError, IndexError):
-                            pass
+                        if current:
+                            ap_clients.append(current)
+                        current = {"mac": line.split()[1]}
+                    elif current:
+                        if line.startswith("signal:"):
+                            try:
+                                current["signal_dbm"] = int(line.split(":", 1)[1].strip().split()[0])
+                            except (ValueError, IndexError):
+                                pass
+                        elif line.startswith("connected time:"):
+                            try:
+                                current["connected_secs"] = int(line.split(":", 1)[1].strip().split()[0])
+                            except (ValueError, IndexError):
+                                pass
+                if current:
+                    ap_clients.append(current)
                 if ap_clients:
                     stats["ap_clients_signal"] = ap_clients
         except Exception:

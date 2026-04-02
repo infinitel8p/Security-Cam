@@ -71,7 +71,7 @@
     ip_interface?: string;
     wifi_ssid?: string;
     wifi_signal_dbm?: number;
-    ap_clients_signal?: { mac: string; signal_dbm: number }[];
+    ap_clients_signal?: { mac: string; signal_dbm?: number; connected_secs?: number }[];
     flask_version?: string;
     opencv_version?: string;
     node_version?: string;
@@ -825,10 +825,19 @@
               <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("stats.apSignal")}</p>
               <div class="mt-1.5 space-y-1">
                 {#each extended.ap_clients_signal as client}
-                  {@const sigColor = client.signal_dbm > -50 ? 'text-status-ok' : client.signal_dbm > -70 ? 'text-status-warn' : 'text-status-critical'}
                   <div class="flex items-center justify-between text-[0.625rem]">
                     <span class="font-mono text-text-muted truncate">{client.mac}</span>
-                    <span class="tabular-nums font-medium {sigColor}">{client.signal_dbm} dBm</span>
+                    <span class="flex items-center gap-2">
+                      {#if client.connected_secs != null}
+                        <span class="text-text-muted">{Math.floor(client.connected_secs / 60)}m</span>
+                      {/if}
+                      {#if client.signal_dbm != null}
+                        {@const sigColor = client.signal_dbm > -50 ? 'text-status-ok' : client.signal_dbm > -70 ? 'text-status-warn' : 'text-status-critical'}
+                        <span class="tabular-nums font-medium {sigColor}">{client.signal_dbm} dBm</span>
+                      {:else}
+                        <span class="text-status-ok font-medium">connected</span>
+                      {/if}
+                    </span>
                   </div>
                 {/each}
               </div>
