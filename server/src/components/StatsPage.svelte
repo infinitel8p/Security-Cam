@@ -339,16 +339,28 @@
   let ramPct = $derived(info ? usagePct(num(info.ram_usage_mb?.used_mb), num(info.ram_usage_mb?.total_mb)) : 0);
   let storageFreeGb = $derived(info ? num(info.storage_info_gb?.total_gb) - num(info.storage_info_gb?.used_gb) : 0);
 
-  // Animated display values
-  const aLoad = animatedNumber();
-  const aTemp = animatedNumber();
-  const aRam = animatedNumber();
-  const aStorage = animatedNumber();
-  const aStorageFree = animatedNumber();
-  const aRamUsed = animatedNumber();
-  const aRamTotal = animatedNumber();
-  const aStorageUsed = animatedNumber();
-  const aStorageTotal = animatedNumber();
+  // Animated display values - tick counter forces Svelte re-render on each rAF frame
+  let animTick = $state(0);
+  const bump = () => { animTick++; };
+  const aLoad = animatedNumber(0, bump);
+  const aTemp = animatedNumber(0, bump);
+  const aRam = animatedNumber(0, bump);
+  const aStorage = animatedNumber(0, bump);
+  const aStorageFree = animatedNumber(0, bump);
+  const aRamUsed = animatedNumber(0, bump);
+  const aRamTotal = animatedNumber(0, bump);
+  const aStorageUsed = animatedNumber(0, bump);
+  const aStorageTotal = animatedNumber(0, bump);
+  // Reactive wrappers - reading animTick creates the dependency that triggers re-render
+  let dLoad = $derived((animTick, aLoad.value));
+  let dTemp = $derived((animTick, aTemp.value));
+  let dRam = $derived((animTick, aRam.value));
+  let dStorage = $derived((animTick, aStorage.value));
+  let dStorageFree = $derived((animTick, aStorageFree.value));
+  let dRamUsed = $derived((animTick, aRamUsed.value));
+  let dRamTotal = $derived((animTick, aRamTotal.value));
+  let dStorageUsed = $derived((animTick, aStorageUsed.value));
+  let dStorageTotal = $derived((animTick, aStorageTotal.value));
 
   $effect(() => { aLoad.set(loadPct); });
   $effect(() => { aTemp.set(cpuTemp); });
@@ -428,7 +440,7 @@
           <span class="h-2 w-2 rounded-full {statusDotColor(loadPct)}"></span>
         </div>
         <p class="mt-2 text-4xl font-bold tabular-nums leading-none text-text-primary">
-          {Math.round(aLoad.value)}<span class="ml-0.5 text-xs font-medium text-text-muted/60">%</span>
+          {Math.round(dLoad)}<span class="ml-0.5 text-xs font-medium text-text-muted/60">%</span>
         </p>
         <div class="mt-3 h-1 rounded-full {barTrackColor(loadPct)}" role="progressbar" aria-valuenow={loadPct} aria-valuemin={0} aria-valuemax={100} aria-label={t("label.cpu")}>
           <div class="h-full rounded-full animate-bar {barColor(loadPct)} transition-all duration-500" style="width: {loadPct}%"></div>
@@ -481,10 +493,10 @@
             <Icon icon={deviceDesktopIcon} class="h-3 w-3 text-text-muted" stroke={2} />
             <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.ram")}</p>
           </div>
-          <p class="text-[0.6875rem] tabular-nums text-text-muted">{aRamUsed.value.toFixed(0)} / {aRamTotal.value.toFixed(0)} MB</p>
+          <p class="text-[0.6875rem] tabular-nums text-text-muted">{dRamUsed.toFixed(0)} / {dRamTotal.toFixed(0)} MB</p>
         </div>
         <p class="mt-2 text-4xl font-bold tabular-nums leading-none text-text-primary">
-          {Math.round(aRam.value)}<span class="ml-0.5 text-xs font-medium text-text-muted/60">%</span>
+          {Math.round(dRam)}<span class="ml-0.5 text-xs font-medium text-text-muted/60">%</span>
         </p>
         <div class="mt-3 h-1 rounded-full {barTrackColor(ramPct)}" role="progressbar" aria-valuenow={ramPct} aria-valuemin={0} aria-valuemax={100} aria-label={t("label.ram")}>
           <div class="h-full rounded-full animate-bar {barColor(ramPct)} transition-all duration-500" style="width: {ramPct}%"></div>
@@ -538,7 +550,7 @@
           <span class="h-2 w-2 rounded-full {statusDotColor(tempPctLevel)}"></span>
         </div>
         <p class="mt-2 text-4xl font-bold tabular-nums leading-none {tempColor(cpuTemp)}">
-          {aTemp.value.toFixed(0)}<span class="ml-0.5 text-xs font-medium text-text-muted/60">&deg;C</span>
+          {dTemp.toFixed(0)}<span class="ml-0.5 text-xs font-medium text-text-muted/60">&deg;C</span>
         </p>
         <div class="mt-3 h-1 rounded-full {barTrackColor(tempPctLevel)}" role="progressbar" aria-valuenow={cpuTemp} aria-valuemin={0} aria-valuemax={85} aria-label={t("label.temperature")}>
           <div class="h-full rounded-full animate-bar {barColor(tempPctLevel)} transition-all duration-500" style="width: {Math.min(cpuTemp / 85 * 100, 100)}%"></div>
@@ -577,16 +589,16 @@
             <Icon icon={databaseIcon} class="h-3 w-3 text-text-muted" stroke={2} />
             <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.disk")}</p>
           </div>
-          <p class="text-[0.6875rem] tabular-nums text-text-muted">{aStorageUsed.value.toFixed(1)} / {aStorageTotal.value.toFixed(0)} GB</p>
+          <p class="text-[0.6875rem] tabular-nums text-text-muted">{dStorageUsed.toFixed(1)} / {dStorageTotal.toFixed(0)} GB</p>
         </div>
         <p class="mt-2 text-4xl font-bold tabular-nums leading-none text-text-primary">
-          {Math.round(aStorage.value)}<span class="ml-0.5 text-xs font-medium text-text-muted/60">%</span>
+          {Math.round(dStorage)}<span class="ml-0.5 text-xs font-medium text-text-muted/60">%</span>
         </p>
         <div class="mt-3 h-1 rounded-full {barTrackColor(storagePct)}" role="progressbar" aria-valuenow={storagePct} aria-valuemin={0} aria-valuemax={100} aria-label={t("label.disk")}>
           <div class="h-full rounded-full animate-bar {barColor(storagePct)} transition-all duration-500" style="width: {storagePct}%"></div>
         </div>
         <p class="mt-3 text-[0.6875rem] tabular-nums text-text-muted">
-          {aStorageFree.value.toFixed(1)} GB {t("stats.free")}
+          {dStorageFree.toFixed(1)} GB {t("stats.free")}
         </p>
       </div>
     </div>
