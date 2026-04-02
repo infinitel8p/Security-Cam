@@ -157,18 +157,36 @@
     }
   }
 
+  function onIOSFullscreenStart() { isFullscreen = true; }
+  function onIOSFullscreenEnd() {
+    isFullscreen = false;
+    try { screen.orientation.unlock(); } catch {}
+  }
+
   async function toggleFullscreen() {
-    if (!document.fullscreenElement) {
+    if (document.fullscreenElement || (document as any).webkitFullscreenElement) {
+      if (document.exitFullscreen) {
+        await document.exitFullscreen();
+      } else if ((document as any).webkitExitFullscreen) {
+        (document as any).webkitExitFullscreen();
+      }
+      return;
+    }
+
+    if (containerEl.requestFullscreen) {
       await containerEl.requestFullscreen();
-      isFullscreen = true;
-    } else {
-      await document.exitFullscreen();
-      isFullscreen = false;
+      try { await screen.orientation.lock("landscape"); } catch {}
+    } else if ((videoEl as any).webkitEnterFullscreen) {
+      (videoEl as any).webkitEnterFullscreen();
     }
   }
 
   function onFullscreenChange() {
-    isFullscreen = !!document.fullscreenElement;
+    const wasFullscreen = isFullscreen;
+    isFullscreen = !!(document.fullscreenElement || (document as any).webkitFullscreenElement);
+    if (wasFullscreen && !isFullscreen) {
+      try { screen.orientation.unlock(); } catch {}
+    }
   }
 
   function toggleRecording() {
@@ -261,6 +279,9 @@
       recording = ev.recording ?? false;
       recordingStartedAt = ev.started_at ?? null;
     });
+
+    videoEl.addEventListener("webkitbeginfullscreen", onIOSFullscreenStart);
+    videoEl.addEventListener("webkitendfullscreen", onIOSFullscreenEnd);
   });
 
   // Recording duration timer - uses backend start timestamp for accuracy
@@ -293,13 +314,15 @@
     clearInterval(recTimer);
     unsubRecording?.();
     cleanup();
+    videoEl?.removeEventListener("webkitbeginfullscreen", onIOSFullscreenStart);
+    videoEl?.removeEventListener("webkitendfullscreen", onIOSFullscreenEnd);
   });
 </script>
 
 <svelte:document on:fullscreenchange={onFullscreenChange} />
 
-<div bind:this={containerEl} class="feed-ring {recording ? 'feed-ring-rec' : connected ? 'feed-ring-ok' : ''}" class:fullscreen={isFullscreen}>
-<div class="card overflow-hidden transition-shadow duration-700 {connected ? 'shadow-glow-breathe' : ''} {recording ? 'recording-halo' : ''}">
+<div bind:this={containerEl} class="{isFullscreen ? '' : 'feed-ring'} {!isFullscreen && recording ? 'feed-ring-rec' : !isFullscreen && connected ? 'feed-ring-ok' : ''}" class:fullscreen={isFullscreen}>
+<div class="card overflow-hidden transition-shadow duration-700 {connected && !isFullscreen ? 'shadow-glow-breathe' : ''} {recording && !isFullscreen ? 'recording-halo' : ''}">
   <!-- Feed -->
   <div class="relative w-full bg-black/80 {isFullscreen ? 'min-h-0 flex-1' : 'aspect-video'}">
     <video
@@ -448,7 +471,22 @@
     display: flex;
     flex-direction: column;
     background: black;
+    width: 100%;
+    height: 100%;
   }
+
+  /* Card fills fullscreen and passes flex layout to children */
+  .fullscreen .card {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background: black;
+  }
+
   .fullscreen video {
     object-fit: contain;
   }
@@ -458,6 +496,7 @@
     background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
     opacity: 0;
     transition: opacity 0.3s ease;
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
   }
   .fullscreen:hover .fullscreen-controls,
   .fullscreen-controls:focus-within {

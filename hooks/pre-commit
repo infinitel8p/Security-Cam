@@ -34,22 +34,25 @@ NEW_VERSION="${TODAY_PREFIX}.${BUILD}"
 # Write VERSION file
 echo "$NEW_VERSION" > "$VERSION_FILE"
 
+# Portable in-place sed (macOS = BSD sed, Windows/Linux = GNU sed)
+sedi() { if sed --version >/dev/null 2>&1; then sed -i "$@"; else sed -i '' "$@"; fi; }
+
 # Sync to server/package.json
 if [ -f "$ROOT/server/package.json" ]; then
-    sed -i '' "s/\"version\": \"[^\"]*\"/\"version\": \"${NEW_VERSION}\"/" "$ROOT/server/package.json"
+    sedi "s/\"version\": \"[^\"]*\"/\"version\": \"${NEW_VERSION}\"/" "$ROOT/server/package.json"
     git add "$ROOT/server/package.json"
 fi
 
 # Sync to documentation/package.json
 if [ -f "$ROOT/documentation/package.json" ]; then
-    sed -i '' "s/\"version\": \"[^\"]*\"/\"version\": \"${NEW_VERSION}\"/" "$ROOT/documentation/package.json"
+    sedi "s/\"version\": \"[^\"]*\"/\"version\": \"${NEW_VERSION}\"/" "$ROOT/documentation/package.json"
     git add "$ROOT/documentation/package.json"
 fi
 
 # Sync to Navbar.svelte
 NAVBAR="$ROOT/server/src/components/Navbar.svelte"
 if [ -f "$NAVBAR" ]; then
-    sed -i '' 's/v\.[0-9][0-9.]*[0-9]/v.'"${NEW_VERSION}"'/' "$NAVBAR"
+    sedi 's/v\.[0-9][0-9.]*[0-9]/v.'"${NEW_VERSION}"'/' "$NAVBAR"
     git add "$NAVBAR"
 fi
 
