@@ -520,6 +520,7 @@ export default {
     eraseBlock: "Tamaño bloque borrado",
     hostname: "Nombre de host",
     os: "SO",
+    distro: "Distro",
     arch: "Arq.",
     kernel: "Kernel",
     platform: "Plataforma",

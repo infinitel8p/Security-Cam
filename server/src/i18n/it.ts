@@ -520,6 +520,7 @@ export default {
     eraseBlock: "Dim. blocco cancellazione",
     hostname: "Hostname",
     os: "SO",
+    distro: "Distro",
     arch: "Arch",
     kernel: "Kernel",
     platform: "Piattaforma",

@@ -520,6 +520,7 @@ export default {
     eraseBlock: "Löschblockgröße",
     hostname: "Hostname",
     os: "BS",
+    distro: "Distro",
     arch: "Arch",
     kernel: "Kernel",
     platform: "Plattform",

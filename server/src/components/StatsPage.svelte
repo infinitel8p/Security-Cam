@@ -62,6 +62,7 @@
     load_avg?: { "1min": number; "5min": number; "15min": number };
     python_version?: string;
     os_info?: string;
+    os_distro?: string;
     arch?: string;
     kernel?: string;
     username?: string;
@@ -866,6 +867,12 @@
           <div class="space-y-2 min-w-0">
             <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("stats.platform")}</p>
             <div class="space-y-1.5">
+              {#if extended.os_distro}
+                <div class="flex items-start gap-2 text-[0.6875rem] min-w-0">
+                  <span class="shrink-0 text-text-muted w-10">{t("stats.distro")}</span>
+                  <span class="text-text-primary truncate min-w-0" title={extended.os_distro}>{extended.os_distro}</span>
+                </div>
+              {/if}
               {#if extended.os_info}
                 <div class="flex items-start gap-2 text-[0.6875rem] min-w-0">
                   <span class="shrink-0 text-text-muted w-10">{t("stats.os")}</span>

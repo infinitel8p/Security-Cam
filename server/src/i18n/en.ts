@@ -549,6 +549,7 @@ export default {
     eraseBlock: "Erase block size",
     hostname: "Hostname",
     os: "OS",
+    distro: "Distro",
     arch: "Arch",
     kernel: "Kernel",
     platform: "Platform",
