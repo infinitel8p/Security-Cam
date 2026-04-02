@@ -20,11 +20,15 @@
 
   const dayLabels = ["M", "", "W", "", "F", "", "S"];
 
+  const SEVERITY_WEIGHT: Record<string, number> = { ok: 1, warn: 3, critical: 10 };
+  const WARN_THRESHOLD = 1.5;
+  const CRITICAL_THRESHOLD = 5.0;
+
   interface Cell {
     date: string;
     label: string;
     count: number;
-    maxSeverity: "empty" | "ok" | "warn" | "critical";
+    severity: "empty" | "ok" | "warn" | "critical";
     inRange: boolean;
   }
 
@@ -73,14 +77,17 @@
         const count = dayEvents.length;
         if (count > maxC) maxC = count;
 
-        let maxSeverity: Cell["maxSeverity"] = "empty";
-        if (dayEvents.some((e) => e.severity === "critical")) maxSeverity = "critical";
-        else if (dayEvents.some((e) => e.severity === "warn")) maxSeverity = "warn";
-        else if (dayEvents.length > 0) maxSeverity = "ok";
+        let severity: Cell["severity"] = "empty";
+        if (dayEvents.length > 0) {
+          const avg =
+            dayEvents.reduce((s, e) => s + (SEVERITY_WEIGHT[e.severity] ?? 1), 0) /
+            dayEvents.length;
+          severity = avg >= CRITICAL_THRESHOLD ? "critical" : avg >= WARN_THRESHOLD ? "warn" : "ok";
+        }
 
         const inRange = cellDate <= today;
         const label = cellDate.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
-        result.push({ date: key, label, count, maxSeverity, inRange });
+        result.push({ date: key, label, count, severity, inRange });
       }
     }
 
@@ -91,12 +98,12 @@
   function cellColor(cell: Cell): string {
     if (!cell.inRange || cell.count === 0) return "bg-surface-elevated";
     const intensity = Math.min(cell.count / maxCount, 1);
-    if (cell.maxSeverity === "critical") {
+    if (cell.severity === "critical") {
       if (intensity > 0.6) return "bg-status-critical";
       if (intensity > 0.3) return "bg-status-critical/60";
       return "bg-status-critical/30";
     }
-    if (cell.maxSeverity === "warn") {
+    if (cell.severity === "warn") {
       if (intensity > 0.6) return "bg-status-warning";
       if (intensity > 0.3) return "bg-status-warning/60";
       return "bg-status-warning/30";
@@ -148,7 +155,7 @@
     {#if hoveredCell && hoveredCell.inRange}
       <span class="truncate text-[0.625rem] tabular-nums text-text-muted">
         {hoveredCell.label} ·
-        <span class="{hoveredCell.maxSeverity === 'critical' ? 'text-status-critical' : hoveredCell.maxSeverity === 'warn' ? 'text-status-warning' : hoveredCell.count > 0 ? 'text-status-ok' : 'text-text-muted'}">
+        <span class="{hoveredCell.severity === 'critical' ? 'text-status-critical' : hoveredCell.severity === 'warn' ? 'text-status-warning' : hoveredCell.count > 0 ? 'text-status-ok' : 'text-text-muted'}">
           {hoveredCell.count} {hoveredCell.count === 1 ? "event" : "events"}
         </span>
       </span>

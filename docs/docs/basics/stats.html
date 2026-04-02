@@ -10,8 +10,8 @@
 
 
 <link rel="search" type="application/opensearchdescription+xml" title="Security-Cam" href="/Security-Cam/opensearch.xml"><link rel="stylesheet" href="/Security-Cam/assets/css/styles.36674e39.css">
-<script src="/Security-Cam/assets/js/runtime~main.38b2bdd1.js" defer="defer"></script>
-<script src="/Security-Cam/assets/js/main.6c3b78a6.js" defer="defer"></script>
+<script src="/Security-Cam/assets/js/runtime~main.ea0be331.js" defer="defer"></script>
+<script src="/Security-Cam/assets/js/main.1a5b0bd8.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
 <svg style="display: none;"><defs>
@@ -22,9 +22,9 @@
 <div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#F8F8F2;--prism-background-color:#282A36"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#F8F8F2;background-color:#282A36"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#F8F8F2"><span class="token plain">http://&lt;raspberry-pi-ip&gt;:3000/stats</span><br></span></code></pre></div></div>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="overview">Overview<a href="#overview" class="hash-link" aria-label="Direct link to Overview" title="Direct link to Overview" translate="no">​</a></h2>
 <p>The page polls <code>/system_info</code> every 10 seconds and displays:</p>
-<table><thead><tr><th>Section</th><th>What it shows</th></tr></thead><tbody><tr><td><strong>Uptime bar</strong></td><td>Time since last boot, hostname, boot timestamp</td></tr><tr><td><strong>CPU</strong></td><td>Current load percentage, per-core bars, sparkline history</td></tr><tr><td><strong>Temperature</strong></td><td>CPU temp in °C, color-coded by severity, sparkline</td></tr><tr><td><strong>RAM</strong></td><td>Used / total in MB, sparkline, swap usage</td></tr><tr><td><strong>Storage</strong></td><td>Used / total in GB with percentage bar, free space</td></tr><tr><td><strong>Throttle</strong></td><td>Active and historical throttle flags, process count, CPU cores, load averages</td></tr><tr><td><strong>Network</strong></td><td>Bytes and packets sent/received since boot</td></tr><tr><td><strong>SD Card</strong></td><td>Card name, serial, manufacturing date, firmware revision, bytes written, life estimate</td></tr><tr><td><strong>Camera</strong></td><td>Current stream resolution and framerate</td></tr><tr><td><strong>Recordings</strong></td><td>Total recording count, timelapse frame count, recording status</td></tr><tr><td><strong>Connectivity</strong></td><td>Bluetooth and WiFi device counts (online/total), sensor status</td></tr><tr><td><strong>Platform</strong></td><td>OS version, Python version, CPU architecture</td></tr></tbody></table>
+<table><thead><tr><th>Section</th><th>What it shows</th></tr></thead><tbody><tr><td><strong>Uptime bar</strong></td><td>Time since last boot, hostname, boot timestamp</td></tr><tr><td><strong>CPU</strong></td><td>Current load percentage, per-core bars, sparkline history</td></tr><tr><td><strong>Temperature</strong></td><td>CPU temp in °C, color-coded by severity, sparkline</td></tr><tr><td><strong>RAM</strong></td><td>Used / total in MB, sparkline, swap usage</td></tr><tr><td><strong>Storage</strong></td><td>Used / total in GB with percentage bar, free space</td></tr><tr><td><strong>Throttle</strong></td><td>Active and historical throttle flags, process count, CPU cores, load averages</td></tr><tr><td><strong>Network</strong></td><td>Bytes and packets sent/received since boot</td></tr><tr><td><strong>SD Card</strong></td><td>Card name, serial, manufacturing date, firmware revision, bytes written, life estimate</td></tr><tr><td><strong>Camera</strong></td><td>Sensor model and native resolution (if detected), available modes, current stream resolution and framerate</td></tr><tr><td><strong>Recordings</strong></td><td>Total recording count, timelapse frame count, recording status</td></tr><tr><td><strong>Connectivity</strong></td><td>Bluetooth and WiFi device counts (online/total), AP client signal strengths (when in AP mode), sensor status</td></tr><tr><td><strong>Platform</strong></td><td>OS distro name, kernel version, Python version, CPU architecture</td></tr></tbody></table>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="sparklines">Sparklines<a href="#sparklines" class="hash-link" aria-label="Direct link to Sparklines" title="Direct link to Sparklines" translate="no">​</a></h2>
-<p>CPU, temperature, and RAM cards include a small inline chart. On first load, up to 1 hour of historical data is loaded from the health log (5-minute interval snapshots). After that, live 10-second samples are appended. The sparklines are pure SVG with gradient area fills — no JavaScript animation overhead.</p>
+<p>CPU, temperature, and RAM cards include a small inline chart. On first load, up to 1 hour of historical data is loaded from the health log (5-minute interval snapshots, including RAM percentage). After that, live 10-second samples are appended. The sparklines are pure SVG with gradient area fills — no JavaScript animation overhead.</p>
 <p>When new data arrives, the area fill briefly pulses brighter to confirm the data is live.</p>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="status-reactive-cards">Status-reactive cards<a href="#status-reactive-cards" class="hash-link" aria-label="Direct link to Status-reactive cards" title="Direct link to Status-reactive cards" translate="no">​</a></h2>
 <p>Metric cards respond visually to threshold crossings:</p>
@@ -57,16 +57,33 @@
 </ul>
 <div class="theme-admonition theme-admonition-note admonition_xJq3 alert alert--secondary"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"></path></svg></span>note</div><div class="admonitionContent_BuS1"><p>Not all SD cards expose every field. Consumer cards typically show name, serial, and manufacturing date. Life estimate and erase block are more common on industrial/eMMC cards.</p></div></div>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="camera--recording">Camera &amp; Recording<a href="#camera--recording" class="hash-link" aria-label="Direct link to Camera &amp; Recording" title="Direct link to Camera &amp; Recording" translate="no">​</a></h2>
-<p>The camera card shows the current stream resolution and framerate. The recordings card shows:</p>
+<p>The camera card shows hardware sensor info (when available) and the current stream configuration:</p>
+<ul>
+<li class=""><strong>Sensor model</strong> — detected from <code>rpicam-hello --list-cameras</code> (e.g. IMX219, IMX708). Cached on startup.</li>
+<li class=""><strong>Native resolution</strong> — the sensor&#x27;s maximum resolution</li>
+<li class=""><strong>Available modes</strong> — supported resolution/FPS combinations shown as compact badges</li>
+<li class=""><strong>Stream resolution / FPS</strong> — the currently configured MediaMTX stream settings</li>
+</ul>
+<p>If the camera command is not available (e.g. on a non-Pi dev machine), only the stream settings are shown.</p>
+<p>The recordings card shows:</p>
 <ul>
 <li class=""><strong>Total recordings</strong> — number of videos in the archive</li>
 <li class=""><strong>Frames today</strong> — timelapse frames captured today (if timelapse is enabled)</li>
 <li class=""><strong>Recording indicator</strong> — a live REC badge when the camera is actively recording</li>
 </ul>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="connectivity--sensor">Connectivity &amp; Sensor<a href="#connectivity--sensor" class="hash-link" aria-label="Direct link to Connectivity &amp; Sensor" title="Direct link to Connectivity &amp; Sensor" translate="no">​</a></h2>
-<p>The connectivity card shows how many tracked Bluetooth and WiFi devices are online out of the total configured. Below that, the current sensor status is shown (Armed, Idle, or Off) along with the sensor type and GPIO pin.</p>
+<p>The connectivity card shows how many tracked Bluetooth and WiFi devices are online out of the total configured.</p>
+<p>When the Pi is running as an access point, the card also shows <strong>AP client signal strengths</strong> — each connected device&#x27;s MAC address with a color-coded dBm value (green &gt; -50 dBm, yellow &gt; -70 dBm, red below).</p>
+<p>Below that, the current sensor status is shown (Armed, Idle, or Off) along with the sensor type and GPIO pin.</p>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="platform-info">Platform info<a href="#platform-info" class="hash-link" aria-label="Direct link to Platform info" title="Direct link to Platform info" translate="no">​</a></h2>
-<p>A footer bar shows the OS version (e.g., <code>Linux-6.1.0-rpi-armv8l</code>), Python version, and CPU architecture. Useful for support and debugging.</p>
+<p>A footer section shows system identity and platform details:</p>
+<ul>
+<li class=""><strong>WiFi signal</strong> — color-coded dBm badge next to the SSID (green &gt; -50, yellow &gt; -70, red below)</li>
+<li class=""><strong>OS distro</strong> — parsed from <code>/etc/os-release</code> (e.g. &quot;Debian GNU/Linux 13 (trixie)&quot;)</li>
+<li class=""><strong>Kernel</strong> — kernel version string from <code>platform.platform()</code></li>
+<li class=""><strong>Architecture</strong> — CPU architecture (e.g. aarch64)</li>
+<li class=""><strong>Software versions</strong> — Python, Flask, OpenCV, Node.js, MediaMTX</li>
+</ul>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="relationship-to-dashboard">Relationship to Dashboard<a href="#relationship-to-dashboard" class="hash-link" aria-label="Direct link to Relationship to Dashboard" title="Direct link to Relationship to Dashboard" translate="no">​</a></h2>
 <p>The Dashboard page includes a compact system health widget (CPU, temp, RAM, storage in a 2×2 grid). The System page expands on this with:</p>
 <ul>
