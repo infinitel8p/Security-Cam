@@ -76,13 +76,20 @@ export function initArchiveBadge(): void {
 
   // Listen for new recordings via SSE
   const sse = sseClient();
-  _unsub = sse.on("recording_state", (data: { recording: boolean }) => {
+  const unsubRec = sse.on("recording_state", (data: { recording: boolean }) => {
     if (!data.recording) {
       // Recording just stopped → a new file was saved
       _count++;
       _notify();
     }
   });
+
+  // Re-fetch count when archive changes (catches timelapses, snapshots, post-processing)
+  const unsubArchive = sse.on("archive_updated", () => {
+    _fetchCount();
+  });
+
+  _unsub = () => { unsubRec(); unsubArchive(); };
 }
 
 export function getNewCount(): number {

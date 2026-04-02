@@ -207,7 +207,7 @@ curl -X POST http://<pi-ip>:5005/timelapse/configure \
 curl http://<pi-ip>:5005/timelapse
 ```
 
-Returns a JSON array of stitched timelapse MP4s, newest first. Each entry contains `path`, `date` (YYYY-MM-DD), and `size` (bytes).
+Returns a JSON array of stitched timelapse MP4s, newest first. Each entry contains `path`, `date` (YYYY-MM-DD), `size` (bytes), and `mtime` (ISO timestamp of when the file was created). If a thumbnail exists, `thumbnail` is also included.
 
 ### Stream timelapse video
 
@@ -289,7 +289,7 @@ Returns the hover-scrub sprite sheet for a recording. The sprite is a single JPE
 curl "http://<pi-ip>:5005/archive/new_count?since=2026-04-01T10:00:00%2B00:00"
 ```
 
-Returns `{"count": N}` — the number of recordings created after the given ISO timestamp. Used by the dashboard to show notification badges on the Archive nav link. Returns `0` if `since` is missing or invalid.
+Returns `{"count": N}` — the number of recordings, timelapses, and snapshots created after the given ISO timestamp. Used by the dashboard to show notification badges on the Archive nav link. The count updates in real-time via SSE `archive_updated` events when new content is added. Returns `0` if `since` is missing or invalid.
 
 ## Log endpoints
 

@@ -17,6 +17,7 @@ import time
 from datetime import datetime
 
 from . import settings_helpers
+from . import sse
 
 log = logging.getLogger("timelapse")
 
@@ -158,6 +159,7 @@ def _stitch_day(day_dir: str, date_str: str, output_dir: str, fps: int) -> bool:
             log.info("Timelapse stitched: %s (%d frames)", output_path, len(frames))
             shutil.rmtree(day_dir, ignore_errors=True)
             _generate_thumbnail(output_path)
+            sse.emit("archive_updated", {"path": output_path, "type": "timelapse"})
             return True
         log.error("Timelapse stitch produced empty file: %s", output_path)
     except subprocess.TimeoutExpired:
@@ -304,9 +306,11 @@ def get_timelapse_videos() -> list[dict]:
             date_str = f"{date_part[:4]}-{date_part[4:6]}-{date_part[6:8]}" if len(date_part) == 8 else ""
             try:
                 size = os.path.getsize(filepath)
+                mtime = datetime.fromtimestamp(os.path.getmtime(filepath)).isoformat()
             except OSError:
                 size = 0
-            entry: dict = {"path": filepath, "date": date_str, "size": size}
+                mtime = ""
+            entry: dict = {"path": filepath, "date": date_str, "size": size, "mtime": mtime}
             # Check for thumbnail sidecar
             thumb_path = os.path.splitext(filepath)[0] + ".thumb.jpg"
             if os.path.exists(thumb_path):
