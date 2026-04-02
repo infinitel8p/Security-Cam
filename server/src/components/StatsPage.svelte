@@ -70,6 +70,7 @@
     ip_address?: string;
     ip_interface?: string;
     wifi_ssid?: string;
+    wifi_signal_dbm?: number;
     flask_version?: string;
     opencv_version?: string;
     node_version?: string;
@@ -857,6 +858,11 @@
               <span class="font-mono text-[0.6875rem] transition-colors duration-150 {ipCopied ? 'text-status-ok' : 'text-text-muted'}">{ipCopied ? t("status.copied") : extended.ip_address}</span>
               {#if extended.wifi_ssid}
                 <span class="rounded-full bg-accent/10 px-2 py-0.5 text-[0.625rem] font-medium text-accent truncate max-w-[10rem]">{extended.wifi_ssid}</span>
+              {/if}
+              {#if extended.wifi_signal_dbm != null}
+                {@const dbm = extended.wifi_signal_dbm}
+                {@const sigColor = dbm > -50 ? 'text-status-ok' : dbm > -70 ? 'text-status-warn' : 'text-status-critical'}
+                <span class="rounded-full bg-surface-overlay px-2 py-0.5 text-[0.625rem] font-medium tabular-nums {sigColor}">{dbm} dBm</span>
               {/if}
             </button>
           {/if}

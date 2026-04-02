@@ -358,7 +358,11 @@ def get_extended_stats():
                     line = line.strip()
                     if line.startswith("SSID:"):
                         stats["wifi_ssid"] = line.split(":", 1)[1].strip()
-                        break
+                    elif line.startswith("signal:"):
+                        try:
+                            stats["wifi_signal_dbm"] = int(line.split(":", 1)[1].strip().split()[0])
+                        except (ValueError, IndexError):
+                            pass
         except Exception:
             pass
 
