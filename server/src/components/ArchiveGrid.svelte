@@ -550,7 +550,7 @@
                 {snap.time}
               </div>
               <!-- Actions (visible on hover) -->
-              <div class="absolute bottom-0 left-0 right-0 flex items-center justify-end gap-1 bg-gradient-to-t from-black/60 to-transparent px-1.5 py-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+              <div class="absolute bottom-0 left-0 right-0 flex items-center justify-end gap-1 bg-gradient-to-t from-black/60 to-transparent px-1.5 py-1.5 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100">
                 <button
                   onclick={() => downloadSnapshot(snap)}
                   class="flex h-7 w-7 items-center justify-center rounded-md bg-black/40 text-white/80 backdrop-blur-sm transition-colors hover:bg-black/60 hover:text-white"
