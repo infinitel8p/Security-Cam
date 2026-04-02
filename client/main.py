@@ -73,6 +73,11 @@ sensor_manager.start()
 storage_manager.start()
 timelapse_manager.start()
 
+# Ensure mediamtx.yml exists (copy from defaults) and merge new default keys,
+# then apply user settings (rotation, resolution, ISP) on top.
+mediamtx_helpers.ensure_config()
+mediamtx_helpers.sync_settings_to_config(settings_helpers.get_settings())
+
 def _on_ffmpeg_crash():
     sensor_manager.notify_manual_recording_stopped()
     event_logger.log_event("recording_stopped", "ffmpeg crash")

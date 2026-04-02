@@ -58,6 +58,40 @@ _ISP_RANGES = {
 }
 
 
+def ensure_config() -> None:
+    """Create mediamtx.yml from defaults if missing, merge new keys if stale.
+
+    Same pattern as settings_helpers._ensure_settings(): the default file
+    is tracked in git, the runtime file is gitignored.  On deploy the
+    default may gain new keys - this merges them into the runtime config
+    while preserving user customisations.
+    """
+    import shutil
+
+    if not os.path.exists(DEFAULT_CONFIG_PATH):
+        return
+
+    if not os.path.exists(CONFIG_PATH):
+        shutil.copy2(DEFAULT_CONFIG_PATH, CONFIG_PATH)
+        log.info("Created mediamtx.yml from defaults")
+        return
+
+    # Merge: add keys present in default but missing in runtime
+    with open(DEFAULT_CONFIG_PATH, "r") as f:
+        default_cfg = yaml.safe_load(f) or {}
+    with open(CONFIG_PATH, "r") as f:
+        runtime_cfg = yaml.safe_load(f) or {}
+
+    default_cam = default_cfg.get("paths", {}).get("cam", {})
+    runtime_cam = runtime_cfg.get("paths", {}).get("cam", {})
+
+    new_keys = {k: v for k, v in default_cam.items() if k not in runtime_cam}
+    if new_keys:
+        _patch_cam_values(new_keys)
+        log.info("Merged %d new default key(s) into mediamtx.yml: %s",
+                 len(new_keys), ", ".join(new_keys))
+
+
 def read_config():
     """Read mediamtx.yml and return the cam path's rpiCamera params."""
     with open(CONFIG_PATH, "r") as f:
@@ -198,6 +232,46 @@ def update_isp_params(params):
     _patch_cam_values(overrides)
     log.info("ISP config written, restarting MediaMTX...")
     return restart_service()
+
+
+def sync_settings_to_config(settings: dict) -> None:
+    """Apply persisted settings to mediamtx.yml (single patch, no restart).
+
+    Called on startup after ensure_config() so mediamtx.yml exists.
+    Applies user's rotation, resolution, and ISP settings from
+    settings.json on top of the config.
+    """
+    if not os.path.exists(CONFIG_PATH):
+        return
+
+    overrides = {}
+
+    # Stream resolution / FPS
+    for key, yml_key in STREAM_KEYS.items():
+        settings_key = {"width": "StreamWidth", "height": "StreamHeight",
+                        "fps": "StreamFPS"}.get(key)
+        if settings_key and settings_key in settings:
+            overrides[yml_key] = int(settings[settings_key])
+
+    # Stream-mode rotation (hflip/vflip)
+    if settings.get("RotationMode") == "stream":
+        angle = int(settings.get("RotationAngle", 0))
+        if angle == 180:
+            overrides["rpiCameraHFlip"] = True
+            overrides["rpiCameraVFlip"] = True
+        else:
+            overrides["rpiCameraHFlip"] = False
+            overrides["rpiCameraVFlip"] = False
+
+    # ISP image-quality params
+    isp = settings.get("ISP", {})
+    for key, yml_key in ISP_KEYS.items():
+        if key in isp:
+            overrides[yml_key] = isp[key]
+
+    if overrides:
+        _patch_cam_values(overrides)
+        log.info("Synced %d setting(s) to mediamtx.yml", len(overrides))
 
 
 def restart_service():
