@@ -208,7 +208,7 @@
         const time = match ? `${match[4]}:${match[5]}:${match[6]}` : "";
         return { ...s, filename, date, time };
       });
-      if (allSnapshots.length > 0) snapshotsOpen = true;
+      // Default collapsed - user opens manually
     } catch {
       // Non-critical
     }
@@ -251,7 +251,7 @@
       const res = await fetch(`${getBackendUrl()}/timelapse`);
       if (!res.ok) return;
       allTimelapses = await res.json();
-      if (allTimelapses.length > 0) timelapsesOpen = true;
+      // Default collapsed - user opens manually
     } catch {
       // Non-critical
     }
