@@ -184,6 +184,40 @@ def get_ram_usage():
 _static_cache: dict | None = None
 
 
+def _parse_camera_info(output: str) -> dict | None:
+    """Parse rpicam-hello --list-cameras output into a structured dict."""
+    import re
+
+    # Match first camera line: "0 : imx219 [3280x2464 10-bit RGGB] (/base/...)"
+    cam_match = re.search(r"^\s*\d+\s*:\s*(\S+)\s*\[(\d+)x(\d+)", output, re.MULTILINE)
+    if not cam_match:
+        return None
+
+    model = cam_match.group(1)
+    native_w = int(cam_match.group(2))
+    native_h = int(cam_match.group(3))
+
+    # Parse available modes: "1920x1080 [30.01 fps ..."
+    modes = []
+    seen = set()
+    for m in re.finditer(r"(\d{3,5})x(\d{3,5})\s*\[(\d+(?:\.\d+)?)\s*fps", output):
+        w, h, fps = int(m.group(1)), int(m.group(2)), float(m.group(3))
+        key = (w, h)
+        if key not in seen:
+            seen.add(key)
+            modes.append({"width": w, "height": h, "max_fps": round(fps, 1)})
+
+    # Sort by resolution descending
+    modes.sort(key=lambda m: m["width"] * m["height"], reverse=True)
+
+    return {
+        "model": model,
+        "native_width": native_w,
+        "native_height": native_h,
+        "modes": modes,
+    }
+
+
 def _get_static_info() -> dict:
     """Return platform info that never changes at runtime (cached once)."""
     global _static_cache
@@ -253,6 +287,23 @@ def _get_static_info() -> dict:
                 info["node_version"] = result.stdout.strip().lstrip("v")
         except Exception:
             pass
+
+    # Camera sensor info (from rpicam-hello / libcamera-hello)
+    for cam_cmd in ("rpicam-hello", "libcamera-hello"):
+        cam_bin = shutil.which(cam_cmd)
+        if cam_bin:
+            try:
+                result = subprocess.run(
+                    [cam_bin, "--list-cameras"],
+                    capture_output=True, text=True, timeout=5,
+                )
+                if result.returncode == 0:
+                    cam = _parse_camera_info(result.stdout)
+                    if cam:
+                        info["camera_sensor"] = cam
+            except Exception:
+                pass
+            break
 
     # MediaMTX version
     mtx_bin = shutil.which("mediamtx") or "/usr/local/bin/mediamtx"
