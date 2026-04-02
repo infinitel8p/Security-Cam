@@ -36,20 +36,20 @@ echo "$NEW_VERSION" > "$VERSION_FILE"
 
 # Sync to server/package.json
 if [ -f "$ROOT/server/package.json" ]; then
-    sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"${NEW_VERSION}\"/" "$ROOT/server/package.json"
+    sed -i '' "s/\"version\": \"[^\"]*\"/\"version\": \"${NEW_VERSION}\"/" "$ROOT/server/package.json"
     git add "$ROOT/server/package.json"
 fi
 
 # Sync to documentation/package.json
 if [ -f "$ROOT/documentation/package.json" ]; then
-    sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"${NEW_VERSION}\"/" "$ROOT/documentation/package.json"
+    sed -i '' "s/\"version\": \"[^\"]*\"/\"version\": \"${NEW_VERSION}\"/" "$ROOT/documentation/package.json"
     git add "$ROOT/documentation/package.json"
 fi
 
 # Sync to Navbar.svelte
 NAVBAR="$ROOT/server/src/components/Navbar.svelte"
 if [ -f "$NAVBAR" ]; then
-    sed -i 's/v\.[0-9][0-9.]*[0-9]/v.'"${NEW_VERSION}"'/' "$NAVBAR"
+    sed -i '' 's/v\.[0-9][0-9.]*[0-9]/v.'"${NEW_VERSION}"'/' "$NAVBAR"
     git add "$NAVBAR"
 fi
 
