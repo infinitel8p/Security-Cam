@@ -250,9 +250,11 @@
     return [...groups.entries()];
   });
 
-  // Auto-expand the category that contains the selected log
+  // Auto-expand category only when a NEW log is selected (not on re-render)
+  let lastAutoExpanded = "";
   $effect(() => {
-    if (selectedInstallLog) {
+    if (selectedInstallLog && selectedInstallLog !== lastAutoExpanded) {
+      lastAutoExpanded = selectedInstallLog;
       const match = installLogs.find((l) => l.name === selectedInstallLog);
       if (match) {
         const cat = match.category || "install";
@@ -267,6 +269,13 @@
     const next = new Set(expandedCategories);
     if (next.has(category)) {
       next.delete(category);
+      // Clear selected log if it belongs to the collapsed category
+      if (selectedInstallLog) {
+        const match = installLogs.find((l) => l.name === selectedInstallLog);
+        if (match && (match.category || "install") === category) {
+          selectedInstallLog = null;
+        }
+      }
     } else {
       next.add(category);
     }
