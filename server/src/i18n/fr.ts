@@ -520,6 +520,7 @@ export default {
     eraseBlock: "Taille bloc effacement",
     hostname: "Nom d'hôte",
     os: "SE",
+    distro: "Distro",
     arch: "Arch",
     kernel: "Noyau",
     platform: "Plateforme",

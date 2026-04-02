@@ -204,6 +204,16 @@ def _get_static_info() -> dict:
     info["arch"] = platform.machine()
     info["kernel"] = platform.release()
 
+    # Distro info from /etc/os-release
+    try:
+        with open("/etc/os-release", "r") as f:
+            for line in f:
+                if line.startswith("PRETTY_NAME="):
+                    info["os_distro"] = line.split("=", 1)[1].strip().strip('"')
+                    break
+    except (FileNotFoundError, PermissionError):
+        pass
+
     # CPU model
     try:
         with open("/proc/cpuinfo", "r") as f:
