@@ -156,7 +156,7 @@
           <Icon icon={cpuIcon} class="h-3 w-3 text-text-muted" stroke={2.5} />
           <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("label.gpio")}</p>
         </div>
-        <p class="mt-1 text-xl font-bold tabular-nums leading-none {data.enabled ? 'text-accent' : 'text-text-muted'}">
+        <p class="mt-1 text-[0.8125rem] font-bold tabular-nums leading-none {data.enabled ? 'text-accent' : 'text-text-muted'}">
           {data.enabled && data.config.gpio != null ? data.config.gpio : "--"}
         </p>
       </div>
