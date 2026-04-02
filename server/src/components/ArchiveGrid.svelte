@@ -85,6 +85,7 @@
     path: string;
     date: string;
     size: number;
+    mtime?: string;
     thumbnail?: string;
   }
   let allTimelapses: Timelapse[] = $state([]);
@@ -257,7 +258,7 @@
       if (!res.ok) return;
       allTimelapses = await res.json();
       // Auto-open if new timelapses since last visit
-      if (lastSeenTs > 0 && allTimelapses.some((tl) => new Date(tl.date).getTime() > lastSeenTs)) {
+      if (lastSeenTs > 0 && allTimelapses.some((tl) => tl.mtime && new Date(tl.mtime).getTime() > lastSeenTs)) {
         timelapsesOpen = true;
       }
     } catch {
@@ -317,15 +318,16 @@
   }
 
   function isNewTimelapse(tl: Timelapse): boolean {
-    if (lastSeenTs <= 0 || !tl.date) return false;
-    return new Date(tl.date).getTime() > lastSeenTs;
+    if (lastSeenTs <= 0) return false;
+    if (tl.mtime) return new Date(tl.mtime).getTime() > lastSeenTs;
+    return false;
   }
 
   let newSnapshotCount = $derived(
     lastSeenTs > 0 ? allSnapshots.filter((s) => new Date(`${s.date}T${s.time}`).getTime() > lastSeenTs).length : 0
   );
   let newTimelapseCount = $derived(
-    lastSeenTs > 0 ? allTimelapses.filter((tl) => new Date(tl.date).getTime() > lastSeenTs).length : 0
+    lastSeenTs > 0 ? allTimelapses.filter((tl) => tl.mtime && new Date(tl.mtime).getTime() > lastSeenTs).length : 0
   );
 
   let unsubArchiveUpdate: (() => void) | null = null;
@@ -343,10 +345,12 @@
     // Mark archive as seen (clears the nav badge)
     markSeen();
 
-    // Re-fetch archive when sprites/thumbnails are generated (async after recording stops)
+    // Re-fetch archive when new content is added (recordings, timelapses, snapshots)
     const sse = sseClient();
     unsubArchiveUpdate = sse.on("archive_updated", () => {
       fetchArchive();
+      fetchSnapshots();
+      fetchTimelapses();
     });
 
     return () => {

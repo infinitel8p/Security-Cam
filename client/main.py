@@ -153,6 +153,7 @@ def snapshot():
     try:
         path = stream_helpers.capture_snapshot()
         log.info("Snapshot captured: %s", path)
+        sse.emit("archive_updated", {"path": path, "type": "snapshot"})
         return jsonify({"path": path})
     except RuntimeError as e:
         log.error("Snapshot failed: %s", e)
