@@ -70,6 +70,8 @@
     ip_address?: string;
     ip_interface?: string;
     wifi_ssid?: string;
+    wifi_signal_dbm?: number;
+    ap_clients_signal?: { mac: string; signal_dbm?: number; connected_secs?: number }[];
     flask_version?: string;
     opencv_version?: string;
     node_version?: string;
@@ -842,6 +844,29 @@
               </p>
             </div>
           </div>
+          {#if extended?.ap_clients_signal?.length}
+            <div class="mt-3 border-t border-border-subtle pt-3">
+              <p class="text-[0.625rem] font-medium uppercase tracking-wider text-text-muted">{t("stats.apSignal")}</p>
+              <div class="mt-1.5 space-y-1">
+                {#each extended.ap_clients_signal as client}
+                  <div class="flex items-center justify-between text-[0.625rem]">
+                    <span class="font-mono text-text-muted truncate">{client.mac}</span>
+                    <span class="flex items-center gap-2">
+                      {#if client.connected_secs != null}
+                        <span class="text-text-muted">{Math.floor(client.connected_secs / 60)}m</span>
+                      {/if}
+                      {#if client.signal_dbm != null}
+                        {@const sigColor = client.signal_dbm > -50 ? 'text-status-ok' : client.signal_dbm > -70 ? 'text-status-warn' : 'text-status-critical'}
+                        <span class="tabular-nums font-medium {sigColor}">{client.signal_dbm} dBm</span>
+                      {:else}
+                        <span class="text-status-ok font-medium">connected</span>
+                      {/if}
+                    </span>
+                  </div>
+                {/each}
+              </div>
+            </div>
+          {/if}
           {#if sensor}
             <div class="mt-3 border-t border-border-subtle pt-3">
               <div class="flex items-center gap-1.5">
@@ -881,6 +906,11 @@
               <span class="font-mono text-[0.6875rem] transition-colors duration-150 {ipCopied ? 'text-status-ok' : 'text-text-muted'}">{ipCopied ? t("status.copied") : extended.ip_address}</span>
               {#if extended.wifi_ssid}
                 <span class="rounded-full bg-accent/10 px-2 py-0.5 text-[0.625rem] font-medium text-accent truncate max-w-[10rem]">{extended.wifi_ssid}</span>
+              {/if}
+              {#if extended.wifi_signal_dbm != null}
+                {@const dbm = extended.wifi_signal_dbm}
+                {@const sigColor = dbm > -50 ? 'text-status-ok' : dbm > -70 ? 'text-status-warn' : 'text-status-critical'}
+                <span class="rounded-full bg-surface-overlay px-2 py-0.5 text-[0.625rem] font-medium tabular-nums {sigColor}">{dbm} dBm</span>
               {/if}
             </button>
           {/if}

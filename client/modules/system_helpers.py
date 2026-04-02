@@ -409,7 +409,44 @@ def get_extended_stats():
                     line = line.strip()
                     if line.startswith("SSID:"):
                         stats["wifi_ssid"] = line.split(":", 1)[1].strip()
-                        break
+                    elif line.startswith("signal:"):
+                        try:
+                            stats["wifi_signal_dbm"] = int(line.split(":", 1)[1].strip().split()[0])
+                        except (ValueError, IndexError):
+                            pass
+        except Exception:
+            pass
+
+        # AP client info (when Pi is running as access point)
+        try:
+            result = subprocess.run(
+                ["iw", "dev", "ap0", "station", "dump"],
+                capture_output=True, text=True, timeout=2,
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                ap_clients = []
+                current = None
+                for line in result.stdout.splitlines():
+                    line = line.strip()
+                    if line.startswith("Station "):
+                        if current:
+                            ap_clients.append(current)
+                        current = {"mac": line.split()[1]}
+                    elif current:
+                        if line.startswith("signal:"):
+                            try:
+                                current["signal_dbm"] = int(line.split(":", 1)[1].strip().split()[0])
+                            except (ValueError, IndexError):
+                                pass
+                        elif line.startswith("connected time:"):
+                            try:
+                                current["connected_secs"] = int(line.split(":", 1)[1].strip().split()[0])
+                            except (ValueError, IndexError):
+                                pass
+                if current:
+                    ap_clients.append(current)
+                if ap_clients:
+                    stats["ap_clients_signal"] = ap_clients
         except Exception:
             pass
 

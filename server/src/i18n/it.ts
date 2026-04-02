@@ -545,5 +545,6 @@ export default {
     framesToday: "Fotogrammi oggi",
     timelapseActive: "Timelapse in corso",
     connectivity: "Connettività",
+    apSignal: "Segnale client AP",
   },
 } as const;
