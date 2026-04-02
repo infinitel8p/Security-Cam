@@ -92,7 +92,8 @@
   let deletingTimelapse: string | null = $state(null);
   let loading = $state(true);
   let error = $state(false);
-  let deleteTarget: Video | null = $state(null);
+  type DeleteTarget = { kind: "video"; item: Video } | { kind: "timelapse"; item: Timelapse } | { kind: "snapshot"; item: Snapshot } | null;
+  let deleteTarget: DeleteTarget = $state(null);
   let deleting = $state(false);
   let search = $state("");
   let sortMode: SortMode = $state("newest");
@@ -393,38 +394,63 @@
     deleting = true;
     const target = deleteTarget;
 
+    const actions = {
+      video: {
+        url: "/delete_video",
+        body: { video_path: target.item.path },
+        remove: () => { allVideos = allVideos.filter((v) => v.path !== target.item.path); },
+        success: t("toast.recordingDeleted"),
+        error: t("toast.deleteRecordingFailed"),
+      },
+      timelapse: {
+        url: "/timelapse/delete",
+        body: { path: target.item.path },
+        remove: () => { allTimelapses = allTimelapses.filter((tl) => tl.path !== target.item.path); },
+        success: t("toast.timelapseDeleted"),
+        error: t("toast.deleteTimelapseFailed"),
+      },
+      snapshot: {
+        url: "/delete_snapshot",
+        body: { snapshot_path: target.item.path },
+        remove: () => { allSnapshots = allSnapshots.filter((s) => s.path !== target.item.path); },
+        success: t("toast.snapshotDeleted"),
+        error: t("toast.deleteSnapshotFailed"),
+      },
+    };
+    const action = actions[target.kind];
+
     toast.promise(
       (async () => {
-        const res = await fetch(`${getBackendUrl()}/delete_video`, {
+        const res = await fetch(`${getBackendUrl()}${action.url}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ video_path: target.path }),
+          body: JSON.stringify(action.body),
         });
         if (!res.ok) throw new Error("Server returned an error");
-        allVideos = allVideos.filter((v) => v.path !== target.path);
+        action.remove();
         deleteTarget = null;
       })(),
       {
         loading: t("status.deleting"),
-        success: t("toast.recordingDeleted"),
-        error: t("toast.deleteRecordingFailed"),
+        success: action.success,
+        error: action.error,
       },
     ).finally(() => { deleting = false; });
   }
 
-  function openDeleteDialog(video: Video, btnEl: HTMLButtonElement) {
-    if (document.startViewTransition) {
-      // Tag the button as the morph source
+  function openDeleteDialog(kind: "video" | "timelapse" | "snapshot", item: Video | Timelapse | Snapshot, btnEl?: HTMLButtonElement) {
+    const target = { kind, item } as DeleteTarget;
+    if (btnEl && document.startViewTransition) {
       btnEl.style.viewTransitionName = "delete-morph";
       const transition = document.startViewTransition(() => {
         btnEl.style.viewTransitionName = "";
-        deleteTarget = video;
+        deleteTarget = target;
       });
       transition.finished.then(() => {
         btnEl.style.viewTransitionName = "";
       });
     } else {
-      deleteTarget = video;
+      deleteTarget = target;
     }
   }
 
@@ -559,8 +585,7 @@
                   <Icon icon={downloadIcon} class="h-3.5 w-3.5" />
                 </button>
                 <button
-                  onclick={() => deleteSnapshot(snap)}
-                  disabled={deletingSnapshot === snap.path}
+                  onclick={(e) => openDeleteDialog("snapshot", snap)}
                   class="flex h-7 w-7 items-center justify-center rounded-md bg-black/40 text-white/80 backdrop-blur-sm transition-colors hover:bg-status-critical/60 hover:text-white disabled:opacity-40"
                   title={t("btn.delete")}
                 >
@@ -632,8 +657,7 @@
                     <Icon icon={downloadIcon} class="h-4 w-4" />
                   </button>
                   <button
-                    onclick={() => deleteTimelapse(tl)}
-                    disabled={deletingTimelapse === tl.path}
+                    onclick={(e) => openDeleteDialog("timelapse", tl)}
                     class="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-status-critical/8 hover:text-status-critical disabled:opacity-40"
                     title={t("btn.delete")}
                   >
@@ -937,7 +961,7 @@
                       <Icon icon={downloadIcon} class="h-[1.125rem] w-[1.125rem] sm:h-4 sm:w-4" />
                     </button>
                     <button
-                      onclick={(e) => openDeleteDialog(video, e.currentTarget as HTMLButtonElement)}
+                      onclick={(e) => openDeleteDialog("video", video, e.currentTarget as HTMLButtonElement)}
                       class="flex h-10 w-10 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-status-critical/8 hover:text-status-critical sm:h-auto sm:w-auto sm:p-2"
                       title={t("btn.delete")}
                     >
@@ -1039,7 +1063,7 @@
                     <Icon icon={downloadIcon} class="h-4 w-4" />
                   </button>
                   <button
-                    onclick={(e) => openDeleteDialog(video, e.currentTarget as HTMLButtonElement)}
+                    onclick={(e) => openDeleteDialog("video", video, e.currentTarget as HTMLButtonElement)}
                     class="flex h-10 w-10 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-status-critical/8 hover:text-status-critical sm:h-8 sm:w-8"
                     title={t("btn.delete")}
                     aria-label={t("btn.deleteRecording")}
@@ -1074,7 +1098,7 @@
       </div>
       <h3 class="mt-3 text-sm font-semibold text-text-primary">{t("dialog.deleteTitle")}</h3>
       <p class="mt-1 text-[0.8125rem] leading-relaxed text-text-secondary">
-        {t("dialog.deleteMessage", { filename: deleteTarget.filename })}
+        {t("dialog.deleteMessage", { filename: deleteTarget.item.filename ?? deleteTarget.item.date ?? deleteTarget.item.path.split("/").pop() })}
       </p>
       <div class="mt-5 flex justify-end gap-2.5">
         <button
