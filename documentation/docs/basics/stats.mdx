@@ -27,14 +27,14 @@ The page polls `/system_info` every 10 seconds and displays:
 | **Throttle** | Active and historical throttle flags, process count, CPU cores, load averages |
 | **Network** | Bytes and packets sent/received since boot |
 | **SD Card** | Card name, serial, manufacturing date, firmware revision, bytes written, life estimate |
-| **Camera** | Current stream resolution and framerate |
+| **Camera** | Sensor model and native resolution (if detected), available modes, current stream resolution and framerate |
 | **Recordings** | Total recording count, timelapse frame count, recording status |
-| **Connectivity** | Bluetooth and WiFi device counts (online/total), sensor status |
-| **Platform** | OS version, Python version, CPU architecture |
+| **Connectivity** | Bluetooth and WiFi device counts (online/total), AP client signal strengths (when in AP mode), sensor status |
+| **Platform** | OS distro name, kernel version, Python version, CPU architecture |
 
 ## Sparklines
 
-CPU, temperature, and RAM cards include a small inline chart. On first load, up to 1 hour of historical data is loaded from the health log (5-minute interval snapshots). After that, live 10-second samples are appended. The sparklines are pure SVG with gradient area fills — no JavaScript animation overhead.
+CPU, temperature, and RAM cards include a small inline chart. On first load, up to 1 hour of historical data is loaded from the health log (5-minute interval snapshots, including RAM percentage). After that, live 10-second samples are appended. The sparklines are pure SVG with gradient area fills — no JavaScript animation overhead.
 
 When new data arrives, the area fill briefly pulses brighter to confirm the data is live.
 
@@ -81,7 +81,16 @@ Not all SD cards expose every field. Consumer cards typically show name, serial,
 
 ## Camera & Recording
 
-The camera card shows the current stream resolution and framerate. The recordings card shows:
+The camera card shows hardware sensor info (when available) and the current stream configuration:
+
+- **Sensor model** — detected from `rpicam-hello --list-cameras` (e.g. IMX219, IMX708). Cached on startup.
+- **Native resolution** — the sensor's maximum resolution
+- **Available modes** — supported resolution/FPS combinations shown as compact badges
+- **Stream resolution / FPS** — the currently configured MediaMTX stream settings
+
+If the camera command is not available (e.g. on a non-Pi dev machine), only the stream settings are shown.
+
+The recordings card shows:
 
 - **Total recordings** — number of videos in the archive
 - **Frames today** — timelapse frames captured today (if timelapse is enabled)
@@ -89,11 +98,21 @@ The camera card shows the current stream resolution and framerate. The recording
 
 ## Connectivity & Sensor
 
-The connectivity card shows how many tracked Bluetooth and WiFi devices are online out of the total configured. Below that, the current sensor status is shown (Armed, Idle, or Off) along with the sensor type and GPIO pin.
+The connectivity card shows how many tracked Bluetooth and WiFi devices are online out of the total configured.
+
+When the Pi is running as an access point, the card also shows **AP client signal strengths** — each connected device's MAC address with a color-coded dBm value (green > -50 dBm, yellow > -70 dBm, red below).
+
+Below that, the current sensor status is shown (Armed, Idle, or Off) along with the sensor type and GPIO pin.
 
 ## Platform info
 
-A footer bar shows the OS version (e.g., `Linux-6.1.0-rpi-armv8l`), Python version, and CPU architecture. Useful for support and debugging.
+A footer section shows system identity and platform details:
+
+- **WiFi signal** — color-coded dBm badge next to the SSID (green > -50, yellow > -70, red below)
+- **OS distro** — parsed from `/etc/os-release` (e.g. "Debian GNU/Linux 13 (trixie)")
+- **Kernel** — kernel version string from `platform.platform()`
+- **Architecture** — CPU architecture (e.g. aarch64)
+- **Software versions** — Python, Flask, OpenCV, Node.js, MediaMTX
 
 ## Relationship to Dashboard
 
