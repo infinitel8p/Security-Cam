@@ -208,7 +208,10 @@
         const time = match ? `${match[4]}:${match[5]}:${match[6]}` : "";
         return { ...s, filename, date, time };
       });
-      // Default collapsed - user opens manually
+      // Auto-open if new snapshots since last visit
+      if (lastSeenTs > 0 && allSnapshots.some((s) => new Date(`${s.date}T${s.time}`).getTime() > lastSeenTs)) {
+        snapshotsOpen = true;
+      }
     } catch {
       // Non-critical
     }
@@ -251,7 +254,10 @@
       const res = await fetch(`${getBackendUrl()}/timelapse`);
       if (!res.ok) return;
       allTimelapses = await res.json();
-      // Default collapsed - user opens manually
+      // Auto-open if new timelapses since last visit
+      if (lastSeenTs > 0 && allTimelapses.some((tl) => new Date(tl.date).getTime() > lastSeenTs)) {
+        timelapsesOpen = true;
+      }
     } catch {
       // Non-critical
     }
@@ -302,6 +308,13 @@
   function isNewRecording(video: Video): boolean {
     return lastSeenTs > 0 && video.timestamp > lastSeenTs;
   }
+
+  let newSnapshotCount = $derived(
+    lastSeenTs > 0 ? allSnapshots.filter((s) => new Date(`${s.date}T${s.time}`).getTime() > lastSeenTs).length : 0
+  );
+  let newTimelapseCount = $derived(
+    lastSeenTs > 0 ? allTimelapses.filter((tl) => new Date(tl.date).getTime() > lastSeenTs).length : 0
+  );
 
   let unsubArchiveUpdate: (() => void) | null = null;
 
@@ -525,6 +538,11 @@
       <span class="rounded-md bg-surface-overlay px-1.5 py-0.5 text-[0.625rem] font-semibold tabular-nums text-text-muted">
         {allSnapshots.length}
       </span>
+      {#if newSnapshotCount > 0 && !snapshotsOpen}
+        <span class="rounded-md bg-status-critical/10 px-1.5 py-0.5 text-[0.625rem] font-semibold tabular-nums text-status-critical">
+          {newSnapshotCount} NEW
+        </span>
+      {/if}
     </button>
 
     {#if snapshotsOpen}
@@ -601,6 +619,11 @@
       <span class="rounded-md bg-surface-overlay px-1.5 py-0.5 text-[0.625rem] font-semibold tabular-nums text-text-muted">
         {allTimelapses.length}
       </span>
+      {#if newTimelapseCount > 0 && !timelapsesOpen}
+        <span class="rounded-md bg-status-critical/10 px-1.5 py-0.5 text-[0.625rem] font-semibold tabular-nums text-status-critical">
+          {newTimelapseCount} NEW
+        </span>
+      {/if}
     </button>
 
     {#if timelapsesOpen}
