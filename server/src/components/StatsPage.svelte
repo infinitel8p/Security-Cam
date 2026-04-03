@@ -19,6 +19,9 @@
   import bluetoothIcon from "../icons/bluetooth.svg?raw";
   import infoCircleIcon from "../icons/info-circle.svg?raw";
 
+  const gitBranch = typeof __GIT_BRANCH__ !== "undefined" ? __GIT_BRANCH__ : "";
+  const gitCommit = typeof __GIT_COMMIT__ !== "undefined" ? __GIT_COMMIT__ : "";
+
   interface ThrottleInfo {
     raw: string;
     under_voltage_now: boolean;
@@ -990,10 +993,10 @@
                   <span class="text-text-primary truncate min-w-0" title={extended.cpu_model}>{extended.cpu_model}</span>
                 </div>
               {/if}
-              {#if extended.git_branch}
+              {#if gitBranch}
                 <div class="flex items-center gap-2 text-[0.6875rem] min-w-0">
                   <span class="shrink-0 text-text-muted w-10">{t("stats.branch")}</span>
-                  <span class="font-mono text-text-primary truncate min-w-0" title="{extended.git_branch}{extended.git_commit ? ` @ ${extended.git_commit}` : ''}">{extended.git_branch}{#if extended.git_commit}<span class="text-text-muted"> @ {extended.git_commit}</span>{/if}</span>
+                  <span class="font-mono text-text-primary truncate min-w-0" title="{gitBranch}{gitCommit ? ' @ ' + gitCommit : ''}">{gitBranch} {#if gitCommit}<span class="text-text-muted">@ {gitCommit}</span>{/if}</span>
                 </div>
               {/if}
             </div>
