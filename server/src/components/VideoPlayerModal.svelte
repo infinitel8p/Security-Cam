@@ -335,7 +335,7 @@
   <!-- Close button -->
   <button
     onclick={onclose}
-    class="absolute right-3 top-3 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white/70 transition-all hover:bg-white/20 hover:text-white {showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'}"
+    class="absolute right-3 top-3 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white/70 backdrop-blur-sm transition-all hover:bg-white/20 hover:text-white {showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'}"
     aria-label={t("btn.close")}
   >
     <Icon icon={xIcon} class="h-5 w-5" />
@@ -345,7 +345,7 @@
   {#if hasPrev}
     <button
       onclick={() => navigate("prev")}
-      class="absolute left-3 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white/70 transition-all hover:bg-white/20 hover:text-white sm:left-6 {showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'}"
+      class="absolute left-3 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white/70 backdrop-blur-sm transition-all hover:bg-white/20 hover:text-white sm:left-6 {showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'}"
       aria-label={t("archive.prevVideo")}
     >
       <Icon icon={chevronLeftIcon} class="h-5 w-5" />
@@ -354,7 +354,7 @@
   {#if hasNext}
     <button
       onclick={() => navigate("next")}
-      class="absolute right-3 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white/70 transition-all hover:bg-white/20 hover:text-white sm:right-6 {showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'}"
+      class="absolute right-3 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white/70 backdrop-blur-sm transition-all hover:bg-white/20 hover:text-white sm:right-6 {showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'}"
       aria-label={t("archive.nextVideo")}
     >
       <Icon icon={chevronRightIcon} class="h-5 w-5" />
@@ -397,7 +397,7 @@
       <!-- svelte-ignore a11y_no_static_element_interactions -->
       <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div
-          class="flex h-16 w-16 items-center justify-center rounded-full bg-black/50 text-white/90 pointer-events-auto cursor-pointer transition-transform duration-200 hover:scale-110"
+          class="flex h-16 w-16 items-center justify-center rounded-full bg-black/50 text-white/90 backdrop-blur-sm pointer-events-auto cursor-pointer transition-transform duration-200 hover:scale-110"
           onclick={togglePlay}
         >
           <Icon icon={playerPlayIcon} class="h-8 w-8 ml-1" />
@@ -463,7 +463,7 @@
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
             <div
-              class="animate-dropdown absolute bottom-full right-0 mb-2 overflow-hidden rounded-xl border border-white/10 bg-surface-overlay py-1 shadow-[var(--shadow-lg)]"
+              class="animate-dropdown absolute bottom-full right-0 mb-2 overflow-hidden rounded-xl border border-white/10 bg-surface-overlay/95 py-1 shadow-[var(--shadow-lg)] backdrop-blur-md"
               onclick={(e) => e.stopPropagation()}
             >
               {#each speeds as speed}

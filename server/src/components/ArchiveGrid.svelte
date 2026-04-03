@@ -964,7 +964,7 @@
                   {/if}
                   <!-- Play button overlay -->
                   <div class="absolute inset-0 flex items-center justify-center transition-opacity duration-200 {hoverVideo === video.path && video.sprite ? 'opacity-0' : 'opacity-40 group-hover:opacity-100'}">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-full bg-black/60 text-white/90">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-full bg-black/50 text-white/90 backdrop-blur-sm">
                       <Icon icon={playerPlayIcon} class="h-6 w-6 ml-0.5" />
                     </div>
                   </div>
@@ -1094,7 +1094,7 @@
                     {/if}
                     <!-- Play overlay -->
                     <div class="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
-                      <div class="flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white/80">
+                      <div class="flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white/80 backdrop-blur-sm">
                         <Icon icon={playerPlayIcon} class="h-4 w-4 ml-0.5" />
                       </div>
                     </div>

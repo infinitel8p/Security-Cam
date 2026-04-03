@@ -1,7 +1,7 @@
 {
   "name": "server",
   "type": "module",
-  "version": "2026.04.03.12",
+  "version": "2026.04.03.13",
   "engines": {
     "node": ">=22.12.0"
   },
