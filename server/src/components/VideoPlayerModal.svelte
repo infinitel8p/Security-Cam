@@ -207,9 +207,9 @@
   // ── Fullscreen ─────────────────────────────────────────────────────────
 
   function toggleFullscreen() {
-    if (!wrapperEl) return;
+    if (!containerEl) return;
     if (document.fullscreenElement) document.exitFullscreen();
-    else wrapperEl.requestFullscreen();
+    else containerEl.requestFullscreen();
   }
 
   function handleFullscreenChange() {
@@ -364,7 +364,7 @@
   <!-- Player container -->
   <div
     bind:this={containerEl}
-    class="relative z-10 w-full max-w-5xl px-4 sm:px-14"
+    class="relative z-10 w-full bg-black {isFullscreen ? '' : 'max-w-5xl px-4 sm:px-14'}"
     onclick={(e) => { if (e.target === containerEl) togglePlay(); }}
   >
     {#key video.path}
@@ -373,7 +373,7 @@
         bind:this={videoEl}
         src={streamUrl(video.path)}
         poster={video.thumbnail ? thumbnailUrl(video.path) : undefined}
-        class="w-full rounded-xl bg-black aspect-video object-contain cursor-pointer"
+        class="w-full bg-black object-contain cursor-pointer {isFullscreen ? 'h-full' : 'rounded-xl aspect-video'}"
         onclick={togglePlay}
         ontimeupdate={handleTimeUpdate}
         onloadedmetadata={handleLoadedMetadata}
@@ -407,7 +407,7 @@
 
     <!-- Controls overlay -->
     <div
-      class="absolute inset-x-0 bottom-0 rounded-b-xl bg-gradient-to-t from-black/80 via-black/40 to-transparent px-4 pb-3 pt-16 transition-opacity duration-300 {showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'}"
+      class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent px-4 pb-3 pt-16 transition-opacity duration-300 {isFullscreen ? '' : 'rounded-b-xl'} {showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'}"
     >
       <!-- Seek bar -->
       <!-- svelte-ignore a11y_no_static_element_interactions -->
