@@ -642,6 +642,14 @@ def stream_video():
     if not video_path or not os.path.exists(video_path):
         abort(404, description="Video not found")
 
+    if request.args.get('download'):
+        return send_file(
+            os.path.abspath(video_path),
+            mimetype='video/mp4',
+            as_attachment=True,
+            download_name=os.path.basename(video_path),
+        )
+
     return send_file(os.path.abspath(video_path), mimetype='video/mp4', conditional=True)
 
 

@@ -293,6 +293,15 @@ export default {
   archive: {
     snapshots: "Schnappschüsse",
     timelapse: "Zeitraffer",
+    player: "Videoplayer",
+    play: "Abspielen",
+    pause: "Pause",
+    mute: "Stummschalten",
+    unmute: "Ton einschalten",
+    speed: "Wiedergabegeschwindigkeit",
+    seek: "Spulen",
+    prevVideo: "Vorheriges Video",
+    nextVideo: "Nächstes Video",
   },
 
   dialog: {

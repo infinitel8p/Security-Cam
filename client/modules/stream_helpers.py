@@ -380,7 +380,9 @@ def _fix_faststart(file_path: str) -> None:
         os.replace(tmp_path, file_path)
         log.info("Faststart applied: %s", file_path)
         _generate_sprite_sheet(file_path)
-        # Notify frontend that sidecars (sprite, faststart) are ready
+        # Invalidate archive cache and notify frontend
+        from modules import archive_helpers
+        archive_helpers.invalidate_cache()
         sse.emit("archive_updated", {"path": file_path})
     except Exception as e:
         log.error("Failed to apply faststart for %s: %s", file_path, e)

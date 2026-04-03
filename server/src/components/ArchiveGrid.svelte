@@ -23,6 +23,8 @@
   import chevronLeftIcon from "../icons/chevron-left.svg?raw";
   import chevronRightIcon from "../icons/chevron-right.svg?raw";
   import clockIcon from "../icons/clock.svg?raw";
+  import playerPlayIcon from "../icons/player-play.svg?raw";
+  import VideoPlayerModal from "./VideoPlayerModal.svelte";
 
   let deleteButtonEl: HTMLButtonElement | null = null;
 
@@ -97,13 +99,20 @@
   type DeleteTarget = { kind: "video"; item: Video } | { kind: "timelapse"; item: Timelapse } | { kind: "snapshot"; item: Snapshot } | null;
   let deleteTarget: DeleteTarget = $state(null);
   let deleting = $state(false);
+  let searchInput = $state("");
   let search = $state("");
+  let searchTimer: ReturnType<typeof setTimeout> | null = null;
   let sortMode: SortMode = $state("newest");
   let filterMode: FilterMode = $state("all");
   let viewMode: ViewMode = $state("grid");
   let showSortMenu = $state(false);
   let showFilterMenu = $state(false);
   let lastSeenTs = $state(0);
+  let playerVideo: Video | null = $state(null);
+
+  function openPlayer(video: Video) {
+    playerVideo = video;
+  }
 
   function parseEntry(entry: { path: string; meta?: VideoMeta; thumbnail?: string; sprite?: string }): Video {
     const filepath = entry.path;
@@ -339,18 +348,19 @@
     // Read the last-seen timestamp before marking as seen
     const stored = localStorage.getItem("lastSeenArchive");
     lastSeenTs = stored ? new Date(stored).getTime() : 0;
-    fetchArchive();
-    fetchSnapshots();
-    fetchTimelapses();
+    Promise.all([fetchArchive(), fetchSnapshots(), fetchTimelapses()]);
     // Mark archive as seen (clears the nav badge)
     markSeen();
 
     // Re-fetch archive when new content is added (recordings, timelapses, snapshots)
+    let refetchTimer: ReturnType<typeof setTimeout> | null = null;
     const sse = sseClient();
     unsubArchiveUpdate = sse.on("archive_updated", () => {
-      fetchArchive();
-      fetchSnapshots();
-      fetchTimelapses();
+      // Debounce rapid SSE events (e.g. multiple sidecars finishing)
+      if (refetchTimer) clearTimeout(refetchTimer);
+      refetchTimer = setTimeout(() => {
+        Promise.all([fetchArchive(), fetchSnapshots(), fetchTimelapses()]);
+      }, 500);
     });
 
     return () => {
@@ -379,16 +389,25 @@
   const SPRITE_FRAMES = 10;
   let hoverVideo: string | null = $state(null);
   let hoverFrame: number = $state(0);
+  let spriteRaf: number | null = null;
 
   function handleSpriteHover(e: MouseEvent, video: Video) {
     if (!video.sprite) return;
-    hoverVideo = video.path;
+    // Capture values synchronously (event object is recycled)
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const pct = (e.clientX - rect.left) / rect.width;
-    hoverFrame = Math.min(SPRITE_FRAMES - 1, Math.max(0, Math.floor(pct * SPRITE_FRAMES)));
+    const clientX = e.clientX;
+    const path = video.path;
+    if (spriteRaf !== null) cancelAnimationFrame(spriteRaf);
+    spriteRaf = requestAnimationFrame(() => {
+      spriteRaf = null;
+      hoverVideo = path;
+      const pct = (clientX - rect.left) / rect.width;
+      hoverFrame = Math.min(SPRITE_FRAMES - 1, Math.max(0, Math.floor(pct * SPRITE_FRAMES)));
+    });
   }
 
   function handleSpriteLeave() {
+    if (spriteRaf !== null) { cancelAnimationFrame(spriteRaf); spriteRaf = null; }
     hoverVideo = null;
   }
 
@@ -412,7 +431,7 @@
 
   function downloadVideo(video: Video) {
     const a = document.createElement("a");
-    a.href = streamUrl(video.path);
+    a.href = `${getBackendUrl()}/stream_video?video_path=${encodeURIComponent(video.path)}&download=1`;
     a.download = video.filename;
     a.click();
   }
@@ -540,22 +559,6 @@
     }
   }
 
-  // Lazy-load video metadata only when card scrolls into view
-  function lazyVideo(node: HTMLVideoElement) {
-    const src = node.dataset.src!;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          node.src = src;
-          node.preload = "metadata";
-          observer.disconnect();
-        }
-      },
-      { rootMargin: "200px" },
-    );
-    observer.observe(node);
-    return { destroy: () => observer.disconnect() };
-  }
 </script>
 
 <svelte:window on:click={handleGlobalClick} />
@@ -771,13 +774,17 @@
       <Icon icon={searchIcon} class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
       <input
         type="text"
-        bind:value={search}
+        bind:value={searchInput}
+        oninput={() => {
+          if (searchTimer) clearTimeout(searchTimer);
+          searchTimer = setTimeout(() => { search = searchInput; }, 200);
+        }}
         placeholder={t("input.searchRecordings")}
         class="h-9 w-full rounded-lg border border-border-subtle bg-surface-raised pl-9 pr-3 text-[0.8125rem] text-text-primary placeholder:text-text-muted transition-colors focus:border-accent/40 focus:outline-none focus:ring-1 focus:ring-accent/20"
       />
-      {#if search}
+      {#if searchInput}
         <button
-          onclick={() => (search = "")}
+          onclick={() => { searchInput = ""; search = ""; if (searchTimer) clearTimeout(searchTimer); }}
           class="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1.5 text-text-muted hover:text-text-secondary"
           aria-label="Clear search"
         >
@@ -934,23 +941,38 @@
               >
                 <!-- svelte-ignore a11y_no_static_element_interactions -->
                 <div
-                  class="relative bg-black/60"
+                  class="relative cursor-pointer bg-black/60"
                   onmousemove={(e) => handleSpriteHover(e, video)}
                   onmouseleave={handleSpriteLeave}
+                  onclick={() => openPlayer(video)}
+                  onkeydown={(e) => { if (e.key === "Enter") openPlayer(video); }}
+                  role="button"
+                  tabindex="0"
                 >
-                  <video
-                    data-src={streamUrl(video.path)}
-                    use:lazyVideo
-                    class="aspect-video w-full object-contain"
-                    controls
-                    preload="none"
-                    poster={video.thumbnail ? thumbnailUrl(video.path) : undefined}
-                  ></video>
+                  <!-- Thumbnail image (or placeholder) -->
+                  {#if video.thumbnail}
+                    <img
+                      src={thumbnailUrl(video.path)}
+                      alt={video.filename}
+                      class="aspect-video w-full object-contain"
+                      loading="lazy"
+                    />
+                  {:else}
+                    <div class="flex aspect-video w-full items-center justify-center">
+                      <Icon icon={videoIcon} class="h-8 w-8 text-text-muted/30" stroke={1.5} />
+                    </div>
+                  {/if}
+                  <!-- Play button overlay -->
+                  <div class="absolute inset-0 flex items-center justify-center transition-opacity duration-200 {hoverVideo === video.path && video.sprite ? 'opacity-0' : 'opacity-40 group-hover:opacity-100'}">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-full bg-black/50 text-white/90 backdrop-blur-sm">
+                      <Icon icon={playerPlayIcon} class="h-6 w-6 ml-0.5" />
+                    </div>
+                  </div>
                   <!-- Sprite hover-scrub overlay -->
                   {#if video.sprite && hoverVideo === video.path}
                     <div
                       class="pointer-events-none absolute inset-0 bg-no-repeat"
-                      style="background-image: url({spriteUrl(video.path)}); background-size: {SPRITE_FRAMES * 100}% 100%; background-position-x: -{hoverFrame * (100 / SPRITE_FRAMES)}%;"
+                      style="background-image: url({spriteUrl(video.path)}); background-size: {SPRITE_FRAMES * 100}% 100%; background-position-x: {SPRITE_FRAMES > 1 ? hoverFrame / (SPRITE_FRAMES - 1) * 100 : 0}%;"
                     ></div>
                     <div
                       class="pointer-events-none absolute bottom-0 left-0 h-0.5 bg-accent transition-[width] duration-75"
@@ -1047,53 +1069,66 @@
                 class:border-t={i > 0}
                 class:border-border-subtle={i > 0}
               >
-                <!-- Thumbnail -->
-                <div class="relative h-16 w-28 shrink-0 overflow-hidden rounded-lg bg-black/60">
-                  {#if video.thumbnail}
-                    <img
-                      src={thumbnailUrl(video.path)}
-                      alt=""
-                      class="h-full w-full object-contain"
-                      loading="lazy"
-                    />
-                  {:else}
-                    <video
-                      data-src={streamUrl(video.path)}
-                      use:lazyVideo
-                      class="h-full w-full object-contain"
-                      preload="none"
-                    ></video>
-                  {/if}
-                </div>
-
-                <!-- Info -->
-                <div class="min-w-0 flex-1">
-                  <div class="flex items-center gap-2">
-                    <p class="truncate text-[0.8125rem] font-medium text-text-primary">{video.filename}</p>
-                    {#if isNewRecording(video)}
-                      <span class="shrink-0 rounded-full bg-status-critical/10 px-1.5 py-0.5 text-[0.5625rem] font-semibold uppercase tracking-wide text-status-critical">
-                        {t("badge.new")}
-                      </span>
+                <!-- Clickable area: thumbnail + info -->
+                <!-- svelte-ignore a11y_no_static_element_interactions -->
+                <div
+                  class="flex min-w-0 flex-1 cursor-pointer items-center gap-4"
+                  onclick={() => openPlayer(video)}
+                  onkeydown={(e) => { if (e.key === "Enter") openPlayer(video); }}
+                  role="button"
+                  tabindex="0"
+                >
+                  <!-- Thumbnail -->
+                  <div class="relative h-16 w-28 shrink-0 overflow-hidden rounded-lg bg-black/60">
+                    {#if video.thumbnail}
+                      <img
+                        src={thumbnailUrl(video.path)}
+                        alt=""
+                        class="h-full w-full object-contain"
+                        loading="lazy"
+                      />
+                    {:else}
+                      <div class="flex h-full w-full items-center justify-center">
+                        <Icon icon={videoIcon} class="h-5 w-5 text-text-muted/30" stroke={1.5} />
+                      </div>
                     {/if}
-                    {#if triggerLabel(video.meta)}
-                      <span class="shrink-0 rounded-full px-1.5 py-0.5 text-[0.5625rem] font-semibold uppercase tracking-wide
-                        {video.meta?.reason === 'sensor'
-                          ? 'bg-status-warning/10 text-status-warning'
-                          : 'bg-accent/10 text-accent'}">
-                        {triggerLabel(video.meta)}
-                      </span>
-                    {/if}
+                    <!-- Play overlay -->
+                    <div class="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
+                      <div class="flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white/80 backdrop-blur-sm">
+                        <Icon icon={playerPlayIcon} class="h-4 w-4 ml-0.5" />
+                      </div>
+                    </div>
                   </div>
-                  <div class="mt-0.5 flex items-center gap-2 text-[0.75rem] text-text-muted">
-                    <span>{formatDate(video.date)}</span>
-                    {#if video.time}
-                      <span class="text-border-strong">|</span>
-                      <span class="tabular-nums">{formatTime(video.time)}</span>
-                    {/if}
-                    {#if video.meta?.duration_seconds}
-                      <span class="text-border-strong">|</span>
-                      <span class="tabular-nums">{formatDuration(video.meta.duration_seconds)}</span>
-                    {/if}
+
+                  <!-- Info -->
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-2">
+                      <p class="truncate text-[0.8125rem] font-medium text-text-primary">{video.filename}</p>
+                      {#if isNewRecording(video)}
+                        <span class="shrink-0 rounded-full bg-status-critical/10 px-1.5 py-0.5 text-[0.5625rem] font-semibold uppercase tracking-wide text-status-critical">
+                          {t("badge.new")}
+                        </span>
+                      {/if}
+                      {#if triggerLabel(video.meta)}
+                        <span class="shrink-0 rounded-full px-1.5 py-0.5 text-[0.5625rem] font-semibold uppercase tracking-wide
+                          {video.meta?.reason === 'sensor'
+                            ? 'bg-status-warning/10 text-status-warning'
+                            : 'bg-accent/10 text-accent'}">
+                          {triggerLabel(video.meta)}
+                        </span>
+                      {/if}
+                    </div>
+                    <div class="mt-0.5 flex items-center gap-2 text-[0.75rem] text-text-muted">
+                      <span>{formatDate(video.date)}</span>
+                      {#if video.time}
+                        <span class="text-border-strong">|</span>
+                        <span class="tabular-nums">{formatTime(video.time)}</span>
+                      {/if}
+                      {#if video.meta?.duration_seconds}
+                        <span class="text-border-strong">|</span>
+                        <span class="tabular-nums">{formatDuration(video.meta.duration_seconds)}</span>
+                      {/if}
+                    </div>
                   </div>
                 </div>
 
@@ -1224,4 +1259,14 @@
       </button>
     </div>
   </div>
+{/if}
+
+<!-- Video player modal -->
+{#if playerVideo}
+  <VideoPlayerModal
+    video={playerVideo}
+    videos={filteredVideos}
+    onclose={() => { playerVideo = null; }}
+    onnavigate={(v) => { playerVideo = v; }}
+  />
 {/if}
