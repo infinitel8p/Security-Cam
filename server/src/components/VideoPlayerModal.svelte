@@ -250,7 +250,7 @@
 
   function downloadVideo() {
     const a = document.createElement("a");
-    a.href = streamUrl(video.path);
+    a.href = `${getBackendUrl()}/stream_video?video_path=${encodeURIComponent(video.path)}&download=1`;
     a.download = video.filename;
     a.click();
   }
