@@ -69,6 +69,192 @@ article {
   margin-right: auto;
 }
 
+/* ---------- Typography hierarchy ---------- */
+
+/* Doc page h1 - strong presence, generous space below */
+article header h1,
+.markdown h1 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.5rem;
+}
+
+/* Doc page h2 - section anchor with breathing room */
+.markdown h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  padding-bottom: 0.4rem;
+  border-bottom: 2px solid var(--ifm-color-primary);
+  margin-top: 3rem;
+  margin-bottom: 1.25rem;
+}
+
+/* h3 - tighter to its content, generous above */
+.markdown h3 {
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+/* ---------- Doc page vertical rhythm ---------- */
+
+/* Lists breathe between items */
+.markdown ul > li + li,
+.markdown ol > li + li {
+  margin-top: 0.5rem;
+}
+
+/* Code blocks get clear separation from surrounding text */
+.markdown div[class*="codeBlockContainer"] {
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+/* Admonitions get clear separation */
+.markdown .theme-admonition {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Tables - breathing room */
+.markdown table {
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+/* ---------- Code blocks ---------- */
+.prism-code {
+  border: 1px solid var(--ifm-toc-border-color);
+  border-radius: 8px !important;
+}
+
+div[class*="codeBlockContainer"] {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="dark"] div[class*="codeBlockContainer"] {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+}
+
+/* Code block title bar */
+div[class*="codeBlockTitle"] {
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* ---------- Global polish ---------- */
+
+/* Smooth link color transitions */
+a {
+  transition: color 0.15s ease;
+}
+
+/* Sidebar menu items - smooth highlight */
+.menu__link {
+  transition: background 0.15s ease, color 0.15s ease;
+  border-radius: 6px;
+}
+
+.menu__link--active:not(.menu__link--sublist) {
+  position: relative;
+}
+
+/* Sidebar category toggle arrow rotation */
+.menu__caret::before {
+  transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Navbar link hover underline */
+.navbar__link:hover {
+  text-decoration: none;
+}
+
+.navbar__link::after {
+  content: '';
+  display: block;
+  height: 2px;
+  background: var(--ifm-color-primary);
+  transform: scaleX(0);
+  transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.navbar__link:hover::after {
+  transform: scaleX(1);
+}
+
+.navbar__link--active::after {
+  transform: scaleX(1);
+}
+
+/* Table of contents - smooth active indicator */
+.table-of-contents__link {
+  transition: color 0.15s ease;
+}
+
+.table-of-contents__link--active {
+  transition: color 0.15s ease, font-weight 0s;
+}
+
+/* Code block copy button */
+.clean-btn[class*="copyButton"] {
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+/* ---------- Details/accordion smooth expand ---------- */
+details {
+  transition: border-color 0.2s ease;
+}
+
+details summary {
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+details summary::marker {
+  transition: color 0.15s ease;
+}
+
+/* ---------- Admonitions - subtle entrance ---------- */
+@keyframes admonitionIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.theme-admonition {
+  animation: admonitionIn 0.35s cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+
+/* ---------- Doc page content fade ---------- */
+@keyframes contentFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+article {
+  animation: contentFade 0.3s ease both;
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .theme-admonition,
+  article {
+    animation: none;
+  }
+
+  .menu__caret::before,
+  .navbar__link::after {
+    transition: none;
+  }
+}
+
 /* ---------- Footer ---------- */
 /* Infima's style="dark" forces its own bg; override it explicitly */
 .footer--dark {

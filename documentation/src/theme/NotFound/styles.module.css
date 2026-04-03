@@ -1,0 +1,109 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* --- Security camera illustration --- */
+.camera {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  animation: cameraIdle 4s ease-in-out infinite;
+}
+
+.cameraBody {
+  width: 72px;
+  height: 48px;
+  background: var(--ifm-font-color-secondary);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.lens {
+  width: 32px;
+  height: 32px;
+  background: #1a1a2e;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+}
+
+.lensInner {
+  width: 20px;
+  height: 20px;
+  background: #0d0d1a;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lensCore {
+  width: 8px;
+  height: 8px;
+  background: var(--ifm-color-primary);
+  border-radius: 50%;
+  animation: blink 3s ease-in-out infinite;
+}
+
+.cameraMount {
+  width: 8px;
+  height: 24px;
+  background: var(--ifm-font-color-secondary);
+  border-radius: 0 0 3px 3px;
+}
+
+/* --- Text --- */
+.title {
+  font-size: 5rem;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  background: linear-gradient(
+    135deg,
+    var(--ifm-color-primary) 0%,
+    var(--ifm-color-primary-lighter) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  color: var(--ifm-font-color-secondary);
+  font-size: 1.15rem;
+  margin: 0.75rem 0 2rem;
+  max-width: 360px;
+}
+
+/* --- Animations --- */
+@keyframes blink {
+  0%, 90%, 100% { opacity: 1; }
+  95% { opacity: 0.2; }
+}
+
+@keyframes cameraIdle {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .camera,
+  .lensCore {
+    animation: none;
+  }
+}

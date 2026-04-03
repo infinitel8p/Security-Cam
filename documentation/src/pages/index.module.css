@@ -4,15 +4,66 @@
  */
 
 .heroBanner {
-	padding: 4rem 0;
 	text-align: center;
 	position: relative;
 	overflow: hidden;
 }
 
+/* Accent glow behind the hero */
+.heroBanner::before {
+	content: '';
+	position: absolute;
+	top: 40%;
+	left: 50%;
+	width: 800px;
+	height: 500px;
+	transform: translate(-50%, -50%);
+	background: radial-gradient(
+		ellipse at center,
+		rgba(255, 255, 255, 0.08) 0%,
+		transparent 60%
+	);
+	pointer-events: none;
+}
+
+/* --- Hero entrance choreography --- */
+@keyframes heroFadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(12px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.heroTitle {
+	font-size: 3.5rem;
+	font-weight: 800;
+	letter-spacing: -0.03em;
+	animation: heroFadeIn 0.6s cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+
+.heroSubtitle {
+	font-size: 1.25rem;
+	opacity: 0;
+	max-width: 540px;
+	margin-left: auto;
+	margin-right: auto;
+	animation: heroFadeIn 0.6s cubic-bezier(0.25, 1, 0.5, 1) 0.1s both;
+}
+
+.heroCta {
+	animation: heroFadeIn 0.6s cubic-bezier(0.25, 1, 0.5, 1) 0.2s both;
+}
+
 @media screen and (max-width: 996px) {
 	.heroBanner {
-		padding: 2rem;
+		padding: 3rem 1.5rem;
+	}
+	.heroTitle {
+		font-size: 2.25rem;
 	}
 }
 
@@ -20,4 +71,34 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	margin-top: 2rem;
+}
+
+/* CTA button */
+.buttons :global(.button) {
+	font-weight: 600;
+	font-size: 1.05rem;
+	padding: 0.85rem 2rem;
+	transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1),
+		box-shadow 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.buttons :global(.button:hover) {
+	transform: translateY(-2px);
+	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.buttons :global(.button:active) {
+	transform: translateY(0);
+	box-shadow: none;
+}
+
+/* --- Reduced motion --- */
+@media (prefers-reduced-motion: reduce) {
+	.heroTitle,
+	.heroSubtitle,
+	.heroCta {
+		animation: none;
+		opacity: 1;
+	}
 }

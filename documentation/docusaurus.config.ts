@@ -4,7 +4,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
   title: 'Security-Cam',
-  tagline: 'A security camera for the Raspberry Pi Zero 2 W using the Waveshare RPi Camera (F).',
+  tagline: 'A DIY security camera for the Raspberry Pi Zero 2 W - records when it matters, stays quiet when you\'re home.',
   favicon: 'img/favicon.png',
 
   url: 'https://dev.infinitel8p.com',

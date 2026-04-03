@@ -76,7 +76,7 @@ systemctl stop mediamtx 2>/dev/null || true
 
 # --- Install dependencies ---
 echo "=== Installing dependencies ==="
-if ./install_requirements.sh; then
+if ./install_requirements.sh --no-log; then
     # Save commit stamp only on successful build
     echo "$AFTER" > "$STAMP_FILE"
     echo "=== Update complete ==="

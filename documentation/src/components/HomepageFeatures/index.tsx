@@ -10,29 +10,29 @@ type FeatureItem = {
 
 const FeatureList: FeatureItem[] = [
   {
-    title: 'Night Vision:',
+    title: 'Night Vision',
     Svg: require('@site/static/img/undraw_surveillance.svg').default,
     description: (
       <>
-        Elevating the Raspberry Pi Zero 2 W along with the Waveshare RPi Camera (F) for a complete view - even in the dark.
+        See clearly in complete darkness with the Waveshare RPi Camera (F) and its built-in infrared LEDs.
       </>
     ),
   },
   {
-    title: 'Device Detection:',
+    title: 'Smart Presence Detection',
     Svg: require('@site/static/img/undraw_broadcast.svg').default,
     description: (
       <>
-        Integration with WiFi Access Point and Bluetooth to prevent recording when you are nearby.
+        Automatically suppress recording when your phone is nearby via Bluetooth or WiFi - no false alarms when you're home.
       </>
     ),
   },
   {
-    title: 'Admin Dashboard:',
+    title: 'Dashboard',
     Svg: require('@site/static/img/undraw_responsive.svg').default,
     description: (
       <>
-        Check the status of your camera, view the live feed, download recordings, and change settings on all your devices.
+        Live feed, video archive, system health, and settings - all from any device on your network.
       </>
     ),
   },
@@ -41,12 +41,14 @@ const FeatureList: FeatureItem[] = [
 function Feature({ title, Svg, description }: FeatureItem) {
   return (
     <div className={clsx('col col--4')}>
-      <div className="text--center">
-        <Svg className={styles.featureSvg} role="img" />
-      </div>
-      <div className="text--center padding-horiz--md">
-        <Heading as="h3">{title}</Heading>
-        <p>{description}</p>
+      <div className={styles.featureCard}>
+        <div className="text--center">
+          <Svg className={styles.featureSvg} role="img" />
+        </div>
+        <div className="text--center padding-horiz--md">
+          <Heading as="h3">{title}</Heading>
+          <p>{description}</p>
+        </div>
       </div>
     </div>
   );

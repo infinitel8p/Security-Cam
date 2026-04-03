@@ -103,7 +103,7 @@ export const SensorImage = ({module, alt}) => {
 
 ### Sensor modules
 
-<div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '12px', marginTop: '8px'}}>
+<div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '1rem', marginTop: '1rem'}}>
   {[
     {module: 'ky-025', name: 'Reed Switch'},
     {module: 'ky-021', name: 'Mini Reed'},
@@ -123,7 +123,7 @@ export const SensorImage = ({module, alt}) => {
   ].map(({module, name}) => (
     <div key={module} style={{textAlign: 'center'}}>
       <SensorImage module={module} alt={name} />
-      <p style={{fontSize: '0.8rem', marginTop: '4px', fontWeight: 500}}>{name}<br/><span style={{opacity: 0.6, fontSize: '0.75rem'}}>{module.toUpperCase()}</span></p>
+      <p style={{fontSize: '0.8rem', marginTop: '0.5rem', fontWeight: 500}}>{name}<br/><span style={{opacity: 0.6, fontSize: '0.75rem'}}>{module.toUpperCase()}</span></p>
     </div>
   ))}
 </div>

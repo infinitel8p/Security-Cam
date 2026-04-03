@@ -8,7 +8,21 @@ last_update:
 
 # Image Quality
 
-The Raspberry Pi camera has a built-in **Image Signal Processor (ISP)** that handles brightness, contrast, white balance, and other adjustments in hardware — with zero CPU cost. Security-Cam exposes these controls on the Settings page under **Camera > Image Quality**.
+The Raspberry Pi camera has a built-in **Image Signal Processor (ISP)** that handles brightness, contrast, white balance, and other adjustments in hardware - with zero CPU cost. Security-Cam exposes these controls on the Settings page under **Camera > Image Quality**.
+
+## Quick reference
+
+| Parameter | Range | Default | What it does |
+|-----------|-------|---------|-------------|
+| **Brightness** | -1 to 1 | 0 | Overall luminosity (post-capture) |
+| **Contrast** | 0 to 16 | 1 | Difference between darks and lights |
+| **Saturation** | 0 to 16 | 1 | Colour intensity (0 = greyscale) |
+| **Sharpness** | 0 to 16 | 1 | Edge enhancement |
+| **EV** | -10 to +10 | 0 | Exposure target offset |
+| **White Balance** | 7 presets | Auto | Colour temperature correction |
+| **Exposure Mode** | Normal / Short / Long | Normal | Shutter speed vs gain balance |
+| **Denoise** | Off / Fast / HQ | Off | Noise reduction |
+| **Metering** | Centre / Spot / Matrix | Centre | Which area drives auto-exposure |
 
 ## Parameter Reference
 

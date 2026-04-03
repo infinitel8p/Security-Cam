@@ -4,20 +4,24 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
 
-# --- Set up logging ---
-LOG_DIR="$SCRIPT_DIR/logs/install"
-mkdir -p "$LOG_DIR"
-LOG_FILE="$LOG_DIR/$(date '+%Y-%m-%d_%H-%M-%S').log"
-exec > >(tee -a "$LOG_FILE") 2>&1
-ls -1t "$LOG_DIR"/*.log 2>/dev/null | tail -n +21 | xargs rm -f 2>/dev/null || true
-
 # --- Parse flags ---
 FORCE=false
+NO_LOG=false
 for arg in "$@"; do
     case "$arg" in
         --force|-f) FORCE=true ;;
+        --no-log) NO_LOG=true ;;
     esac
 done
+
+# --- Set up logging (skip when called from update.sh which logs already) ---
+if ! $NO_LOG; then
+    LOG_DIR="$SCRIPT_DIR/logs/install"
+    mkdir -p "$LOG_DIR"
+    LOG_FILE="$LOG_DIR/$(date '+%Y-%m-%d_%H-%M-%S').log"
+    exec > >(tee -a "$LOG_FILE") 2>&1
+    ls -1t "$LOG_DIR"/*.log 2>/dev/null | tail -n +21 | xargs rm -f 2>/dev/null || true
+fi
 
 # --- Fingerprint helpers ---
 # Generate a hash of the inputs for a given step so we can skip it when unchanged.

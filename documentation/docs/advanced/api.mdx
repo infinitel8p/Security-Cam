@@ -12,6 +12,20 @@ The Flask backend runs on port `5005` and exposes REST endpoints for sensor cont
 
 Replace `<pi-ip>` with your Raspberry Pi's IP address in the examples below.
 
+| Category | Key endpoints |
+|----------|--------------|
+| **[Sensors](#sensor-endpoints)** | `/sensor/configure`, `/sensor/status`, `/sensor/enable`, `/sensor/test` |
+| **[Bluetooth](#bluetooth-endpoints)** | `/bluetooth/scan`, `/bluetooth/pair`, `/bluetooth/discoverable` |
+| **[Storage](#storage-endpoints)** | `/storage/status`, `/storage/configure`, `/storage/cleanup` |
+| **[Timelapse](#timelapse-endpoints)** | `/timelapse/status`, `/timelapse/start`, `/timelapse/stop` |
+| **[Logs](#log-endpoints)** | `/logs`, `/logs/scripts`, `/logs/mediamtx` |
+| **[System](#system-alert-state)** | `/system/alert`, `/system_info`, `/deploy_info` |
+| **[Media](#snapshot-endpoint)** | `/snapshot`, `/thumbnail/<file>`, `/sprite/<file>` |
+| **[Archive](#archive-badge-endpoint)** | `/archive/count` |
+| **[Settings](#settings-file)** | `/settings` |
+
+---
+
 ## Sensor endpoints
 
 ### Configure sensor
