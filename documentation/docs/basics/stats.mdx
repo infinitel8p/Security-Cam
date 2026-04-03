@@ -1,129 +1,183 @@
 ---
 sidebar_position: 6
 last_update:
-  date: 2026-04-01
+  date: 2026-04-03
   author: Ludo
 ---
 
 # System Stats
 
-The **System** page gives you a detailed, real-time view of the Raspberry Pi's health and status. It's accessible from the sidebar or bottom tab bar via the pulse icon.
+The **System** page gives you a detailed, real-time view of the Raspberry Pi's health and status. Accessible from the sidebar or bottom tab bar via the pulse icon.
 
 ```
 http://<raspberry-pi-ip>:3000/stats
 ```
 
+---
+
 ## Overview
 
-The page polls `/system_info` every 10 seconds and displays:
+The page polls `/system_info` every 10 seconds and displays everything in a single scrollable view:
 
 | Section | What it shows |
 | --- | --- |
-| **Uptime bar** | Time since last boot, hostname, boot timestamp |
-| **CPU** | Current load percentage, per-core bars, sparkline history |
-| **Temperature** | CPU temp in °C, color-coded by severity, sparkline |
+| **Uptime bar** | Time since last boot, hostname, username, IP address (click to copy), WiFi SSID and signal strength |
+| **CPU** | Current load %, per-core bars, sparkline history |
+| **Temperature** | CPU temp in C with thermal gradient, sparkline |
 | **RAM** | Used / total in MB, sparkline, swap usage |
-| **Storage** | Used / total in GB with percentage bar, free space |
-| **Throttle** | Active and historical throttle flags, process count, CPU cores, load averages |
+| **Storage** | Used / total in GB, percentage bar, free space |
+| **Throttle** | Active and historical flags, process count, CPU cores, load averages |
 | **Network** | Bytes and packets sent/received since boot |
-| **SD Card** | Card name, serial, manufacturing date, firmware revision, bytes written, life estimate |
-| **Camera** | Sensor model and native resolution (if detected), available modes, current stream resolution and framerate |
-| **Recordings** | Total recording count, timelapse frame count, recording status |
-| **Connectivity** | Bluetooth and WiFi device counts (online/total), AP client signal strengths (when in AP mode), sensor status |
-| **Platform** | OS distro name, kernel version, Python version, CPU architecture |
+| **SD Card** | Name, serial, manufacturing date, firmware revision, bytes written, life estimate |
+| **Camera** | Sensor model, native resolution, available modes, current stream settings |
+| **Recordings** | Total count, timelapse frames today, live REC indicator |
+| **Connectivity** | BT/WiFi device counts (online/total), AP client signal strengths, sensor status |
+| **Platform** | OS distro, kernel, architecture, Python/Flask/Node.js/MediaMTX versions, git branch |
+
+---
 
 ## Sparklines
 
-CPU, temperature, and RAM cards include a small inline chart. On first load, up to 1 hour of historical data is loaded from the health log (5-minute interval snapshots, including RAM percentage). After that, live 10-second samples are appended. The sparklines are pure SVG with gradient area fills — no JavaScript animation overhead.
+CPU, temperature, and RAM cards each include a small inline chart rendered on a Canvas element.
 
-When new data arrives, the area fill briefly pulses brighter to confirm the data is live.
+**Data sources:**
+- **On first load**: Up to 1 hour of historical data from the health log (5-minute interval snapshots) loads in parallel with the first live poll
+- **After that**: Live 10-second samples are appended, keeping up to 60 data points
+
+**How they look:**
+- A gradient-filled area chart with a stroke line on top
+- A pulsing dot at the leading edge (latest data point) confirms the feed is live
+- When new data arrives, values interpolate smoothly toward their targets rather than jumping
+
+**Performance:**
+- Full 60fps during data transitions (smooth flow-in)
+- Throttles to ~15fps when settled (idle glow pulse only)
+- Stops entirely when `prefers-reduced-motion` is enabled
+- DPR-aware rendering capped at 2x for Pi performance
+
+---
 
 ## Status-reactive cards
 
-Metric cards respond visually to threshold crossings:
+The four metric cards (CPU, RAM, temperature, storage) respond visually to threshold crossings:
 
-- **Normal** (< 75%) — clean card, blue sparkline
-- **Warning** (75-89%) — amber sparkline, subtle amber glow, animated border sweep
-- **Critical** (90%+) — red sparkline, red glow, red animated border sweep
+| State | Threshold | Visual treatment |
+|-------|-----------|-----------------|
+| **Normal** | < 75% | Clean card, blue sparkline |
+| **Warning** | 75-89% | Amber sparkline, subtle amber glow, animated border sweep |
+| **Critical** | 90%+ | Red sparkline, red glow, red animated border sweep |
 
-The border sweep uses CSS `@property` for a smooth conic-gradient animation. It degrades gracefully in older browsers and is disabled for users who prefer reduced motion.
+The border sweep is a rotating conic-gradient animation using CSS `@property`. It degrades gracefully in older browsers and is disabled for users who prefer reduced motion.
+
+---
+
+## Temperature gradient
+
+The temperature card's large number renders as a gradient that shifts along a thermal spectrum:
+
+| Range | Colour |
+|-------|--------|
+| Below ~45 C | Accent blue (cool) |
+| ~45-60 C | Blends toward amber (warm) |
+| Above ~70 C | Red (hot) |
+
+The gradient position animates smoothly over 1.5 seconds using a registered CSS `@property`. The card also has a subtle ambient glow that shifts through the same spectrum. In browsers without `@property` support, the colour still changes but snaps instead of animating.
+
+---
 
 ## Throttle details
 
-The throttle section shows both **active** flags (currently happening) and **past** flags (happened since boot). Flags include:
+Shows both **active** flags (currently happening) and **past** flags (happened since boot):
 
-- **Low voltage** — power supply can't deliver enough current
-- **Throttled** — CPU clock reduced to protect hardware
-- **Freq capped** — maximum frequency limited
-- **Temp limit** — soft thermal limit reached
+| Flag | Meaning |
+|------|---------|
+| **Low voltage** | Power supply can't deliver enough current |
+| **Throttled** | CPU clock reduced to protect hardware |
+| **Freq capped** | Maximum frequency limited |
+| **Temp limit** | Soft thermal limit reached |
 
-Process count, CPU core count, and 1/5/15 minute load averages are shown below the throttle flags. The raw hex value from `vcgencmd get_throttled` is shown for debugging.
+Below the flags: process count, CPU core count, and 1/5/15 minute load averages. The raw hex value from `vcgencmd get_throttled` is shown for debugging.
 
 :::tip
-If you see persistent throttle flags, consider upgrading to the official Raspberry Pi power supply (5V 3A) or improving ventilation.
+If you see persistent throttle flags, upgrade to the official Raspberry Pi power supply (5V 3A) or improve ventilation.
 :::
+
+---
 
 ## SD Card health
 
-All available metadata from `/sys/block/mmcblk0/device/` is displayed:
+Metadata from `/sys/block/mmcblk0/device/`:
 
-- **Name** — card model identifier
-- **Manufacturing date** — when the card was made
-- **Serial / Manufacturer ID** — unique identifiers
-- **Hardware / Firmware revision** — versions
-- **Written since boot** — total bytes written since last boot (from `/proc/diskstats`)
-- **Life estimate** — wear level reported by the card (if supported)
-- **Erase block size** — preferred erase size, hinting at wear leveling granularity
+| Field | Source | Notes |
+|-------|--------|-------|
+| **Name** | Card model ID | Always available |
+| **Manufacturing date** | Card metadata | Usually available |
+| **Serial** | Unique card ID | Usually available |
+| **Manufacturer ID** | OEM identifier | Usually available |
+| **Hardware revision** | Card hardware version | Less common |
+| **Firmware revision** | Card firmware version | Less common |
+| **Written since boot** | `/proc/diskstats` | Bytes written since last boot |
+| **Life estimate** | Wear level | Industrial/eMMC cards only |
+| **Erase block size** | Wear leveling hint | Industrial/eMMC cards only |
 
 :::note
 Not all SD cards expose every field. Consumer cards typically show name, serial, and manufacturing date. Life estimate and erase block are more common on industrial/eMMC cards.
 :::
 
-## Camera & Recording
+---
 
-The camera card shows hardware sensor info (when available) and the current stream configuration:
+## Camera and recording
 
-- **Sensor model** — detected from `rpicam-hello --list-cameras` (e.g. IMX219, IMX708). Cached on startup.
-- **Native resolution** — the sensor's maximum resolution
-- **Available modes** — supported resolution/FPS combinations shown as compact badges
-- **Stream resolution / FPS** — the currently configured MediaMTX stream settings
+**Camera card:**
+- **Sensor model** - detected from `rpicam-hello --list-cameras` (e.g. IMX219, IMX708), cached on startup
+- **Native resolution** - the sensor's maximum resolution
+- **Available modes** - supported resolution/FPS combinations as compact badges
+- **Stream resolution / FPS** - currently configured MediaMTX settings
 
-If the camera command is not available (e.g. on a non-Pi dev machine), only the stream settings are shown.
+If the camera command is not available (e.g. on a dev machine), only stream settings are shown.
 
-The recordings card shows:
+**Recordings card:**
+- **Total recordings** - number of videos in the archive (fetched via lightweight count endpoint)
+- **Frames today** - timelapse frames captured today (if enabled)
+- **REC indicator** - pulsing red badge when actively recording
 
-- **Total recordings** — number of videos in the archive
-- **Frames today** — timelapse frames captured today (if timelapse is enabled)
-- **Recording indicator** — a live REC badge when the camera is actively recording
+---
 
-## Connectivity & Sensor
+## Connectivity and sensor
 
-The connectivity card shows how many tracked Bluetooth and WiFi devices are online out of the total configured.
+**Device counts**: How many tracked Bluetooth and WiFi devices are online out of total configured.
 
-When the Pi is running as an access point, the card also shows **AP client signal strengths** — each connected device's MAC address with a color-coded dBm value (green > -50 dBm, yellow > -70 dBm, red below).
+**AP client signals** (when Pi runs as access point): Each connected device's MAC address with a colour-coded dBm value:
 
-Below that, the current sensor status is shown (Armed, Idle, or Off) along with the sensor type and GPIO pin.
+| Signal | Colour |
+|--------|--------|
+| Better than -50 dBm | Green |
+| -50 to -70 dBm | Yellow |
+| Worse than -70 dBm | Red |
+
+**Sensor status**: Armed, Idle, or Off - plus sensor type and GPIO pin.
+
+---
 
 ## Platform info
 
-A footer section shows system identity and platform details:
+A footer section shows system identity:
 
-- **WiFi signal** — color-coded dBm badge next to the SSID (green > -50, yellow > -70, red below)
-- **OS distro** — parsed from `/etc/os-release` (e.g. "Debian GNU/Linux 13 (trixie)")
-- **Kernel** — kernel version string from `platform.platform()`
-- **Architecture** — CPU architecture (e.g. aarch64)
-- **Software versions** — Python, Flask, OpenCV, Node.js, MediaMTX
+| Field | Source |
+|-------|--------|
+| WiFi signal | Colour-coded dBm badge next to SSID |
+| OS distro | `/etc/os-release` |
+| Kernel | `platform.platform()` |
+| Architecture | e.g. aarch64 |
+| CPU model | `/proc/cpuinfo` |
+| Boot time | Formatted from `psutil.boot_time()` |
+| Software versions | Python, Flask, OpenCV, Node.js, MediaMTX |
+| Git branch / commit | Build-time injected |
+
+---
 
 ## Relationship to Dashboard
 
-The Dashboard page includes a compact system health widget (CPU, temp, RAM, storage in a 2×2 grid). The System page expands on this with:
+The Dashboard page includes a compact system health widget (CPU, temp, RAM, storage in a 2x2 grid). The System page expands on this with sparkline history, status-reactive card effects, throttle breakdown, network I/O, SD card metadata, camera/recording/connectivity info, and full platform details.
 
-- Sparkline history charts with area fills and pulse animations
-- Status-reactive card glows and animated border sweeps
-- Full throttle flag breakdown with system details
-- Network I/O statistics
-- SD card metadata
-- Camera, recording, and connectivity status
-- Platform information
-
-The Dashboard widget is designed for a quick glance; the System page is for investigation and monitoring.
+**Dashboard** = quick glance. **System** = investigation and monitoring.

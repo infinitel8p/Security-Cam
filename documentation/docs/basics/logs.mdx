@@ -1,0 +1,169 @@
+---
+sidebar_position: 7
+last_update:
+  date: 2026-04-03
+  author: Ludo
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Logs
+
+The **Logs** page lets you inspect, search, and filter the system's log output in real time. Useful for debugging issues, monitoring activity, and reviewing setup history.
+
+```
+http://<raspberry-pi-ip>:3000/logs
+```
+
+---
+
+## Tabs
+
+<Tabs>
+<TabItem value="app" label="Application">
+
+The main security camera application log. Shows API requests, recording events, sensor triggers, Bluetooth/WiFi scanning, presence detection, and system messages.
+
+**Source examples**: `stream`, `sensor.mgr`, `bt.scan`, `presence`, `api`, `system.health`, `wifi`, `settings`, `sse`
+
+</TabItem>
+<TabItem value="stream" label="Streaming">
+
+The MediaMTX streaming server log. Shows WebRTC connections, RTSP sessions, camera pipeline events, and stream errors.
+
+**Source examples**: `RTSP`, `WebRTC`, `HLS`, `RPICamera`
+
+</TabItem>
+<TabItem value="setup" label="Setup">
+
+Saved output from install, update, AP setup, and Bluetooth pairing scripts. Useful for reviewing what happened during initial setup or troubleshooting failed installations.
+
+**Categories**: Install, Update, AP Setup, Bluetooth Pairing
+
+</TabItem>
+</Tabs>
+
+---
+
+## Searching and filtering
+
+### Instant search
+
+Type in the search bar to filter instantly - no need to press Enter. Matches against message text, source name, and timestamp. Filtering happens in the browser against the 2000 most recent entries already in memory, so results appear with zero latency.
+
+:::tip Keyboard shortcut
+Press `/` from anywhere on the page to jump to the search bar.
+:::
+
+### Level filter
+
+| Level | Color | What it captures |
+|-------|-------|-----------------|
+| **Error** | Red | Connection failures, recording problems, hardware issues |
+| **Warn** | Amber | Non-critical issues like timeouts or retries |
+| **Info** | Green | Normal operations - recording start/stop, device detection |
+| **Debug** | Gray | Verbose diagnostics, only useful for investigating specific problems |
+
+The level filter fetches a fresh set of up to 2000 matching entries from the server. When no filters are active, each button shows a count badge.
+
+### Source filter
+
+Filters by the subsystem that produced the log entry. Available when multiple sources exist in the loaded data. Applied server-side to reduce payload size.
+
+| Source | What it logs |
+|--------|-------------|
+| `stream` | Camera capture, MJPEG, recording |
+| `stream.mtx` | MediaMTX configuration |
+| `sensor.mgr` | Sensor lifecycle |
+| `sensor.*` | Individual sensor drivers |
+| `bt.scan` | Bluetooth scanning |
+| `presence` | Device presence monitoring |
+| `api` | HTTP requests/responses |
+| `system.health` | CPU, temp, RAM monitoring |
+| `system.storage` | Disk space, auto-delete |
+| `wifi` | WiFi/AP scanning |
+| `settings` | Settings reads/writes |
+| `events` | Activity event log |
+| `sse` | Server-sent events |
+
+---
+
+## Keyboard shortcuts
+
+When the search bar is not focused, these shortcuts are available on the Application and Streaming tabs:
+
+| Key | Action |
+|-----|--------|
+| `j` / `ArrowDown` | Move focus down one row |
+| `k` / `ArrowUp` | Move focus up one row |
+| `g` | Jump to first entry |
+| `G` | Jump to last entry |
+| `/` | Focus the search bar |
+| `e` | Quick-filter to **Error** |
+| `w` | Quick-filter to **Warning** |
+| `i` | Quick-filter to **Info** |
+| `d` | Quick-filter to **Debug** |
+| `a` | Clear level filter (show **All**) |
+| `Escape` | Clear row focus / blur search bar |
+
+The focused row is highlighted with a blue left-edge accent. Click a row to focus it with the mouse.
+
+---
+
+## Live updates
+
+When **Auto-refresh** is enabled (default), the page polls every 5 seconds. The status bar shows:
+
+| Indicator | Meaning |
+|-----------|---------|
+| Green pulsing **LIVE** | Feed is actively updating |
+| **+N** badge | N new entries arrived in the last refresh (fades after 3 seconds) |
+
+:::info Battery saver
+Auto-refresh pauses automatically when the browser tab is hidden, avoiding unnecessary load on the Pi.
+:::
+
+---
+
+## Virtual scrolling
+
+The log table uses virtual scrolling on desktop - only the ~25 visible rows are in the DOM at any time, regardless of how many entries exist (up to 2000). Scrolling through the full log is instant with no pagination.
+
+On mobile, entries show in a stacked card layout (level badge + timestamp on one line, message below) limited to 200 entries in a scrollable container.
+
+---
+
+## Setup logs
+
+The **Setup** tab groups saved script output by category:
+
+| Category | Color | What it contains |
+|----------|-------|-----------------|
+| **Install** | Blue | Initial system setup output |
+| **Update** | Green | Software update output |
+| **AP Setup** | Amber | Access point configuration output |
+| **Bluetooth Pairing** | Violet | Device pairing session output |
+
+Click a category to expand its file list. Click a file to view its contents. Filenames contain the date and time the script ran (e.g. `2026-04-01_09-51-07.log`). A header bar shows the currently open file.
+
+---
+
+## Source colors
+
+Each log source name displays in a unique color derived from its name via a hash function. This makes it easy to spot clusters of activity from the same subsystem at a glance - a burst of blue `bt.scan` entries, a cluster of green `stream` entries - without reading the source column text.
+
+---
+
+## Downloading
+
+The **Download** button (top right, icon-only on mobile) exports:
+
+| Tab | What downloads |
+|-----|---------------|
+| Application / Streaming | All loaded entries as `.log` text: `timestamp [LEVEL] source: message` |
+| Setup | The currently selected script log file as-is |
+
+:::tip Bug reports
+When reporting a bug, download the Application log filtered to **Error** level and attach it. This gives the most relevant diagnostics without noise.
+:::

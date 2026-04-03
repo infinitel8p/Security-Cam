@@ -1,0 +1,551 @@
+---
+sidebar_position: 8
+last_update:
+  date: 2026-04-03
+  author: Ludo
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Settings
+
+The **Settings** page is the central configuration hub for the security camera. It's organized into five scrollable sections with a sidebar (desktop) or tab bar (mobile) for quick navigation.
+
+```
+http://<raspberry-pi-ip>:3000/settings
+```
+
+:::tip Direct links
+You can link directly to a section using a URL hash: `/settings#camera`, `/settings#devices`, etc.
+:::
+
+---
+
+## Appearance {#appearance}
+
+### Theme
+
+| Mode | Behaviour |
+|------|-----------|
+| **System** | Follows your OS light/dark preference |
+| **Light** | Always light |
+| **Dark** | Always dark **(default)** |
+
+Saved in `localStorage`, applied immediately without a page reload.
+
+### Language
+
+Five languages are supported:
+
+| | | | | |
+|---|---|---|---|---|
+| English | Deutsch | Francais | Espanol | Italiano |
+
+Changing the language reloads the page to apply translations everywhere. On first visit, the dashboard detects your browser language and falls back to English if no match is found.
+
+### Scan lines
+
+A cosmetic CRT-style scan line overlay on the live video feed. Enabled by default. Toggle it off for a clean image. Saved to the server.
+
+---
+
+## Camera {#camera}
+
+### Rotation
+
+Set the camera rotation to match your physical mounting orientation.
+
+**Angle**: `0` | `90` | `180` | `270` degrees (default `0`)
+
+<Tabs>
+<TabItem value="display" label="Display Only (default)">
+
+Rotates the image in the browser via CSS transform. Zero CPU cost. Recordings are saved unrotated. Supports all four angles.
+
+</TabItem>
+<TabItem value="stream" label="Apply to Stream">
+
+Rotates at the MediaMTX/camera level so recordings are saved rotated.
+
+:::warning Hardware limitation
+The Pi's H.264 hardware encoder only supports **0** and **180** degree rotation. Selecting 90 or 270 in stream mode will show a warning - these angles may fail or fall back to software encoding.
+:::
+
+</TabItem>
+</Tabs>
+
+Changes auto-save when you select an angle or switch modes.
+
+### Stream resolution and framerate
+
+A preset dropdown organizes options by camera module. Recommended presets are marked with a star.
+
+<Tabs>
+<TabItem value="common" label="Common">
+
+Works with all camera modules.
+
+| Resolution | FPS | Notes |
+|-----------|-----|-------|
+| 640x360 | 30 | Lightweight 16:9 |
+| 640x480 | 15 | Lowest resource usage |
+| 640x480 | 30 | Minimal CPU load |
+| 1280x720 | 15 | 720p, lower CPU |
+| 1280x720 | 30 | 720p, smooth playback |
+| 1920x1080 | 15 | 1080p, lower CPU |
+| 1920x1080 | 30 | 1080p, native on all modules |
+
+</TabItem>
+<TabItem value="ov5647" label="OV5647 (v1, 5 MP)">
+
+| Resolution | FPS | Notes |
+|-----------|-----|-------|
+| 1296x972 | 15 | Sharp 4:3, relaxed CPU |
+| **1296x972** | **30** | **Best balance for Pi Zero 2 W** |
+| 2592x1944 | 15 | Max 5 MP - exceeds Zero 2 W encoder limit |
+
+</TabItem>
+<TabItem value="imx219" label="IMX219 (v2, 8 MP)">
+
+| Resolution | FPS | Notes |
+|-----------|-----|-------|
+| 1640x1232 | 15 | Full sensor binned, lower CPU |
+| **1640x1232** | **30** | **Full sensor binned, best balance** |
+| 3280x2464 | 15 | Max 8 MP - exceeds Zero 2 W encoder limit |
+
+</TabItem>
+<TabItem value="imx477" label="IMX477 (HQ, 12.3 MP)">
+
+| Resolution | FPS | Notes |
+|-----------|-----|-------|
+| 1332x990 | 30 | 2x2 binned, lightweight |
+| **2028x1520** | **30** | **Half-resolution, best balance** |
+| 4056x3040 | 10 | Max 12.3 MP - exceeds Zero 2 W encoder limit |
+
+</TabItem>
+<TabItem value="imx708" label="IMX708 (v3, 12 MP)">
+
+| Resolution | FPS | Notes |
+|-----------|-----|-------|
+| 1536x864 | 30 | Binned 16:9, lightweight |
+| **2304x1296** | **30** | **Native 16:9, best balance** |
+| 4608x2592 | 14 | Max 12 MP - exceeds Zero 2 W encoder limit |
+
+</TabItem>
+</Tabs>
+
+:::danger Encoder limit warning
+Presets marked "exceeds Zero 2 W encoder limit" may cause encoding failures on the Pi Zero 2 W. They work fine on Pi 4/5.
+:::
+
+**Custom**: Select "Custom" from the dropdown to manually enter width (`320`-`4056`), height (`240`-`3040`), and FPS (`1`-`120`).
+
+Click **Apply** to save. The stream may briefly interrupt while MediaMTX applies the new configuration.
+
+### Image quality (ISP) {#isp}
+
+The Raspberry Pi camera's hardware Image Signal Processor handles all adjustments below with **zero CPU cost**.
+
+:::info Live preview
+Click **Show preview** to see the live feed while adjusting. The preview auto-reconnects after applying changes.
+:::
+
+#### Brightness
+
+| | |
+|---|---|
+| **Range** | -1 to 1 |
+| **Default** | 0 |
+| **What it does** | Shifts overall luminosity after capture. Unlike EV, it doesn't affect how the sensor captures light. |
+| **When to use** | Fine-tune when auto-exposure is close but the image feels slightly too dark or bright. For larger corrections, use EV. |
+
+#### Contrast
+
+| | |
+|---|---|
+| **Range** | 0 to 16 |
+| **Default** | 1 |
+| **What it does** | Controls difference between darks and lights. Below 1 = flatter. Above 1 = more punch. |
+| **When to use** | Increase to 1.5-2 for flat/hazy images. Reduce toward 0.5 if shadows are crushed. |
+
+#### Saturation
+
+| | |
+|---|---|
+| **Range** | 0 to 16 |
+| **Default** | 1 |
+| **What it does** | Controls colour intensity. 0 = black and white. 1 = natural. |
+| **When to use** | 1.2-1.5 for vibrant feed. 0 for greyscale (can help spot movement). |
+
+#### Sharpness
+
+| | |
+|---|---|
+| **Range** | 0 to 16 |
+| **Default** | 1 |
+| **What it does** | Edge-enhancement. Higher = crisper details. |
+| **When to use** | 2-3 for sharper feed. Avoid above 4 (amplifies noise, creates halos). |
+
+#### Exposure Compensation (EV)
+
+| | |
+|---|---|
+| **Range** | -10 to +10 |
+| **Default** | 0 |
+| **What it does** | Tells auto-exposure to aim brighter (+) or darker (-). Each +1 roughly doubles brightness. Changes how the sensor captures light - affects noise and motion blur. |
+| **When to use** | +2 to +3 in dark environments. -1 to -2 when a bright light source washes out the rest. |
+
+#### White Balance
+
+**Default:** Auto
+
+| Preset | Temperature | Best for |
+|--------|-------------|----------|
+| Auto | Adaptive | Most situations |
+| Daylight | ~5500K | Outdoor sunlight |
+| Cloudy | ~6500K | Overcast sky, shade |
+| Tungsten | ~3200K | Traditional incandescent bulbs |
+| Fluorescent | ~4000K | Office / strip lighting |
+| Indoor | ~3500K | Mixed warm indoor lighting |
+| Incandescent | ~2700K | Warm yellow bulbs |
+
+:::tip IR cameras
+If you use IR LEDs for night vision, set a fixed preset like **Daylight**. Auto mode will fight the IR illumination and produce colour casts.
+:::
+
+#### Exposure Mode
+
+| Mode | Behaviour |
+|------|-----------|
+| **Normal** (default) | Balanced shutter speed and gain |
+| **Short** | Faster shutter - less motion blur, more noise |
+| **Long** | Slower shutter - more light captured, more blur |
+
+#### Denoise
+
+| Mode | Behaviour |
+|------|-----------|
+| **Off** (default) | No noise reduction |
+| **Fast** | Spatial denoising within each frame |
+| **High Quality** | Temporal denoising across frames - best results |
+
+:::warning Performance on Pi Zero 2 W
+**High Quality** denoise uses CPU for temporal noise reduction and can cause frame drops on the Pi Zero 2 W. Use **Fast** or **Off**. On Pi 4/5, High Quality runs fine.
+:::
+
+#### Metering
+
+| Mode | Behaviour |
+|------|-----------|
+| **Centre-weighted** (default) | Prioritises the middle of the frame |
+| **Spot** | Measures only a small centre area |
+| **Matrix** | Balances across the whole frame |
+
+Use **Spot** when the camera faces a bright window. Use **Matrix** for wide-angle rooms with mixed lighting.
+
+#### Recommended ISP recipes
+
+<Tabs>
+<TabItem value="night" label="Night / Low Light">
+
+- Brightness: **+0.3** to **+0.5**
+- Exposure mode: **Long**
+- EV: **+2** to **+3**
+- Denoise: **Fast**
+
+</TabItem>
+<TabItem value="daylight" label="Washed-out Daylight">
+
+- Contrast: **1.5** to **2**
+- White balance: **Daylight** or **Cloudy**
+
+</TabItem>
+<TabItem value="ir" label="IR Night Vision">
+
+- White balance: **Daylight** (fixed)
+- This prevents auto-WB from fighting IR illumination
+
+</TabItem>
+<TabItem value="noisy" label="High Noise">
+
+- Denoise: **Fast**
+- Sharpness: reduce to **0.5** to soften noise artifacts
+- If still noisy, try increasing EV instead of brightness
+
+</TabItem>
+</Tabs>
+
+#### Applying ISP changes
+
+Click **Apply** to save. The stream restarts briefly (~3 seconds). Click **Reset to defaults** to return all parameters to factory settings. Settings persist in `settings.json` and `mediamtx.yml` across reboots.
+
+---
+
+## Storage {#storage}
+
+### Save location
+
+Click **Browse** to open a directory picker dialog. Navigate the Pi's filesystem by clicking folders to go deeper, or the back arrow to go up. Click **Select** to confirm.
+
+Default: `./recordings` relative to the client directory.
+
+Below the picker, a metadata line shows the SD card name, manufacturing date, and bytes written since boot (when available from the hardware).
+
+#### Network storage
+
+Mount a NAS share and select it as the save location:
+
+<Tabs>
+<TabItem value="nfs" label="NFS">
+
+```bash
+# Mount
+sudo mount -t nfs 192.168.1.50:/recordings /mnt/nas
+
+# Persist across reboots
+echo '192.168.1.50:/recordings /mnt/nas nfs defaults,noatime 0 0' | sudo tee -a /etc/fstab
+```
+
+</TabItem>
+<TabItem value="smb" label="SMB/CIFS">
+
+```bash
+# Mount
+sudo mount -t cifs //192.168.1.50/cam /mnt/nas -o guest
+
+# Persist across reboots
+echo '//192.168.1.50/cam /mnt/nas cifs guest,noatime 0 0' | sudo tee -a /etc/fstab
+```
+
+</TabItem>
+</Tabs>
+
+Then select `/mnt/nas` in the directory browser.
+
+### Auto-delete
+
+Prevents the SD card from filling up by removing the oldest recordings when disk usage exceeds a threshold.
+
+| Setting | Range | Default |
+|---------|-------|---------|
+| Threshold | 10%-95% (step 5%) | 85% |
+
+The check runs before each new recording and every 5 minutes in the background. When enabled, a disk usage bar shows:
+
+- **Blue** - healthy (well below threshold)
+- **Amber** - approaching (within 10% of threshold)
+- **Red** - exceeded (oldest recordings being deleted)
+
+A thin vertical marker shows the threshold position on the bar. Click **Save** after adjusting.
+
+:::tip
+With network storage, you can raise the threshold or disable auto-delete entirely since your NAS likely has much more space than the SD card.
+:::
+
+### Timelapse
+
+Captures periodic still frames and compiles them into a timelapse video at the end of each day.
+
+| Setting | Range | Default | Description |
+|---------|-------|---------|-------------|
+| Interval | 1-60 min | 5 min | How often to capture a frame |
+| Output FPS | 1-60 fps | 24 fps | Framerate of the compiled video |
+| Resolution | Original / 640x480 / 320x240 | 640x480 | Output frame size |
+
+When active, a pulsing green indicator shows the frame count captured today. Click **Save** after changing settings.
+
+---
+
+## Devices {#devices}
+
+Manage Bluetooth and WiFi devices for presence detection. When a tracked device is nearby, the system knows someone is home - this gates whether sensor-triggered recordings start.
+
+:::note
+Device presence gates **sensor-triggered recordings only**. You can always start a manual recording regardless of device presence.
+:::
+
+### Device status indicators
+
+Each configured device shows a real-time status dot (updated via Server-Sent Events):
+
+| Indicator | Meaning |
+|-----------|---------|
+| Green dot with glow | Device detected nearby |
+| Gray dot | Device not detected |
+| Dim gray dot | Status unknown (not checked yet) |
+
+### Bluetooth devices
+
+<Tabs>
+<TabItem value="scan" label="Scan">
+
+Click **Scan for Devices** to run a 25-second Bluetooth discovery. Found devices appear with their name (if available) and MAC address. Click **Add** to track a device.
+
+:::info Phone pairing
+When adding a phone, you may need to confirm pairing on the phone itself. A hint appears: "Check your phone to confirm pairing."
+:::
+
+</TabItem>
+<TabItem value="discover" label="Make Discoverable">
+
+Puts the Pi into Bluetooth discoverable mode for 90 seconds. Go to your phone's Bluetooth settings and pair with the Pi from there - useful when scan doesn't find your device.
+
+The countdown persists even if you switch tabs or the page reloads (saved in session storage).
+
+</TabItem>
+<TabItem value="manual" label="Enter Manually">
+
+Click **Enter Manually** in the scan panel to type a MAC address (17 characters, e.g. `AA:BB:CC:DD:EE:FF`) and an optional name.
+
+</TabItem>
+</Tabs>
+
+**Removing**: Click the X button on a device row. On desktop it appears on hover; on mobile it's always visible.
+
+**Naming**: Devices found by scan may not have a name. Type a name in the inline input before clicking Add.
+
+### WiFi devices
+
+Same interface as Bluetooth but with a 5-second scan for WiFi stations connected to the Pi's access point. WiFi presence only works when the Pi is running as an access point.
+
+---
+
+## Trigger sensors {#sensors}
+
+Configure a physical sensor connected to the Pi's GPIO pins to automatically trigger recordings.
+
+### Auto recording toggle
+
+The main toggle enables or disables the sensor. Status badge shows:
+
+| Badge | Meaning |
+|-------|---------|
+| **Armed** (green) | Sensor enabled and actively monitoring |
+| **Idle** (gray) | Sensor enabled, waiting for presence check |
+| **Disabled** (gray) | Sensor is off |
+
+### Sensor type
+
+Select from a grid of 16 sensor types:
+
+| Type | Module | Use case | Image |
+|------|--------|----------|-------|
+| Reed switch | KY-025 | Door/window open detection | ![KY-025](/img/sensors/ky-025.png) |
+| Mini reed | KY-021 | Compact door sensor | ![KY-021](/img/sensors/ky-021.png) |
+| PIR motion | HC-SR501 | Room motion detection | ![HC-SR501](/img/sensors/hc-sr501.png) |
+| Hall digital | KY-003 | Magnetic field on/off | ![KY-003](/img/sensors/ky-003.png) |
+| Hall linear | KY-024 | Analog magnetic proximity | ![KY-024](/img/sensors/ky-024.png) |
+| Vibration | KY-002 | Bump/impact detection | ![KY-002](/img/sensors/ky-002.png) |
+| Knock | KY-031 | Knock pattern detection | ![KY-031](/img/sensors/ky-031.png) |
+| Tilt | KY-020 | Angle change detection | ![KY-020](/img/sensors/ky-020.png) |
+| Tilt ball | KY-017 | Mercury tilt switch | ![KY-017](/img/sensors/ky-017.png) |
+| Touch | KY-036 | Capacitive touch | ![KY-036](/img/sensors/ky-036.png) |
+| Button | - | Manual press trigger | |
+| Light gate | KY-010 | Beam-break detection | ![KY-010](/img/sensors/ky-010.png) |
+| IR proximity | KY-032 | Infrared object detection | ![KY-032](/img/sensors/ky-032.png) |
+| Sound (small) | KY-038 | Sound level (compact mic) | ![KY-038](/img/sensors/ky-038.png) |
+| Sound (large) | KY-037 | Sound level (large mic) | ![KY-037](/img/sensors/ky-037.png) |
+| Mock | - | Software-only test sensor | |
+
+Selecting a type resets GPIO to the sensor's default and resets calibration.
+
+### Wiring diagram
+
+Each sensor type (except Mock) has an expandable **Show Wiring** section with:
+- A visual SVG diagram showing how to connect the sensor to the Pi's GPIO header
+- A pin-by-pin connection table
+- Any sensor-specific wiring notes
+
+### Configuration
+
+| Setting | Range | Default | Description |
+|---------|-------|---------|-------------|
+| GPIO Pin | 0-27 | Varies by type | Which Pi GPIO pin. The suggested default is shown as a hint below the input. |
+| Hold Timeout | 0-300 s | 10 s | How long to keep recording after the trigger clears. Set to 0 to stop immediately. |
+| Invert Trigger | On/Off | Off | When off: LOW-to-HIGH triggers (active high). When on: HIGH-to-LOW triggers (active low). |
+
+### Calibration {#calibration}
+
+Some sensors expose tuning sliders. These appear below the main config when the selected sensor supports them.
+
+<Tabs>
+<TabItem value="pir" label="PIR Motion">
+
+**Sensitivity** (1-10, default 7)
+
+Controls how many consecutive readings are averaged before triggering. 10 = triggers on slightest motion. 1 = requires sustained movement.
+
+:::tip
+Most HC-SR501 boards have a physical potentiometer too. Use hardware for coarse, software for fine tuning.
+:::
+
+</TabItem>
+<TabItem value="vibknock" label="Vibration / Knock">
+
+| Parameter | Range | Default (vib.) | Default (knock) |
+|-----------|-------|-----------------|-----------------|
+| Pulse threshold | 1-20 | 1 | 3 |
+| Counting window | 1-30 s | 5 s | 5 s |
+
+Example: knock with threshold 3, window 5s = "3 knocks within 5 seconds" to trigger. Single accidental bumps are ignored.
+
+</TabItem>
+<TabItem value="tilt" label="Tilt Switch">
+
+**Settle time** (0-5 s in 0.1s steps, default 0.5s)
+
+Requires the tilt to be held for the set duration before triggering. Filters out vibration-induced false positives (door slamming sloshing the mercury).
+
+</TabItem>
+<TabItem value="touch" label="Touch Sensor">
+
+**Touch duration** (0-3 s in 0.1s steps, default 0.3s)
+
+Requires touch to be held before triggering. Filters static discharge and accidental brushes.
+
+</TabItem>
+</Tabs>
+
+:::info Sensors without calibration
+Reed switches, hall sensors, light gates, buttons, IR proximity, sound sensors, and mock have clean digital signals that work reliably with defaults. No calibration sliders appear.
+:::
+
+### Testing
+
+Click **Start Test** to enter live test mode. The sensor pin is read every 500ms showing:
+
+- A badge with the current value (**1** High / **0** Low) and GPIO pin number
+- A sparkline chart of the last 40 readings
+
+Trigger the sensor physically to verify readings change. Click **Stop Test** when done.
+
+### Mock sensor
+
+When Mock is selected and enabled, two buttons replace the wiring test:
+
+- **Simulate Trigger** - fires the sensor, starting a recording if armed
+- **Simulate Release** - releases the trigger, starting the hold timeout countdown
+
+This tests the full pipeline (trigger, record, hold, stop) without hardware.
+
+### Save workflow
+
+1. Select sensor type and configure GPIO, hold time, invert logic, and calibration
+2. Click **Save** to store the configuration
+3. Toggle **Auto Recording** to arm the sensor
+4. Status badge changes to **Armed**
+
+The enable/disable toggle takes effect immediately without a separate save.
+
+---
+
+## Navigation {#navigation}
+
+**Desktop** (1024px+): A sticky sidebar highlights the current section as you scroll. Click a section name to smooth-scroll to it. The URL hash updates to match.
+
+**Mobile**: A horizontal tab bar at the top serves the same purpose. The active section updates automatically based on scroll position.
+
+## Data loading
+
+All settings load in parallel on page mount - the settings file, timelapse status, storage status, and system info are fetched simultaneously. Device presence status updates in real time via Server-Sent Events.

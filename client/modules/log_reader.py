@@ -28,7 +28,7 @@ def _parse_line(line: str) -> dict | None:
 
 
 def get_api_logs(limit: int = 500, level: str | None = None,
-                 search: str | None = None) -> list[dict]:
+                 search: str | None = None, source: str | None = None) -> list[dict]:
     """Return parsed API log lines (newest first).
 
     Reads the current log file and rotated backups (.1, .2, .3) until
@@ -43,6 +43,7 @@ def get_api_logs(limit: int = 500, level: str | None = None,
 
     level_upper = level.upper() if level else None
     search_lower = search.lower() if search else None
+    source_lower = source.lower() if source else None
     results: list[dict] = []
 
     for path in files:
@@ -60,11 +61,13 @@ def get_api_logs(limit: int = 500, level: str | None = None,
                 continue
             parsed = _parse_line(raw)
             if parsed is None:
-                # Continuation line — attach to previous entry if any
+                # Continuation line - attach to previous entry if any
                 if results:
                     results[-1]["message"] += "\n" + raw
                 continue
             if level_upper and parsed["level"] != level_upper:
+                continue
+            if source_lower and parsed["source"].lower() != source_lower:
                 continue
             if search_lower and search_lower not in raw.lower():
                 continue

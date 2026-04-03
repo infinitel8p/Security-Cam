@@ -797,7 +797,8 @@ def logs_api():
     limit = min(limit, 2000)
     level = request.args.get('level')
     search = request.args.get('search')
-    return jsonify(log_reader.get_api_logs(limit=limit, level=level, search=search))
+    source = request.args.get('source')
+    return jsonify(log_reader.get_api_logs(limit=limit, level=level, search=search, source=source))
 
 
 @app.route('/logs/mediamtx', methods=['GET'])
