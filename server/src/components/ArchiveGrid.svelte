@@ -99,7 +99,9 @@
   type DeleteTarget = { kind: "video"; item: Video } | { kind: "timelapse"; item: Timelapse } | { kind: "snapshot"; item: Snapshot } | null;
   let deleteTarget: DeleteTarget = $state(null);
   let deleting = $state(false);
+  let searchInput = $state("");
   let search = $state("");
+  let searchTimer: ReturnType<typeof setTimeout> | null = null;
   let sortMode: SortMode = $state("newest");
   let filterMode: FilterMode = $state("all");
   let viewMode: ViewMode = $state("grid");
@@ -346,18 +348,19 @@
     // Read the last-seen timestamp before marking as seen
     const stored = localStorage.getItem("lastSeenArchive");
     lastSeenTs = stored ? new Date(stored).getTime() : 0;
-    fetchArchive();
-    fetchSnapshots();
-    fetchTimelapses();
+    Promise.all([fetchArchive(), fetchSnapshots(), fetchTimelapses()]);
     // Mark archive as seen (clears the nav badge)
     markSeen();
 
     // Re-fetch archive when new content is added (recordings, timelapses, snapshots)
+    let refetchTimer: ReturnType<typeof setTimeout> | null = null;
     const sse = sseClient();
     unsubArchiveUpdate = sse.on("archive_updated", () => {
-      fetchArchive();
-      fetchSnapshots();
-      fetchTimelapses();
+      // Debounce rapid SSE events (e.g. multiple sidecars finishing)
+      if (refetchTimer) clearTimeout(refetchTimer);
+      refetchTimer = setTimeout(() => {
+        Promise.all([fetchArchive(), fetchSnapshots(), fetchTimelapses()]);
+      }, 500);
     });
 
     return () => {
@@ -386,16 +389,25 @@
   const SPRITE_FRAMES = 10;
   let hoverVideo: string | null = $state(null);
   let hoverFrame: number = $state(0);
+  let spriteRaf: number | null = null;
 
   function handleSpriteHover(e: MouseEvent, video: Video) {
     if (!video.sprite) return;
-    hoverVideo = video.path;
+    // Capture values synchronously (event object is recycled)
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const pct = (e.clientX - rect.left) / rect.width;
-    hoverFrame = Math.min(SPRITE_FRAMES - 1, Math.max(0, Math.floor(pct * SPRITE_FRAMES)));
+    const clientX = e.clientX;
+    const path = video.path;
+    if (spriteRaf !== null) cancelAnimationFrame(spriteRaf);
+    spriteRaf = requestAnimationFrame(() => {
+      spriteRaf = null;
+      hoverVideo = path;
+      const pct = (clientX - rect.left) / rect.width;
+      hoverFrame = Math.min(SPRITE_FRAMES - 1, Math.max(0, Math.floor(pct * SPRITE_FRAMES)));
+    });
   }
 
   function handleSpriteLeave() {
+    if (spriteRaf !== null) { cancelAnimationFrame(spriteRaf); spriteRaf = null; }
     hoverVideo = null;
   }
 
@@ -762,13 +774,17 @@
       <Icon icon={searchIcon} class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
       <input
         type="text"
-        bind:value={search}
+        bind:value={searchInput}
+        oninput={() => {
+          if (searchTimer) clearTimeout(searchTimer);
+          searchTimer = setTimeout(() => { search = searchInput; }, 200);
+        }}
         placeholder={t("input.searchRecordings")}
         class="h-9 w-full rounded-lg border border-border-subtle bg-surface-raised pl-9 pr-3 text-[0.8125rem] text-text-primary placeholder:text-text-muted transition-colors focus:border-accent/40 focus:outline-none focus:ring-1 focus:ring-accent/20"
       />
-      {#if search}
+      {#if searchInput}
         <button
-          onclick={() => (search = "")}
+          onclick={() => { searchInput = ""; search = ""; if (searchTimer) clearTimeout(searchTimer); }}
           class="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1.5 text-text-muted hover:text-text-secondary"
           aria-label="Clear search"
         >

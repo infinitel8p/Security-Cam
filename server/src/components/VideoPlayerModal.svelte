@@ -147,9 +147,10 @@
 
   // ── Seeking ────────────────────────────────────────────────────────────
 
-  function seekFromEvent(e: MouseEvent | TouchEvent, bar: HTMLElement) {
+  let seekRaf: number | null = null;
+
+  function seekTo(clientX: number, bar: HTMLElement) {
     const rect = bar.getBoundingClientRect();
-    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
     const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
     if (videoEl) {
       videoEl.currentTime = pct * duration;
@@ -160,13 +161,20 @@
   function handleSeekStart(e: MouseEvent | TouchEvent) {
     seeking = true;
     const bar = e.currentTarget as HTMLElement;
-    seekFromEvent(e, bar);
+    const startX = "touches" in e ? e.touches[0].clientX : e.clientX;
+    seekTo(startX, bar);
 
     const moveHandler = (ev: MouseEvent | TouchEvent) => {
       ev.preventDefault();
-      seekFromEvent(ev, bar);
+      const clientX = "touches" in ev ? (ev as TouchEvent).touches[0]?.clientX ?? 0 : (ev as MouseEvent).clientX;
+      if (seekRaf !== null) cancelAnimationFrame(seekRaf);
+      seekRaf = requestAnimationFrame(() => {
+        seekRaf = null;
+        seekTo(clientX, bar);
+      });
     };
     const upHandler = () => {
+      if (seekRaf !== null) { cancelAnimationFrame(seekRaf); seekRaf = null; }
       seeking = false;
       document.removeEventListener("mousemove", moveHandler);
       document.removeEventListener("mouseup", upHandler);
