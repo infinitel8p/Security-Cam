@@ -1,8 +1,6 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { initLocale, t } from "../i18n";
-  import { getBackendUrl } from "../lib/api";
-  import { apiFetch } from "../lib/fetch";
   import { initArchiveBadge, subscribe as subscribeBadge } from "../lib/archive-badge";
   import { initSystemAlerts, subscribe as subscribeAlert, type AlertLevel } from "../lib/system-alert";
   import ThemeToggle from "./ThemeToggle.svelte";
@@ -17,10 +15,12 @@
 
   let badgeCount = $state(0);
   let alertLevel: AlertLevel = $state("ok");
-  let gitBranch = $state("");
-  let gitCommit = $state("");
   let unsubBadge: (() => void) | null = null;
   let unsubAlert: (() => void) | null = null;
+
+  // Baked in at build time via vite.define - no fetch, no flash
+  const gitBranch = typeof __GIT_BRANCH__ !== "undefined" ? __GIT_BRANCH__ : "";
+  const gitCommit = typeof __GIT_COMMIT__ !== "undefined" ? __GIT_COMMIT__ : "";
 
   onMount(() => {
     initLocale();
@@ -28,20 +28,6 @@
     initSystemAlerts();
     unsubBadge = subscribeBadge((count) => { badgeCount = count; });
     unsubAlert = subscribeAlert((state) => { alertLevel = state.overall; });
-    const cached = sessionStorage.getItem("deploy_info");
-    if (cached) {
-      try {
-        const d = JSON.parse(cached);
-        gitBranch = d.git_branch ?? "";
-        gitCommit = d.git_commit ?? "";
-      } catch { /* ignore corrupt cache */ }
-    } else {
-      apiFetch(`${getBackendUrl()}/deploy_info`).then(r => r.json()).then(d => {
-        gitBranch = d.git_branch ?? "";
-        gitCommit = d.git_commit ?? "";
-        sessionStorage.setItem("deploy_info", JSON.stringify(d));
-      }).catch(() => {});
-    }
   });
 
   onDestroy(() => {
@@ -75,7 +61,7 @@
     <div>
       <span class="text-[0.8125rem] font-bold tracking-tight text-text-primary">Security-Cam</span>
       <p class="text-[0.625rem] leading-none font-medium font-mono tracking-widest text-text-muted">
-        v.2026.04.03.5
+        v.2026.04.03.6
       </p>
       {#if gitBranch}
         <p class="mt-0.5 text-[0.5625rem] leading-none font-mono text-text-muted/60 truncate max-w-[7.5rem]" title="{gitBranch}{gitCommit ? ' @ ' + gitCommit : ''}">
