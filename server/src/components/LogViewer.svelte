@@ -467,7 +467,7 @@
   onDestroy(() => {
     stopAutoRefresh();
     if (newCountTimer) clearTimeout(newCountTimer);
-    document.removeEventListener("keydown", handleKeydown);
+    if (typeof document !== "undefined") document.removeEventListener("keydown", handleKeydown);
   });
 
   // Restart auto-refresh when toggle changes
