@@ -10,13 +10,8 @@
 
 
 <link rel="search" type="application/opensearchdescription+xml" title="Security-Cam" href="/Security-Cam/opensearch.xml"><link rel="stylesheet" href="/Security-Cam/assets/css/styles.36674e39.css">
-<<<<<<< HEAD
-<script src="/Security-Cam/assets/js/runtime~main.1cc2b8b1.js" defer="defer"></script>
-<script src="/Security-Cam/assets/js/main.4d56f7c0.js" defer="defer"></script>
-=======
-<script src="/Security-Cam/assets/js/runtime~main.68fa2345.js" defer="defer"></script>
-<script src="/Security-Cam/assets/js/main.eca884ec.js" defer="defer"></script>
->>>>>>> d69aa10 (feat: add deploy_info endpoint to expose git branch and commit details)
+<script src="/Security-Cam/assets/js/runtime~main.8a3e1e8c.js" defer="defer"></script>
+<script src="/Security-Cam/assets/js/main.61982721.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
 <svg style="display: none;"><defs>
@@ -61,11 +56,13 @@
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="archive">Archive<a href="#archive" class="hash-link" aria-label="Direct link to Archive" title="Direct link to Archive" translate="no">​</a></h2>
 <p>Browse and manage recorded videos:</p>
 <ul>
-<li class="">Videos are displayed in a grid, grouped by date, and can be filtered by time range or sorted</li>
-<li class="">Click a video to stream it directly in the browser</li>
-<li class="">Download or delete individual recordings</li>
-<li class=""><strong>Thumbnails</strong> — a JPEG snapshot is captured from the live feed the moment recording starts. This provides instant preview images in both grid and list view, without waiting for the browser to decode the video (fixes blank thumbnails on iOS Safari)</li>
-<li class=""><strong>Hover scrub</strong> — hover over a video card in grid view to scrub through the recording. A sprite sheet of 10 evenly-spaced frames is generated automatically when recording stops. Move the mouse left/right to preview different moments without opening the video</li>
+<li class=""><strong>Thumbnail cards</strong> — video cards show a JPEG thumbnail captured from the live feed the moment recording starts. No <code>&lt;video&gt;</code> element is loaded in the grid, so thumbnails display reliably on every browser and device (including iOS Safari). Cards show a centered play button that fades in on hover</li>
+<li class=""><strong>Hover scrub</strong> — hover over a video card in grid view to scrub through the recording. A sprite sheet of 10 evenly-spaced frames is generated automatically when recording stops. Move the mouse left/right to preview different moments. The sprite overlay now renders above the thumbnail image, fixing the previous z-order issue where it was hidden behind the native video element</li>
+<li class=""><strong>Click to play</strong> — clicking a video card opens a full-screen modal player with custom controls. No native browser <code>&lt;video controls&gt;</code> are used, so the experience is consistent across Chrome, Safari, Firefox, and mobile. The player includes a seek bar, time display, volume toggle, fullscreen, and download. Use arrow keys to navigate: left/right to seek 10 seconds, up/down for volume, Space or K to play/pause, F for fullscreen, M to mute</li>
+<li class=""><strong>Playback speed</strong> — the modal player has a speed selector (0.5x, 1x, 2x, 4x, 8x) for reviewing long recordings quickly. Speed resets to 1x when navigating to a different video</li>
+<li class=""><strong>Previous/next navigation</strong> — arrow buttons on the sides of the player let you step through filtered recordings without closing the modal. A counter shows your position (e.g. &quot;3 / 12&quot;)</li>
+<li class="">Videos are displayed in a grid, grouped by date, and can be filtered by time range or sorted. In list view, clicking the thumbnail or filename opens the same player modal</li>
+<li class="">Download or delete individual recordings from the card footer (grid view) or the row actions (list view)</li>
 <li class=""><strong>New recording badges</strong> — the Archive nav icon shows a red badge with the count of recordings created since your last visit. Inside the archive, new recordings are highlighted with a &quot;NEW&quot; label. The badge clears automatically when you open the archive page</li>
 <li class=""><strong>Snapshots</strong> — still frames captured from the live feed via the snapshot button appear in a collapsible section at the top of the archive. Each snapshot shows a thumbnail with the capture time, and can be downloaded or deleted individually</li>
 <li class=""><strong>Timelapse</strong> — daily timelapse videos appear in their own collapsible section. Each video compresses a full day into a short clip. Enable timelapse capture in Settings &gt; Storage to start generating them automatically</li>
