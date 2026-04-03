@@ -144,14 +144,20 @@ def get_cpu_temp():
 def get_cpu_load():
     """
     Returns the CPU load as a percentage, considering the maximum load across all cores.
+    Uses interval=0 for non-blocking reads (compares with previous sample).
 
     Returns:
         int: The CPU load as a percentage rounded to the nearest integer.
     """
-    
-    per_core_loads = psutil.cpu_percent(interval=1, percpu=True)
+
+    per_core_loads = psutil.cpu_percent(interval=0, percpu=True)
     max_load = max(per_core_loads)
     return round(max_load)
+
+
+# Prime the psutil CPU counter so the first interval=0 call returns
+# meaningful data instead of 0.0
+psutil.cpu_percent(interval=None)
 
 
 def get_storage_info():

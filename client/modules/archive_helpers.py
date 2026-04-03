@@ -1,13 +1,38 @@
 import json
 import logging
 import os
+import time
 from . import settings_helpers
 
 log = logging.getLogger("archive")
 settings = settings_helpers.get_settings()
 
+# TTL cache to avoid full filesystem scans on every request
+_cache: dict = {}
+_CACHE_TTL = 30  # seconds
+
+
+def invalidate_cache():
+    """Clear the archive cache. Call after recording stop, delete, etc."""
+    _cache.clear()
+
+
+def _get_cached(key: str, loader):
+    now = time.monotonic()
+    entry = _cache.get(key)
+    if entry and (now - entry[1]) < _CACHE_TTL:
+        return entry[0]
+    result = loader()
+    _cache[key] = (result, now)
+    return result
+
+
 def get_videos():
     reload_settings()
+    return _get_cached("videos", _scan_videos)
+
+
+def _scan_videos():
     video_dir = settings["VideoSaveLocation"]
     videos = []
 
@@ -73,6 +98,10 @@ def count_videos_since(since_iso: str) -> int:
 def get_snapshots():
     """List all snapshot JPEG files in the recordings directory."""
     reload_settings()
+    return _get_cached("snapshots", _scan_snapshots)
+
+
+def _scan_snapshots():
     video_dir = settings["VideoSaveLocation"]
     snapshots = []
 
@@ -119,6 +148,7 @@ def delete_snapshot(snapshot_path):
 
     try:
         os.remove(target)
+        invalidate_cache()
         log.info("Snapshot deleted: %s", target)
         return {"message": "Snapshot deleted"}, 200
     except Exception as e:
@@ -128,7 +158,10 @@ def delete_snapshot(snapshot_path):
 
 def reload_settings():
     global settings
+    prev = settings.get("VideoSaveLocation")
     settings = settings_helpers.get_settings()
+    if settings.get("VideoSaveLocation") != prev:
+        invalidate_cache()
 
 def delete_video(video_path):
     reload_settings()
@@ -169,6 +202,7 @@ def delete_video(video_path):
             sidecar = os.path.splitext(target)[0] + ext
             if os.path.exists(sidecar):
                 os.remove(sidecar)
+        invalidate_cache()
         log.info("Video deleted: %s", target)
         return {"message": "Video deleted successfully"}, 200
     except Exception as e:
