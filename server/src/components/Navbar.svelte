@@ -28,10 +28,20 @@
     initSystemAlerts();
     unsubBadge = subscribeBadge((count) => { badgeCount = count; });
     unsubAlert = subscribeAlert((state) => { alertLevel = state.overall; });
-    apiFetch(`${getBackendUrl()}/deploy_info`).then(r => r.json()).then(d => {
-      gitBranch = d.git_branch ?? "";
-      gitCommit = d.git_commit ?? "";
-    }).catch(() => {});
+    const cached = sessionStorage.getItem("deploy_info");
+    if (cached) {
+      try {
+        const d = JSON.parse(cached);
+        gitBranch = d.git_branch ?? "";
+        gitCommit = d.git_commit ?? "";
+      } catch { /* ignore corrupt cache */ }
+    } else {
+      apiFetch(`${getBackendUrl()}/deploy_info`).then(r => r.json()).then(d => {
+        gitBranch = d.git_branch ?? "";
+        gitCommit = d.git_commit ?? "";
+        sessionStorage.setItem("deploy_info", JSON.stringify(d));
+      }).catch(() => {});
+    }
   });
 
   onDestroy(() => {
@@ -58,18 +68,18 @@
 <nav
   class="fixed left-0 top-0 z-40 hidden h-screen w-52 flex-col border-r border-border-subtle bg-surface-raised lg:flex">
   <!-- Logo -->
-  <div class="flex items-center gap-3 px-5 py-5">
+  <div class="flex items-start gap-3 px-5 py-5">
     <div class="flex h-8 w-8 items-center justify-center">
       <img src="icon.png" alt="Security Cam" width="32" height="32" loading="eager">
     </div>
     <div>
       <span class="text-[0.8125rem] font-bold tracking-tight text-text-primary">Security-Cam</span>
       <p class="text-[0.625rem] leading-none font-medium font-mono tracking-widest text-text-muted">
-        v.2026.04.03.4
+        v.2026.04.03.5
       </p>
       {#if gitBranch}
-        <p class="mt-0.5 text-[0.5625rem] leading-none font-mono text-text-muted/60 truncate max-w-[7.5rem]" title="{gitBranch}{gitCommit ? ` @ ${gitCommit}` : ''}">
-          {gitBranch}{#if gitCommit}<span class="text-text-muted/40"> @ {gitCommit}</span>{/if}
+        <p class="mt-0.5 text-[0.5625rem] leading-none font-mono text-text-muted/60 truncate max-w-[7.5rem]" title="{gitBranch}{gitCommit ? ' @ ' + gitCommit : ''}">
+          {gitBranch} {#if gitCommit}<span class="text-text-muted/40">@ {gitCommit}</span>{/if}
         </p>
       {/if}
     </div>
