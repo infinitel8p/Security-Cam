@@ -72,11 +72,11 @@ import videoIcon from "../icons/device-tv-old.svg?raw";
 			</div>
 		</div>
 
-		<!-- Timelines row -->
+		<!-- Timelines row (below fold - hydrate when scrolled into view) -->
 		<div
 			class="animate-in stagger-3 mt-4 grid grid-cols-1 gap-4 sm:mt-5 sm:gap-5 lg:grid-cols-2">
-			<EventTracker client:load />
-			<HealthTracker client:load />
+			<EventTracker client:visible />
+			<HealthTracker client:visible />
 		</div>
 
 		<!-- Access Log -->
@@ -97,7 +97,7 @@ import videoIcon from "../icons/device-tv-old.svg?raw";
 					/></span
 				>
 			</div>
-			<AccessLog client:load />
+			<AccessLog client:visible />
 		</section>
 
 		<!-- Activity Timeline -->
@@ -118,7 +118,7 @@ import videoIcon from "../icons/device-tv-old.svg?raw";
 					/></span
 				>
 			</div>
-			<ActivityTimeline client:load />
+			<ActivityTimeline client:visible />
 		</section>
 	</div>
 </Layout>
