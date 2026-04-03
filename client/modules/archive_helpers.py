@@ -32,6 +32,11 @@ def get_videos():
     return _get_cached("videos", _scan_videos)
 
 
+def get_video_count() -> int:
+    """Return total number of videos using the cached list."""
+    return len(get_videos())
+
+
 def _scan_videos():
     video_dir = settings["VideoSaveLocation"]
     videos = []

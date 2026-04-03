@@ -62,6 +62,7 @@
 
   let discoverable = $state(restoredDiscoverable);
   let discoverableError = $state("");
+  let discoTimeout: ReturnType<typeof setTimeout> | undefined;
 
   if (restoredDiscoverable) {
     // The backend request is still running (or already timed out).
@@ -69,7 +70,7 @@
     showScanPanel = true;
     const remainingMs = savedUntil - Date.now();
     startCountdown(Math.max(0, Math.ceil(remainingMs / 1000)));
-    setTimeout(() => {
+    discoTimeout = setTimeout(() => {
       if (discoverable) {
         discoverable = false;
         discoverableError = "";
@@ -96,7 +97,7 @@
     timerInterval = undefined;
   }
 
-  onDestroy(() => stopTimer());
+  onDestroy(() => { stopTimer(); clearTimeout(discoTimeout); });
 
   function formatTime(s: number): string {
     const m = Math.floor(s / 60);

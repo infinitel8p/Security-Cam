@@ -149,6 +149,7 @@
   // ── Seeking ────────────────────────────────────────────────────────────
 
   let seekRaf: number | null = null;
+  let seekCleanup: (() => void) | null = null;
 
   function seekTo(clientX: number, bar: HTMLElement) {
     const rect = bar.getBoundingClientRect();
@@ -177,10 +178,15 @@
     const upHandler = () => {
       if (seekRaf !== null) { cancelAnimationFrame(seekRaf); seekRaf = null; }
       seeking = false;
+      seekCleanup?.();
+    };
+    seekCleanup?.();
+    seekCleanup = () => {
       document.removeEventListener("mousemove", moveHandler);
       document.removeEventListener("mouseup", upHandler);
       document.removeEventListener("touchmove", moveHandler as any);
       document.removeEventListener("touchend", upHandler);
+      seekCleanup = null;
     };
     document.addEventListener("mousemove", moveHandler);
     document.addEventListener("mouseup", upHandler);
@@ -310,6 +316,7 @@
 
   onDestroy(() => {
     if (hideTimer) clearTimeout(hideTimer);
+    seekCleanup?.();
     document.removeEventListener("fullscreenchange", handleFullscreenChange);
     document.body.style.overflow = "";
   });

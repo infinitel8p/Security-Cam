@@ -371,6 +371,7 @@
 
   onDestroy(() => {
     unsubArchiveUpdate?.();
+    if (searchTimer) clearTimeout(searchTimer);
   });
 
   function streamUrl(path: string): string {

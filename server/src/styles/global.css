@@ -565,6 +565,41 @@ body {
   );
 }
 
+/* ── Thermal gradient (temperature card number) ────────────────────────── */
+@property --thermal-stop {
+  syntax: "<percentage>";
+  initial-value: 0%;
+  inherits: false;
+}
+
+.thermal-value {
+  color: var(--color-text-primary); /* fallback for browsers without @property */
+  background: linear-gradient(
+    135deg,
+    var(--color-accent) 0%,
+    var(--color-status-warning) 50%,
+    var(--color-status-critical) 100%
+  );
+  background-size: 200% 100%;
+  background-position-x: var(--thermal-stop);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transition: --thermal-stop 1.5s cubic-bezier(0.25, 1, 0.5, 1), background-position-x 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Firefox fallback: no @property support, so transition won't work. Use instant position change. */
+@supports not (background: paint(a)) {
+  .thermal-value {
+    transition: background-position-x 0.8s ease-out;
+  }
+}
+
+/* Ambient thermal glow behind the card */
+.thermal-ambient {
+  transition: box-shadow 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
 /* ── Reduced motion ────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .animate-in, .animate-bar, .animate-bar-grow,

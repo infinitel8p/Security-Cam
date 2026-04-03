@@ -233,7 +233,8 @@
       if (res.ok) {
         testValue = data.value;
         testError = "";
-        testHistory = [...testHistory.slice(-39), data.value ?? false];
+        if (testHistory.length >= 40) testHistory.shift();
+        testHistory = [...testHistory, data.value ?? false];
       } else {
         testError = data.error || t("toast.saveFailed");
         testValue = null;

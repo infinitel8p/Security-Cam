@@ -506,6 +506,12 @@ def sensor_test():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/archive/count', methods=['GET'])
+def archive_count():
+    """Return just the total number of recordings (lightweight)."""
+    return jsonify({"count": archive_helpers.get_video_count()})
+
+
 @app.route('/archive/new_count', methods=['GET'])
 def archive_new_count():
     """Return the number of recordings created after a given timestamp."""

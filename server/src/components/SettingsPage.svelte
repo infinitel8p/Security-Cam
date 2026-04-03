@@ -147,7 +147,14 @@
     loading = true;
     error = false;
     try {
-      const res = await apiFetch(`${getBackendUrl()}/settings`);
+      const base = getBackendUrl();
+      // Fire all requests in parallel - settings is critical, others are supplementary
+      const [res, tlRes, storageRes, sysRes] = await Promise.all([
+        apiFetch(`${base}/settings`),
+        apiFetch(`${base}/timelapse/status`).catch(() => null),
+        apiFetch(`${base}/storage/status`).catch(() => null),
+        apiFetch(`${base}/system_info`).catch(() => null),
+      ]);
       if (!res.ok) throw new Error();
       const settings = await res.json();
       btDevices = settings.TARGET_BT_ADDRESSES ?? [];
@@ -178,38 +185,23 @@
       timelapseFps = tl.fps ?? 24;
       timelapseResolution = tl.resolution ?? "640x480";
 
-      // Fetch live timelapse status
-      try {
-        const tlRes = await apiFetch(`${getBackendUrl()}/timelapse/status`);
-        if (tlRes.ok) {
-          const tlStatus = await tlRes.json();
-          timelapseFrameCount = tlStatus.today_frame_count ?? 0;
-        }
-      } catch {
-        // Silent
+      if (tlRes?.ok) {
+        const tlStatus = await tlRes.json();
+        timelapseFrameCount = tlStatus.today_frame_count ?? 0;
       }
-
-      // Fetch live disk usage + SD health
-      try {
-        const storageRes = await apiFetch(`${getBackendUrl()}/storage/status`);
-        if (storageRes.ok) {
-          const st = await storageRes.json();
-          storageDiskPercent = st.disk_percent ?? 0;
+      if (storageRes?.ok) {
+        const st = await storageRes.json();
+        storageDiskPercent = st.disk_percent ?? 0;
+      }
+      if (sysRes?.ok) {
+        const sys = await sysRes.json();
+        const sd = sys.sd_health;
+        if (sd) {
+          sdWrittenGb = sd.written_since_boot_gb ?? null;
+          sdName = sd.name ?? null;
+          sdDate = sd.manufacturing_date ?? null;
         }
-      } catch { /* non-critical */ }
-
-      try {
-        const sysRes = await apiFetch(`${getBackendUrl()}/system_info`);
-        if (sysRes.ok) {
-          const sys = await sysRes.json();
-          const sd = sys.sd_health;
-          if (sd) {
-            sdWrittenGb = sd.written_since_boot_gb ?? null;
-            sdName = sd.name ?? null;
-            sdDate = sd.manufacturing_date ?? null;
-          }
-        }
-      } catch { /* non-critical */ }
+      }
     } catch {
       error = true;
     } finally {
@@ -222,9 +214,8 @@
     locale = getLocale();
     const saved = localStorage.getItem("theme") as ThemeMode | null;
     theme = saved === "light" || saved === "dark" ? saved : "system";
-    await fetchSettings();
-
-    // Fetch initial device statuses, then use SSE for updates
+    // Fire settings + device statuses in parallel (independent requests)
+    fetchSettings();
     fetchDeviceStatuses();
     const sse = sseClient();
     sse.registerFallback({

@@ -5,6 +5,7 @@
   import { animatedNumber } from "../lib/animate-number";
   import { initLocale, t } from "../i18n";
   import Icon from "./Icon.svelte";
+  import SparklineCanvas from "./SparklineCanvas.svelte";
   import temperatureIcon from "../icons/temperature.svg?raw";
   import cpuIcon from "../icons/cpu.svg?raw";
   import databaseIcon from "../icons/database.svg?raw";
@@ -132,7 +133,6 @@
   let pollTimer: ReturnType<typeof setTimeout> | null = null;
   let consecutiveErrors = 0;
   let destroyed = false;
-  let pulseKey = $state(0);
 
   // History for sparklines
   const HISTORY_LEN = 60;
@@ -154,15 +154,15 @@
       if (data.extended) extended = data.extended;
       error = false;
       consecutiveErrors = 0;
-      pulseKey++;
 
       if (info) {
         const load = info.cpu_load_percent ?? 0;
         const temp = info.cpu_temp_celsius ?? 0;
         const ram = usagePct(info.ram_usage_mb?.used_mb ?? 0, info.ram_usage_mb?.total_mb ?? 1);
-        cpuHistory = [...cpuHistory.slice(-(HISTORY_LEN - 1)), Math.round(load)];
-        tempHistory = [...tempHistory.slice(-(HISTORY_LEN - 1)), temp];
-        ramHistory = [...ramHistory.slice(-(HISTORY_LEN - 1)), ram];
+        if (cpuHistory.length >= HISTORY_LEN) { cpuHistory.shift(); tempHistory.shift(); ramHistory.shift(); }
+        cpuHistory = [...cpuHistory, Math.round(load)];
+        tempHistory = [...tempHistory, temp];
+        ramHistory = [...ramHistory, ram];
       }
 
       // Fetch secondary data (non-blocking)
@@ -194,7 +194,7 @@
       apiFetch(`${base}/sensor/status`).then(r => r.ok ? r.json() : null).then(d => { if (d) sensor = d; }).catch(() => {}),
       apiFetch(`${base}/timelapse/status`).then(r => r.ok ? r.json() : null).then(d => { if (d) timelapse = d; }).catch(() => {}),
       apiFetch(`${base}/recording_status`).then(r => r.ok ? r.json() : null).then(d => { if (d) recording = d.recording ?? false; }).catch(() => {}),
-      apiFetch(`${base}/archive`).then(r => r.ok ? r.json() : null).then(d => { if (Array.isArray(d)) archiveCount = d.length; }).catch(() => {}),
+      apiFetch(`${base}/archive/count`).then(r => r.ok ? r.json() : null).then(d => { if (d) archiveCount = d.count ?? 0; }).catch(() => {}),
     ];
     await Promise.allSettled(fetches);
   }
@@ -216,7 +216,8 @@
 
   onMount(() => {
     initLocale();
-    loadHistory().then(() => fetchInfo()).then(schedulePoll);
+    // Load history backfill and live data in parallel, then start polling
+    Promise.all([loadHistory(), fetchInfo()]).then(schedulePoll);
   });
 
   onDestroy(() => {
@@ -229,12 +230,6 @@
 
   function usagePct(used: number, total: number): number {
     return total > 0 ? Math.round((used / total) * 100) : 0;
-  }
-
-  function tempColor(temp: number): string {
-    if (temp >= 70) return "text-status-critical";
-    if (temp >= 55) return "text-status-warning";
-    return "text-status-ok";
   }
 
   function barColor(pct: number): string {
@@ -269,11 +264,25 @@
     return "";
   }
 
-  /** Sparkline stroke color keyed to status */
-  function sparklineColor(pct: number): string {
-    if (pct >= 90) return "text-status-critical/50";
-    if (pct >= 75) return "text-status-warning/50";
-    return "text-accent/50";
+  /** Sparkline stroke color keyed to status - returns raw CSS color for canvas */
+  function sparklineHex(pct: number): string {
+    if (pct >= 90) return "rgba(240,104,104,0.5)";
+    if (pct >= 75) return "rgba(240,185,58,0.5)";
+    return "rgba(77,148,255,0.5)";
+  }
+
+  /** Thermal gradient stop: 0% = cool (accent), 100% = hot (critical) */
+  function thermalStop(temp: number): string {
+    // Map 35-75°C range to 0-100% gradient position
+    const ratio = Math.max(0, Math.min(1, (temp - 35) / 40));
+    return `${ratio * 100}%`;
+  }
+
+  /** Thermal ambient glow shadow */
+  function thermalGlow(temp: number): string {
+    if (temp >= 70) return "0 0 30px -8px rgba(240,104,104,0.15), inset 0 1px 0 0 rgba(240,104,104,0.1)";
+    if (temp >= 55) return "0 0 24px -8px rgba(240,185,58,0.12), inset 0 1px 0 0 rgba(240,185,58,0.08)";
+    return "";
   }
 
   function formatUptimeLong(seconds: number | undefined | null): string {
@@ -294,22 +303,6 @@
 
   function throttleHistory(t: ThrottleInfo): boolean {
     return t.under_voltage_occurred || t.freq_capped_occurred || t.throttled_occurred || t.soft_temp_limit_occurred;
-  }
-
-  /** Build SVG polyline points — always fills full width */
-  function sparklinePoints(data: number[], max: number): string {
-    if (data.length < 2) return "";
-    const safeMax = max > 0 ? max : 1;
-    const w = 100;
-    const h = 24;
-    const step = w / (data.length - 1);
-    return data
-      .map((v, i) => {
-        const x = i * step;
-        const y = h - (Math.min(v, safeMax) / safeMax) * h;
-        return `${x.toFixed(1)},${y.toFixed(1)}`;
-      })
-      .join(" ");
   }
 
   function formatBytes(bytes: number | null | undefined): string {
@@ -452,29 +445,7 @@
           <div class="h-full rounded-full animate-bar {barColor(loadPct)} transition-all duration-500" style="width: {loadPct}%"></div>
         </div>
         {#if cpuHistory.length > 1}
-          <svg class="mt-3 h-8 w-full" viewBox="0 0 100 24" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="cpu-fill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="currentColor" stop-opacity="0.12" />
-                <stop offset="100%" stop-color="currentColor" stop-opacity="0" />
-              </linearGradient>
-            </defs>
-            {#key pulseKey}
-              <polygon
-                points="{sparklinePoints(cpuHistory, 100)} 100,24 0,24"
-                fill="url(#cpu-fill)"
-                class="{sparklineColor(loadPct)} animate-sparkline-pulse"
-              />
-            {/key}
-            <polyline
-              points={sparklinePoints(cpuHistory, 100)}
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.2"
-              stroke-linejoin="round"
-              class="{sparklineColor(loadPct)}"
-            />
-          </svg>
+          <SparklineCanvas data={cpuHistory} max={100} color={sparklineHex(loadPct)} />
         {/if}
         <!-- Per-core bars -->
         {#if extended?.cpu_per_core && extended.cpu_per_core.length > 1}
@@ -508,29 +479,7 @@
           <div class="h-full rounded-full animate-bar {barColor(ramPct)} transition-all duration-500" style="width: {ramPct}%"></div>
         </div>
         {#if ramHistory.length > 1}
-          <svg class="mt-3 h-8 w-full" viewBox="0 0 100 24" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="ram-fill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="currentColor" stop-opacity="0.12" />
-                <stop offset="100%" stop-color="currentColor" stop-opacity="0" />
-              </linearGradient>
-            </defs>
-            {#key pulseKey}
-              <polygon
-                points="{sparklinePoints(ramHistory, 100)} 100,24 0,24"
-                fill="url(#ram-fill)"
-                class="{sparklineColor(ramPct)} animate-sparkline-pulse"
-              />
-            {/key}
-            <polyline
-              points={sparklinePoints(ramHistory, 100)}
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.2"
-              stroke-linejoin="round"
-              class="{sparklineColor(ramPct)}"
-            />
-          </svg>
+          <SparklineCanvas data={ramHistory} max={100} color={sparklineHex(ramPct)} />
         {/if}
         <!-- Swap -->
         {#if extended?.swap && extended.swap.total_mb > 0}
@@ -547,7 +496,10 @@
       </div>
 
       <!-- CPU Temp -->
-      <div class="card px-4 py-4 transition-shadow duration-700 animate-in stagger-3 {cardGlow(tempPctLevel)} {cardSweepClass(tempPctLevel)}">
+      <div
+        class="card px-4 py-4 thermal-ambient animate-in stagger-3 {cardSweepClass(tempPctLevel)}"
+        style="box-shadow: {thermalGlow(cpuTemp)};"
+      >
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-1.5">
             <Icon icon={temperatureIcon} class="h-3 w-3 text-text-muted" stroke={2} />
@@ -555,36 +507,17 @@
           </div>
           <span class="h-2 w-2 rounded-full {statusDotColor(tempPctLevel)}"></span>
         </div>
-        <p class="mt-2 text-4xl font-bold tabular-nums leading-none {tempColor(cpuTemp)}">
-          {dTemp.toFixed(0)}<span class="ml-0.5 text-xs font-medium text-text-muted/60">&deg;C</span>
+        <p
+          class="mt-2 text-4xl font-bold tabular-nums leading-none thermal-value"
+          style="--thermal-stop: {thermalStop(cpuTemp)};"
+        >
+          {dTemp.toFixed(0)}<span class="ml-0.5 text-xs font-medium text-text-muted/60" style="-webkit-text-fill-color: unset;">&deg;C</span>
         </p>
         <div class="mt-3 h-1 rounded-full {barTrackColor(tempPctLevel)}" role="progressbar" aria-valuenow={cpuTemp} aria-valuemin={0} aria-valuemax={85} aria-label={t("label.temperature")}>
           <div class="h-full rounded-full animate-bar {barColor(tempPctLevel)} transition-all duration-500" style="width: {Math.min(cpuTemp / 85 * 100, 100)}%"></div>
         </div>
         {#if tempHistory.length > 1}
-          <svg class="mt-3 h-8 w-full" viewBox="0 0 100 24" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="temp-fill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="currentColor" stop-opacity="0.12" />
-                <stop offset="100%" stop-color="currentColor" stop-opacity="0" />
-              </linearGradient>
-            </defs>
-            {#key pulseKey}
-              <polygon
-                points="{sparklinePoints(tempHistory, 85)} 100,24 0,24"
-                fill="url(#temp-fill)"
-                class="{sparklineColor(tempPctLevel)} animate-sparkline-pulse"
-              />
-            {/key}
-            <polyline
-              points={sparklinePoints(tempHistory, 85)}
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.2"
-              stroke-linejoin="round"
-              class="{sparklineColor(tempPctLevel)}"
-            />
-          </svg>
+          <SparklineCanvas data={tempHistory} max={85} color={sparklineHex(tempPctLevel)} />
         {/if}
       </div>
 
