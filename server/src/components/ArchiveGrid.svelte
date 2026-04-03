@@ -956,7 +956,7 @@
                   {#if video.sprite && hoverVideo === video.path}
                     <div
                       class="pointer-events-none absolute inset-0 bg-no-repeat"
-                      style="background-image: url({spriteUrl(video.path)}); background-size: {SPRITE_FRAMES * 100}% 100%; background-position-x: -{hoverFrame * (100 / SPRITE_FRAMES)}%;"
+                      style="background-image: url({spriteUrl(video.path)}); background-size: {SPRITE_FRAMES * 100}% 100%; background-position-x: {SPRITE_FRAMES > 1 ? hoverFrame / (SPRITE_FRAMES - 1) * 100 : 0}%;"
                     ></div>
                     <div
                       class="pointer-events-none absolute bottom-0 left-0 h-0.5 bg-accent transition-[width] duration-75"
