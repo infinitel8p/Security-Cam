@@ -43,24 +43,38 @@ def _timelapse_dir() -> str:
     return tl_dir
 
 
+def _camera_overlay_enabled() -> bool:
+    """Check whether MediaMTX's hardware text overlay is active."""
+    try:
+        from modules import mediamtx_helpers
+        import yaml
+        with open(mediamtx_helpers.CONFIG_PATH, "r") as f:
+            cfg = yaml.safe_load(f)
+        cam = cfg.get("paths", {}).get("cam", {})
+        return bool(cam.get("rpiCameraTextOverlayEnable", False))
+    except Exception:
+        return False
+
+
 def _capture_frame(output_path: str, resolution: str | None = None) -> bool:
     """Capture a single JPEG frame from the RTSP stream.
 
-    Burns a timestamp overlay into the frame and returns True on success,
-    False on failure (logged at DEBUG).
+    If the camera's hardware text overlay is disabled, burns a timestamp
+    via FFmpeg drawtext so timelapse frames always have one.  Returns
+    True on success, False on failure (logged at DEBUG).
     """
-    now = datetime.now()
-    timestamp_text = now.strftime("%Y-%m-%d  %H\\:%M\\:%S")
-
     filters = []
     if resolution and resolution != "original":
         filters.append(f"scale={resolution}")
-    filters.append(
-        f"drawtext=text='{timestamp_text}'"
-        ":fontsize=16:fontcolor=white:borderw=2:bordercolor=black"
-        ":x=8:y=h-th-8"
-    )
-    vf = ",".join(filters)
+
+    if not _camera_overlay_enabled():
+        now = datetime.now()
+        timestamp_text = now.strftime("%Y-%m-%d  %H\\:%M\\:%S")
+        filters.append(
+            f"drawtext=text='{timestamp_text}'"
+            ":fontsize=16:fontcolor=white:borderw=2:bordercolor=black"
+            ":x=8:y=h-th-8"
+        )
 
     cmd = [
         "ffmpeg", "-y",
@@ -68,8 +82,9 @@ def _capture_frame(output_path: str, resolution: str | None = None) -> bool:
         "-i", RTSP_URL,
         "-frames:v", "1",
         "-q:v", "6",
-        "-vf", vf,
     ]
+    if filters:
+        cmd += ["-vf", ",".join(filters)]
     cmd.append(output_path)
 
     try:
