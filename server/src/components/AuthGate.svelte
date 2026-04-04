@@ -62,13 +62,13 @@
         setToken(data.token);
         state = "authenticated";
       } else {
-        error = t("toast.invalidToken");
+        error = t("toast.wrongPassword");
         shakeKey++;
       }
     } catch (e: any) {
       error = e?.message === "network"
         ? t("toast.networkError")
-        : t("toast.invalidToken");
+        : t("toast.wrongPassword");
       shakeKey++;
     } finally {
       submitting = false;

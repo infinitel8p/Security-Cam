@@ -239,7 +239,11 @@ def snapshot():
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
     if request.method == 'GET':
-        return jsonify(settings_helpers.get_settings())
+        s = settings_helpers.get_settings()
+        # Never expose password_hash via API
+        if "Auth" in s:
+            s["Auth"].pop("password_hash", None)
+        return jsonify(s)
     elif request.method == 'POST':
         new_settings = request.json
         if "VideoSaveLocation" in new_settings:
@@ -250,6 +254,13 @@ def settings():
             else:
                 return jsonify({"message": "Invalid directory or insufficient permissions"}), 400
         else:
+            # Auth updates: only allow 'enabled', preserve token/password_hash
+            if "Auth" in new_settings:
+                current_auth = settings_helpers.get_settings().get("Auth", {})
+                new_settings["Auth"] = {
+                    **current_auth,
+                    "enabled": new_settings["Auth"].get("enabled", current_auth.get("enabled", False)),
+                }
             settings_helpers.update_settings(new_settings)
             if "Auth" in new_settings:
                 auth.refresh()

@@ -64,7 +64,7 @@
   let deviceStatuses = $state<{ bt: Record<string, boolean>; wifi: Record<string, boolean> }>({ bt: {}, wifi: {} });
   let unsubPresence: (() => void) | null = null;
 
-  const sectionIds = ["appearance", "camera", "storage", "devices", "sensors", "system"];
+  const sectionIds = ["appearance", "camera", "storage", "devices", "sensors", "security", "system"];
 
   // Nav active state color (unified accent)
   const sectionColor = "text-accent";
@@ -118,6 +118,7 @@
     unsubPresence?.();
     unsubUpdate?.();
     if (observer) observer.disconnect();
+    if (regenTimeout) clearTimeout(regenTimeout);
   });
 
   type ThemeMode = "system" | "light" | "dark";
@@ -475,13 +476,7 @@
 
     toast.promise(
       (async () => {
-        const res = await apiFetch(`${getBackendUrl()}/settings`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ Auth: { enabled } }),
-        });
-        if (!res.ok) throw new Error();
-        // Reload settings to get the token (generated at startup)
+        // Fetch token before enabling, while /settings is still open
         if (enabled) {
           const sr = await apiFetch(`${getBackendUrl()}/settings`);
           if (sr.ok) {
@@ -489,6 +484,12 @@
             authToken = s.Auth?.token ?? "";
           }
         }
+        const res = await apiFetch(`${getBackendUrl()}/settings`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ Auth: { enabled } }),
+        });
+        if (!res.ok) throw new Error();
         return enabled;
       })(),
       {
@@ -655,6 +656,7 @@
       {@render mobileNavItem("storage", t("section.storage"))}
       {@render mobileNavItem("devices", t("section.devices"))}
       {@render mobileNavItem("sensors", t("section.triggerSensors"))}
+      {@render mobileNavItem("security", t("section.security"))}
       {@render mobileNavItem("system", t("section.system"))}
     </div>
   </nav>
@@ -668,6 +670,7 @@
         {@render navItem("storage", t("section.storage"))}
         {@render navItem("devices", t("section.devices"))}
         {@render navItem("sensors", t("section.triggerSensors"))}
+        {@render navItem("security", t("section.security"))}
         {@render navItem("system", t("section.system"))}
       </div>
     </nav>
