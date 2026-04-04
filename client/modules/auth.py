@@ -8,7 +8,6 @@ Auth can be disabled in settings for isolated network setups.
 
 import hmac
 import logging
-import os
 import secrets
 import string
 
@@ -28,9 +27,6 @@ EXEMPT_PATHS = frozenset([
     "/auth/status",
     "/auth/validate",
 ])
-
-_DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "data")
-_PASSWORD_FILE = os.path.join(_DATA_DIR, "default-password.txt")
 
 
 def _generate_password(length: int = 12) -> str:
@@ -57,18 +53,14 @@ def ensure_token() -> None:
         _token = secrets.token_urlsafe(32)
         auth["token"] = _token
         changed = True
-        log.info("Generated new API token")
+        log.info("Generated new API token: %s", _token)
 
     if not _password_hash:
         password = _generate_password()
         _password_hash = generate_password_hash(password)
         auth["password_hash"] = _password_hash
         changed = True
-        # Write to a file the user can read via SSH - never to the log
-        os.makedirs(_DATA_DIR, exist_ok=True)
-        with open(_PASSWORD_FILE, "w") as f:
-            f.write(password + "\n")
-        log.info("Default password written to %s", _PASSWORD_FILE)
+        log.info("Generated default password: %s", password)
 
     if changed:
         settings_helpers.update_settings({"Auth": {**auth}})
@@ -115,9 +107,6 @@ def set_password(new_password: str) -> None:
     settings_helpers.update_settings({
         "Auth": {**auth, "password_hash": _password_hash}
     })
-    # Remove the default password file once the user sets their own
-    if os.path.exists(_PASSWORD_FILE):
-        os.remove(_PASSWORD_FILE)
     log.info("Password updated")
 
 
@@ -137,8 +126,6 @@ def regenerate_token() -> str:
 def check_request() -> bool:
     """Check if the current request is authorized. Returns True if allowed."""
     if not _enabled:
-        return True
-    if request.method in ("OPTIONS", "HEAD"):
         return True
     if request.path in EXEMPT_PATHS:
         return True

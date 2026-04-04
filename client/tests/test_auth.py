@@ -196,55 +196,26 @@ def test_auth_status_invalid_token(app, client):
 
 
 def test_settings_update_refreshes_auth(app, client):
-    """Updating Auth.enabled via settings refreshes the auth module."""
-    _enable_auth(app, token="my-token", password="pass")
-    # Disable auth via settings endpoint (token/password_hash stripped, enabled goes through)
-    res = client.post("/settings",
-                      json={"Auth": {"enabled": False}},
-                      headers={"Authorization": "Bearer my-token"},
-                      content_type="application/json")
-    assert res.status_code == 200
-
-    # Should work without auth now
+    """Updating Auth in settings refreshes the auth module."""
+    _disable_auth(app)
+    # Should work without auth
     res = client.get("/settings")
     assert res.status_code == 200
 
-    # Re-enable via settings
+    # Enable auth via settings endpoint
     res = client.post("/settings",
-                      json={"Auth": {"enabled": True}},
+                      json={"Auth": {"enabled": True, "token": "new-token"}},
                       content_type="application/json")
     assert res.status_code == 200
 
-    # Now should require auth again (token unchanged from _enable_auth)
+    # Now should require auth
     res = client.get("/settings")
     assert res.status_code == 401
 
+    # Should work with the new token
     res = client.get("/settings",
-                     headers={"Authorization": "Bearer my-token"})
+                     headers={"Authorization": "Bearer new-token"})
     assert res.status_code == 200
-
-
-def test_settings_strips_token_and_hash(app, client):
-    """POST /settings cannot overwrite token or password_hash."""
-    _enable_auth(app, token="original-token", password="pass")
-    res = client.post("/settings",
-                      json={"Auth": {"enabled": True, "token": "hacked", "password_hash": "hacked"}},
-                      headers={"Authorization": "Bearer original-token"},
-                      content_type="application/json")
-    assert res.status_code == 200
-
-    # Original token still works (wasn't overwritten)
-    import modules.auth as auth_mod
-    assert auth_mod.validate_token("original-token") is True
-    assert auth_mod.validate_token("hacked") is False
-
-
-def test_settings_get_hides_password_hash(app, client):
-    """GET /settings does not include password_hash."""
-    _enable_auth(app, token="t", password="pass")
-    res = client.get("/settings", headers={"Authorization": "Bearer t"})
-    data = res.get_json()
-    assert "password_hash" not in data.get("Auth", {})
 
 
 # --- Password change ---

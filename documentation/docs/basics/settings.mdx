@@ -328,13 +328,7 @@ The enable/disable toggle takes effect immediately without a separate save.
 
 Toggle **API authentication** to require login for the dashboard and all API requests. When enabled, visitors must enter a password to access the dashboard. Disable only on isolated networks where authentication adds unnecessary friction.
 
-A default password is generated on first startup and written to `client/data/default-password.txt`. Read it via SSH:
-
-```bash
-cat /opt/security-cam/client/data/default-password.txt
-```
-
-The file is automatically deleted once you change the password. Change it using the **Change password** section below.
+A default password is generated on first startup and logged to the Pi console. After enabling auth, change it using the **Change password** section.
 
 ### API token
 
@@ -350,7 +344,7 @@ If you forget the password, edit the settings file via SSH to disable auth:
 cd /opt/security-cam/client/settings
 python3 -c "import json; s=json.load(open('settings.json')); s['Auth']['enabled']=False; s['Auth']['password_hash']=''; json.dump(s,open('settings.json','w'),indent=4)"
 ```
-Then restart the service. A new default password will be generated and written to `client/data/default-password.txt`.
+Then restart the service. A new default password will be generated and logged to the console.
 :::
 
 ---
