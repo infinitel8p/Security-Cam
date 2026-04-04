@@ -40,6 +40,7 @@
   let ispDenoise = $state("off");
   let ispMetering = $state("centre");
   let scanLinesEnabled = $state(true);
+  let captivePortalEnabled = $state(true);
   let storageLimitEnabled = $state(false);
   let storageLimitPercent = $state(85);
   let storageDiskPercent = $state(0);
@@ -166,6 +167,8 @@
       streamFPS = settings.StreamFPS ?? 30;
       saveLocation = settings.VideoSaveLocation ?? "/home/pi/Videos";
       scanLinesEnabled = settings.ScanLines !== false;
+      const cp = settings.CaptivePortal ?? {};
+      captivePortalEnabled = cp.enabled !== false;
       const sl = settings.StorageLimit ?? {};
       storageLimitEnabled = sl.enabled ?? false;
       storageLimitPercent = sl.max_percent ?? 85;
@@ -334,6 +337,34 @@
     if (!wifiDevices.some(d => d.address.toLowerCase() === device.address.toLowerCase())) {
       wifiDevices = [...wifiDevices, device];
     }
+  }
+
+  let captivePortalSaving = false;
+  function toggleCaptivePortal() {
+    if (captivePortalSaving) return;
+    captivePortalSaving = true;
+    captivePortalEnabled = !captivePortalEnabled;
+    const enabled = captivePortalEnabled;
+
+    toast.promise(
+      (async () => {
+        const res = await apiFetch(`${getBackendUrl()}/captive-portal`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ enabled }),
+        });
+        if (!res.ok) throw new Error();
+        return enabled;
+      })(),
+      {
+        loading: t("status.saving"),
+        success: (on) => on ? t("toast.captivePortalEnabled") : t("toast.captivePortalDisabled"),
+        error: () => {
+          captivePortalEnabled = !enabled;
+          return t("toast.saveFailed");
+        },
+      },
+    ).finally(() => { captivePortalSaving = false; });
   }
 
   let scanLinesSaving = false;
@@ -506,6 +537,15 @@
                 <p class="mt-0.5 text-xs text-text-muted">{t("help.scanLines")}</p>
               </div>
               <ToggleSpring checked={scanLinesEnabled} onToggle={toggleScanLines} label={t("label.scanLines")} />
+            </div>
+          </div>
+          <div class="border-t border-border-subtle px-4 py-3.5 sm:px-5 sm:py-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-text-primary">{t("label.captivePortal")}</p>
+                <p class="mt-0.5 text-xs text-text-muted">{t("help.captivePortal")}</p>
+              </div>
+              <ToggleSpring checked={captivePortalEnabled} onToggle={toggleCaptivePortal} label={t("label.captivePortal")} />
             </div>
           </div>
         </div>

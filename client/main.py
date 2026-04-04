@@ -19,6 +19,7 @@ from modules import storage_manager
 from modules import sse
 from modules import log_reader
 from modules import timelapse_manager
+from modules import captive_portal_helpers
 from modules.sensors import available_types as sensor_available_types
 
 # --- Logging setup ---
@@ -85,6 +86,10 @@ def _on_ffmpeg_crash():
 
 stream_helpers.set_on_crash(_on_ffmpeg_crash)
 sse.set_on_connect(presence_monitor.poll_now)
+
+captive_portal_helpers.sync(
+    settings_helpers.get_settings().get("CaptivePortal", {}).get("enabled", True)
+)
 
 event_logger.log_event("system_boot")
 log.info("Security Cam backend started")
@@ -788,6 +793,27 @@ def event_history_csv():
 
 
 # --- Log viewer endpoints ---
+
+
+@app.route('/captive-portal', methods=['GET', 'POST'])
+def captive_portal():
+    if request.method == 'GET':
+        settings = settings_helpers.get_settings()
+        cp = settings.get("CaptivePortal", {"enabled": True})
+        active = captive_portal_helpers.rule_exists()
+        return jsonify({"enabled": cp.get("enabled", True), "active": active})
+
+    data = request.json or {}
+    enabled = bool(data.get("enabled", True))
+    settings_helpers.update_settings({"CaptivePortal": {"enabled": enabled}})
+
+    if enabled:
+        captive_portal_helpers.enable()
+    else:
+        captive_portal_helpers.disable()
+
+    log.info("Captive portal %s", "enabled" if enabled else "disabled")
+    return jsonify({"enabled": enabled})
 
 
 @app.route('/logs/api', methods=['GET'])
