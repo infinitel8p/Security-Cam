@@ -66,38 +66,15 @@ import {useState} from 'react';
 
 export const SensorImage = ({module, alt}) => {
   const src = useBaseUrl(`/img/sensors/${module}.png`);
-  const [open, setOpen] = useState(false);
   const [hidden, setHidden] = useState(false);
   if (hidden) return null;
   return (
-    <>
-      <img
-        src={src}
-        alt={alt}
-        style={{height: '80px', borderRadius: '8px', objectFit: 'cover', cursor: 'pointer'}}
-        onClick={() => setOpen(true)}
-        onError={() => setHidden(true)}
-      />
-      {open && (
-        <div
-          onClick={() => setOpen(false)}
-          style={{
-            position: 'fixed', inset: 0, zIndex: 9999,
-            background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'zoom-out',
-          }}>
-          <img
-            src={src}
-            alt={alt}
-            style={{maxHeight: '80vh', maxWidth: '80vw', borderRadius: '12px', boxShadow: '0 8px 32px rgba(0,0,0,0.4)'}}
-          />
-          <p style={{position: 'absolute', bottom: '12%', color: 'white', fontSize: '1rem', fontWeight: 600}}>
-            {alt} <span style={{opacity: 0.7, fontWeight: 400}}>({module.toUpperCase()})</span>
-          </p>
-        </div>
-      )}
-    </>
+    <img
+      src={src}
+      alt={alt}
+      style={{height: '80px', borderRadius: '8px', objectFit: 'cover', cursor: 'zoom-in'}}
+      onError={() => setHidden(true)}
+    />
   );
 };
 

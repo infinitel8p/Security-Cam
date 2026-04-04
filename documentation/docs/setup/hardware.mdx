@@ -128,27 +128,15 @@ The pinout on the KY-025 module with the already connected jumper wires is shown
 
 ![image](https://github.com/infinitel8p/Security-Cam/assets/50703696/6ec39776-6104-42eb-9780-88899c248223)
 
-<div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
-
-<div style={{ flex: '0 0 auto' }}>
-
 | KY-025 Pin  | Wire              |
 | ----------- | ----------------- |
 | **GND**     | Black Jumper Wire |
 | **DO**      | Blue Jumper Wire  |
 | **+ (VCC)** | Red Jumper Wire   |
 
-</div>
-
-<div style={{ flex: 1, minWidth: 0 }}>
-
 :::note
 The KY-025 module has a fourth pin, marked with `AO`. This is the analog output pin and is not used in this project since the Raspberry Pi does not have an analog input pin and a converter such as the ADS1115 would be required to use it.
 :::
-
-</div>
-
-</div>
 
 ### Raspberry Pi connection
 
@@ -210,40 +198,18 @@ The DS3231 module has a fifth pin, marked with `NC`. This "NC" (Not Connected) p
 
 ![20230927_172741](https://github.com/infinitel8p/Security-Cam/assets/50703696/b1fa89fb-877d-44ab-9870-e8b178a2d528)
 
-<div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
-  <div style={{ flex: '0 0 auto' }}>
-    <table>
-      <tr>
-        <th>Raspberry Pi Pin</th>
-        <th>Wire</th>
-      </tr>
-      <tr>
-        <td><strong>[pin 1] 3V3</strong></td>
-        <td>Red Wire</td>
-      </tr>
-      <tr>
-        <td><strong>[pin 3] SDA</strong></td>
-        <td>Orange Wire</td>
-      </tr>
-      <tr>
-        <td><strong>[pin 5] SCL</strong></td>
-        <td>Yellow Wire</td>
-      </tr>
-      <tr>
-        <td><strong>[pin 6 or 9] GND</strong></td>
-        <td>Green Wire</td>
-      </tr>
-    </table>
+| Raspberry Pi Pin | Wire |
+| --- | --- |
+| **[pin 1] 3V3** | Red Wire |
+| **[pin 3] SDA** | Orange Wire |
+| **[pin 5] SCL** | Yellow Wire |
+| **[pin 6 or 9] GND** | Green Wire |
 
 :::note
 For the connections on the Raspberry you can refer the diagram shown [here](#raspberry-pi-connection) again
 :::
 
-  </div>
-  <div style={{ flex: 1, minWidth: 0 }}>
-    <img src="https://github.com/infinitel8p/Security-Cam/assets/50703696/b317925d-4eb0-4f59-a70e-86bfebb64f05" alt="RTC wiring diagram" style={{maxWidth: '100%', borderRadius: '8px'}} />
-  </div>
-</div>
+<img src="https://github.com/infinitel8p/Security-Cam/assets/50703696/b317925d-4eb0-4f59-a70e-86bfebb64f05" alt="RTC wiring diagram" style={{maxWidth: '100%', borderRadius: '8px'}} />
 
 :::tip
 This is the connection layout using a breadboard. The clock can also just be connected directly to the Raspberry Pi skipping the breadboard as shown below.

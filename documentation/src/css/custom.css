@@ -259,13 +259,28 @@ article {
   --ifm-footer-background-color: #2563eb;
   background-color: #2563eb;
   color: #ffffff;
-  text-align: center;
 }
 
 [data-theme="dark"] .footer--dark {
   --ifm-footer-background-color: #4d94ff;
   background-color: #4d94ff;
   color: #ffffff;
+}
+
+.footer--dark .row.footer__links {
+  justify-content: center;
+}
+
+.footer--dark .col.footer__col {
+  text-align: center;
+}
+
+.footer--dark .footer__items.clean-list {
+  padding-left: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .footer--dark a {

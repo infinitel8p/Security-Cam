@@ -21,7 +21,7 @@ const config: Config = {
     locales: ['en'],
   },
 
-  plugins: ['@docusaurus/theme-live-codeblock'],
+  plugins: ['@docusaurus/theme-live-codeblock', 'docusaurus-plugin-image-zoom'],
 
   presets: [
     [
@@ -49,6 +49,13 @@ const config: Config = {
   ],
 
   themeConfig: {
+    zoom: {
+      selector: '.markdown img',
+      background: {
+        light: 'rgba(255, 255, 255, 0.9)',
+        dark: 'rgba(18, 16, 25, 0.9)',
+      },
+    },
     liveCodeBlock: {
       /**
        * The position of the live playground, above or under the editor
