@@ -1,11 +1,11 @@
 {
   "name": "documentation",
-  "version": "2026.04.04.8",
+  "version": "2026.04.04.9",
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
-    "build": "docusaurus build && node -e \"const fs=require('fs');fs.rmSync('../docs',{recursive:true,force:true});fs.renameSync('build','../docs')\"",
+    "build": "docusaurus build && node -e \"const fs=require('fs');fs.cpSync('build','../docs',{recursive:true,force:true});fs.rmSync('build',{recursive:true,force:true})\"",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
     "clear": "docusaurus clear",

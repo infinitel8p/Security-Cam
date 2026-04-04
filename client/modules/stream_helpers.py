@@ -332,7 +332,7 @@ def sprite_path(video_path: str) -> str:
 def _generate_sprite_sheet(file_path: str) -> None:
     """Extract 10 evenly-spaced frames into a single horizontal sprite sheet.
 
-    Reads duration from .meta.json. Best-effort — failures are logged, not raised.
+    Reads duration from .meta.json. Best-effort - failures are logged, not raised.
     """
     meta = _read_meta(file_path)
     if not meta:

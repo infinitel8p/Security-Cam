@@ -54,7 +54,7 @@ interface SSEClient {
 const MAX_SSE_FAILURES = 3;
 const SSE_RETRY_DELAY = 3000;
 
-/** Singleton SSE client — shared across all components. */
+/** Singleton SSE client - shared across all components. */
 let instance: SSEClient | null = null;
 
 export function sseClient(): SSEClient {

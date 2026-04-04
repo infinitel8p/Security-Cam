@@ -26,7 +26,7 @@ _thread = None
 _stats_thread = None
 _lock = threading.Lock()
 
-# Alert state tracking — only emit SSE on transitions
+# Alert state tracking - only emit SSE on transitions
 _prev_alerts: dict[str, str] = {}
 _current_alert_state: dict = {"overall": "ok", "alerts": {}, "values": {}}
 

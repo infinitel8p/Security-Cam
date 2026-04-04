@@ -41,9 +41,20 @@
   border: 1px solid var(--ifm-toc-border-color);
   background: var(--ifm-background-surface-color);
   height: 100%;
-  transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1),
+  transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1),
     box-shadow 0.25s cubic-bezier(0.25, 1, 0.5, 1),
-    border-color 0.2s ease;
+    border-color 0.2s ease,
+    opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+
+  /* Start hidden for scroll reveal */
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+/* Revealed state */
+.featureCardVisible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .featureCard:hover {
@@ -71,34 +82,11 @@
   line-height: 1.6;
 }
 
-/* Staggered fade-in on load */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.featureCard {
-  animation: fadeInUp 0.5s cubic-bezier(0.25, 1, 0.5, 1) both;
-}
-
-/* Target parent .col wrapper for stagger since .featureCard is always :nth-child(1) within its col */
-:global(.col):nth-child(2) .featureCard {
-  animation-delay: 0.1s;
-}
-
-:global(.col):nth-child(3) .featureCard {
-  animation-delay: 0.2s;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .featureCard {
-    animation: none;
+    opacity: 1;
+    transform: none;
+    transition: border-color 0.2s ease;
   }
   .featureSvg {
     transition: none;

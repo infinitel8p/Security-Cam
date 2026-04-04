@@ -34,7 +34,7 @@
   // Spring solver config
   const SPRING = { stiffness: 400, damping: 28, mass: 1.0 };
   const DT = 1 / 60;
-  const REST_THRESHOLD = 0.5; // px — close enough to snap
+  const REST_THRESHOLD = 0.5; // px - close enough to snap
 
   let knobX = $state(checked ? dims.travel : 0);
   let glowOpacity = $state(checked ? 1 : 0);

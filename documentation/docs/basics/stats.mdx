@@ -1,5 +1,5 @@
 ---
-sidebar_position: 6
+sidebar_position: 8
 last_update:
   date: 2026-04-03
   author: Ludo
@@ -59,13 +59,7 @@ CPU, temperature, and RAM cards each include a small inline chart rendered on a 
 
 ## Status-reactive cards
 
-The four metric cards (CPU, RAM, temperature, storage) respond visually to threshold crossings:
-
-| State | Threshold | Visual treatment |
-|-------|-----------|-----------------|
-| **Normal** | < 75% | Clean card, blue sparkline |
-| **Warning** | 75-89% | Amber sparkline, subtle amber glow, animated border sweep |
-| **Critical** | 90%+ | Red sparkline, red glow, red animated border sweep |
+The four metric cards (CPU, RAM, temperature, storage) respond visually when metrics cross [warning or critical thresholds](./visual-guide#system-monitor-thresholds). Effects include colour-matched sparklines, an ambient glow, and an animated border sweep.
 
 The border sweep is a rotating conic-gradient animation using CSS `@property`. It degrades gracefully in older browsers and is disabled for users who prefer reduced motion.
 
@@ -73,15 +67,7 @@ The border sweep is a rotating conic-gradient animation using CSS `@property`. I
 
 ## Temperature gradient
 
-The temperature card's large number renders as a gradient that shifts along a thermal spectrum:
-
-| Range | Colour |
-|-------|--------|
-| Below ~45 C | Accent blue (cool) |
-| ~45-60 C | Blends toward amber (warm) |
-| Above ~70 C | Red (hot) |
-
-The gradient position animates smoothly over 1.5 seconds using a registered CSS `@property`. The card also has a subtle ambient glow that shifts through the same spectrum. In browsers without `@property` support, the colour still changes but snaps instead of animating.
+The temperature card's large number renders as a gradient that shifts along a thermal spectrum - from accent blue (cool) through amber (warm) to red (hot). The gradient position animates smoothly over 1.5 seconds using a registered CSS `@property`. The card also has a subtle ambient glow that shifts through the same spectrum. In browsers without `@property` support, the colour still changes but snaps instead of animating.
 
 ---
 

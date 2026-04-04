@@ -53,7 +53,7 @@ def test_csv_export_detail_column(client):
 
     # Second event has detail "PIR motion"
     assert rows[1][3] == "PIR motion"
-    # First event has no detail — should be empty string
+    # First event has no detail - should be empty string
     assert rows[0][3] == ""
 
 

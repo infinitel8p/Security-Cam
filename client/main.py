@@ -744,7 +744,7 @@ def isp_settings():
         isp.update(params)
         settings_helpers.update_settings({"ISP": isp})
     except Exception:
-        pass  # non-critical — MediaMTX already updated
+        pass  # non-critical - MediaMTX already updated
 
     log.info("ISP settings applied: %s", list(params.keys()))
     return jsonify({"message": "Image quality updated, MediaMTX restarted"})

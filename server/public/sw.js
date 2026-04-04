@@ -165,7 +165,7 @@ self.addEventListener("fetch", (event) => {
           if (response.ok) await cacheResponse(request, response);
           return response;
         } catch {
-          // Server unreachable — serve from cache
+          // Server unreachable - serve from cache
           const cached = await matchCache(request);
           if (cached) return cached;
 

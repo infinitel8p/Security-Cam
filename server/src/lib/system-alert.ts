@@ -76,7 +76,7 @@ async function _fetchState() {
       _notify();
     }
   } catch {
-    // Non-critical — badge just stays "ok" until first SSE event
+    // Non-critical - badge just stays "ok" until first SSE event
   }
 }
 

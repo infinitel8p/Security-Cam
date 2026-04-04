@@ -15,7 +15,7 @@ bt_log = logging.getLogger("bt.scan")
 def is_device_connected_to_bt() -> bool:
     """Check if any of the target Bluetooth addresses are visible."""
     if bluetooth is None:
-        bt_log.warning("pybluez not installed — BT presence check unavailable")
+        bt_log.warning("pybluez not installed - BT presence check unavailable")
         return False
     settings = settings_helpers.get_settings()
     for addr in settings.get("TARGET_BT_ADDRESSES", []):

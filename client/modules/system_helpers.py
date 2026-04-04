@@ -96,7 +96,7 @@ def get_sd_health():
     if life_a:
         info["life_time_est"] = life_a
 
-    # Preferred erase size — can hint at wear leveling block size
+    # Preferred erase size - can hint at wear leveling block size
     pref_erase = _read(f"{device}/preferred_erase_size")
     if pref_erase:
         try:
@@ -406,7 +406,7 @@ def get_extended_stats():
     except (AttributeError, OSError):
         pass
 
-    # Static platform info (cached — never changes at runtime)
+    # Static platform info (cached - never changes at runtime)
     stats.update(_get_static_info())
 
     # Dynamic network info (can change if WiFi reconnects)
@@ -424,7 +424,7 @@ def get_extended_stats():
     except Exception:
         pass
 
-    # WiFi SSID (dynamic — can change on reconnect)
+    # WiFi SSID (dynamic - can change on reconnect)
     import shutil
     if shutil.which("iw"):
         try:

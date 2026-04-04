@@ -18,7 +18,7 @@ _state_lock = threading.Lock()
 # Track last-known state: {"AA:BB:CC:DD:EE:FF": True/False}
 _bt_state: dict[str, bool] = {}
 _wifi_state: dict[str, bool] = {}
-# Miss counters for hysteresis (BT only — WiFi station list is authoritative)
+# Miss counters for hysteresis (BT only - WiFi station list is authoritative)
 _bt_miss_count: dict[str, int] = {}
 # Track last event time per (address, event_type) to debounce flapping
 _last_event: dict[tuple[str, str], float] = {}
@@ -68,7 +68,7 @@ def _handle_bt_poll(addr: str, online: bool, name: str):
     was_online = _bt_state.get(addr)
 
     if online:
-        # Device responded — reset miss counter, handle arrival
+        # Device responded - reset miss counter, handle arrival
         _bt_miss_count[addr] = 0
         if was_online is None:
             # First time seeing this device after boot
@@ -78,17 +78,17 @@ def _handle_bt_poll(addr: str, online: bool, name: str):
         elif not was_online:
             _emit_transition(addr, True, name, "Bluetooth", _bt_state)
     else:
-        # Device not found — increment miss counter
+        # Device not found - increment miss counter
         count = _bt_miss_count.get(addr, 0) + 1
         _bt_miss_count[addr] = count
 
         if was_online is None:
-            # First poll after boot, device not found — just set state silently
+            # First poll after boot, device not found - just set state silently
             _bt_state[addr] = False
             return
 
         if was_online and count >= MISS_THRESHOLD:
-            # Enough consecutive misses — declare "left"
+            # Enough consecutive misses - declare "left"
             log.info("Bluetooth device missed %d consecutive polls: %s (%s)",
                      count, name, addr)
             _emit_transition(addr, False, name, "Bluetooth", _bt_state)

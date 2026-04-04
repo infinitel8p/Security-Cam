@@ -28,7 +28,7 @@ def _start(target, **kwargs):
     return p.start()
 
 
-# Background services — prevent threads from spawning
+# Background services - prevent threads from spawning
 _start("modules.health_logger.start")
 _start("modules.health_logger.get_history", return_value=[])
 _start("modules.health_logger.get_current_alerts", return_value={
@@ -55,7 +55,7 @@ _start("modules.storage_manager.check_and_cleanup", return_value={
 })
 _start("modules.storage_manager.ensure_storage")
 
-# Timelapse — prevent background thread
+# Timelapse - prevent background thread
 _start("modules.timelapse_manager.start")
 _start("modules.timelapse_manager.stop")
 _start("modules.timelapse_manager.restart")
@@ -65,7 +65,7 @@ _start("modules.timelapse_manager.get_status", return_value={
 })
 _start("modules.timelapse_manager.get_timelapse_videos", return_value=[])
 
-# Stream helpers — no camera / ffmpeg
+# Stream helpers - no camera / ffmpeg
 _start("modules.stream_helpers.set_on_crash")
 _start("modules.stream_helpers.start_recording")
 _start("modules.stream_helpers.stop_recording")
@@ -94,11 +94,11 @@ _start("modules.activity_helpers.get_device_statuses", return_value={
 _start("modules.settings_helpers.pair_bt_device", return_value=True)
 _start("modules.settings_helpers.unpair_bt_device", return_value=True)
 
-# SSE — prevent real event emission
+# SSE - prevent real event emission
 _start("modules.sse.emit")
 _start("modules.sse.stream", return_value=iter([]))
 
-# Event logger — use real logic but patched path (see tmp_data fixture)
+# Event logger - use real logic but patched path (see tmp_data fixture)
 _start("modules.event_logger.log_event")
 
 # Now safe to import

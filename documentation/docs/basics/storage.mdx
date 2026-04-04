@@ -1,5 +1,5 @@
 ---
-sidebar_position: 5
+sidebar_position: 7
 last_update:
   date: 2026-03-31
   author: Ludo
@@ -51,3 +51,7 @@ echo '//192.168.1.50/cam /mnt/nas cifs guest,noatime 0 0' | sudo tee -a /etc/fst
 :::tip
 Network storage also means auto-delete has much more room to work with. You can set a higher threshold or disable it entirely if your NAS has plenty of space.
 :::
+
+## Timelapse
+
+The system can capture periodic still frames and compile them into a daily timelapse video at midnight. Timelapse videos and frames are stored alongside recordings in the configured save location. Configure the capture interval, output FPS, and resolution in [Settings > Storage](./settings#storage).

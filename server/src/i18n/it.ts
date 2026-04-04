@@ -194,7 +194,7 @@ export default {
     timelapseInterval: "Intervallo di cattura",
     timelapseFps: "Velocità di riproduzione",
     timelapseResolution: "Risoluzione immagine",
-    timelapseCapturing: "In corso — {n} fotogrammi oggi",
+    timelapseCapturing: "In corso - {n} fotogrammi oggi",
     brightness: "Luminosità",
     contrast: "Contrasto",
     saturation: "Saturazione",

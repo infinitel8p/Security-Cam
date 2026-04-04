@@ -1,4 +1,5 @@
 import clsx from 'clsx';
+import { useRef, useEffect, useState } from 'react';
 import Heading from '@theme/Heading';
 import styles from './styles.module.css';
 
@@ -38,10 +39,40 @@ const FeatureList: FeatureItem[] = [
   },
 ];
 
-function Feature({ title, Svg, description }: FeatureItem) {
+function Feature({ title, Svg, description, index }: FeatureItem & { index: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    // Check reduced motion preference
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) {
+      setVisible(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className={clsx('col col--4')}>
-      <div className={styles.featureCard}>
+    <div ref={ref} className={clsx('col col--4')}>
+      <div
+        className={clsx(styles.featureCard, visible && styles.featureCardVisible)}
+        style={{ transitionDelay: `${index * 100}ms` }}
+      >
         <div className="text--center">
           <Svg className={styles.featureSvg} role="img" />
         </div>
@@ -60,7 +91,7 @@ export default function HomepageFeatures(): JSX.Element {
       <div className="container">
         <div className="row">
           {FeatureList.map((props, idx) => (
-            <Feature key={idx} {...props} />
+            <Feature key={idx} index={idx} {...props} />
           ))}
         </div>
       </div>

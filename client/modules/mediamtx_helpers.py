@@ -19,7 +19,7 @@ STREAM_KEYS = {
     "fps": "rpiCameraFPS",
 }
 
-# ISP image-quality keys (hardware ISP — zero CPU cost)
+# ISP image-quality keys (hardware ISP - zero CPU cost)
 ISP_KEYS = {
     "brightness":  "rpiCameraBrightness",
     "contrast":    "rpiCameraContrast",
@@ -315,7 +315,7 @@ def sync_config():
     without overwriting the user's camera-specific tuning.
 
     Strategy: copy the default file verbatim (preserving its original YAML
-    formatting — MediaMTX is sensitive to flow vs block style), then patch
+    formatting - MediaMTX is sensitive to flow vs block style), then patch
     user camera values back in via line-level replacements.  This avoids
     yaml.dump which would reformat the file and break MediaMTX parsing.
     """

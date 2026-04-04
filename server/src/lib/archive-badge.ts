@@ -26,7 +26,7 @@ function _getLastSeen(): string {
   if (typeof localStorage === "undefined") return new Date().toISOString();
   const stored = localStorage.getItem(STORAGE_KEY);
   if (stored) return stored;
-  // First visit ever — seed with "now" so existing recordings don't all show as new
+  // First visit ever - seed with "now" so existing recordings don't all show as new
   const now = new Date().toISOString();
   localStorage.setItem(STORAGE_KEY, now);
   return now;

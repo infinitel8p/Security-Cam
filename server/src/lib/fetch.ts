@@ -4,7 +4,7 @@
  * - Default 8s timeout via AbortController
  * - GET requests retry once on failure; POST/PUT/DELETE do not retry
  * - Exponential backoff between retries (1s, 2s, ...)
- * - Drop-in replacement for fetch() — same signature with optional extras
+ * - Drop-in replacement for fetch() - same signature with optional extras
  *
  * Usage:
  *   import { apiFetch } from "../lib/fetch";

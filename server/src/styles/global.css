@@ -431,7 +431,7 @@ body {
   background: var(--color-surface-elevated);
 }
 
-/* Filled track variant — set --fill via inline style */
+/* Filled track variant - set --fill via inline style */
 .range-fill {
   background: linear-gradient(
     to right,

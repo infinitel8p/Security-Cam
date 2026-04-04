@@ -1,5 +1,5 @@
 ---
-sidebar_position: 3
+sidebar_position: 5
 description: "Tune brightness, contrast, white balance, and more using the camera's hardware ISP"
 last_update:
   date: 2026-04-01
@@ -30,7 +30,7 @@ The Raspberry Pi camera has a built-in **Image Signal Processor (ISP)** that han
 
 **Range:** -1 to 1 &nbsp;|&nbsp; **Default:** 0
 
-Controls the overall luminosity of the image. At `0`, the ISP uses its default processing. Negative values darken the image, positive values brighten it. Unlike EV compensation (which changes exposure time/gain), brightness is applied after capture — it shifts the entire tonal range up or down without affecting how the sensor captures light.
+Controls the overall luminosity of the image. At `0`, the ISP uses its default processing. Negative values darken the image, positive values brighten it. Unlike EV compensation (which changes exposure time/gain), brightness is applied after capture - it shifts the entire tonal range up or down without affecting how the sensor captures light.
 
 **When to use:** Fine-tune when the auto-exposure is close but the image feels slightly too dark or bright overall. For larger corrections, use EV instead.
 
@@ -56,7 +56,7 @@ Controls colour intensity. At `0`, the image is completely desaturated (black an
 
 Applies edge-enhancement to make fine details crisper. At `0`, no sharpening is applied (softer image). Higher values increase the contrast along edges, making text, faces, and textures more defined.
 
-**When to use:** Increase to 2–3 for a crisper feed, especially at lower resolutions. Be careful above 4 — over-sharpening amplifies sensor noise and creates visible halos around edges. If the image looks noisy, try reducing sharpness before enabling denoise.
+**When to use:** Increase to 2–3 for a crisper feed, especially at lower resolutions. Be careful above 4 - over-sharpening amplifies sensor noise and creates visible halos around edges. If the image looks noisy, try reducing sharpness before enabling denoise.
 
 ### Exposure Compensation (EV)
 
@@ -64,7 +64,7 @@ Applies edge-enhancement to make fine details crisper. At `0`, no sharpening is 
 
 Tells the auto-exposure algorithm to aim brighter or darker than it normally would. Each step of +1 roughly doubles the brightness (by allowing longer exposure or higher gain). Negative values do the opposite.
 
-**When to use:** Set to +2 or +3 in dark environments where auto-exposure isn't going bright enough. Set to -1 or -2 when a bright light source (window, lamp) causes the rest of the scene to be too dark. Unlike brightness, EV changes how the sensor captures light — it affects noise levels and motion blur.
+**When to use:** Set to +2 or +3 in dark environments where auto-exposure isn't going bright enough. Set to -1 or -2 when a bright light source (window, lamp) causes the rest of the scene to be too dark. Unlike brightness, EV changes how the sensor captures light - it affects noise levels and motion blur.
 
 ### White Balance
 
@@ -81,7 +81,7 @@ Corrects the colour temperature of the light source so whites look white. In **A
 | Indoor | ~3500K | Mixed warm indoor lighting |
 | Incandescent | ~2700K | Warm yellow bulbs |
 
-**When to use:** Auto works well in most cases. Switch to a fixed preset if the camera is in a room with constant lighting (avoids colour shifts). If you use IR LEDs for night vision, set a fixed preset like Daylight — Auto will fight the IR illumination and produce colour casts.
+**When to use:** Auto works well in most cases. Switch to a fixed preset if the camera is in a room with constant lighting (avoids colour shifts). If you use IR LEDs for night vision, set a fixed preset like Daylight - Auto will fight the IR illumination and produce colour casts.
 
 ### Exposure Mode
 
@@ -89,9 +89,9 @@ Corrects the colour temperature of the light source so whites look white. In **A
 
 Controls how the auto-exposure algorithm balances shutter speed and gain:
 
-- **Normal** — balanced, suitable for most scenarios
-- **Short** — prefers faster shutter speeds, reducing motion blur but potentially increasing noise in low light
-- **Long** — allows slower shutter speeds, capturing more light but with more motion blur
+- **Normal** - balanced, suitable for most scenarios
+- **Short** - prefers faster shutter speeds, reducing motion blur but potentially increasing noise in low light
+- **Long** - allows slower shutter speeds, capturing more light but with more motion blur
 
 **When to use:** Use Short if you need to capture fast movement (e.g., camera faces a road or entrance). Use Long for static scenes in dim lighting where blur isn't a concern.
 
@@ -113,29 +113,29 @@ Reduces sensor noise (grainy speckle visible in low light). **Fast** applies spa
 
 Controls which part of the frame the auto-exposure uses to calculate brightness:
 
-- **Centre-weighted** — prioritises the middle of the frame, fading toward edges. Good general-purpose choice.
-- **Spot** — measures brightness from a small area in the centre only. Everything else is ignored.
-- **Matrix** — divides the frame into zones and balances across all of them. Handles mixed lighting best.
+- **Centre-weighted** - prioritises the middle of the frame, fading toward edges. Good general-purpose choice.
+- **Spot** - measures brightness from a small area in the centre only. Everything else is ignored.
+- **Matrix** - divides the frame into zones and balances across all of them. Handles mixed lighting best.
 
-**When to use:** Use Spot if the camera points at a bright window or light source — it'll expose for the centre subject instead of the bright background. Use Matrix for wide-angle views of rooms with mixed lighting (bright window + dim interior).
+**When to use:** Use Spot if the camera points at a bright window or light source - it'll expose for the centre subject instead of the bright background. Use Matrix for wide-angle views of rooms with mixed lighting (bright window + dim interior).
 
 ## How It Works
 
 1. Open **Settings > Camera > Image Quality**
 2. Click **Show preview** to see the live feed while adjusting
 3. Move sliders or change dropdowns
-4. Click **Apply** — the stream restarts briefly (~3 seconds) with new settings
+4. Click **Apply** - the stream restarts briefly (~3 seconds) with new settings
 5. The preview auto-reconnects showing the result
 
 Settings are saved to both `settings.json` (UI state) and `mediamtx.yml` (runtime config), so they persist across reboots.
 
 :::tip Reset anytime
-Click **Reset to defaults** to return all values to their factory settings. This is non-destructive — you can always readjust.
+Click **Reset to defaults** to return all values to their factory settings. This is non-destructive - you can always readjust.
 :::
 
 ## Performance {#performance}
 
-All ISP adjustments are processed by the camera's hardware — they don't use CPU at all. The one exception:
+All ISP adjustments are processed by the camera's hardware - they don't use CPU at all. The one exception:
 
 :::warning Denoise on Pi Zero 2 W
 **High Quality** denoise uses additional CPU for temporal noise reduction. On the Pi Zero 2 W, this can cause frame drops. Prefer **Fast** or **Off** for smooth performance.
@@ -147,7 +147,7 @@ All ISP adjustments are processed by the camera's hardware — they don't use CP
 - **Washed-out daylight**: Increase contrast to 1.5–2, set white balance to Daylight or Cloudy
 - **IR camera with IR LEDs**: Set white balance to a fixed preset (Daylight works well) to avoid auto-WB fighting the IR illumination
 - **High-noise image**: Try denoise Fast. If that's not enough, reduce sharpness to 0.5 to soften noise artifacts
-- **Metering**: Use Spot if the camera points at a bright window — it'll expose for the center subject, not the window
+- **Metering**: Use Spot if the camera points at a bright window - it'll expose for the center subject, not the window
 
 ## API Reference
 

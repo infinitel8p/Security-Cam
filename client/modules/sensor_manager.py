@@ -77,7 +77,7 @@ def _on_trigger():
 
     # Presence check runs outside the lock (can be slow / blocking)
     if _is_someone_home():
-        log.info("Sensor triggered but device present — skipping recording")
+        log.info("Sensor triggered but device present - skipping recording")
         with _lock:
             _suppressed = True
         _emit_state()
@@ -89,7 +89,7 @@ def _on_trigger():
             _emit_state()
             return
 
-        log.info("Sensor triggered, no presence detected — starting recording")
+        log.info("Sensor triggered, no presence detected - starting recording")
         sensor_type = _sensor.sensor_type if _sensor else None
         stream_helpers.start_recording(reason="sensor", sensor_type=sensor_type)
         _sensor_recording = True

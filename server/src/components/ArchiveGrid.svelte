@@ -915,16 +915,16 @@
       </button>
     </div>
   {:else if viewMode === "grid"}
-    <!-- Grid view grouped by date — with timeline -->
+    <!-- Grid view grouped by date - with timeline -->
     <div class="archive-timeline relative space-y-6 pl-6 sm:pl-8">
-      <!-- Timeline track — translate -50% to center the 1px line on the dot center -->
+      <!-- Timeline track - translate -50% to center the 1px line on the dot center -->
       <div class="absolute left-3 top-1 bottom-1 w-px -translate-x-1/2 bg-border-subtle sm:left-4" aria-hidden="true">
         <div class="archive-timeline-fill absolute inset-x-0 top-0 bg-accent/40 rounded-full"></div>
       </div>
       {#each groupedVideos as group, gi (group.date)}
         <div>
           <div class="relative mb-3 flex items-center gap-3">
-            <!-- Timeline dot — first is larger -->
+            <!-- Timeline dot - first is larger -->
             <div class="absolute -left-6 sm:-left-8 flex items-center justify-center w-6 sm:w-8">
               <div class="rounded-full border-2 border-surface-base transition-colors {gi === 0 ? 'h-3 w-3 bg-accent ring-2 ring-accent/20' : 'h-2.5 w-2.5 bg-accent/60 ring-2 ring-accent/10'}"></div>
             </div>
@@ -1044,16 +1044,16 @@
       {/each}
     </div>
   {:else}
-    <!-- List view grouped by date — with timeline -->
+    <!-- List view grouped by date - with timeline -->
     <div class="archive-timeline relative space-y-5 pl-6 sm:pl-8">
-      <!-- Timeline track — translate -50% to center the 1px line on the dot center -->
+      <!-- Timeline track - translate -50% to center the 1px line on the dot center -->
       <div class="absolute left-3 top-1 bottom-1 w-px -translate-x-1/2 bg-border-subtle sm:left-4" aria-hidden="true">
         <div class="archive-timeline-fill absolute inset-x-0 top-0 bg-accent/40 rounded-full"></div>
       </div>
       {#each groupedVideos as group, gi (group.date)}
         <div>
           <div class="relative mb-2 flex items-center gap-3">
-            <!-- Timeline dot — first is larger -->
+            <!-- Timeline dot - first is larger -->
             <div class="absolute -left-6 sm:-left-8 flex items-center justify-center w-6 sm:w-8">
               <div class="rounded-full border-2 border-surface-base transition-colors {gi === 0 ? 'h-3 w-3 bg-accent ring-2 ring-accent/20' : 'h-2.5 w-2.5 bg-accent/60 ring-2 ring-accent/10'}"></div>
             </div>

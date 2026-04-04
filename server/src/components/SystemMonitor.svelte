@@ -142,7 +142,7 @@
     return t.under_voltage_occurred || t.freq_capped_occurred || t.throttled_occurred || t.soft_temp_limit_occurred;
   }
 
-  // Derived from animated values — numbers animate smoothly, colors use real target
+  // Derived from animated values - numbers animate smoothly, colors use real target
   let loadPct = $derived(Math.round(dLoad));
   let storagePct = $derived(info ? usagePct(dStorageUsed, info.storage_info_gb.total_gb) : 0);
   let ramPct = $derived(info ? usagePct(dRamUsed, info.ram_usage_mb.total_mb) : 0);

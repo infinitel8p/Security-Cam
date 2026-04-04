@@ -343,7 +343,7 @@ Returns `{"git_branch": "main", "git_commit": "a1b2c3d"}` if the project directo
 curl "http://<pi-ip>:5005/archive/new_count?since=2026-04-01T10:00:00%2B00:00"
 ```
 
-Returns `{"count": N}` — the number of recordings, timelapses, and snapshots created after the given ISO timestamp. Used by the dashboard to show notification badges on the Archive nav link. The count updates in real-time via SSE `archive_updated` events when new content is added. Returns `0` if `since` is missing or invalid.
+Returns `{"count": N}` - the number of recordings, timelapses, and snapshots created after the given ISO timestamp. Used by the dashboard to show notification badges on the Archive nav link. The count updates in real-time via SSE `archive_updated` events when new content is added. Returns `0` if `since` is missing or invalid.
 
 ## Log endpoints
 

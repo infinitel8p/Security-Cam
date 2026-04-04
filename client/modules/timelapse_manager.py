@@ -123,7 +123,7 @@ def _generate_thumbnail(video_path: str) -> None:
             capture_output=True, timeout=30,
         )
         if not (os.path.exists(thumb_path) and os.path.getsize(thumb_path) > 0):
-            # Very short timelapse — try first frame
+            # Very short timelapse - try first frame
             subprocess.run(
                 [
                     "ffmpeg", "-y",
@@ -244,7 +244,7 @@ def _background_loop() -> None:
 
         current_date = datetime.now().strftime("%Y-%m-%d")
 
-        # Day rollover — stitch previous day
+        # Day rollover - stitch previous day
         if _last_date is not None and current_date != _last_date:
             prev_dir = os.path.join(tl_dir, _last_date)
             if os.path.isdir(prev_dir):

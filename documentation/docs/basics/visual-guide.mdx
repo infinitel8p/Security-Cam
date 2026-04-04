@@ -1,0 +1,260 @@
+---
+sidebar_position: 2
+last_update:
+  date: 2026-04-04
+  author: Ludo
+---
+
+# Visual Guide
+
+The dashboard uses colour, animation, and subtle visual cues to communicate system state at a glance. This page documents every indicator so you know exactly what the UI is telling you.
+
+---
+
+## Colour system
+
+Three status colours appear throughout the dashboard. They adapt between dark and light themes for readability.
+
+| Status | Dark theme | Light theme | Meaning |
+| --- | --- | --- | --- |
+| **OK** | <span style={{color: '#34d9ac'}}>#34d9ac</span> | <span style={{color: '#059669'}}>#059669</span> | Healthy, connected, normal |
+| **Warning** | <span style={{color: '#f0b93a'}}>#f0b93a</span> | <span style={{color: '#d97706'}}>#d97706</span> | Caution - approaching a limit |
+| **Critical** | <span style={{color: '#f06868'}}>#f06868</span> | <span style={{color: '#dc2626'}}>#dc2626</span> | Alert - needs attention |
+
+The primary accent colour is <span style={{color: '#4d94ff'}}>#4d94ff</span> (blue), used for interactive elements and normal-state metrics.
+
+---
+
+## Live feed indicators
+
+The video player on the Home page provides several layers of visual feedback.
+
+### Connection ring
+
+A subtle rotating gradient border surrounds the video feed when connected. The ring colour and speed change based on state:
+
+| State | Colour | Speed | Effect |
+| --- | --- | --- | --- |
+| **Connected (idle)** | <span style={{color: '#34d9ac'}}>Green (30% opacity)</span> | 8s rotation | Calm, slow sweep |
+| **Recording** | <span style={{color: '#f06868'}}>Red (45% opacity)</span> | 3s rotation | Faster, more prominent sweep |
+| **Disconnected** | None | - | Ring hidden |
+
+The ring is hidden in fullscreen mode.
+
+### Breathing glow
+
+When the feed is connected, the video card has a gentle breathing box-shadow that pulses green every 3 seconds. This confirms the connection is alive without drawing too much attention.
+
+During recording, an additional red inset halo pulses every 2 seconds along the card border.
+
+### Status badges (top-right corner)
+
+| Badge | Appearance | When shown |
+| --- | --- | --- |
+| **LIVE** | <span style={{color: '#34d9ac'}}>Green dot</span> + "LIVE" text | Connected, not recording |
+| **REC** | <span style={{color: '#f06868'}}>Red dot</span> + "REC" text + elapsed time | Recording in progress |
+
+The badge also shows the stream type: "WebRTC" or "HLS" depending on which protocol is active.
+
+### Stream mode indicator (bottom-left)
+
+A small badge in the control bar shows the current protocol:
+
+| State | Dot colour | Text |
+| --- | --- | --- |
+| **Connected** | <span style={{color: '#34d9ac'}}>Green</span> (or <span style={{color: '#f06868'}}>red</span> if recording) | "WebRTC" or "HLS" |
+| **Offline** | Grey | "OFFLINE" |
+
+### Scan-line overlay
+
+An optional CRT-style scan-line effect overlays the video feed (toggle in Settings > Appearance). The scan lines shift from neutral to a faint red tint during recording.
+
+### Recording control bar
+
+The control bar background has a subtle red gradient sweep from the left edge when recording is active, reinforcing the recording state.
+
+### Video reveal
+
+When the video feed first connects, the image fades in over 0.8 seconds with a brief brightness and saturation transition (bright and desaturated to normal) for a cinematic reveal effect.
+
+---
+
+## Navigation indicators
+
+### Archive badge
+
+A red circle badge on the Archive nav icon shows the number of new recordings since your last visit. Displays "99+" if the count exceeds 99. The badge disappears when you open the Archive page.
+
+### System alert dot
+
+A coloured dot on the Dashboard nav icon indicates system health:
+
+| Dot | Meaning |
+| --- | --- |
+| <span style={{color: '#f06868'}}>Red (pulsing)</span> | Critical - a metric has crossed a critical threshold (90%+ CPU/RAM/storage, or 70C+ temp) |
+| <span style={{color: '#f0b93a'}}>Amber (static)</span> | Warning - a metric is in the warning range |
+| No dot | Everything is OK |
+
+The dot updates in real time via SSE events with a 60-second polling fallback.
+
+### Active page indicator
+
+The current page has a blue left border bar, blue icon, and a subtle blue background highlight in the sidebar.
+
+---
+
+## System monitor thresholds
+
+The Dashboard and System pages use the same threshold logic for colour-coding metrics.
+
+### CPU temperature
+
+| Range | Colour | Status |
+| --- | --- | --- |
+| Below 55C | <span style={{color: '#34d9ac'}}>Green</span> | Normal |
+| 55C - 69C | <span style={{color: '#f0b93a'}}>Amber</span> | Warning |
+| 70C and above | <span style={{color: '#f06868'}}>Red</span> | Critical |
+
+On the System page, the temperature number renders as a [gradient](./stats#temperature-gradient) that smoothly shifts from blue (cool) through amber (warm) to red (hot). The card itself gains a subtle ambient glow matching the thermal state.
+
+### CPU load, RAM, and storage
+
+| Range | Colour | Status |
+| --- | --- | --- |
+| Below 75% | <span style={{color: '#4d94ff'}}>Blue (accent)</span> | Normal |
+| 75% - 89% | <span style={{color: '#f0b93a'}}>Amber</span> | Warning |
+| 90% and above | <span style={{color: '#f06868'}}>Red</span> | Critical |
+
+Progress bars and sparklines change colour to match. On the System page, cards crossing warning or critical thresholds gain an [animated border sweep and ambient glow](./stats#status-reactive-cards).
+
+### Throttle flags
+
+Active throttle conditions appear as coloured badges:
+
+| Flag | Badge colour |
+| --- | --- |
+| Low voltage / Throttled | <span style={{color: '#f06868'}}>Red</span> |
+| Freq capped / Temp limit | <span style={{color: '#f0b93a'}}>Amber</span> |
+
+Past (historical) flags appear in grey.
+
+---
+
+## Activity and event colours
+
+### Activity Timeline
+
+Each event type has a distinct icon and background colour:
+
+| Event | Colour | Icon background |
+| --- | --- | --- |
+| Recording started | <span style={{color: '#f06868'}}>Red</span> | Red tint |
+| Recording stopped | Grey | Grey |
+| Motion detected | <span style={{color: '#f0b93a'}}>Amber</span> | Amber tint |
+| Sensor triggered | <span style={{color: '#f0b93a'}}>Amber</span> | Amber tint |
+| Sensor released | Grey | Grey |
+| Sensor armed | <span style={{color: '#34d9ac'}}>Green</span> | Green tint |
+| Sensor disarmed | Grey | Grey |
+| Stream disconnected | <span style={{color: '#f06868'}}>Red</span> | Red tint |
+| Stream reconnected | <span style={{color: '#34d9ac'}}>Green</span> | Green tint |
+| Unauthorized access | <span style={{color: '#f06868'}}>Red</span> | Red tint |
+| System boot | <span style={{color: '#4d94ff'}}>Blue</span> | Blue tint |
+| Device arrived | <span style={{color: '#34d9ac'}}>Green</span> | Green tint |
+| Device left | Grey | Grey |
+
+Rapid sensor trigger/release events within 5 minutes of each other are collapsed into a single entry with a count badge (e.g. "x3").
+
+### Event Heatmap
+
+The 7-day event histogram uses hourly colour-coded bars. Each bar's colour reflects the severity of events in that hour:
+
+| Severity | Colour |
+| --- | --- |
+| OK events only | <span style={{color: '#34d9ac'}}>Green</span> |
+| Warning events present | <span style={{color: '#f0b93a'}}>Amber</span> |
+| Critical events present | <span style={{color: '#f06868'}}>Red</span> |
+| No events | Grey |
+
+Hover over a bar to see the day, hour, and event types. Non-hovered bars fade to 40% opacity to highlight the selected time slot.
+
+For the long-range heatmap (day-of-week grid), colour is based on a weighted average of all events that day. See [heatmap colour coding](./dashboard#heatmap-colour-coding) for the full formula.
+
+### Health Tracker
+
+The 72-hour health timeline (48 bars, 1.5-hour buckets) uses the same colour scheme:
+
+| Status | Colour |
+| --- | --- |
+| OK | <span style={{color: '#34d9ac'}}>Green</span> |
+| Warning | <span style={{color: '#f0b93a'}}>Amber</span> |
+| Critical | <span style={{color: '#f06868'}}>Red</span> |
+| No data | Grey |
+
+Hover behaviour matches the event histogram - other bars fade to highlight the selected slot.
+
+---
+
+## Archive page indicators
+
+### NEW badges
+
+Recordings, snapshots, and timelapse videos created since your last archive visit show a red "NEW" label in the top-left corner of their thumbnail card. The badge appears with a pop animation.
+
+The timelapse section header shows a count badge (e.g. "3 NEW") when there are unseen timelapses and the section is collapsed.
+
+### Card interactions
+
+- **Hover lift** - video cards lift slightly (`1px`) on hover with an elevated shadow
+- **Hover scrub** - moving the mouse across a video thumbnail scrubs through a 10-frame sprite sheet preview. No visual indicator for this feature - you discover it by interacting
+
+### Filter indicators
+
+When a non-default time filter is active (Today, Last week, Last month), the filter button shows a blue border and text to indicate filtering is applied.
+
+---
+
+## Sparkline indicators
+
+CPU, temperature, and RAM sparklines on the System page include:
+
+- **Gradient area fill** - filled area chart with a stroke line
+- **Pulsing head dot** - a breathing glow on the latest data point confirms the feed is live
+- **Colour changes** - sparkline colour shifts from blue to amber to red as values cross thresholds
+
+---
+
+## Animations and motion
+
+### Entrance animations
+
+UI elements enter with staggered fade-up animations. Cards, dialogs, and dropdowns each have distinct entrance motions (fade, scale, slide) to provide spatial context.
+
+### Reduced motion
+
+All animations respect the `prefers-reduced-motion` system setting. When enabled:
+
+- All animations play instantly (effectively disabled)
+- The feed ring, breathing glow, recording halo, and border sweeps are hidden
+- Sparkline glow pulses stop when data is settled
+- Skeleton loading shimmers are removed
+- Button press transforms are disabled
+
+This ensures the dashboard is fully usable for users who are sensitive to motion.
+
+---
+
+## SSE connection and fallback
+
+The dashboard uses Server-Sent Events (SSE) for real-time updates. Connection behaviour:
+
+| State | Behaviour |
+| --- | --- |
+| **Connected** | Live SSE stream, instant updates |
+| **Reconnecting** | Retries every 3 seconds after a disconnect |
+| **Degraded (polling)** | After 3 consecutive SSE failures, falls back to periodic HTTP polling. Continues attempting SSE recovery in the background |
+
+The stream protocol (WebRTC/HLS) has similar fallback logic - after 3 failures on one protocol, it switches to the other and continues retrying the preferred protocol.
+
+:::note
+SSE degradation is silent - there is no visible indicator in the UI. The dashboard continues to update via polling, just less frequently.
+:::

@@ -1,138 +1,328 @@
 /**
- * CSS files with the .module.css suffix will be treated as CSS modules
- * and scoped locally.
+ * Hero section styles - Security-Cam documentation landing page
  */
 
+/* --- Conic border ring (rotating gradient border) --- */
+@property --border-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes borderSpin {
+  to { --border-angle: 360deg; }
+}
+
 .heroBanner {
-	text-align: center;
-	position: relative;
-	overflow: hidden;
-	/* Dark hero matching the dashboard aesthetic */
-	--ifm-hero-background-color: #060810;
-	--ifm-hero-text-color: #e2e6f0;
-	background: #060810;
-	color: #e2e6f0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  --ifm-hero-background-color: #060810;
+  --ifm-hero-text-color: #e2e6f0;
+  background: #060810;
+  color: #e2e6f0;
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+  animation: borderSpin 8s linear infinite;
 }
 
 [data-theme="light"] .heroBanner {
-	--ifm-hero-background-color: var(--ifm-color-primary);
-	--ifm-hero-text-color: #fff;
-	background: var(--ifm-color-primary);
-	color: #fff;
+  --ifm-hero-background-color: #1a4fd8;
+  --ifm-hero-text-color: #fff;
+  background: linear-gradient(170deg, #2563eb 0%, #1a4fd8 40%, #1340b0 100%);
+  color: #fff;
 }
 
-/* Dark mode: subtle grid texture + accent glow */
-.heroBanner::before {
-	content: '';
-	position: absolute;
-	inset: 0;
-	background-image:
-		radial-gradient(circle at 50% 40%, rgba(77, 148, 255, 0.08) 0%, transparent 60%),
-		linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-		linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-	background-size: 100% 100%, 48px 48px, 48px 48px;
-	pointer-events: none;
+/* Conic border ring - full perimeter with pulsing glow */
+@keyframes borderGlowPulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
 }
 
-/* Light mode: just the glow, no grid */
-[data-theme="light"] .heroBanner::before {
-	background-image:
-		radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 0.12) 0%, transparent 60%);
-	background-size: 100% 100%;
+.heroBorderRing {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  border-radius: 0;
+  padding: 2px;
+  /* Conic gradient as the "border" via mask technique */
+  background: conic-gradient(
+    from var(--border-angle),
+    transparent 10%,
+    rgba(77, 148, 255, 0.4) 30%,
+    rgba(77, 148, 255, 1) 50%,
+    rgba(77, 148, 255, 0.4) 70%,
+    transparent 90%
+  );
+  /* Mask: show only the 2px edge */
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  /* Glow + spin */
+  filter: drop-shadow(0 0 8px rgba(77, 148, 255, 0.5));
+  animation: borderSpin 8s linear infinite, borderGlowPulse 3s ease-in-out infinite;
+}
+
+[data-theme="light"] .heroBorderRing {
+  background: conic-gradient(
+    from var(--border-angle),
+    transparent 10%,
+    rgba(255, 255, 255, 0.4) 30%,
+    rgba(255, 255, 255, 1) 50%,
+    rgba(255, 255, 255, 0.4) 70%,
+    transparent 90%
+  );
+  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.6));
+}
+
+/* --- Canvas layers --- */
+.noiseCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.gridCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  /* Fade in the grid on load */
+  opacity: 0;
+  animation: gridReveal 1.2s cubic-bezier(0.25, 1, 0.5, 1) 0.3s both;
+}
+
+/* Brighter when mouse is actively hovering */
+.gridCanvasActive {
+  opacity: 1;
+}
+
+@keyframes gridReveal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Scan-line overlay - camera/CRT aesthetic */
+.heroScanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(255, 255, 255, 0.03) 2px,
+    rgba(255, 255, 255, 0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+[data-theme="light"] .heroScanlines {
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(255, 255, 255, 0.04) 2px,
+    rgba(255, 255, 255, 0.04) 4px
+  );
+}
+
+/* Vignette - camera viewport feel */
+.heroVignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 75% 70% at 50% 50%, transparent 50%, rgba(0, 0, 0, 0.35) 100%);
+  pointer-events: none;
+  z-index: 3;
+}
+
+[data-theme="light"] .heroVignette {
+  background: radial-gradient(ellipse 75% 70% at 50% 50%, transparent 50%, rgba(0, 0, 0, 0.12) 100%);
 }
 
 /* --- Hero entrance choreography --- */
 @keyframes heroFadeIn {
-	from {
-		opacity: 0;
-		transform: translateY(12px);
-	}
-	to {
-		opacity: 1;
-		transform: translateY(0);
-	}
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes accentLineExpand {
+  from {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
 }
 
 .heroTitle {
-	font-size: 3.5rem;
-	font-weight: 800;
-	letter-spacing: -0.03em;
-	animation: heroFadeIn 0.6s cubic-bezier(0.25, 1, 0.5, 1) both;
+  font-size: 4.5rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin-bottom: 1.5rem;
+  animation: heroFadeIn 0.7s cubic-bezier(0.25, 1, 0.5, 1) both;
+  text-shadow: 0 0 40px rgba(77, 148, 255, 0.15), 0 0 80px rgba(77, 148, 255, 0.05);
+}
+
+[data-theme="light"] .heroTitle {
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
+}
+
+.heroAccent {
+  width: 48px;
+  height: 2px;
+  background: var(--ifm-color-primary);
+  margin: 0 auto 1.5rem;
+  border: none;
+  opacity: 0;
+  animation: accentLineExpand 0.5s cubic-bezier(0.25, 1, 0.5, 1) 0.15s both;
+}
+
+[data-theme="light"] .heroAccent {
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .heroSubtitle {
-	font-size: 1.25rem;
-	max-width: 540px;
-	margin-left: auto;
-	margin-right: auto;
-	color: #8490ad;
-	opacity: 0;
-	animation: heroFadeIn 0.6s cubic-bezier(0.25, 1, 0.5, 1) 0.1s both;
+  font-size: 1.15rem;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+  color: #6b7a99;
+  line-height: 1.6;
+  opacity: 0;
+  animation: heroFadeIn 0.7s cubic-bezier(0.25, 1, 0.5, 1) 0.12s both;
 }
 
 [data-theme="light"] .heroSubtitle {
-	color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .heroCta {
-	animation: heroFadeIn 0.6s cubic-bezier(0.25, 1, 0.5, 1) 0.2s both;
+  margin-top: 2.5rem;
+  animation: heroFadeIn 0.7s cubic-bezier(0.25, 1, 0.5, 1) 0.24s both;
 }
 
-@media screen and (max-width: 996px) {
-	.heroBanner {
-		padding: 3rem 1.5rem;
-	}
-	.heroTitle {
-		font-size: 2.25rem;
-	}
-}
-
+/* --- CTA button --- */
 .buttons {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	margin-top: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* CTA button */
 .buttons :global(.button) {
-	font-weight: 600;
-	font-size: 1.05rem;
-	padding: 0.85rem 2rem;
-	transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1),
-		box-shadow 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 1rem 2.5rem;
+  border-radius: 10px;
+  transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1),
+    box-shadow 0.3s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-/* Dark hero: blue CTA button */
 .buttons :global(.button--secondary) {
-	--ifm-button-background-color: var(--ifm-color-primary);
-	--ifm-button-border-color: var(--ifm-color-primary);
-	color: #fff;
+  --ifm-button-background-color: var(--ifm-color-primary);
+  --ifm-button-border-color: var(--ifm-color-primary);
+  color: #fff;
+  position: relative;
+  box-shadow:
+    0 2px 8px rgba(77, 148, 255, 0.25),
+    0 0 20px rgba(77, 148, 255, 0.15);
 }
 
-/* Light hero: white CTA button on blue bg */
+.buttons :global(.button--secondary:hover) {
+  transform: translateY(-3px);
+  box-shadow:
+    0 8px 24px rgba(77, 148, 255, 0.35),
+    0 0 40px rgba(77, 148, 255, 0.2);
+}
+
+.buttons :global(.button--secondary:active) {
+  transform: translateY(0);
+  box-shadow:
+    0 2px 8px rgba(77, 148, 255, 0.25),
+    0 0 20px rgba(77, 148, 255, 0.15);
+}
+
 [data-theme="light"] .buttons :global(.button--secondary) {
-	--ifm-button-background-color: #fff;
-	--ifm-button-border-color: #fff;
-	color: var(--ifm-color-primary);
+  --ifm-button-background-color: #fff;
+  --ifm-button-border-color: #fff;
+  color: var(--ifm-color-primary);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.12),
+    0 0 24px rgba(255, 255, 255, 0.2);
 }
 
-.buttons :global(.button:hover) {
-	transform: translateY(-2px);
-	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+[data-theme="light"] .buttons :global(.button--secondary:hover) {
+  transform: translateY(-3px);
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.15),
+    0 0 44px rgba(255, 255, 255, 0.3);
 }
 
-.buttons :global(.button:active) {
-	transform: translateY(0);
-	box-shadow: none;
+[data-theme="light"] .buttons :global(.button--secondary:active) {
+  transform: translateY(0);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.12),
+    0 0 24px rgba(255, 255, 255, 0.2);
+}
+
+/* --- Responsive --- */
+@media screen and (max-width: 996px) {
+  .heroBanner {
+    padding: 3.5rem 1.5rem;
+  }
+  .heroTitle {
+    font-size: 2.75rem;
+  }
 }
 
 /* --- Reduced motion --- */
 @media (prefers-reduced-motion: reduce) {
-	.heroTitle,
-	.heroSubtitle,
-	.heroCta {
-		animation: none;
-		opacity: 1;
-	}
+  .heroBanner {
+    animation: none;
+  }
+
+  .heroBorderRing {
+    animation: none;
+    background: rgba(77, 148, 255, 0.3);
+    filter: none;
+  }
+
+  .heroTitle,
+  .heroSubtitle,
+  .heroCta,
+  .heroAccent {
+    animation: none;
+    opacity: 1;
+  }
+
+  .heroAccent {
+    transform: scaleX(1);
+  }
+
+  .gridCanvas {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* --- Fallback for browsers without @property (Firefox) --- */
+@supports not (animation-timeline: --foo) {
+  /* Firefox doesn't support @property yet, so the conic border won't animate.
+     Give it a static gradient border instead. */
 }

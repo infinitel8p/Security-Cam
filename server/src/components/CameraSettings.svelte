@@ -68,39 +68,39 @@
         { label: "HD 1280×720 · 15 fps", w: 1280, h: 720, fps: 15, note: "720p, lower CPU" },
         { label: "HD 1280×720 · 30 fps", w: 1280, h: 720, fps: 30, note: "720p, smooth playback" },
         { label: "Full HD 1920×1080 · 15 fps", w: 1920, h: 1080, fps: 15, note: "1080p, lower CPU" },
-        { label: "Full HD 1920×1080 · 30 fps", w: 1920, h: 1080, fps: 30, note: "1080p — native on all modules" },
+        { label: "Full HD 1920×1080 · 30 fps", w: 1920, h: 1080, fps: 30, note: "1080p - native on all modules" },
       ],
     },
     {
-      label: "OV5647 (Camera v1 — 5 MP)",
+      label: "OV5647 (Camera v1 - 5 MP)",
       presets: [
         { label: "1296×972 · 15 fps", w: 1296, h: 972, fps: 15, note: "Sharp 4:3, relaxed CPU" },
         { label: "★ 1296×972 · 30 fps", w: 1296, h: 972, fps: 30, note: "Best balance for Pi Zero 2 W", recommended: true },
-        { label: "2592×1944 · 15 fps", w: 2592, h: 1944, fps: 15, note: "Max resolution — 5 MP, exceeds H.264 encoder limit on Pi Zero 2 W", warn: true },
+        { label: "2592×1944 · 15 fps", w: 2592, h: 1944, fps: 15, note: "Max resolution - 5 MP, exceeds H.264 encoder limit on Pi Zero 2 W", warn: true },
       ],
     },
     {
-      label: "IMX219 (Camera v2 — 8 MP)",
+      label: "IMX219 (Camera v2 - 8 MP)",
       presets: [
         { label: "1640×1232 · 15 fps", w: 1640, h: 1232, fps: 15, note: "Full sensor binned, lower CPU" },
-        { label: "★ 1640×1232 · 30 fps", w: 1640, h: 1232, fps: 30, note: "Full sensor binned — best balance", recommended: true },
-        { label: "3280×2464 · 15 fps", w: 3280, h: 2464, fps: 15, note: "Max resolution — 8 MP, exceeds H.264 encoder limit on Pi Zero 2 W", warn: true },
+        { label: "★ 1640×1232 · 30 fps", w: 1640, h: 1232, fps: 30, note: "Full sensor binned - best balance", recommended: true },
+        { label: "3280×2464 · 15 fps", w: 3280, h: 2464, fps: 15, note: "Max resolution - 8 MP, exceeds H.264 encoder limit on Pi Zero 2 W", warn: true },
       ],
     },
     {
-      label: "IMX477 (HQ Camera — 12.3 MP)",
+      label: "IMX477 (HQ Camera - 12.3 MP)",
       presets: [
         { label: "1332×990 · 30 fps", w: 1332, h: 990, fps: 30, note: "2×2 binned, lightweight" },
-        { label: "★ 2028×1520 · 30 fps", w: 2028, h: 1520, fps: 30, note: "Half-resolution — best balance, may exceed encoder limit on Pi Zero 2 W", recommended: true, warn: true },
-        { label: "4056×3040 · 10 fps", w: 4056, h: 3040, fps: 10, note: "Max resolution — 12.3 MP, exceeds H.264 encoder limit on Pi Zero 2 W", warn: true },
+        { label: "★ 2028×1520 · 30 fps", w: 2028, h: 1520, fps: 30, note: "Half-resolution - best balance, may exceed encoder limit on Pi Zero 2 W", recommended: true, warn: true },
+        { label: "4056×3040 · 10 fps", w: 4056, h: 3040, fps: 10, note: "Max resolution - 12.3 MP, exceeds H.264 encoder limit on Pi Zero 2 W", warn: true },
       ],
     },
     {
-      label: "IMX708 (Camera v3 — 12 MP)",
+      label: "IMX708 (Camera v3 - 12 MP)",
       presets: [
         { label: "1536×864 · 30 fps", w: 1536, h: 864, fps: 30, note: "Binned 16:9, lightweight" },
-        { label: "★ 2304×1296 · 30 fps", w: 2304, h: 1296, fps: 30, note: "Native 16:9 — best balance, may exceed encoder limit on Pi Zero 2 W", recommended: true, warn: true },
-        { label: "4608×2592 · 14 fps", w: 4608, h: 2592, fps: 14, note: "Max resolution — 12 MP, exceeds H.264 encoder limit on Pi Zero 2 W", warn: true },
+        { label: "★ 2304×1296 · 30 fps", w: 2304, h: 1296, fps: 30, note: "Native 16:9 - best balance, may exceed encoder limit on Pi Zero 2 W", recommended: true, warn: true },
+        { label: "4608×2592 · 14 fps", w: 4608, h: 2592, fps: 14, note: "Max resolution - 12 MP, exceeds H.264 encoder limit on Pi Zero 2 W", warn: true },
       ],
     },
   ];

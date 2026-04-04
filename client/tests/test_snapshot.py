@@ -42,7 +42,7 @@ def test_snapshot_filename_pattern(client, rec_dir):
 def test_snapshot_ffmpeg_fails(client, rec_dir):
     """POST /snapshot returns 500 when ffmpeg produces no output."""
     def fake_run(cmd, **kwargs):
-        # Don't create the file — simulates ffmpeg failure
+        # Don't create the file - simulates ffmpeg failure
         return MagicMock(returncode=1, stderr=b"error")
 
     with patch("modules.stream_helpers.subprocess.run", side_effect=fake_run):

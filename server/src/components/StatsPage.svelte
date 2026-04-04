@@ -136,13 +136,13 @@
 
   // History for sparklines
   const HISTORY_LEN = 60;
-  const POLL_INTERVAL = 10_000; // 10s — gentler on the Pi's CPU
+  const POLL_INTERVAL = 10_000; // 10s - gentler on the Pi's CPU
   let cpuHistory = $state<number[]>([]);
   let tempHistory = $state<number[]>([]);
   let ramHistory = $state<number[]>([]);
 
   async function fetchInfo() {
-    // Skip fetch when tab is hidden — no point updating invisible UI
+    // Skip fetch when tab is hidden - no point updating invisible UI
     if (typeof document !== "undefined" && document.hidden) return;
 
     retrying = true;
@@ -250,7 +250,7 @@
     return "bg-status-ok";
   }
 
-  /** Subtle card glow keyed to status — "calm until it matters" */
+  /** Subtle card glow keyed to status - "calm until it matters" */
   function cardGlow(pct: number): string {
     if (pct >= 90) return "shadow-[inset_0_1px_0_0_rgba(240,104,104,0.15),0_0_20px_-6px_rgba(240,104,104,0.1)]";
     if (pct >= 75) return "shadow-[inset_0_1px_0_0_rgba(240,185,58,0.12),0_0_16px_-6px_rgba(240,185,58,0.08)]";
@@ -326,7 +326,7 @@
     }
   }
 
-  /** Safe numeric access — returns 0 for null/undefined/NaN */
+  /** Safe numeric access - returns 0 for null/undefined/NaN */
   function num(v: number | null | undefined): number {
     return v != null && isFinite(v) ? v : 0;
   }
@@ -369,7 +369,7 @@
   $effect(() => { if (info) { aRamUsed.set(num(info.ram_usage_mb?.used_mb)); aRamTotal.set(num(info.ram_usage_mb?.total_mb)); } });
   $effect(() => { if (info) { aStorageUsed.set(num(info.storage_info_gb?.used_gb)); aStorageTotal.set(num(info.storage_info_gb?.total_gb)); } });
 
-  /** All four core metrics in OK range — system is healthy */
+  /** All four core metrics in OK range - system is healthy */
   let allNominal = $derived(
     info != null && loadPct < 75 && ramPct < 75 && tempPctLevel === 0 && storagePct < 75
   );
@@ -397,7 +397,7 @@
   </div>
 {:else if info}
   <div class="mt-6">
-    <!-- Uptime + Identity — compact inline row -->
+    <!-- Uptime + Identity - compact inline row -->
     <div class="card flex flex-wrap items-center gap-x-4 gap-y-1.5 px-4 py-3 min-w-0 sm:gap-x-6 animate-in transition-shadow duration-700 {allNominal ? 'shadow-[inset_3px_0_0_0_rgba(52,217,172,0.35)]' : ''}">
       <div class="flex items-center gap-2 shrink-0">
         <Icon icon={clockIcon} class="h-3.5 w-3.5 {allNominal ? 'text-status-ok' : 'text-accent'} transition-colors duration-700" stroke={2} />
@@ -427,7 +427,7 @@
       {/if}
     </div>
 
-    <!-- Core metrics — unified 2×2 grid -->
+    <!-- Core metrics - unified 2×2 grid -->
     <div class="mt-4 grid gap-4 sm:grid-cols-2">
       <!-- CPU Load -->
       <div class="card px-4 py-4 transition-shadow duration-700 animate-in stagger-1 {cardGlow(loadPct)} {cardSweepClass(loadPct)}">
@@ -600,7 +600,7 @@
           {/if}
         {/if}
 
-        <!-- System — separated by border from throttle -->
+        <!-- System - separated by border from throttle -->
         {#if extended}
           <div class="mt-3 border-t border-border-subtle pt-3">
             <div class="grid grid-cols-2 gap-x-4 gap-y-2 sm:gap-x-6">
@@ -1009,7 +1009,7 @@
       <div class="skeleton h-4 w-20"></div>
       <div class="skeleton h-4 w-28"></div>
     </div>
-    <!-- Metric cards skeleton — 2×2 grid -->
+    <!-- Metric cards skeleton - 2×2 grid -->
     <div class="mt-4 grid gap-4 sm:grid-cols-2">
       {#each Array(4) as _, i}
         <div class="card px-4 py-4">

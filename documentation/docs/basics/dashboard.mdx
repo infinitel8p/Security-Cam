@@ -44,7 +44,7 @@ The main page shows everything at a glance.
 - **Backend Status** - online/offline indicator for the Flask backend, polled every 10 seconds
 - **Sensor Status** - current sensor type, state (Armed / Triggered / Suppressed / Disabled), and GPIO pin. See [sensor states](./sensors#sensor-states) for what each means
 - **Connection Status** - how many tracked Bluetooth and WiFi devices are online
-- **System Health** - CPU temperature, load, RAM usage, storage, uptime, and throttle status. When metrics cross warning or critical thresholds, a toast notification appears and an alert dot shows on the Dashboard nav icon. For detailed system stats with history charts and SD card info, see the [Stats page](./stats)
+- **System Health** - CPU temperature, load, RAM usage, storage, uptime, and throttle status. When metrics cross [warning or critical thresholds](./visual-guide#system-monitor-thresholds), a toast notification appears and an alert dot shows on the Dashboard nav icon. For detailed system stats with history charts and SD card info, see the [Stats page](./stats)
 
 **Activity & history**
 
@@ -59,7 +59,7 @@ The main page shows everything at a glance.
 
 ### Heatmap colour coding
 
-Each cell in the heatmap represents one day. The colour is determined by a **weighted average** of all events that day — not the single worst event. This means a handful of warnings among many normal events won't turn the whole day orange.
+Each cell in the heatmap represents one day. The colour is determined by a **weighted average** of all events that day - not the single worst event. This means a handful of warnings among many normal events won't turn the whole day orange.
 
 **Severity weights:** each event type has a numeric weight based on its severity. The day's colour comes from the average weight across all events:
 
@@ -69,15 +69,15 @@ Each cell in the heatmap represents one day. The colour is determined by a **wei
 | 3 | Warning | <span style={{color: '#f0b93a'}}>Amber</span> | Recording started, motion detected |
 | 10 | Critical | <span style={{color: '#f06868'}}>Red</span> | Stream disconnected, unauthorized access |
 
-**Colour thresholds** — the weighted average maps to a colour:
+**Colour thresholds** - the weighted average maps to a colour:
 
 | Average | Result | Meaning |
 | --- | --- | --- |
 | < 1.5 | <span style={{color: '#34d9ac'}}>Green</span> | Mostly normal activity |
 | 1.5 – 5.0 | <span style={{color: '#f0b93a'}}>Amber</span> | Notable proportion of warnings or some critical events |
-| &ge; 5.0 | <span style={{color: '#f06868'}}>Red</span> | Heavily concerning — many warnings or critical events |
+| &ge; 5.0 | <span style={{color: '#f06868'}}>Red</span> | Heavily concerning - many warnings or critical events |
 
-Within each colour, **opacity scales with event count** relative to the busiest day — so a quiet green day looks faint while a busy green day looks solid.
+Within each colour, **opacity scales with event count** relative to the busiest day - so a quiet green day looks faint while a busy green day looks solid.
 
 <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginTop: '1rem', marginBottom: '1rem'}}>
   <span style={{fontSize: '0.8rem', color: 'var(--ifm-font-color-secondary)'}}>Less</span>
@@ -101,7 +101,7 @@ Browse and manage recorded videos.
 
 **Browsing**
 
-- Videos are displayed in a grid, grouped by date, and can be filtered by time range or sorted. In list view, clicking the thumbnail or filename opens the same player modal
+- Videos (H.264 MP4) are displayed in a grid, grouped by date, and can be filtered by time range or sorted. In list view, clicking the thumbnail or filename opens the same player modal
 - **Thumbnail cards** - video cards show a JPEG thumbnail captured from the live feed the moment recording starts. No `<video>` element is loaded in the grid, so thumbnails display reliably on every browser and device (including iOS Safari). Cards show a centered play button that fades in on hover
 - **Hover scrub** - hover over a video card in grid view to scrub through the recording. A sprite sheet of 10 evenly-spaced frames is generated automatically when recording stops. Move the mouse left/right to preview different moments
 - **New recording badges** - the Archive nav icon shows a red badge with the count of recordings created since your last visit. Inside the archive, new recordings are highlighted with a "NEW" label. The badge clears automatically when you open the archive page
@@ -121,37 +121,29 @@ Browse and manage recorded videos.
 
 ## Settings
 
-Configure the system without touching config files. The settings page has a sidebar with five sections:
-
-- **Appearance** - switch between dark, light, and system theme. Choose the dashboard language (English, German, French, Spanish, Italian). Toggle the scan line overlay on the live feed.
-- **Camera** - adjust stream resolution, framerate, and rotation (display-only or hardware via MediaMTX). Pick from quality presets tuned for the Pi Zero 2 W, or set custom resolution and FPS.
-- **Storage** - choose where recorded videos are stored on the Pi. Enable [auto-delete](./storage) to prevent the SD card from filling up. Enable **timelapse** to automatically capture a frame every few minutes and stitch them into a daily video at midnight — great for seeing activity patterns.
-- **Devices** - add or remove tracked Bluetooth and WiFi devices. Three ways to add a Bluetooth device: scan for nearby devices, [make the Pi discoverable](#bluetooth-pairing-from-the-dashboard) so your phone can find it, or enter a MAC address manually. Online/offline status is shown per device. Tracked devices are used for presence detection — if any are nearby, sensor triggers are ignored.
-- **Recording Sensors** - select and configure the active sensor type, set the GPIO pin and hold timeout, adjust [calibration](./calibration), test wiring with a live sparkline, and enable/disable auto-recording. See the [sensors guide](./sensors) for details.
-
-All settings changes show a toast confirmation when saved successfully.
+Configure the system without touching config files. The settings page has a sidebar with six sections: Appearance, Camera, Storage, Devices, Recording Sensors, and System. See the [Settings page guide](./settings) for full details on each section.
 
 ## System
 
 Comprehensive system monitoring page. Shows everything from the Dashboard health widget in an expanded layout, plus:
 
-- **Sparkline history** — rolling charts for CPU, temperature, and RAM with gradient area fills
+- **Sparkline history** - rolling charts for CPU, temperature, and RAM with gradient area fills
 - **Per-core CPU bars** and 1/5/15 min load averages
-- **Throttle breakdown** — active and past flags with process count and system details
-- **Network I/O** — bytes and packets sent/received since boot
-- **SD card details** — full card metadata including serial, firmware revision, bytes written, life estimate
-- **Camera info** — current stream resolution and framerate
-- **Recording stats** — total recordings, timelapse frame count, live REC indicator
-- **Connectivity** — tracked Bluetooth/WiFi device counts, sensor status
-- **Platform info** — OS version, Python version, architecture
+- **Throttle breakdown** - active and past flags with process count and system details
+- **Network I/O** - bytes and packets sent/received since boot
+- **SD card details** - full card metadata including serial, firmware revision, bytes written, life estimate
+- **Camera info** - current stream resolution and framerate
+- **Recording stats** - total recordings, timelapse frame count, live REC indicator
+- **Connectivity** - tracked Bluetooth/WiFi device counts, sensor status
+- **Platform info** - OS version, Python version, architecture
 
 Data refreshes every 10 seconds. Cards glow and show animated border sweeps when metrics cross warning/critical thresholds. See the [System page guide](./stats) for full details.
 
 ## Logs
 
-View system logs directly from the dashboard without needing SSH access. The logs page has two tabs:
+View system logs directly from the dashboard without needing SSH access. For common log patterns and debugging tips, see [Troubleshooting](./troubleshooting). The logs page has three tabs:
 
-- **API Logs** — shows parsed entries from the Flask backend log (`security-cam.log`), including rotated backups. Each entry shows timestamp, log level, source module, and message. Features:
+- **API Logs** - shows parsed entries from the Flask backend log (`security-cam.log`), including rotated backups. Each entry shows timestamp, log level, source module, and message. Features:
   - Filter by level (Error, Warning, Info, Debug)
   - Filter by category (e.g. `bt.pair` for Bluetooth, `sensor.mgr` for sensors, `stream` for recording) via a dropdown that lists all source modules found in the current logs
   - Full-text search across all log fields
@@ -159,38 +151,16 @@ View system logs directly from the dashboard without needing SSH access. The log
   - Paginated display with "show more" for large logs
   - Download the current view as a text file
 
-- **MediaMTX** — shows parsed entries from the MediaMTX RTSP/WebRTC server log. Same filtering, search, category dropdown, and auto-refresh features as API logs. Useful for diagnosing stream issues.
+- **MediaMTX** - shows parsed entries from the MediaMTX RTSP/WebRTC server log. Same filtering, search, category dropdown, and auto-refresh features as API logs. Useful for diagnosing stream issues.
 
-- **Script Logs** — browse log files from all setup and maintenance scripts, grouped by category:
-  - **Install** — `install_requirements.sh` and `install_mediamtx.sh` output
-  - **Update** — auto-update (`update.sh`) output
-  - **AP Setup** — WiFi Access Point setup (`setup_ap.sh`) output
-  - **Bluetooth Pairing** — Bluetooth pairing (`pair_bluetooth.sh`) output
+- **Script Logs** - browse log files from all setup and maintenance scripts, grouped by category:
+  - **Install** - `install_requirements.sh` and `install_mediamtx.sh` output
+  - **Update** - auto-update (`update.sh`) output
+  - **AP Setup** - WiFi Access Point setup (`setup_ap.sh`) output
+  - **Bluetooth Pairing** - Bluetooth pairing (`pair_bluetooth.sh`) output
 
   Select a file from the sidebar to view its full output. New log directories are discovered automatically.
 
-## Bluetooth pairing from the dashboard
-
-You don't need SSH or the setup script to pair Bluetooth devices after initial setup. The **Settings > Devices** section in the dashboard supports two pairing methods:
-
-1. **Scan** — the Pi scans for nearby Bluetooth devices for ~20 seconds. Pick your device from the results. Works best when your device's Bluetooth visibility is turned on (on iPhone, keep Settings > Bluetooth open during the scan).
-
-2. **Make Pi discoverable** — the Pi makes itself visible for 90 seconds. Open Bluetooth settings on your phone and pair with the Pi from there. This is useful when your device doesn't show up in scans, which is common with iPhones and some Android devices.
-
-Both methods auto-accept pairing prompts, trust the device, and register it for presence detection. You can also enter a MAC address manually if you know it.
-
-:::tip
-For the initial setup before the dashboard is running, use the [`pair_bluetooth.sh`](../setup/bluetooth) script over SSH instead.
-:::
-
 ## How auto-recording works
 
-When a trigger sensor is enabled:
-
-1. The sensor fires (door opens, motion detected, vibration felt, etc.)
-2. The system checks if any tracked Bluetooth or WiFi device is nearby
-3. If nobody is home, recording starts automatically
-4. When the sensor releases, recording continues for the configured hold timeout (default 10 seconds) to prevent gaps from brief interruptions
-5. After the hold timeout, recording stops
-
-Manual recording from the dashboard is always allowed, regardless of sensor state or presence detection.
+When a trigger sensor is enabled, it gates recording based on device presence - recording only starts if no tracked device is nearby. See [how it works](./sensors#how-it-works) in the sensors guide for the full flow. Manual recording is always allowed regardless of sensor state or presence.

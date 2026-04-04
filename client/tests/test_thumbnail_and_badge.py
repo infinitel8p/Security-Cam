@@ -66,7 +66,7 @@ def test_archive_new_count_filters_by_time(client, rec_dir):
         f.write("new")
     os.utime(new, (now - 60, now - 60))  # 1 min ago
 
-    # Since 1 hour ago — only the recent one should count
+    # Since 1 hour ago - only the recent one should count
     since = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
     from urllib.parse import quote
     res = client.get(f"/archive/new_count?since={quote(since)}")

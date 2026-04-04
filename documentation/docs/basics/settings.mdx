@@ -1,5 +1,5 @@
 ---
-sidebar_position: 8
+sidebar_position: 10
 last_update:
   date: 2026-04-03
   author: Ludo
@@ -149,138 +149,9 @@ Click **Apply** to save. The stream may briefly interrupt while MediaMTX applies
 
 ### Image quality (ISP) {#isp}
 
-The Raspberry Pi camera's hardware Image Signal Processor handles all adjustments below with **zero CPU cost**.
+The Raspberry Pi camera's hardware Image Signal Processor handles brightness, contrast, white balance, exposure, denoise, and more - all with zero CPU cost. Click **Show preview** to see the live feed while adjusting.
 
-:::info Live preview
-Click **Show preview** to see the live feed while adjusting. The preview auto-reconnects after applying changes.
-:::
-
-#### Brightness
-
-| | |
-|---|---|
-| **Range** | -1 to 1 |
-| **Default** | 0 |
-| **What it does** | Shifts overall luminosity after capture. Unlike EV, it doesn't affect how the sensor captures light. |
-| **When to use** | Fine-tune when auto-exposure is close but the image feels slightly too dark or bright. For larger corrections, use EV. |
-
-#### Contrast
-
-| | |
-|---|---|
-| **Range** | 0 to 16 |
-| **Default** | 1 |
-| **What it does** | Controls difference between darks and lights. Below 1 = flatter. Above 1 = more punch. |
-| **When to use** | Increase to 1.5-2 for flat/hazy images. Reduce toward 0.5 if shadows are crushed. |
-
-#### Saturation
-
-| | |
-|---|---|
-| **Range** | 0 to 16 |
-| **Default** | 1 |
-| **What it does** | Controls colour intensity. 0 = black and white. 1 = natural. |
-| **When to use** | 1.2-1.5 for vibrant feed. 0 for greyscale (can help spot movement). |
-
-#### Sharpness
-
-| | |
-|---|---|
-| **Range** | 0 to 16 |
-| **Default** | 1 |
-| **What it does** | Edge-enhancement. Higher = crisper details. |
-| **When to use** | 2-3 for sharper feed. Avoid above 4 (amplifies noise, creates halos). |
-
-#### Exposure Compensation (EV)
-
-| | |
-|---|---|
-| **Range** | -10 to +10 |
-| **Default** | 0 |
-| **What it does** | Tells auto-exposure to aim brighter (+) or darker (-). Each +1 roughly doubles brightness. Changes how the sensor captures light - affects noise and motion blur. |
-| **When to use** | +2 to +3 in dark environments. -1 to -2 when a bright light source washes out the rest. |
-
-#### White Balance
-
-**Default:** Auto
-
-| Preset | Temperature | Best for |
-|--------|-------------|----------|
-| Auto | Adaptive | Most situations |
-| Daylight | ~5500K | Outdoor sunlight |
-| Cloudy | ~6500K | Overcast sky, shade |
-| Tungsten | ~3200K | Traditional incandescent bulbs |
-| Fluorescent | ~4000K | Office / strip lighting |
-| Indoor | ~3500K | Mixed warm indoor lighting |
-| Incandescent | ~2700K | Warm yellow bulbs |
-
-:::tip IR cameras
-If you use IR LEDs for night vision, set a fixed preset like **Daylight**. Auto mode will fight the IR illumination and produce colour casts.
-:::
-
-#### Exposure Mode
-
-| Mode | Behaviour |
-|------|-----------|
-| **Normal** (default) | Balanced shutter speed and gain |
-| **Short** | Faster shutter - less motion blur, more noise |
-| **Long** | Slower shutter - more light captured, more blur |
-
-#### Denoise
-
-| Mode | Behaviour |
-|------|-----------|
-| **Off** (default) | No noise reduction |
-| **Fast** | Spatial denoising within each frame |
-| **High Quality** | Temporal denoising across frames - best results |
-
-:::warning Performance on Pi Zero 2 W
-**High Quality** denoise uses CPU for temporal noise reduction and can cause frame drops on the Pi Zero 2 W. Use **Fast** or **Off**. On Pi 4/5, High Quality runs fine.
-:::
-
-#### Metering
-
-| Mode | Behaviour |
-|------|-----------|
-| **Centre-weighted** (default) | Prioritises the middle of the frame |
-| **Spot** | Measures only a small centre area |
-| **Matrix** | Balances across the whole frame |
-
-Use **Spot** when the camera faces a bright window. Use **Matrix** for wide-angle rooms with mixed lighting.
-
-#### Recommended ISP recipes
-
-<Tabs>
-<TabItem value="night" label="Night / Low Light">
-
-- Brightness: **+0.3** to **+0.5**
-- Exposure mode: **Long**
-- EV: **+2** to **+3**
-- Denoise: **Fast**
-
-</TabItem>
-<TabItem value="daylight" label="Washed-out Daylight">
-
-- Contrast: **1.5** to **2**
-- White balance: **Daylight** or **Cloudy**
-
-</TabItem>
-<TabItem value="ir" label="IR Night Vision">
-
-- White balance: **Daylight** (fixed)
-- This prevents auto-WB from fighting IR illumination
-
-</TabItem>
-<TabItem value="noisy" label="High Noise">
-
-- Denoise: **Fast**
-- Sharpness: reduce to **0.5** to soften noise artifacts
-- If still noisy, try increasing EV instead of brightness
-
-</TabItem>
-</Tabs>
-
-#### Applying ISP changes
+Sliders and dropdowns are available for: Brightness, Contrast, Saturation, Sharpness, Exposure Compensation (EV), White Balance, Exposure Mode, Denoise, and Metering. See the [Image Quality guide](./image-quality) for parameter ranges, defaults, tips, and recommended recipes.
 
 Click **Apply** to save. The stream restarts briefly (~3 seconds). Click **Reset to defaults** to return all parameters to factory settings. Settings persist in `settings.json` and `mediamtx.yml` across reboots.
 
@@ -298,34 +169,7 @@ Below the picker, a metadata line shows the SD card name, manufacturing date, an
 
 #### Network storage
 
-Mount a NAS share and select it as the save location:
-
-<Tabs>
-<TabItem value="nfs" label="NFS">
-
-```bash
-# Mount
-sudo mount -t nfs 192.168.1.50:/recordings /mnt/nas
-
-# Persist across reboots
-echo '192.168.1.50:/recordings /mnt/nas nfs defaults,noatime 0 0' | sudo tee -a /etc/fstab
-```
-
-</TabItem>
-<TabItem value="smb" label="SMB/CIFS">
-
-```bash
-# Mount
-sudo mount -t cifs //192.168.1.50/cam /mnt/nas -o guest
-
-# Persist across reboots
-echo '//192.168.1.50/cam /mnt/nas cifs guest,noatime 0 0' | sudo tee -a /etc/fstab
-```
-
-</TabItem>
-</Tabs>
-
-Then select `/mnt/nas` in the directory browser.
+You can point recordings to a NAS by mounting a network share and selecting the mount point in the directory browser. See [network storage](./storage#network-storage) for NFS and SMB mount instructions.
 
 ### Auto-delete
 
@@ -363,7 +207,7 @@ When active, a pulsing green indicator shows the frame count captured today. Cli
 
 ## Devices {#devices}
 
-Manage Bluetooth and WiFi devices for presence detection. When a tracked device is nearby, the system knows someone is home - this gates whether sensor-triggered recordings start.
+Manage Bluetooth and WiFi devices for presence detection. When a tracked device is nearby, the system knows someone is home - this gates whether sensor-triggered recordings start. See [how auto-recording works](./sensors#how-it-works) for the full flow.
 
 :::note
 Device presence gates **sensor-triggered recordings only**. You can always start a manual recording regardless of device presence.
@@ -431,35 +275,11 @@ The main toggle enables or disables the sensor. Status badge shows:
 
 ### Sensor type
 
-Select from a grid of 16 sensor types:
-
-| Type | Module | Use case | Image |
-|------|--------|----------|-------|
-| Reed switch | KY-025 | Door/window open detection | ![KY-025](/img/sensors/ky-025.png) |
-| Mini reed | KY-021 | Compact door sensor | ![KY-021](/img/sensors/ky-021.png) |
-| PIR motion | HC-SR501 | Room motion detection | ![HC-SR501](/img/sensors/hc-sr501.png) |
-| Hall digital | KY-003 | Magnetic field on/off | ![KY-003](/img/sensors/ky-003.png) |
-| Hall linear | KY-024 | Analog magnetic proximity | ![KY-024](/img/sensors/ky-024.png) |
-| Vibration | KY-002 | Bump/impact detection | ![KY-002](/img/sensors/ky-002.png) |
-| Knock | KY-031 | Knock pattern detection | ![KY-031](/img/sensors/ky-031.png) |
-| Tilt | KY-020 | Angle change detection | ![KY-020](/img/sensors/ky-020.png) |
-| Tilt ball | KY-017 | Mercury tilt switch | ![KY-017](/img/sensors/ky-017.png) |
-| Touch | KY-036 | Capacitive touch | ![KY-036](/img/sensors/ky-036.png) |
-| Button | - | Manual press trigger | |
-| Light gate | KY-010 | Beam-break detection | ![KY-010](/img/sensors/ky-010.png) |
-| IR proximity | KY-032 | Infrared object detection | ![KY-032](/img/sensors/ky-032.png) |
-| Sound (small) | KY-038 | Sound level (compact mic) | ![KY-038](/img/sensors/ky-038.png) |
-| Sound (large) | KY-037 | Sound level (large mic) | ![KY-037](/img/sensors/ky-037.png) |
-| Mock | - | Software-only test sensor | |
-
-Selecting a type resets GPIO to the sensor's default and resets calibration.
+Select from a grid of 16 sensor types. Selecting a type resets GPIO to the sensor's default and resets calibration. See the [sensors guide](./sensors#supported-sensors) for the full list with default GPIO pins, use cases, and [wiring diagrams](./wiring).
 
 ### Wiring diagram
 
-Each sensor type (except Mock) has an expandable **Show Wiring** section with:
-- A visual SVG diagram showing how to connect the sensor to the Pi's GPIO header
-- A pin-by-pin connection table
-- Any sensor-specific wiring notes
+Each sensor type (except Mock) has an expandable **Show Wiring** section with a visual SVG diagram, pin-by-pin connection table, and sensor-specific notes. For detailed wiring guidance, see the [wiring guide](./wiring).
 
 ### Configuration
 
@@ -471,49 +291,7 @@ Each sensor type (except Mock) has an expandable **Show Wiring** section with:
 
 ### Calibration {#calibration}
 
-Some sensors expose tuning sliders. These appear below the main config when the selected sensor supports them.
-
-<Tabs>
-<TabItem value="pir" label="PIR Motion">
-
-**Sensitivity** (1-10, default 7)
-
-Controls how many consecutive readings are averaged before triggering. 10 = triggers on slightest motion. 1 = requires sustained movement.
-
-:::tip
-Most HC-SR501 boards have a physical potentiometer too. Use hardware for coarse, software for fine tuning.
-:::
-
-</TabItem>
-<TabItem value="vibknock" label="Vibration / Knock">
-
-| Parameter | Range | Default (vib.) | Default (knock) |
-|-----------|-------|-----------------|-----------------|
-| Pulse threshold | 1-20 | 1 | 3 |
-| Counting window | 1-30 s | 5 s | 5 s |
-
-Example: knock with threshold 3, window 5s = "3 knocks within 5 seconds" to trigger. Single accidental bumps are ignored.
-
-</TabItem>
-<TabItem value="tilt" label="Tilt Switch">
-
-**Settle time** (0-5 s in 0.1s steps, default 0.5s)
-
-Requires the tilt to be held for the set duration before triggering. Filters out vibration-induced false positives (door slamming sloshing the mercury).
-
-</TabItem>
-<TabItem value="touch" label="Touch Sensor">
-
-**Touch duration** (0-3 s in 0.1s steps, default 0.3s)
-
-Requires touch to be held before triggering. Filters static discharge and accidental brushes.
-
-</TabItem>
-</Tabs>
-
-:::info Sensors without calibration
-Reed switches, hall sensors, light gates, buttons, IR proximity, sound sensors, and mock have clean digital signals that work reliably with defaults. No calibration sliders appear.
-:::
+Some sensors expose tuning sliders below the main config (PIR sensitivity, vibration/knock pulse threshold, tilt settle time, touch duration). See the [Calibration guide](./calibration) for parameter details and tuning tips.
 
 ### Testing
 
