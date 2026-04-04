@@ -198,7 +198,7 @@ def test_auth_status_invalid_token(app, client):
 def test_settings_update_refreshes_auth(app, client):
     """Updating Auth.enabled via settings refreshes the auth module."""
     _enable_auth(app, token="my-token", password="pass")
-    # Disable auth via settings endpoint (token/password_hash stripped, enabled goes through)
+    # Disable auth via settings endpoint
     res = client.post("/settings",
                       json={"Auth": {"enabled": False}},
                       headers={"Authorization": "Bearer my-token"},
@@ -209,18 +209,24 @@ def test_settings_update_refreshes_auth(app, client):
     res = client.get("/settings")
     assert res.status_code == 200
 
-    # Re-enable via settings
+    # Re-enable via settings - token gets regenerated
     res = client.post("/settings",
                       json={"Auth": {"enabled": True}},
                       content_type="application/json")
     assert res.status_code == 200
+    data = res.get_json()
+    new_token = data.get("token")
+    assert new_token
+    assert new_token != "my-token"
 
-    # Now should require auth again (token unchanged from _enable_auth)
-    res = client.get("/settings")
-    assert res.status_code == 401
-
+    # Old token no longer works
     res = client.get("/settings",
                      headers={"Authorization": "Bearer my-token"})
+    assert res.status_code == 401
+
+    # New token works
+    res = client.get("/settings",
+                     headers={"Authorization": "Bearer " + new_token})
     assert res.status_code == 200
 
 

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import { setToken } from "../lib/auth";
   import { apiFetch } from "../lib/fetch";
   import { sseClient } from "../lib/sse";
   import { checkNow as checkForUpdateNow, subscribe as subscribeUpdate, clearUpdate, type UpdateState } from "../lib/update-badge";
@@ -476,20 +477,20 @@
 
     toast.promise(
       (async () => {
-        // Fetch token before enabling, while /settings is still open
-        if (enabled) {
-          const sr = await apiFetch(`${getBackendUrl()}/settings`);
-          if (sr.ok) {
-            const s = await sr.json();
-            authToken = s.Auth?.token ?? "";
-          }
-        }
         const res = await apiFetch(`${getBackendUrl()}/settings`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ Auth: { enabled } }),
         });
         if (!res.ok) throw new Error();
+        // When enabling, the backend regenerates the token and returns it
+        if (enabled) {
+          const data = await res.json().catch(() => ({}));
+          if (data.token) {
+            authToken = data.token;
+            setToken(data.token);
+          }
+        }
         return enabled;
       })(),
       {

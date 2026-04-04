@@ -257,13 +257,20 @@ def settings():
             # Auth updates: only allow 'enabled', preserve token/password_hash
             if "Auth" in new_settings:
                 current_auth = settings_helpers.get_settings().get("Auth", {})
+                enabling = new_settings["Auth"].get("enabled", False) and not current_auth.get("enabled", False)
                 new_settings["Auth"] = {
                     **current_auth,
                     "enabled": new_settings["Auth"].get("enabled", current_auth.get("enabled", False)),
                 }
+                # Regenerate token when enabling auth so previously exposed tokens can't be reused
+                if enabling:
+                    new_settings["Auth"]["token"] = auth.regenerate_token()
             settings_helpers.update_settings(new_settings)
             if "Auth" in new_settings:
                 auth.refresh()
+                # Return the token when enabling so the frontend can store it
+                if new_settings["Auth"].get("enabled"):
+                    return jsonify({"message": "Settings updated", "token": auth.get_token()})
             return jsonify({"message": "Settings updated"})
 
 
