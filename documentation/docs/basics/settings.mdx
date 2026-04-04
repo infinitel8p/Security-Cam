@@ -344,13 +344,24 @@ The **API token** field shows a token for programmatic access - use it with scri
 
 ### Password recovery
 
-:::tip Locked out?
-If you forget the password, edit the settings file via SSH to disable auth:
+:::tip Locked out? SD card reset
+If you forget the password, you can reset auth using the SD card:
+
+1. Power off the Pi and remove the SD card
+2. Insert it into any computer
+3. Create an empty file called `reset-auth` on the boot partition (the one with `config.txt`)
+4. Put the card back and power on
+
+Auth will be disabled on next startup and a new default password written to `client/data/default-password.txt`.
+:::
+
+:::info SSH alternative
+If you have SSH access, you can also reset via the command line:
 ```bash
 cd /opt/security-cam/client/settings
 python3 -c "import json; s=json.load(open('settings.json')); s['Auth']['enabled']=False; s['Auth']['password_hash']=''; json.dump(s,open('settings.json','w'),indent=4)"
 ```
-Then restart the service. A new default password will be generated and written to `client/data/default-password.txt`.
+Then restart the service.
 :::
 
 ---

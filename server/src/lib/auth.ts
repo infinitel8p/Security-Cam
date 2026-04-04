@@ -19,3 +19,11 @@ export function setToken(token: string): void {
 export function clearToken(): void {
   localStorage.removeItem(STORAGE_KEY);
 }
+
+/** Append ?token= to a URL for resources loaded via src attributes (img, video). */
+export function authUrl(url: string): string {
+  const token = getToken();
+  if (!token) return url;
+  const sep = url.includes("?") ? "&" : "?";
+  return `${url}${sep}token=${encodeURIComponent(token)}`;
+}

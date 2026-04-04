@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import type { Snippet } from "svelte";
   import { getBackendUrl } from "../lib/api";
   import { getToken, setToken } from "../lib/auth";
@@ -12,6 +12,10 @@
   let error = $state("");
   let submitting = $state(false);
   let shakeKey = $state(0);
+
+  // Particle canvas
+  let canvasEl: HTMLCanvasElement | undefined = $state();
+  let animFrame = 0;
 
   onMount(async () => {
     initLocale();
@@ -40,6 +44,92 @@
     } catch {
       state = "authenticated";
     }
+  });
+
+  // Particle system - starts when login screen is shown
+  $effect(() => {
+    if (state !== "login" || !canvasEl) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const ctx = canvasEl.getContext("2d");
+    if (!ctx) return;
+
+    const resize = () => {
+      canvasEl!.width = window.innerWidth;
+      canvasEl!.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    const COUNT = 35;
+    const CONNECT_DIST = 120;
+    const particles: { x: number; y: number; vx: number; vy: number; r: number }[] = [];
+
+    for (let i = 0; i < COUNT; i++) {
+      particles.push({
+        x: Math.random() * canvasEl!.width,
+        y: Math.random() * canvasEl!.height,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        r: Math.random() * 1.5 + 0.5,
+      });
+    }
+
+    const isLight = document.documentElement.classList.contains("light");
+    const dotColor = isLight ? "37, 99, 235" : "77, 148, 255";
+
+    function draw() {
+      const w = canvasEl!.width;
+      const h = canvasEl!.height;
+      ctx!.clearRect(0, 0, w, h);
+
+      // Move
+      for (const p of particles) {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0 || p.x > w) p.vx *= -1;
+        if (p.y < 0 || p.y > h) p.vy *= -1;
+      }
+
+      // Lines
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < CONNECT_DIST) {
+            const alpha = (1 - dist / CONNECT_DIST) * 0.7;
+            ctx!.strokeStyle = `rgba(${dotColor}, ${alpha})`;
+            ctx!.lineWidth = 0.5;
+            ctx!.beginPath();
+            ctx!.moveTo(particles[i].x, particles[i].y);
+            ctx!.lineTo(particles[j].x, particles[j].y);
+            ctx!.stroke();
+          }
+        }
+      }
+
+      // Dots
+      for (const p of particles) {
+        ctx!.fillStyle = `rgba(${dotColor}, 0.9)`;
+        ctx!.beginPath();
+        ctx!.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx!.fill();
+      }
+
+      animFrame = requestAnimationFrame(draw);
+    }
+
+    animFrame = requestAnimationFrame(draw);
+
+    return () => {
+      cancelAnimationFrame(animFrame);
+      window.removeEventListener("resize", resize);
+    };
+  });
+
+  onDestroy(() => {
+    if (typeof cancelAnimationFrame !== "undefined") cancelAnimationFrame(animFrame);
   });
 
   async function handleLogin() {
@@ -86,25 +176,35 @@
   </div>
 {:else if state === "login"}
   <div class="auth-screen">
-    <!-- Accent glow behind the card -->
-    <div class="auth-glow"></div>
+    <!-- Layer 1: dot grid (CSS) -->
+    <div class="auth-grid"></div>
 
-    <div class="auth-card" style="animation: auth-enter 0.6s cubic-bezier(0.16, 1, 0.3, 1) both">
+    <!-- Layer 2: particles (Canvas) -->
+    <canvas class="auth-particles" bind:this={canvasEl}></canvas>
+
+    <!-- Layer 3: ambient glows -->
+    <div class="auth-glow auth-glow-primary"></div>
+    <div class="auth-glow auth-glow-secondary"></div>
+
+    <!-- Layer 4: card -->
+    <div class="auth-card" style="animation: auth-enter 0.7s cubic-bezier(0.16, 1, 0.3, 1) both">
       <!-- Shield icon -->
-      <div class="auth-icon-wrap">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <div class="auth-icon-wrap" style="animation: auth-enter 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both">
+        <div class="auth-icon-pulse"></div>
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" />
+          <path d="M10 12l2 2 4-4" stroke-width="1.5" />
         </svg>
       </div>
 
       <!-- Title -->
-      <div class="auth-header">
+      <div class="auth-header" style="animation: auth-enter 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both">
         <h1 class="auth-title">{t("auth.loginTitle")}</h1>
         <p class="auth-subtitle">{t("auth.loginPrompt")}</p>
       </div>
 
-      <!-- Input group -->
-      <div class="auth-form" style="animation: auth-enter 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both">
+      <!-- Form -->
+      <div class="auth-form" style="animation: auth-enter 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both">
         {#key shakeKey}
           <input
             type="password"
@@ -151,49 +251,105 @@
     overflow: hidden;
   }
 
-  /* ── Ambient glow ──────────────────────────────── */
-  .auth-glow {
+  /* ── Layer 1: Dot grid ─────────────────────────── */
+  .auth-grid {
     position: absolute;
-    width: 360px;
-    height: 360px;
-    border-radius: 50%;
-    background: radial-gradient(circle, var(--color-accent) 0%, transparent 70%);
-    opacity: 0.04;
-    filter: blur(60px);
+    inset: 0;
+    background-image: radial-gradient(circle, var(--color-accent) 0.5px, transparent 0.5px);
+    background-size: 32px 32px;
+    opacity: 0.24;
+    mask-image: radial-gradient(ellipse 60% 50% at 50% 50%, black 20%, transparent 70%);
     pointer-events: none;
   }
 
-  :global(.light) .auth-glow {
-    opacity: 0.06;
+  :global(.light) .auth-grid { opacity: 0.18; }
+
+  /* ── Layer 2: Particle canvas ──────────────────── */
+  .auth-particles {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
   }
 
-  /* ── Card ───────────────────────────────────────── */
+  /* ── Layer 3: Ambient glows ────────────────────── */
+  .auth-glow {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(80px);
+  }
+
+  .auth-glow-primary {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, var(--color-accent) 0%, transparent 70%);
+    opacity: 0.22;
+    animation: auth-glow-drift 8s ease-in-out infinite alternate;
+  }
+
+  .auth-glow-secondary {
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, var(--color-accent) 0%, transparent 70%);
+    opacity: 0.12;
+    animation: auth-glow-drift 8s ease-in-out 2s infinite alternate-reverse;
+  }
+
+  :global(.light) .auth-glow-primary { opacity: 0.25; }
+  :global(.light) .auth-glow-secondary { opacity: 0.15; }
+
+  /* ── Layer 4: Card ─────────────────────────────── */
   .auth-card {
     position: relative;
     width: 100%;
-    max-width: 340px;
-    padding: 2.5rem 2rem 2rem;
+    max-width: 360px;
+    padding: 3rem 2.25rem 2.25rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1.5rem;
-    border-radius: 1.25rem;
+    gap: 1.75rem;
+    border-radius: 1.5rem;
     background: var(--color-surface-raised);
     border: 1px solid var(--color-border-default);
-    box-shadow: var(--shadow-lg);
+    box-shadow:
+      var(--shadow-lg),
+      0 0 100px -10px rgba(77, 148, 255, 0.2);
+    backdrop-filter: blur(8px);
+  }
+
+  :global(.light) .auth-card {
+    box-shadow:
+      var(--shadow-lg),
+      0 0 100px -10px rgba(37, 99, 235, 0.18);
   }
 
   /* ── Shield icon ───────────────────────────────── */
   .auth-icon-wrap {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 56px;
-    height: 56px;
-    border-radius: 16px;
-    background: var(--color-accent-muted);
+    width: 72px;
+    height: 72px;
+    border-radius: 22px;
+    background: linear-gradient(
+      135deg,
+      var(--color-accent-muted) 0%,
+      rgba(77, 148, 255, 0.18) 100%
+    );
     color: var(--color-accent);
     border: 1px solid var(--color-accent-strong);
+  }
+
+  .auth-icon-pulse {
+    position: absolute;
+    inset: -4px;
+    border-radius: 26px;
+    border: 1.5px solid var(--color-accent);
+    opacity: 0;
+    animation: auth-pulse 3s ease-out infinite;
   }
 
   /* ── Header ────────────────────────────────────── */
@@ -201,13 +357,13 @@
     text-align: center;
     display: flex;
     flex-direction: column;
-    gap: 0.375rem;
+    gap: 0.5rem;
   }
 
   .auth-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
     color: var(--color-text-primary);
   }
 
@@ -272,28 +428,38 @@
     justify-content: center;
     gap: 0.5rem;
     width: 100%;
-    padding: 0.75rem 1rem;
+    padding: 0.875rem 1rem;
     font-size: 0.875rem;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: 0.01em;
     color: #fff;
     background: var(--color-accent);
     border: none;
     border-radius: 0.75rem;
     cursor: pointer;
-    transition: background 0.15s, transform 0.1s, opacity 0.15s;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s, opacity 0.15s;
+    box-shadow: 0 2px 12px rgba(77, 148, 255, 0.25);
+  }
+
+  :global(.light) .auth-btn {
+    box-shadow: 0 2px 12px rgba(37, 99, 235, 0.2);
   }
 
   .auth-btn:hover:not(:disabled) {
     background: var(--color-accent-hover);
+    box-shadow: 0 4px 20px rgba(77, 148, 255, 0.35);
+    transform: translateY(-1px);
   }
 
   .auth-btn:active:not(:disabled) {
-    transform: scale(0.98);
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 1px 6px rgba(77, 148, 255, 0.2);
   }
 
   .auth-btn:disabled {
-    opacity: 0.4;
+    opacity: 0.35;
     cursor: not-allowed;
+    box-shadow: none;
   }
 
   .auth-btn-spinner {
@@ -338,8 +504,21 @@
     to { transform: rotate(360deg); }
   }
 
+  @keyframes auth-pulse {
+    0% { opacity: 0.4; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.3); }
+  }
+
+  @keyframes auth-glow-drift {
+    from { transform: translate(-10%, -10%); }
+    to { transform: translate(10%, 10%); }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .auth-input-error { animation: none; }
-    .auth-card, .auth-form, .auth-error { animation: none; }
+    .auth-card, .auth-form, .auth-header, .auth-icon-wrap, .auth-error { animation: none; }
+    .auth-icon-pulse { animation: none; display: none; }
+    .auth-glow-primary, .auth-glow-secondary { animation: none; }
+    .auth-particles { display: none; }
   }
 </style>

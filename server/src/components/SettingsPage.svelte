@@ -1007,13 +1007,13 @@
           <span class="h-3.5 w-0.5 rounded-full bg-accent"></span>
           <h2 class="text-xs font-semibold uppercase tracking-widest text-text-secondary">{t("section.security")}</h2>
         </div>
-        <div class="card overflow-hidden">
+        <div class="card overflow-hidden {authEnabled ? 'ring-1 ring-accent/15' : ''} transition-all duration-500">
           <!-- Auth toggle with shield icon -->
           <div class="px-4 py-4 sm:px-5 sm:py-5">
             <div class="flex items-center justify-between gap-4">
               <div class="flex items-start gap-3">
-                <div class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl {authEnabled ? 'bg-accent-muted border border-accent-strong text-accent' : 'bg-surface-elevated border border-border-default text-text-muted'} transition-colors duration-300">
-                  <Icon icon={shieldIcon} class="h-[18px] w-[18px]" />
+                <div class="mt-0.5 flex shrink-0 items-center justify-center transition-all duration-300 {authEnabled ? 'h-10 w-10 rounded-[14px] bg-accent/15 border border-accent/25 text-accent shadow-[0_0_16px_-4px_rgba(77,148,255,0.2)]' : 'h-9 w-9 rounded-xl bg-surface-elevated border border-border-default text-text-muted'}">
+                  <Icon icon={shieldIcon} class="{authEnabled ? 'h-[20px] w-[20px]' : 'h-[18px] w-[18px]'} transition-all duration-300" />
                 </div>
                 <div>
                   <p class="text-sm font-medium text-text-primary">{t("label.authEnabled")}</p>

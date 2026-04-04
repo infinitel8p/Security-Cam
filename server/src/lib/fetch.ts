@@ -51,8 +51,8 @@ export async function apiFetch(
       // Token rejected - clear and force re-login
       if (res.status === 401) {
         clearToken();
-        window.location.reload();
-        throw new Error("Unauthorized");
+        if (typeof window !== "undefined") window.location.reload();
+        return res;
       }
 
       return res;

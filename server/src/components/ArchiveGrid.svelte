@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import { authUrl } from "../lib/auth";
   import { apiFetch } from "../lib/fetch";
   import { sseClient } from "../lib/sse";
   import { markSeen } from "../lib/archive-badge";
@@ -230,7 +231,7 @@
   }
 
   function snapshotUrl(path: string): string {
-    return `${getBackendUrl()}/snapshot_image?path=${encodeURIComponent(path)}`;
+    return authUrl(`${getBackendUrl()}/snapshot_image?path=${encodeURIComponent(path)}`);
   }
 
   async function deleteSnapshot(snapshot: Snapshot) {
@@ -276,11 +277,11 @@
   }
 
   function timelapseVideoUrl(path: string): string {
-    return `${getBackendUrl()}/timelapse/video?path=${encodeURIComponent(path)}`;
+    return authUrl(`${getBackendUrl()}/timelapse/video?path=${encodeURIComponent(path)}`);
   }
 
   function timelapseThumbnailUrl(path: string): string {
-    return `${getBackendUrl()}/timelapse/thumbnail?path=${encodeURIComponent(path)}`;
+    return authUrl(`${getBackendUrl()}/timelapse/thumbnail?path=${encodeURIComponent(path)}`);
   }
 
   function formatBytes(bytes: number): string {
@@ -375,15 +376,15 @@
   });
 
   function streamUrl(path: string): string {
-    return `${getBackendUrl()}/stream_video?video_path=${encodeURIComponent(path)}&cache_buster=${Date.now()}`;
+    return authUrl(`${getBackendUrl()}/stream_video?video_path=${encodeURIComponent(path)}&cache_buster=${Date.now()}`);
   }
 
   function thumbnailUrl(path: string): string {
-    return `${getBackendUrl()}/thumbnail?video_path=${encodeURIComponent(path)}`;
+    return authUrl(`${getBackendUrl()}/thumbnail?video_path=${encodeURIComponent(path)}`);
   }
 
   function spriteUrl(path: string): string {
-    return `${getBackendUrl()}/sprite?video_path=${encodeURIComponent(path)}`;
+    return authUrl(`${getBackendUrl()}/sprite?video_path=${encodeURIComponent(path)}`);
   }
 
   // Sprite hover-scrub state
@@ -432,7 +433,7 @@
 
   function downloadVideo(video: Video) {
     const a = document.createElement("a");
-    a.href = `${getBackendUrl()}/stream_video?video_path=${encodeURIComponent(video.path)}&download=1`;
+    a.href = authUrl(`${getBackendUrl()}/stream_video?video_path=${encodeURIComponent(video.path)}&download=1`);
     a.download = video.filename;
     a.click();
   }

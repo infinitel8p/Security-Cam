@@ -31,6 +31,8 @@ EXEMPT_PATHS = frozenset([
 
 _DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "data")
 _PASSWORD_FILE = os.path.join(_DATA_DIR, "default-password.txt")
+_RESET_FILE = "/boot/firmware/reset-auth"
+_RESET_FILE_LEGACY = "/boot/reset-auth"
 
 
 def _generate_password(length: int = 12) -> str:
@@ -39,14 +41,35 @@ def _generate_password(length: int = 12) -> str:
     return "".join(secrets.choice(alphabet) for _ in range(length))
 
 
+def _check_reset_file() -> bool:
+    """Check for a reset-auth file on the boot partition. Remove it if found."""
+    for path in (_RESET_FILE, _RESET_FILE_LEGACY):
+        if os.path.exists(path):
+            try:
+                os.remove(path)
+            except OSError:
+                pass
+            return True
+    return False
+
+
 def ensure_token() -> None:
     """Generate a token and default password on first run if missing.
 
-    Call once at startup.
+    Call once at startup. Also checks for a reset-auth file on the boot
+    partition (SD card recovery).
     """
     global _token, _enabled, _password_hash
     settings = settings_helpers.get_settings()
     auth = settings.get("Auth", {})
+
+    # SD card recovery: user placed a reset-auth file on the boot partition
+    if _check_reset_file():
+        log.info("Found reset-auth file on boot partition - resetting auth")
+        auth["enabled"] = False
+        auth["password_hash"] = ""
+        settings_helpers.update_settings({"Auth": auth})
+
     _enabled = auth.get("enabled", False)
     _token = auth.get("token", "")
     _password_hash = auth.get("password_hash", "")
@@ -66,7 +89,8 @@ def ensure_token() -> None:
         changed = True
         # Write to a file the user can read via SSH - never to the log
         os.makedirs(_DATA_DIR, exist_ok=True)
-        with open(_PASSWORD_FILE, "w") as f:
+        fd = os.open(_PASSWORD_FILE, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "w") as f:
             f.write(password + "\n")
         log.info("Default password written to %s", _PASSWORD_FILE)
 

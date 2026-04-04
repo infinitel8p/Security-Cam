@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import { authUrl } from "../lib/auth";
   import { t } from "../i18n";
   import Icon from "./Icon.svelte";
   import playerPlayIcon from "../icons/player-play.svg?raw";
@@ -67,11 +68,11 @@
   let progress = $derived(duration > 0 ? (currentTime / duration) * 100 : 0);
 
   function streamUrl(path: string): string {
-    return `${getBackendUrl()}/stream_video?video_path=${encodeURIComponent(path)}`;
+    return authUrl(`${getBackendUrl()}/stream_video?video_path=${encodeURIComponent(path)}`);
   }
 
   function thumbnailUrl(path: string): string {
-    return `${getBackendUrl()}/thumbnail?video_path=${encodeURIComponent(path)}`;
+    return authUrl(`${getBackendUrl()}/thumbnail?video_path=${encodeURIComponent(path)}`);
   }
 
   function fmtTime(seconds: number): string {
@@ -256,7 +257,7 @@
 
   function downloadVideo() {
     const a = document.createElement("a");
-    a.href = `${getBackendUrl()}/stream_video?video_path=${encodeURIComponent(video.path)}&download=1`;
+    a.href = authUrl(`${getBackendUrl()}/stream_video?video_path=${encodeURIComponent(video.path)}&download=1`);
     a.download = video.filename;
     a.click();
   }
