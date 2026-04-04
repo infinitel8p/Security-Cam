@@ -795,6 +795,32 @@ def event_history_csv():
 # --- Log viewer endpoints ---
 
 
+@app.route('/system/restart', methods=['POST'])
+def system_restart():
+    """Restart the security-cam service (Flask + Astro)."""
+    log.warning("Service restart requested from %s", request.remote_addr)
+    event_logger.log_event("service_restart")
+    subprocess.Popen(
+        ["bash", "-c", "sleep 1 && sudo systemctl restart security-cam"],
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        start_new_session=True,
+    )
+    return jsonify({"message": "Restarting services..."})
+
+
+@app.route('/system/reboot', methods=['POST'])
+def system_reboot():
+    """Reboot the Raspberry Pi."""
+    log.warning("System reboot requested from %s", request.remote_addr)
+    event_logger.log_event("system_reboot")
+    subprocess.Popen(
+        ["bash", "-c", "sleep 2 && sudo systemctl reboot"],
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        start_new_session=True,
+    )
+    return jsonify({"message": "Rebooting..."})
+
+
 @app.route('/captive-portal', methods=['GET', 'POST'])
 def captive_portal():
     if request.method == 'GET':

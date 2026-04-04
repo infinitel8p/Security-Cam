@@ -62,7 +62,7 @@
   let deviceStatuses = $state<{ bt: Record<string, boolean>; wifi: Record<string, boolean> }>({ bt: {}, wifi: {} });
   let unsubPresence: (() => void) | null = null;
 
-  const sectionIds = ["appearance", "camera", "storage", "devices", "sensors"];
+  const sectionIds = ["appearance", "camera", "storage", "devices", "sensors", "system"];
 
   // Nav active state color (unified accent)
   const sectionColor = "text-accent";
@@ -339,6 +339,43 @@
     }
   }
 
+  let restartConfirm = $state(false);
+  let rebootConfirm = $state(false);
+  let restartTimeout: ReturnType<typeof setTimeout> | null = null;
+  let rebootTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  function confirmRestart() {
+    restartConfirm = true;
+    if (restartTimeout) clearTimeout(restartTimeout);
+    restartTimeout = setTimeout(() => { restartConfirm = false; }, 5000);
+  }
+
+  function confirmReboot() {
+    rebootConfirm = true;
+    if (rebootTimeout) clearTimeout(rebootTimeout);
+    rebootTimeout = setTimeout(() => { rebootConfirm = false; }, 5000);
+  }
+
+  async function doRestart() {
+    restartConfirm = false;
+    toast(t("toast.restarting"), { icon: "🔄" });
+    try {
+      await apiFetch(`${getBackendUrl()}/system/restart`, { method: "POST" });
+    } catch {
+      // Expected - the service will restart and kill this connection
+    }
+  }
+
+  async function doReboot() {
+    rebootConfirm = false;
+    toast(t("toast.rebooting"), { icon: "🔄" });
+    try {
+      await apiFetch(`${getBackendUrl()}/system/reboot`, { method: "POST" });
+    } catch {
+      // Expected - the device will reboot and kill this connection
+    }
+  }
+
   let captivePortalSaving = false;
   function toggleCaptivePortal() {
     if (captivePortalSaving) return;
@@ -462,6 +499,7 @@
       {@render mobileNavItem("storage", t("section.storage"))}
       {@render mobileNavItem("devices", t("section.devices"))}
       {@render mobileNavItem("sensors", t("section.triggerSensors"))}
+      {@render mobileNavItem("system", t("section.system"))}
     </div>
   </nav>
 
@@ -474,6 +512,7 @@
         {@render navItem("storage", t("section.storage"))}
         {@render navItem("devices", t("section.devices"))}
         {@render navItem("sensors", t("section.triggerSensors"))}
+        {@render navItem("system", t("section.system"))}
       </div>
     </nav>
 
@@ -801,6 +840,48 @@
           <h2 class="text-xs font-semibold uppercase tracking-widest text-text-secondary">{t("section.triggerSensors")}</h2>
         </div>
         <SensorSettings />
+      </section>
+
+      <!-- System -->
+      <section id="settings-system" class="scroll-mt-16 lg:scroll-mt-8 mt-12 space-y-3">
+        <div class="flex items-center gap-2.5">
+          <span class="h-3.5 w-0.5 rounded-full bg-accent"></span>
+          <h2 class="text-xs font-semibold uppercase tracking-widest text-text-secondary">{t("section.system")}</h2>
+        </div>
+        <div class="card overflow-hidden">
+          <div class="px-4 py-4 sm:px-5 sm:py-5">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-text-primary">{t("label.restartServices")}</p>
+                <p class="mt-0.5 text-xs text-text-muted">{t("help.restartServices")}</p>
+              </div>
+              {#if restartConfirm}
+                <div class="flex gap-2 animate-slide-down">
+                  <button onclick={() => { restartConfirm = false; }} class="btn-press rounded-lg border border-border-default px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text-secondary transition-colors">{t("btn.cancel")}</button>
+                  <button onclick={doRestart} class="btn-press rounded-lg bg-status-warning px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-status-warning/90">{t("btn.restart")}</button>
+                </div>
+              {:else}
+                <button onclick={confirmRestart} class="btn-press shrink-0 rounded-lg border border-border-default px-4 py-2 text-xs font-semibold text-text-secondary transition-colors hover:border-border-strong hover:text-text-primary">{t("btn.restart")}</button>
+              {/if}
+            </div>
+          </div>
+          <div class="border-t border-border-subtle px-4 py-4 sm:px-5 sm:py-5">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-text-primary">{t("label.rebootDevice")}</p>
+                <p class="mt-0.5 text-xs text-text-muted">{t("help.rebootDevice")}</p>
+              </div>
+              {#if rebootConfirm}
+                <div class="flex gap-2 animate-slide-down">
+                  <button onclick={() => { rebootConfirm = false; }} class="btn-press rounded-lg border border-border-default px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text-secondary transition-colors">{t("btn.cancel")}</button>
+                  <button onclick={doReboot} class="btn-press rounded-lg bg-status-critical px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-status-critical/90">{t("btn.reboot")}</button>
+                </div>
+              {:else}
+                <button onclick={confirmReboot} class="btn-press shrink-0 rounded-lg border border-border-default px-4 py-2 text-xs font-semibold text-text-secondary transition-colors hover:border-border-strong hover:text-text-primary">{t("btn.reboot")}</button>
+              {/if}
+            </div>
+          </div>
+        </div>
       </section>
     </div>
   </div>
