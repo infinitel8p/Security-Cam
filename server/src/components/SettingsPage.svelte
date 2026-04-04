@@ -483,13 +483,17 @@
           body: JSON.stringify({ Auth: { enabled } }),
         });
         if (!res.ok) throw new Error();
-        // When enabling, the backend regenerates the token and returns it
+        // Store the token so future requests are authenticated
         if (enabled) {
-          const data = await res.json().catch(() => ({}));
-          if (data.token) {
-            authToken = data.token;
-            setToken(data.token);
+          if (!authToken) {
+            // Token not yet loaded - fetch it before auth takes effect
+            const sr = await apiFetch(`${getBackendUrl()}/settings`);
+            if (sr.ok) {
+              const s = await sr.json();
+              authToken = s.Auth?.token ?? "";
+            }
           }
+          if (authToken) setToken(authToken);
         }
         return enabled;
       })(),
@@ -508,7 +512,9 @@
     try {
       await navigator.clipboard.writeText(authToken);
       toast(t("toast.tokenCopied"));
-    } catch { /* clipboard not available */ }
+    } catch {
+      toast.error(t("toast.saveFailed"));
+    }
   }
 
   function confirmRegen() {
@@ -524,6 +530,7 @@
       if (!res.ok) throw new Error();
       const data = await res.json();
       authToken = data.token;
+      setToken(data.token);
       toast(t("toast.tokenRegenerated"));
     } catch {
       toast.error(t("toast.saveFailed"));
@@ -1036,6 +1043,7 @@
                   type="password"
                   bind:value={currentPassword}
                   placeholder={t("label.currentPassword")}
+                  maxlength={128}
                   autocomplete="current-password"
                   aria-label={t("label.currentPassword")}
                   class="w-full rounded-lg bg-surface-elevated border border-border-subtle px-3.5 py-2.5 text-sm text-text-primary placeholder:text-text-muted/70 outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent-muted"
@@ -1044,6 +1052,7 @@
                   type="password"
                   bind:value={newPassword}
                   placeholder={t("label.newPassword")}
+                  maxlength={128}
                   autocomplete="new-password"
                   aria-label={t("label.newPassword")}
                   class="w-full rounded-lg bg-surface-elevated border border-border-subtle px-3.5 py-2.5 text-sm text-text-primary placeholder:text-text-muted/70 outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent-muted"
@@ -1052,6 +1061,7 @@
                   type="password"
                   bind:value={confirmPassword}
                   placeholder={t("label.confirmPassword")}
+                  maxlength={128}
                   autocomplete="new-password"
                   aria-label={t("label.confirmPassword")}
                   class="w-full rounded-lg bg-surface-elevated border border-border-subtle px-3.5 py-2.5 text-sm text-text-primary placeholder:text-text-muted/70 outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent-muted"

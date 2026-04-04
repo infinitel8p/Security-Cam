@@ -134,8 +134,8 @@ def test_auth_validate_rejects_bad_password(app, client):
 # --- Token generation ---
 
 
-def test_token_generated_when_empty(app):
-    """When Auth.token is empty and refresh is called, regenerate_token fills it."""
+def test_regenerate_token_when_empty(app):
+    """When Auth.token is empty, regenerate_token creates a new one."""
     import modules.settings_helpers as sh
     import modules.auth as auth_mod
     with open(sh.SETTINGS_FILE, "r") as f:

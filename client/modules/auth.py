@@ -19,7 +19,8 @@ from modules import settings_helpers
 
 log = logging.getLogger("auth")
 
-# Cached state - refreshed on settings change
+# Cached state - refreshed on settings change.
+# Safe for single-process Flask (Pi deployment); not thread-safe across workers.
 _token: str = ""
 _enabled: bool = False
 _password_hash: str = ""
@@ -47,8 +48,8 @@ def _check_reset_file() -> bool:
         if os.path.exists(path):
             try:
                 os.remove(path)
-            except OSError:
-                pass
+            except OSError as e:
+                log.warning("Could not remove reset-auth file %s: %s", path, e)
             return True
     return False
 

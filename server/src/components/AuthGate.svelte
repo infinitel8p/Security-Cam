@@ -150,6 +150,7 @@
 
       if (data.valid && data.token) {
         setToken(data.token);
+        sessionStorage.removeItem("auth-reload");
         state = "authenticated";
       } else {
         error = t("toast.wrongPassword");
@@ -211,6 +212,7 @@
             bind:value={passwordInput}
             onkeydown={handleKeydown}
             placeholder={t("auth.passwordPlaceholder")}
+            maxlength={128}
             autocomplete="current-password"
             aria-label={t("auth.passwordPlaceholder")}
             class="auth-input"

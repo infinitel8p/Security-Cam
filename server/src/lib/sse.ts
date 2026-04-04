@@ -141,6 +141,7 @@ export function sseClient(): SSEClient {
     if (destroyed) return;
 
     let url = `${getBackendUrl()}/events`;
+    // Read token fresh on every reconnect so regenerated tokens are picked up
     const token = getToken();
     if (token) url += `?token=${encodeURIComponent(token)}`;
     es = new EventSource(url);

@@ -48,10 +48,21 @@ export async function apiFetch(
       const res = await fetch(input, { ...fetchInit, signal: controller.signal });
       clearTimeout(timer);
 
-      // Token rejected - clear and force re-login
+      // Clear reload guard on any successful auth
+      if (res.status !== 401 && typeof sessionStorage !== "undefined") {
+        sessionStorage.removeItem("auth-reload");
+      }
+
+      // Token rejected - clear and force re-login (with loop guard)
       if (res.status === 401) {
         clearToken();
-        if (typeof window !== "undefined") window.location.reload();
+        if (typeof window !== "undefined") {
+          const key = "auth-reload";
+          if (!sessionStorage.getItem(key)) {
+            sessionStorage.setItem(key, "1");
+            window.location.reload();
+          }
+        }
         return res;
       }
 

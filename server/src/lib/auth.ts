@@ -24,6 +24,8 @@ export function clearToken(): void {
 export function authUrl(url: string): string {
   const token = getToken();
   if (!token) return url;
+  // Avoid double-appending if already present
+  if (new URL(url, location.href).searchParams.has("token")) return url;
   const sep = url.includes("?") ? "&" : "?";
   return `${url}${sep}token=${encodeURIComponent(token)}`;
 }
