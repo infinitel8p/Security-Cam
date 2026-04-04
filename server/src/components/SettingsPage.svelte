@@ -3,6 +3,7 @@
   import { getBackendUrl } from "../lib/api";
   import { apiFetch } from "../lib/fetch";
   import { sseClient } from "../lib/sse";
+  import { checkNow as checkForUpdateNow, subscribe as subscribeUpdate, clearUpdate, type UpdateState } from "../lib/update-badge";
   import toast from "svelte-5-french-toast";
   import DeviceList from "./DeviceList.svelte";
   import CameraSettings from "./CameraSettings.svelte";
@@ -114,6 +115,7 @@
 
   onDestroy(() => {
     unsubPresence?.();
+    unsubUpdate?.();
     if (observer) observer.disconnect();
   });
 
@@ -217,6 +219,8 @@
     locale = getLocale();
     const saved = localStorage.getItem("theme") as ThemeMode | null;
     theme = saved === "light" || saved === "dark" ? saved : "system";
+    // Subscribe to shared update state
+    unsubUpdate = subscribeUpdate((state) => { updateResult = state.lastChecked ? state : null; });
     // Fire settings + device statuses in parallel (independent requests)
     fetchSettings();
     fetchDeviceStatuses();
@@ -336,6 +340,48 @@
     }
     if (!wifiDevices.some(d => d.address.toLowerCase() === device.address.toLowerCase())) {
       wifiDevices = [...wifiDevices, device];
+    }
+  }
+
+  // --- Update check (shared state from update-badge.ts) ---
+  let updateChecking = $state(false);
+  let updateResult = $state<UpdateState | null>(null);
+  let updateConfirm = $state(false);
+  let updateTimeout: ReturnType<typeof setTimeout> | null = null;
+  let unsubUpdate: (() => void) | null = null;
+
+  async function checkForUpdates() {
+    updateChecking = true;
+    try {
+      const result = await checkForUpdateNow();
+      if (result.error) {
+        toast.error(result.error);
+      } else if (result.available) {
+        toast(t("toast.updatesFound", { n: result.commits_behind }));
+      } else {
+        toast(t("toast.noUpdates"));
+      }
+    } catch {
+      toast.error(t("toast.updateCheckFailed"));
+    } finally {
+      updateChecking = false;
+    }
+  }
+
+  function confirmUpdate() {
+    updateConfirm = true;
+    if (updateTimeout) clearTimeout(updateTimeout);
+    updateTimeout = setTimeout(() => { updateConfirm = false; }, 5000);
+  }
+
+  async function doUpdate() {
+    updateConfirm = false;
+    clearUpdate();
+    toast(t("toast.updating"));
+    try {
+      await apiFetch(`${getBackendUrl()}/system/restart`, { method: "POST" });
+    } catch {
+      // Expected - service restarts and runs update.sh via ExecStartPre
     }
   }
 
@@ -849,7 +895,51 @@
           <h2 class="text-xs font-semibold uppercase tracking-widest text-text-secondary">{t("section.system")}</h2>
         </div>
         <div class="card overflow-hidden">
+          <!-- Software Update -->
           <div class="px-4 py-4 sm:px-5 sm:py-5">
+            <div class="flex items-center justify-between gap-4">
+              <div class="min-w-0">
+                <p class="text-sm font-medium text-text-primary">{t("label.softwareUpdate")}</p>
+                <p class="mt-0.5 text-xs text-text-muted">{t("help.softwareUpdate")}</p>
+              </div>
+              <button
+                onclick={checkForUpdates}
+                disabled={updateChecking}
+                class="btn-press shrink-0 rounded-lg border border-border-default px-4 py-2 text-xs font-semibold text-text-secondary transition-colors hover:border-border-strong hover:text-text-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {updateChecking ? t("btn.checking") : t("btn.checkForUpdates")}
+              </button>
+            </div>
+            {#if updateResult}
+              <div class="mt-3 rounded-lg bg-surface-elevated px-3.5 py-3 space-y-2 animate-slide-down">
+                {#if updateResult.error && !updateResult.available}
+                  <p class="text-xs text-status-warning">{updateResult.error}</p>
+                {:else if updateResult.available}
+                  <div class="flex items-center justify-between">
+                    <p class="text-xs font-medium text-status-ok">{t("label.commitsAvailable", { n: updateResult.commits_behind })}</p>
+                    {#if updateConfirm}
+                      <div class="flex gap-2 animate-slide-down">
+                        <button onclick={() => { updateConfirm = false; }} class="btn-press rounded-lg border border-border-default px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text-secondary transition-colors">{t("btn.cancel")}</button>
+                        <button onclick={doUpdate} class="btn-press rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-accent-hover">{t("btn.updateNow")}</button>
+                      </div>
+                    {:else}
+                      <button onclick={confirmUpdate} class="btn-press shrink-0 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-accent-hover">{t("btn.updateNow")}</button>
+                    {/if}
+                  </div>
+                  {#if updateResult.summary}
+                    <pre class="text-[0.6875rem] leading-relaxed text-text-secondary font-mono whitespace-pre-wrap max-h-32 overflow-y-auto">{updateResult.summary}</pre>
+                  {/if}
+                {:else}
+                  <p class="text-xs text-text-muted">{t("label.upToDate")}</p>
+                {/if}
+                {#if updateResult.lastChecked}
+                  <p class="text-[0.625rem] text-text-muted/60">{t("label.lastChecked")}: {new Date(updateResult.lastChecked).toLocaleTimeString()}</p>
+                {/if}
+              </div>
+            {/if}
+          </div>
+          <!-- Restart Services -->
+          <div class="border-t border-border-subtle px-4 py-4 sm:px-5 sm:py-5">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm font-medium text-text-primary">{t("label.restartServices")}</p>

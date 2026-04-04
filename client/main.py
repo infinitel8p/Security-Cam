@@ -795,6 +795,82 @@ def event_history_csv():
 # --- Log viewer endpoints ---
 
 
+@app.route('/system/update/check', methods=['GET'])
+def check_for_updates():
+    """Check if updates are available by comparing local HEAD against origin."""
+    import shutil
+    git_bin = shutil.which("git")
+    if not git_bin:
+        abort(500, description="git not found")
+
+    project_dir = os.path.dirname(os.path.abspath(__file__))
+
+    def run_git(*args, timeout=15):
+        r = subprocess.run(
+            [git_bin, *args],
+            capture_output=True, text=True, timeout=timeout,
+            cwd=project_dir,
+        )
+        if r.returncode != 0:
+            raise RuntimeError(r.stderr.strip() or f"git {args[0]} failed")
+        return r.stdout.strip()
+
+    try:
+        # Fetch latest from remote
+        run_git("fetch", "--quiet", timeout=20)
+
+        branch = run_git("rev-parse", "--abbrev-ref", "HEAD")
+        local_hash = run_git("rev-parse", "HEAD")
+        remote_ref = f"origin/{branch}"
+
+        try:
+            remote_hash = run_git("rev-parse", remote_ref)
+        except RuntimeError:
+            return jsonify({
+                "available": False,
+                "branch": branch,
+                "local_commit": local_hash[:8],
+                "error": f"Remote branch {remote_ref} not found",
+            })
+
+        if local_hash == remote_hash:
+            return jsonify({
+                "available": False,
+                "branch": branch,
+                "local_commit": local_hash[:8],
+                "commits_behind": 0,
+            })
+
+        # Count commits behind
+        behind = run_git("rev-list", "--count", f"HEAD..{remote_ref}")
+        commits_behind = int(behind)
+
+        # Get short log of new commits
+        summary = run_git(
+            "log", "--oneline", "--no-decorate",
+            "-20", f"HEAD..{remote_ref}",
+        )
+
+        return jsonify({
+            "available": commits_behind > 0,
+            "branch": branch,
+            "local_commit": local_hash[:8],
+            "remote_commit": remote_hash[:8],
+            "commits_behind": commits_behind,
+            "summary": summary,
+        })
+
+    except subprocess.TimeoutExpired:
+        log.warning("Update check timed out (no internet?)")
+        return jsonify({
+            "available": False,
+            "error": "Timed out - check internet connection",
+        })
+    except Exception as e:
+        log.error("Update check failed: %s", e)
+        abort(500, description=str(e))
+
+
 @app.route('/system/restart', methods=['POST'])
 def system_restart():
     """Restart the security-cam service (Flask + Astro)."""

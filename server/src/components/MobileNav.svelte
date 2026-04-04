@@ -3,6 +3,7 @@
   import { initLocale, t } from "../i18n";
   import { initArchiveBadge, subscribe as subscribeBadge } from "../lib/archive-badge";
   import { initSystemAlerts, subscribe as subscribeAlert, type AlertLevel } from "../lib/system-alert";
+  import { initUpdateBadge, subscribe as subscribeUpdate } from "../lib/update-badge";
   import ThemeToggle from "./ThemeToggle.svelte";
   import Icon from "./Icon.svelte";
   import layoutGridIcon from "../icons/layout-grid.svg?raw";
@@ -13,20 +14,25 @@
 
   let badgeCount = $state(0);
   let alertLevel: AlertLevel = $state("ok");
+  let updateAvailable = $state(false);
   let unsubBadge: (() => void) | null = null;
   let unsubAlert: (() => void) | null = null;
+  let unsubUpdate: (() => void) | null = null;
 
   onMount(() => {
     initLocale();
     initArchiveBadge();
     initSystemAlerts();
+    initUpdateBadge();
     unsubBadge = subscribeBadge((count) => { badgeCount = count; });
     unsubAlert = subscribeAlert((state) => { alertLevel = state.overall; });
+    unsubUpdate = subscribeUpdate((state) => { updateAvailable = state.available; });
   });
 
   onDestroy(() => {
     unsubBadge?.();
     unsubAlert?.();
+    unsubUpdate?.();
   });
 
   const path = $derived(typeof window !== "undefined" ? window.location.pathname : "/");
@@ -82,6 +88,9 @@
     <span class="absolute top-0 left-1/2 h-[2px] w-8 -translate-x-1/2 rounded-b-full bg-accent transition-all duration-200 {isActive('/settings') ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0'}"></span>
     <span class="relative">
       <Icon icon={settingsIcon} class="h-5 w-5 shrink-0" />
+      {#if updateAvailable && !isActive('/settings')}
+        <span class="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-accent"></span>
+      {/if}
     </span>
     <span class="text-[0.6875rem] leading-none font-medium">{t("nav.settings")}</span>
   </a>

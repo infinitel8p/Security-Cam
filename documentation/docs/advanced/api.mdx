@@ -19,7 +19,7 @@ Replace `<pi-ip>` with your Raspberry Pi's IP address in the examples below.
 | **[Storage](#storage-endpoints)** | `/storage/status`, `/storage/configure`, `/storage/cleanup` |
 | **[Timelapse](#timelapse-endpoints)** | `/timelapse/status`, `/timelapse/start`, `/timelapse/stop` |
 | **[Logs](#log-endpoints)** | `/logs`, `/logs/scripts`, `/logs/mediamtx` |
-| **[System](#system-endpoints)** | `/system/alert`, `/system_info`, `/system/restart`, `/system/reboot`, `/captive-portal` |
+| **[System](#system-endpoints)** | `/system/alert`, `/system_info`, `/system/restart`, `/system/reboot`, `/system/update/check`, `/captive-portal` |
 | **[Media](#snapshot-endpoint)** | `/snapshot`, `/thumbnail/<file>`, `/sprite/<file>` |
 | **[Archive](#archive-badge-endpoint)** | `/archive/count` |
 | **[Settings](#settings-file)** | `/settings` |
@@ -180,6 +180,27 @@ curl -X POST http://<pi-ip>:5005/system/restart
 ```
 
 Restarts the `security-cam` systemd service (Flask API + Astro dashboard). The response is sent before the restart begins (1-second delay). Returns `{"message": "Restarting services..."}`.
+
+### Check for updates
+
+```bash
+curl http://<pi-ip>:5005/system/update/check
+```
+
+Runs `git fetch` and compares the local HEAD against the remote branch. Returns:
+
+```json
+{
+  "available": true,
+  "branch": "main",
+  "local_commit": "93a56b1a",
+  "remote_commit": "f2e1a990",
+  "commits_behind": 3,
+  "summary": "f2e1a99 feat: add update check\n8b3c012 fix: sensor timeout\n..."
+}
+```
+
+When no updates are available, `available` is `false` and `commits_behind` is `0`. If the fetch times out (no internet), returns `{"available": false, "error": "Timed out - check internet connection"}`. The fetch has a 20-second timeout.
 
 ### Reboot device
 

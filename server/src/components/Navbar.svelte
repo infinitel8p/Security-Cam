@@ -3,6 +3,7 @@
   import { initLocale, t } from "../i18n";
   import { initArchiveBadge, subscribe as subscribeBadge } from "../lib/archive-badge";
   import { initSystemAlerts, subscribe as subscribeAlert, type AlertLevel } from "../lib/system-alert";
+  import { initUpdateBadge, subscribe as subscribeUpdate } from "../lib/update-badge";
   import ThemeToggle from "./ThemeToggle.svelte";
   import Icon from "./Icon.svelte";
   import layoutGridIcon from "../icons/layout-grid.svg?raw";
@@ -15,8 +16,10 @@
 
   let badgeCount = $state(0);
   let alertLevel: AlertLevel = $state("ok");
+  let updateAvailable = $state(false);
   let unsubBadge: (() => void) | null = null;
   let unsubAlert: (() => void) | null = null;
+  let unsubUpdate: (() => void) | null = null;
 
   // Baked in at build time via vite.define - no fetch, no flash
   const gitBranch = typeof __GIT_BRANCH__ !== "undefined" ? __GIT_BRANCH__ : "";
@@ -26,13 +29,16 @@
     initLocale();
     initArchiveBadge();
     initSystemAlerts();
+    initUpdateBadge();
     unsubBadge = subscribeBadge((count) => { badgeCount = count; });
     unsubAlert = subscribeAlert((state) => { alertLevel = state.overall; });
+    unsubUpdate = subscribeUpdate((state) => { updateAvailable = state.available; });
   });
 
   onDestroy(() => {
     unsubBadge?.();
     unsubAlert?.();
+    unsubUpdate?.();
   });
 
   const path = $derived(typeof window !== "undefined" ? window.location.pathname : "/");
@@ -61,7 +67,7 @@
     <div>
       <span class="text-[0.8125rem] font-bold tracking-tight text-text-primary">Security-Cam</span>
       <p class="text-[0.625rem] leading-none font-medium font-mono tracking-widest text-text-muted">
-        v.2026.04.04.9
+        v.2026.04.04.10
       </p>
       {#if gitBranch}
         <p class="mt-0.5 text-[0.5625rem] leading-none font-mono text-text-muted/60 truncate max-w-[7.5rem]" title="{gitBranch}{gitCommit ? ' @ ' + gitCommit : ''}">
@@ -94,6 +100,9 @@
           {/if}
           {#if href === "/" && alertLevel !== "ok" && !active}
             <span class="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full {alertLevel === 'critical' ? 'bg-status-critical animate-pulse' : 'bg-status-warning'}"></span>
+          {/if}
+          {#if href === "/settings" && updateAvailable && !active}
+            <span class="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-accent"></span>
           {/if}
         </span>
         {t(labelKey)}

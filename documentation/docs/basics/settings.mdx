@@ -324,6 +324,16 @@ The enable/disable toggle takes effect immediately without a separate save.
 
 ## System {#system}
 
+### Software update
+
+The dashboard automatically checks for updates every 12 hours in the background. When updates are available, a blue dot appears on the **Settings** icon in the navigation bar. You can also check manually by clicking **Check for updates**.
+
+If updates are available, a summary of new commits is shown with the number of commits behind. Click **Update & restart** to apply - this restarts the `security-cam` service, which runs the update script (`setup/update.sh`) automatically before starting. The update script pulls new code, installs dependencies if needed, and rebuilds the frontend.
+
+:::note
+The Pi needs an internet connection to check for and download updates. If the check times out, verify the Pi can reach GitHub. The last check result is cached locally so the badge persists across page reloads.
+:::
+
 ### Restart services
 
 Restarts the Flask API and Astro dashboard without rebooting the Pi. The connection drops briefly (~10 seconds) while systemd restarts the `security-cam` service. Equivalent to running `sudo systemctl restart security-cam` via SSH.
@@ -332,7 +342,7 @@ Restarts the Flask API and Astro dashboard without rebooting the Pi. The connect
 
 Performs a full Raspberry Pi reboot. May take a few minutes if `update.sh` detects code changes and triggers a frontend rebuild. Equivalent to `sudo systemctl reboot` via SSH.
 
-Both actions require a confirmation click (auto-cancels after 5 seconds) and log an event to the activity timeline.
+All three actions require a confirmation click (auto-cancels after 5 seconds). Restart and reboot log an event to the activity timeline.
 
 ---
 
