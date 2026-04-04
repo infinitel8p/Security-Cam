@@ -144,9 +144,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 100svh;
+    position: fixed;
+    inset: 0;
     background: var(--color-surface-base);
-    position: relative;
+    z-index: 50;
     overflow: hidden;
   }
 
