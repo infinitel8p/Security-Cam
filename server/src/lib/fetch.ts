@@ -12,6 +12,8 @@
  *   const res = await apiFetch(url, { method: "POST", body: ..., timeout: 15_000 });
  */
 
+import { getToken, clearToken } from "./auth";
+
 const DEFAULT_TIMEOUT = 8_000;
 
 export async function apiFetch(
@@ -21,6 +23,16 @@ export async function apiFetch(
   const { timeout = DEFAULT_TIMEOUT, retries, ...fetchInit } = init ?? {};
   const method = (fetchInit.method ?? "GET").toUpperCase();
   const maxRetries = retries ?? (method === "GET" ? 1 : 0);
+
+  // Inject auth token into every request
+  const token = getToken();
+  if (token) {
+    const headers = new Headers(fetchInit.headers);
+    if (!headers.has("Authorization")) {
+      headers.set("Authorization", `Bearer ${token}`);
+    }
+    fetchInit.headers = headers;
+  }
 
   let lastError: unknown;
 
@@ -35,6 +47,14 @@ export async function apiFetch(
     try {
       const res = await fetch(input, { ...fetchInit, signal: controller.signal });
       clearTimeout(timer);
+
+      // Token rejected - clear and force re-login
+      if (res.status === 401) {
+        clearToken();
+        window.location.reload();
+        throw new Error("Unauthorized");
+      }
+
       return res;
     } catch (err) {
       clearTimeout(timer);

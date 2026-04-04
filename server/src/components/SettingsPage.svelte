@@ -13,6 +13,7 @@
   import Icon from "./Icon.svelte";
   import ToggleSpring from "./ToggleSpring.svelte";
   import deviceDesktopIcon from "../icons/device-desktop.svg?raw";
+  import shieldIcon from "../icons/shield.svg?raw";
   import sunIcon from "../icons/sun.svg?raw";
   import moonIcon from "../icons/moon.svg?raw";
   import { initLocale, getLocale, setLocale, type Locale } from "../i18n";
@@ -171,6 +172,9 @@
       scanLinesEnabled = settings.ScanLines !== false;
       const cp = settings.CaptivePortal ?? {};
       captivePortalEnabled = cp.enabled !== false;
+      const au = settings.Auth ?? {};
+      authEnabled = au.enabled ?? false;
+      authToken = au.token ?? "";
       const sl = settings.StorageLimit ?? {};
       storageLimitEnabled = sl.enabled ?? false;
       storageLimitPercent = sl.max_percent ?? 85;
@@ -448,6 +452,112 @@
         },
       },
     ).finally(() => { captivePortalSaving = false; });
+  }
+
+  // --- Auth settings ---
+  let authEnabled = $state(false);
+  let authToken = $state("");
+  let authSaving = false;
+  let regenConfirm = $state(false);
+  let regenTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  // Password change
+  let currentPassword = $state("");
+  let newPassword = $state("");
+  let confirmPassword = $state("");
+  let passwordSaving = $state(false);
+
+  function toggleAuth() {
+    if (authSaving) return;
+    authSaving = true;
+    authEnabled = !authEnabled;
+    const enabled = authEnabled;
+
+    toast.promise(
+      (async () => {
+        const res = await apiFetch(`${getBackendUrl()}/settings`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ Auth: { enabled } }),
+        });
+        if (!res.ok) throw new Error();
+        // Reload settings to get the token (generated at startup)
+        if (enabled) {
+          const sr = await apiFetch(`${getBackendUrl()}/settings`);
+          if (sr.ok) {
+            const s = await sr.json();
+            authToken = s.Auth?.token ?? "";
+          }
+        }
+        return enabled;
+      })(),
+      {
+        loading: t("status.saving"),
+        success: (on) => on ? t("toast.authEnabled") : t("toast.authDisabled"),
+        error: () => {
+          authEnabled = !enabled;
+          return t("toast.saveFailed");
+        },
+      },
+    ).finally(() => { authSaving = false; });
+  }
+
+  async function copyToken() {
+    try {
+      await navigator.clipboard.writeText(authToken);
+      toast(t("toast.tokenCopied"));
+    } catch { /* clipboard not available */ }
+  }
+
+  function confirmRegen() {
+    regenConfirm = true;
+    if (regenTimeout) clearTimeout(regenTimeout);
+    regenTimeout = setTimeout(() => { regenConfirm = false; }, 5000);
+  }
+
+  async function doRegen() {
+    regenConfirm = false;
+    try {
+      const res = await apiFetch(`${getBackendUrl()}/auth/regenerate`, { method: "POST" });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      authToken = data.token;
+      toast(t("toast.tokenRegenerated"));
+    } catch {
+      toast.error(t("toast.saveFailed"));
+    }
+  }
+
+  async function changePassword() {
+    if (passwordSaving) return;
+    if (newPassword !== confirmPassword) {
+      toast.error(t("toast.passwordMismatch"));
+      return;
+    }
+    if (newPassword.length < 4) {
+      toast.error(t("toast.passwordTooShort"));
+      return;
+    }
+    passwordSaving = true;
+    try {
+      const res = await apiFetch(`${getBackendUrl()}/auth/set-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ current: currentPassword, new: newPassword }),
+      });
+      if (res.ok) {
+        toast.success(t("toast.passwordChanged"));
+        currentPassword = "";
+        newPassword = "";
+        confirmPassword = "";
+      } else {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.error || t("toast.saveFailed"));
+      }
+    } catch {
+      toast.error(t("toast.saveFailed"));
+    }
+    passwordSaving = false;
   }
 
   let scanLinesSaving = false;
@@ -886,6 +996,104 @@
           <h2 class="text-xs font-semibold uppercase tracking-widest text-text-secondary">{t("section.triggerSensors")}</h2>
         </div>
         <SensorSettings />
+      </section>
+
+      <!-- Security -->
+      <section id="settings-security" class="scroll-mt-16 lg:scroll-mt-8 mt-12 space-y-3">
+        <div class="flex items-center gap-2.5">
+          <span class="h-3.5 w-0.5 rounded-full bg-accent"></span>
+          <h2 class="text-xs font-semibold uppercase tracking-widest text-text-secondary">{t("section.security")}</h2>
+        </div>
+        <div class="card overflow-hidden">
+          <!-- Auth toggle with shield icon -->
+          <div class="px-4 py-4 sm:px-5 sm:py-5">
+            <div class="flex items-center justify-between gap-4">
+              <div class="flex items-start gap-3">
+                <div class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl {authEnabled ? 'bg-accent-muted border border-accent-strong text-accent' : 'bg-surface-elevated border border-border-default text-text-muted'} transition-colors duration-300">
+                  <Icon icon={shieldIcon} class="h-[18px] w-[18px]" />
+                </div>
+                <div>
+                  <p class="text-sm font-medium text-text-primary">{t("label.authEnabled")}</p>
+                  <p class="mt-0.5 text-xs text-text-muted">{t("help.authEnabled")}</p>
+                </div>
+              </div>
+              <ToggleSpring checked={authEnabled} onToggle={toggleAuth} label={t("label.authEnabled")} />
+            </div>
+          </div>
+          <!-- Password change (visible when auth enabled) -->
+          {#if authEnabled}
+            <div class="border-t border-border-subtle px-4 py-4 sm:px-5 sm:py-5 space-y-3">
+              <div>
+                <p class="text-sm font-medium text-text-primary">{t("label.changePassword")}</p>
+                <p class="mt-0.5 text-xs text-text-muted">{t("help.changePassword")}</p>
+              </div>
+              <div class="space-y-2">
+                <input
+                  type="password"
+                  bind:value={currentPassword}
+                  placeholder={t("label.currentPassword")}
+                  autocomplete="current-password"
+                  aria-label={t("label.currentPassword")}
+                  class="w-full rounded-lg bg-surface-elevated border border-border-subtle px-3.5 py-2.5 text-sm text-text-primary placeholder:text-text-muted/70 outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent-muted"
+                />
+                <input
+                  type="password"
+                  bind:value={newPassword}
+                  placeholder={t("label.newPassword")}
+                  autocomplete="new-password"
+                  aria-label={t("label.newPassword")}
+                  class="w-full rounded-lg bg-surface-elevated border border-border-subtle px-3.5 py-2.5 text-sm text-text-primary placeholder:text-text-muted/70 outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent-muted"
+                />
+                <input
+                  type="password"
+                  bind:value={confirmPassword}
+                  placeholder={t("label.confirmPassword")}
+                  autocomplete="new-password"
+                  aria-label={t("label.confirmPassword")}
+                  class="w-full rounded-lg bg-surface-elevated border border-border-subtle px-3.5 py-2.5 text-sm text-text-primary placeholder:text-text-muted/70 outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent-muted"
+                />
+              </div>
+              <button
+                onclick={changePassword}
+                disabled={passwordSaving || !currentPassword || !newPassword || !confirmPassword}
+                class="btn-press rounded-lg border border-border-default px-3.5 py-2 text-xs font-semibold text-text-secondary transition-colors hover:border-border-strong hover:text-text-primary disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {t("btn.changePassword")}
+              </button>
+            </div>
+          {/if}
+          <!-- API token display (visible when auth enabled and token exists) -->
+          {#if authEnabled && authToken}
+            <div class="border-t border-border-subtle px-4 py-4 sm:px-5 sm:py-5 space-y-3">
+              <div>
+                <p class="text-sm font-medium text-text-primary">{t("label.apiToken")}</p>
+                <p class="mt-0.5 text-xs text-text-muted">{t("help.apiToken")}</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="flex-1 min-w-0 relative group">
+                  <code class="block w-full truncate rounded-lg bg-surface-elevated border border-border-subtle px-3.5 py-2.5 text-xs font-mono text-text-secondary select-all tracking-wide">{authToken}</code>
+                </div>
+                <button
+                  onclick={copyToken}
+                  class="btn-press shrink-0 rounded-lg border border-border-default px-3.5 py-2.5 text-xs font-semibold text-text-secondary transition-colors hover:border-border-strong hover:text-text-primary"
+                >
+                  {t("btn.copyToken")}
+                </button>
+              </div>
+              <div class="flex items-center justify-between pt-1">
+                <p class="text-xs text-text-muted">{t("help.regenerateToken")}</p>
+                {#if regenConfirm}
+                  <div class="flex gap-2 animate-slide-down">
+                    <button onclick={() => { regenConfirm = false; }} class="btn-press rounded-lg border border-border-default px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text-secondary transition-colors">{t("btn.cancel")}</button>
+                    <button onclick={doRegen} class="btn-press rounded-lg bg-status-warning px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-status-warning/90">{t("btn.regenerateToken")}</button>
+                  </div>
+                {:else}
+                  <button onclick={confirmRegen} class="btn-press shrink-0 rounded-lg border border-border-default px-3 py-1.5 text-xs font-semibold text-text-secondary transition-colors hover:border-border-strong hover:text-text-primary">{t("btn.regenerateToken")}</button>
+                {/if}
+              </div>
+            </div>
+          {/if}
+        </div>
       </section>
 
       <!-- System -->
