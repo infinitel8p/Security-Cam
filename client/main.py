@@ -20,6 +20,7 @@ from modules import sse
 from modules import log_reader
 from modules import timelapse_manager
 from modules import captive_portal_helpers
+from modules import auth
 from modules.sensors import available_types as sensor_available_types
 
 # --- Logging setup ---
@@ -49,8 +50,10 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 
 
 @app.before_request
-def log_request():
+def log_and_auth():
     log.info("%s %s (from %s)", request.method, request.path, request.remote_addr)
+    if not auth.check_request():
+        return jsonify({"error": "Unauthorized"}), 401
 
 
 @app.after_request
@@ -66,6 +69,59 @@ def events():
     return Response(sse.stream(), mimetype='text/event-stream',
                     headers={'Cache-Control': 'no-cache',
                              'X-Accel-Buffering': 'no'})
+
+
+auth.ensure_token()
+
+
+# --- Auth endpoints (exempt from middleware) ---
+
+
+@app.route('/auth/status', methods=['GET'])
+def auth_status():
+    """Check whether auth is enabled, and optionally validate a provided token."""
+    enabled = auth.is_enabled()
+    token = request.headers.get("Authorization", "").removeprefix("Bearer ").strip()
+    if not token:
+        token = request.args.get("token", "")
+    valid = auth.validate_token(token) if token else None
+    return jsonify({"enabled": enabled, "valid": valid})
+
+
+@app.route('/auth/validate', methods=['POST'])
+def auth_validate():
+    """Validate a password and return the API token on success."""
+    password = (request.json or {}).get("password", "")
+    if auth.validate_password(password):
+        return jsonify({"valid": True, "token": auth.get_token()})
+    return jsonify({"valid": False})
+
+
+@app.route('/auth/regenerate', methods=['POST'])
+def auth_regenerate():
+    """Generate a new API token. Invalidates the old one."""
+    new_token = auth.regenerate_token()
+    return jsonify({"token": new_token})
+
+
+@app.route('/auth/set-password', methods=['POST'])
+def auth_set_password():
+    """Change the dashboard password. Body: {"current": "...", "new": "..."}"""
+    body = request.json or {}
+    current = body.get("current", "")
+    new_password = body.get("new", "")
+
+    if not new_password or len(new_password) < 4:
+        return jsonify({"error": "Password must be at least 4 characters"}), 400
+
+    if len(new_password) > 128:
+        return jsonify({"error": "Password must be at most 128 characters"}), 400
+
+    if not auth.validate_password(current):
+        return jsonify({"error": "Current password is incorrect"}), 403
+
+    auth.set_password(new_password)
+    return jsonify({"message": "Password updated"})
 
 
 health_logger.start()
@@ -195,6 +251,8 @@ def settings():
                 return jsonify({"message": "Invalid directory or insufficient permissions"}), 400
         else:
             settings_helpers.update_settings(new_settings)
+            if "Auth" in new_settings:
+                auth.refresh()
             return jsonify({"message": "Settings updated"})
 
 
