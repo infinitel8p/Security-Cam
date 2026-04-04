@@ -112,14 +112,6 @@ export function initUpdateBadge(): void {
   _intervalId = setInterval(() => { checkNow(); }, CHECK_INTERVAL);
 }
 
-export function isChecking(): boolean {
-  return _checking;
-}
-
-export function getState(): UpdateState {
-  return _state;
-}
-
 export function subscribe(fn: (state: UpdateState) => void): () => void {
   _listeners.push(fn);
   fn(_state);

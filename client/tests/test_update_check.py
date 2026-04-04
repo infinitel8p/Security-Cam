@@ -65,7 +65,6 @@ def test_remote_branch_not_found(client):
     def side_effect(cmd, **kwargs):
         m = MagicMock()
         m.stderr = ""
-        args = cmd[1] if len(cmd) > 1 else ""
         if "fetch" in cmd:
             m.stdout, m.returncode = "", 0
         elif cmd[-1] == "HEAD" and "--abbrev-ref" in cmd:
