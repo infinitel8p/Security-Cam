@@ -10,7 +10,7 @@ import TabItem from '@theme/TabItem';
 
 # Settings
 
-The **Settings** page is the central configuration hub for the security camera. It's organized into five scrollable sections with a sidebar (desktop) or tab bar (mobile) for quick navigation.
+The **Settings** page is the central configuration hub for the security camera. It's organized into six scrollable sections with a sidebar (desktop) or tab bar (mobile) for quick navigation.
 
 ```
 http://<raspberry-pi-ip>:3000/settings
@@ -47,6 +47,10 @@ Changing the language reloads the page to apply translations everywhere. On firs
 ### Scan lines
 
 A cosmetic CRT-style scan line overlay on the live video feed. Enabled by default. Toggle it off for a clean image. Saved to the server.
+
+### Captive portal
+
+Controls whether the AP captive portal popup appears when devices connect to the Pi's WiFi access point. Enabled by default. When disabled, the iptables redirect rule is removed and devices no longer see the popup. Only relevant when the Pi is running as an access point (see [WiFi setup](../setup/wifi)).
 
 ---
 
@@ -537,6 +541,20 @@ This tests the full pipeline (trigger, record, hold, stop) without hardware.
 4. Status badge changes to **Armed**
 
 The enable/disable toggle takes effect immediately without a separate save.
+
+---
+
+## System {#system}
+
+### Restart services
+
+Restarts the Flask API and Astro dashboard without rebooting the Pi. The connection drops briefly (~10 seconds) while systemd restarts the `security-cam` service. Equivalent to running `sudo systemctl restart security-cam` via SSH.
+
+### Reboot device
+
+Performs a full Raspberry Pi reboot. May take a few minutes if `update.sh` detects code changes and triggers a frontend rebuild. Equivalent to `sudo systemctl reboot` via SSH.
+
+Both actions require a confirmation click (auto-cancels after 5 seconds) and log an event to the activity timeline.
 
 ---
 

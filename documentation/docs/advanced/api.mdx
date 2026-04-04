@@ -19,7 +19,7 @@ Replace `<pi-ip>` with your Raspberry Pi's IP address in the examples below.
 | **[Storage](#storage-endpoints)** | `/storage/status`, `/storage/configure`, `/storage/cleanup` |
 | **[Timelapse](#timelapse-endpoints)** | `/timelapse/status`, `/timelapse/start`, `/timelapse/stop` |
 | **[Logs](#log-endpoints)** | `/logs`, `/logs/scripts`, `/logs/mediamtx` |
-| **[System](#system-alert-state)** | `/system/alert`, `/system_info`, `/deploy_info` |
+| **[System](#system-endpoints)** | `/system/alert`, `/system_info`, `/system/restart`, `/system/reboot`, `/captive-portal` |
 | **[Media](#snapshot-endpoint)** | `/snapshot`, `/thumbnail/<file>`, `/sprite/<file>` |
 | **[Archive](#archive-badge-endpoint)** | `/archive/count` |
 | **[Settings](#settings-file)** | `/settings` |
@@ -171,7 +171,37 @@ Force an immediate cleanup regardless of schedule:
 curl -X POST http://<pi-ip>:5005/storage/cleanup
 ```
 
-## System alert state
+## System endpoints
+
+### Restart services
+
+```bash
+curl -X POST http://<pi-ip>:5005/system/restart
+```
+
+Restarts the `security-cam` systemd service (Flask API + Astro dashboard). The response is sent before the restart begins (1-second delay). Returns `{"message": "Restarting services..."}`.
+
+### Reboot device
+
+```bash
+curl -X POST http://<pi-ip>:5005/system/reboot
+```
+
+Reboots the Raspberry Pi. The response is sent before the reboot begins (2-second delay). Returns `{"message": "Rebooting..."}`.
+
+### Captive portal
+
+```bash
+# Get status
+curl http://<pi-ip>:5005/captive-portal
+
+# Enable or disable
+curl -X POST http://<pi-ip>:5005/captive-portal \
+  -H 'Content-Type: application/json' \
+  -d '{"enabled": false}'
+```
+
+GET returns `{"enabled": true, "active": true}` where `enabled` is the saved setting and `active` reflects whether the iptables rule is currently present. POST toggles the setting and the iptables PREROUTING rule that redirects port 80 to the dashboard.
 
 ### Get current alert levels
 
@@ -377,6 +407,9 @@ The sensor and storage configuration is stored in `client/settings/settings.json
   "StorageLimit": {
     "enabled": false,
     "max_percent": 85
+  },
+  "CaptivePortal": {
+    "enabled": true
   }
 }
 ```

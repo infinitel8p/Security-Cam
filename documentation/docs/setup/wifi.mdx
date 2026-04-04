@@ -267,7 +267,13 @@ address=/nmcheck.gnome.org/192.168.4.1
 sudo iptables -t nat -A PREROUTING -i ap0 -p tcp --dport 80 -j REDIRECT --to-port 3000
 ```
 
-If you ran `setup_ap.sh`, both are already configured. To disable the captive portal, remove the `address=` lines from the dnsmasq config and the iptables PREROUTING rule, then restart dnsmasq.
+If you ran `setup_ap.sh`, both are already configured.
+
+### Enabling / disabling
+
+The captive portal can be toggled from the dashboard under **Settings > Appearance > Captive portal**. When disabled, the iptables redirect rule is removed so port 80 requests no longer reach the dashboard and devices stop showing the popup.
+
+To disable manually instead, remove the `address=` lines from the dnsmasq config and the iptables PREROUTING rule, then restart dnsmasq.
 
 ## Verify the setup
 

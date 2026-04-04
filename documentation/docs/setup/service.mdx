@@ -65,6 +65,15 @@ sudo systemctl status security-cam --no-pager
 | `mediamtx` | Camera stream (WebRTC/RTSP) | 8889 / 8554 |
 | `security-cam` | Flask API + Astro dashboard | 5005 / 3000 |
 
+## Restarting from the dashboard
+
+You can restart or reboot directly from the web interface under **Settings > System**:
+
+- **Restart services** - restarts the Flask API and Astro dashboard without rebooting the Pi (~10 seconds downtime)
+- **Reboot device** - full system reboot (may take a few minutes if `update.sh` triggers a rebuild)
+
+Both require a confirmation click and log an event to the activity timeline.
+
 ## Running manually (without the service)
 
 If you prefer to run without systemd (e.g. for debugging):
