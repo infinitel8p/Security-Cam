@@ -1,7 +1,7 @@
 {
   "name": "server",
   "type": "module",
-  "version": "2026.04.04.6",
+  "version": "2026.04.04.7",
   "engines": {
     "node": ">=22.12.0"
   },
@@ -23,7 +23,7 @@
     "svelte": "^5.55.1",
     "svelte-5-french-toast": "^2.0.6",
     "tailwindcss": "^4.2.2",
-    "typescript": "^6.0.2"
+    "typescript": "^5.9.3"
   },
   "devDependencies": {
     "jsdom": "^29.0.1",
