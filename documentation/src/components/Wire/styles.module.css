@@ -1,0 +1,153 @@
+.wireGroup {
+  border-radius: 8px;
+  border: 1px solid var(--ifm-toc-border-color);
+  overflow: hidden;
+  margin: 1rem 0;
+}
+
+.wireRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.wireRow + .wireRow {
+  border-top: 1px solid var(--ifm-toc-border-color);
+}
+
+/* Source dot - glows when pulse departs */
+.wireDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: srcGlow 2s ease-in-out infinite;
+}
+
+.wireRow:nth-child(2) .wireDot { animation-delay: 0.6s; }
+.wireRow:nth-child(3) .wireDot { animation-delay: 1.2s; }
+
+@keyframes srcGlow {
+  0%, 5% { opacity: 0.5; transform: scale(1); }
+  12% { opacity: 1; transform: scale(1.4); }
+  25% { opacity: 0.5; transform: scale(1); }
+  100% { opacity: 0.5; transform: scale(1); }
+}
+
+/* Pin name */
+.wirePin {
+  min-width: 5rem;
+  font-size: 0.88rem;
+  flex-shrink: 0;
+}
+
+/* Wire line - contains track + pulse + arrow, clipped */
+.wireLine {
+  flex: 1;
+  height: 2px;
+  position: relative;
+  min-width: 40px;
+  overflow: hidden;
+  border-radius: 1px;
+}
+
+/* Static track */
+.wireTrack {
+  position: absolute;
+  inset: 0;
+  opacity: 0.2;
+}
+
+/* Traveling pulse */
+.wirePulse {
+  position: absolute;
+  top: -1px;
+  height: 4px;
+  width: 30%;
+  border-radius: 2px;
+  opacity: 0.8;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% { left: -30%; opacity: 0; }
+  10% { opacity: 0.9; }
+  90% { opacity: 0.9; }
+  100% { left: 100%; opacity: 0; }
+}
+
+/* Stagger per row */
+.wireRow:nth-child(2) .wirePulse { animation-delay: 0.6s; }
+.wireRow:nth-child(3) .wirePulse { animation-delay: 1.2s; }
+
+/* Arrow head */
+.wireArrowHead {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-left: 6px solid;
+  opacity: 0.5;
+}
+
+/* Destination dot - glows when pulse arrives */
+.destDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  opacity: 0.4;
+  animation: destGlow 2s ease-in-out infinite;
+}
+
+.wireRow:nth-child(2) .destDot { animation-delay: 0.6s; }
+.wireRow:nth-child(3) .destDot { animation-delay: 1.2s; }
+
+@keyframes destGlow {
+  0%, 70% { opacity: 0.3; transform: scale(1); }
+  85% { opacity: 1; transform: scale(1.4); }
+  100% { opacity: 0.3; transform: scale(1); }
+}
+
+/* Destination label */
+.wireDest {
+  font-size: 0.88rem;
+  font-weight: 600;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+/* Pin number badge */
+.destPin {
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  background: var(--ifm-toc-border-color);
+  color: var(--ifm-font-color-secondary);
+}
+
+[data-theme="dark"] .destPin {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .wirePulse {
+    animation: none;
+    left: 35%;
+    opacity: 0.5;
+  }
+  .wireDot,
+  .destDot {
+    animation: none;
+    opacity: 0.5;
+  }
+}

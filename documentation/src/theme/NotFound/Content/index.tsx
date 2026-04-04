@@ -1,11 +1,12 @@
 import {type ReactNode} from 'react';
 import Link from '@docusaurus/Link';
+import useBaseUrl from '@docusaurus/useBaseUrl';
 import styles from '../styles.module.css';
 
 export default function NotFoundContent(): ReactNode {
   return (
     <div className={styles.container}>
-      <div className={styles.camera}>
+      <div className={styles.camera} aria-hidden="true">
         <div className={styles.cameraBody}>
           <div className={styles.lens}>
             <div className={styles.lensInner}>
@@ -19,7 +20,7 @@ export default function NotFoundContent(): ReactNode {
       <p className={styles.subtitle}>
         Nothing to see here - this area is not under surveillance.
       </p>
-      <Link className="button button--primary button--lg" to="/">
+      <Link className="button button--primary button--lg" to={useBaseUrl('/')}>
         Back to safety
       </Link>
     </div>

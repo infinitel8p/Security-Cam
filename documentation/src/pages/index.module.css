@@ -7,23 +7,38 @@
 	text-align: center;
 	position: relative;
 	overflow: hidden;
+	/* Dark hero matching the dashboard aesthetic */
+	--ifm-hero-background-color: #060810;
+	--ifm-hero-text-color: #e2e6f0;
+	background: #060810;
+	color: #e2e6f0;
 }
 
-/* Accent glow behind the hero */
+[data-theme="light"] .heroBanner {
+	--ifm-hero-background-color: var(--ifm-color-primary);
+	--ifm-hero-text-color: #fff;
+	background: var(--ifm-color-primary);
+	color: #fff;
+}
+
+/* Dark mode: subtle grid texture + accent glow */
 .heroBanner::before {
 	content: '';
 	position: absolute;
-	top: 40%;
-	left: 50%;
-	width: 800px;
-	height: 500px;
-	transform: translate(-50%, -50%);
-	background: radial-gradient(
-		ellipse at center,
-		rgba(255, 255, 255, 0.08) 0%,
-		transparent 60%
-	);
+	inset: 0;
+	background-image:
+		radial-gradient(circle at 50% 40%, rgba(77, 148, 255, 0.08) 0%, transparent 60%),
+		linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+	background-size: 100% 100%, 48px 48px, 48px 48px;
 	pointer-events: none;
+}
+
+/* Light mode: just the glow, no grid */
+[data-theme="light"] .heroBanner::before {
+	background-image:
+		radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 0.12) 0%, transparent 60%);
+	background-size: 100% 100%;
 }
 
 /* --- Hero entrance choreography --- */
@@ -47,11 +62,16 @@
 
 .heroSubtitle {
 	font-size: 1.25rem;
-	opacity: 0;
 	max-width: 540px;
 	margin-left: auto;
 	margin-right: auto;
+	color: #8490ad;
+	opacity: 0;
 	animation: heroFadeIn 0.6s cubic-bezier(0.25, 1, 0.5, 1) 0.1s both;
+}
+
+[data-theme="light"] .heroSubtitle {
+	color: rgba(255, 255, 255, 0.85);
 }
 
 .heroCta {
@@ -83,9 +103,23 @@
 		box-shadow 0.2s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
+/* Dark hero: blue CTA button */
+.buttons :global(.button--secondary) {
+	--ifm-button-background-color: var(--ifm-color-primary);
+	--ifm-button-border-color: var(--ifm-color-primary);
+	color: #fff;
+}
+
+/* Light hero: white CTA button on blue bg */
+[data-theme="light"] .buttons :global(.button--secondary) {
+	--ifm-button-background-color: #fff;
+	--ifm-button-border-color: #fff;
+	color: var(--ifm-color-primary);
+}
+
 .buttons :global(.button:hover) {
 	transform: translateY(-2px);
-	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
 .buttons :global(.button:active) {

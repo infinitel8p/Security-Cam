@@ -1,0 +1,494 @@
+/* Type scale */
+.container {
+  --pin-text-sm: 0.7rem;
+  --pin-text-base: 0.78rem;
+  --pin-text-title: 0.88rem;
+  margin: 1rem 0 1.5rem;
+}
+
+/* --- Sensor dropdown --- */
+.dropdown {
+  position: relative;
+  max-width: 420px;
+  margin: 0 auto 1rem;
+}
+
+.dropdownTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: var(--pin-text-base);
+  font-family: inherit;
+  color: var(--ifm-font-color-base);
+  background: var(--ifm-background-surface-color);
+  border: 1px solid var(--ifm-toc-border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+  text-align: left;
+}
+
+.dropdownTrigger:hover {
+  border-color: var(--ifm-color-primary);
+}
+
+.dropdownTrigger:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+
+.dropdownArrow {
+  font-size: 0.7rem;
+  color: var(--ifm-font-color-secondary);
+  transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.dropdownArrow.open {
+  transform: rotate(180deg);
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 0.25rem;
+  list-style: none;
+  background: var(--ifm-background-surface-color);
+  border: 1px solid var(--ifm-toc-border-color);
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  z-index: 10;
+  max-height: 240px;
+  overflow-y: auto;
+  animation: dropdownIn 0.15s cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+
+[data-theme="dark"] .dropdownMenu {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes dropdownIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdownItem {
+  padding: 0.4rem 0.6rem;
+  font-size: var(--pin-text-base);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+
+.dropdownItem:hover {
+  background: color-mix(in srgb, var(--ifm-color-primary) 10%, transparent);
+}
+
+.dropdownItem.selected {
+  color: var(--ifm-color-primary);
+  font-weight: 600;
+}
+
+/* ============================================
+   BOARD
+   ============================================ */
+.boardOuter {
+  display: flex;
+  justify-content: center;
+}
+
+.board {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  padding: 1.25rem 1rem 1rem;
+  border-radius: 14px;
+  overflow: hidden;
+
+  /* Dark surface with faint blue tint */
+  background:
+    linear-gradient(170deg, rgba(37, 99, 235, 0.06) 0%, rgba(30, 64, 175, 0.03) 100%),
+    linear-gradient(180deg, #161b26 0%, #111620 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    0 8px 32px rgba(0, 0, 0, 0.25),
+    0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Glowing border when a sensor is selected */
+.board.hasSelection {
+  border-color: color-mix(in srgb, var(--ifm-color-primary) 40%, transparent);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    0 8px 32px rgba(0, 0, 0, 0.25),
+    0 0 20px color-mix(in srgb, var(--ifm-color-primary) 12%, transparent),
+    0 0 40px color-mix(in srgb, var(--ifm-color-primary) 6%, transparent);
+}
+
+[data-theme="light"] .board {
+  background:
+    linear-gradient(170deg, rgba(37, 99, 235, 0.04) 0%, rgba(30, 64, 175, 0.02) 100%),
+    linear-gradient(180deg, #f5f7fa 0%, #edf0f5 100%);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.8) inset,
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .board.hasSelection {
+  border-color: color-mix(in srgb, var(--ifm-color-primary) 30%, transparent);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.8) inset,
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 0 20px color-mix(in srgb, var(--ifm-color-primary) 10%, transparent),
+    0 0 40px color-mix(in srgb, var(--ifm-color-primary) 5%, transparent);
+}
+
+/* --- Corner screw holes --- */
+.screw {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 0, 0, 0.3) 28%, rgba(180, 160, 120, 0.5) 30%, rgba(180, 160, 120, 0.5) 46%, transparent 48%);
+  z-index: 2;
+}
+
+.screwTL { top: 8px; left: 8px; }
+.screwTR { top: 8px; right: 8px; }
+.screwBL { bottom: 8px; left: 8px; }
+.screwBR { bottom: 8px; right: 8px; }
+
+/* --- Subtle grid texture --- */
+.traces {
+  position: absolute;
+  inset: 0;
+  opacity: 0.4;
+  background-image:
+    repeating-linear-gradient(
+      0deg, transparent, transparent 27px,
+      rgba(255, 255, 255, 0.02) 27px, rgba(255, 255, 255, 0.02) 28px
+    ),
+    repeating-linear-gradient(
+      90deg, transparent, transparent 27px,
+      rgba(255, 255, 255, 0.02) 27px, rgba(255, 255, 255, 0.02) 28px
+    );
+  pointer-events: none;
+}
+
+[data-theme="light"] .traces {
+  background-image:
+    repeating-linear-gradient(
+      0deg, transparent, transparent 27px,
+      rgba(0, 0, 0, 0.02) 27px, rgba(0, 0, 0, 0.02) 28px
+    ),
+    repeating-linear-gradient(
+      90deg, transparent, transparent 27px,
+      rgba(0, 0, 0, 0.02) 27px, rgba(0, 0, 0, 0.02) 28px
+    );
+}
+
+/* --- Pin header area --- */
+.pinHeader {
+  position: relative;
+  z-index: 1;
+}
+
+/* --- Orientation hint --- */
+.orientHint {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  margin-top: 0.75rem;
+  font-size: var(--pin-text-sm);
+  font-family: var(--ifm-font-family-monospace);
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+[data-theme="light"] .orientHint {
+  color: rgba(0, 0, 0, 0.3);
+}
+
+.orientArrow {
+  display: inline-block;
+  animation: arrowPulse 2s ease-in-out infinite;
+}
+
+@keyframes arrowPulse {
+  0%, 100% { transform: translateX(0); opacity: 0.4; }
+  50% { transform: translateX(-3px); opacity: 0.8; }
+}
+
+/* --- Pin rows --- */
+.pinRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0;
+}
+
+.pin {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 2px 0.3rem;
+  flex: 1;
+  min-width: 0;
+  border-radius: 3px;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pin.left {
+  justify-content: flex-end;
+  text-align: right;
+  border-radius: 3px 20px 20px 3px;
+}
+
+.pin.right {
+  justify-content: flex-start;
+  text-align: left;
+  border-radius: 20px 3px 3px 20px;
+}
+
+.pin.highlighted {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="light"] .pin.highlighted {
+  background: rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 12px rgba(37, 99, 235, 0.08);
+}
+
+/* Dim non-highlighted pins when a sensor is selected */
+.hasSelection .pin:not(.highlighted) .pinDot {
+  opacity: 0.3;
+  filter: saturate(0.3);
+}
+
+.hasSelection .pin:not(.highlighted) .pinLabel {
+  opacity: 0.2;
+}
+
+/* --- Pin dot --- */
+.pinDot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-size: var(--pin-text-sm);
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  transition: box-shadow 0.2s cubic-bezier(0.25, 1, 0.5, 1),
+    transform 0.2s cubic-bezier(0.25, 1, 0.5, 1),
+    opacity 0.2s ease,
+    filter 0.2s ease;
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes pinPulse {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.35); }
+  100% { transform: scale(1.2); }
+}
+
+.highlighted .pinDot {
+  animation: pinPulse 0.35s cubic-bezier(0.25, 1, 0.5, 1) both;
+  z-index: 1;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* --- Pin label --- */
+.pinLabel {
+  font-size: var(--pin-text-sm);
+  font-family: var(--ifm-font-family-monospace);
+  color: rgba(255, 255, 255, 0.45);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.15s ease, opacity 0.2s ease;
+  line-height: 1.2;
+}
+
+[data-theme="light"] .pinLabel {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.highlighted .pinLabel {
+  color: #fff;
+  font-weight: 600;
+}
+
+[data-theme="light"] .highlighted .pinLabel {
+  color: var(--ifm-font-color-base);
+}
+
+/* ============================================
+   WIRING INFO PANEL
+   ============================================ */
+@keyframes wiringSlideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.wiringInfo {
+  margin: 0.75rem auto 0;
+  max-width: 420px;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--ifm-color-primary);
+  background: color-mix(in srgb, var(--ifm-color-primary) 6%, var(--ifm-background-surface-color));
+  animation: wiringSlideIn 0.25s cubic-bezier(0.25, 1, 0.5, 1) both;
+  box-shadow:
+    0 0 20px color-mix(in srgb, var(--ifm-color-primary) 15%, transparent),
+    0 0 40px color-mix(in srgb, var(--ifm-color-primary) 8%, transparent);
+}
+
+.wiringInfo strong {
+  display: block;
+  font-size: var(--pin-text-title);
+  margin-bottom: 0.5rem;
+  color: var(--ifm-color-primary);
+}
+
+.wiringPins {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+@keyframes chipFadeIn {
+  from { opacity: 0; transform: translateX(-4px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.wiringChip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  font-size: var(--pin-text-base);
+  padding: 0.3rem 0.6rem;
+  border-radius: 5px;
+  background: var(--ifm-background-surface-color);
+  border: 1px solid var(--ifm-toc-border-color);
+  border-left: 3px solid;
+  line-height: 1.4;
+  animation: chipFadeIn 0.2s cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+
+.wiringChip:nth-child(2) { animation-delay: 0.05s; }
+.wiringChip:nth-child(3) { animation-delay: 0.1s; }
+
+.wireName {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: var(--pin-text-base);
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--ifm-font-color-base);
+}
+
+.wireArrow {
+  color: var(--ifm-font-color-secondary);
+  font-size: var(--pin-text-sm);
+}
+
+.wiringPinNum {
+  color: var(--ifm-font-color-secondary);
+  font-size: var(--pin-text-sm);
+  margin-left: 0.1rem;
+}
+
+.wireColorDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+/* --- Legend --- */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--ifm-toc-border-color);
+  justify-content: center;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: var(--pin-text-sm);
+  color: var(--ifm-font-color-secondary);
+}
+
+.legendDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* --- Responsive --- */
+@media (max-width: 520px) {
+  .container {
+    --pin-text-sm: 0.6rem;
+    --pin-text-base: 0.68rem;
+    --pin-text-title: 0.8rem;
+  }
+  .pinDot {
+    width: 22px;
+    height: 22px;
+  }
+  .board {
+    padding: 1.5rem 0.75rem 1rem;
+  }
+  .screw {
+    width: 8px;
+    height: 8px;
+  }
+}
+
+/* --- Reduced motion --- */
+@media (prefers-reduced-motion: reduce) {
+  .pinDot,
+  .pin,
+  .board {
+    transition: none;
+  }
+  .highlighted .pinDot {
+    animation: none;
+    transform: scale(1.2);
+  }
+  .wiringInfo,
+  .wiringChip,
+  .dropdownMenu {
+    animation: none;
+  }
+  .dropdownArrow,
+  .orientArrow {
+    transition: none;
+    animation: none;
+  }
+}

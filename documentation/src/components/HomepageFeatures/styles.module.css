@@ -6,12 +6,26 @@
 }
 
 .features :global(.row) {
+  display: flex;
+  flex-wrap: nowrap;
   gap: 1.5rem;
+  margin: 0; /* override Docusaurus negative margin */
 }
 
 .features :global(.col) {
   padding-left: 0;
   padding-right: 0;
+  flex: 1;
+  max-width: none; /* override col--4 max-width */
+}
+
+@media (max-width: 768px) {
+  .features :global(.row) {
+    flex-wrap: wrap;
+  }
+  .features :global(.col) {
+    flex: 1 1 100%;
+  }
 }
 
 .featureSvg {
@@ -73,11 +87,12 @@
   animation: fadeInUp 0.5s cubic-bezier(0.25, 1, 0.5, 1) both;
 }
 
-.featureCard:nth-child(2) {
+/* Target parent .col wrapper for stagger since .featureCard is always :nth-child(1) within its col */
+:global(.col):nth-child(2) .featureCard {
   animation-delay: 0.1s;
 }
 
-.featureCard:nth-child(3) {
+:global(.col):nth-child(3) .featureCard {
   animation-delay: 0.2s;
 }
 
