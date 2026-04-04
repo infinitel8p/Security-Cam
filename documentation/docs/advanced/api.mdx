@@ -12,24 +12,6 @@ The Flask backend runs on port `5005` and exposes REST endpoints for sensor cont
 
 Replace `<pi-ip>` with your Raspberry Pi's IP address in the examples below.
 
-## Authentication
-
-When authentication is enabled (see [Settings - Security](/docs/basics/settings#security)), the dashboard requires a password to log in. For programmatic access (scripts, curl), use the API token shown in Settings.
-
-Pass the API token as a Bearer header:
-
-```bash
-curl -H "Authorization: Bearer <token>" http://<pi-ip>:5005/settings
-```
-
-Or as a query parameter (useful for SSE connections):
-
-```
-http://<pi-ip>:5005/events?token=<token>
-```
-
-The `/auth/status` and `/auth/validate` endpoints are exempt and always accessible. Requests without a valid token receive a `401 Unauthorized` response.
-
 | Category | Key endpoints |
 |----------|--------------|
 | **[Sensors](#sensor-endpoints)** | `/sensor/configure`, `/sensor/status`, `/sensor/enable`, `/sensor/test` |
@@ -40,7 +22,6 @@ The `/auth/status` and `/auth/validate` endpoints are exempt and always accessib
 | **[System](#system-endpoints)** | `/system/alert`, `/system_info`, `/system/restart`, `/system/reboot`, `/system/update/check`, `/captive-portal` |
 | **[Media](#snapshot-endpoint)** | `/snapshot`, `/thumbnail/<file>`, `/sprite/<file>` |
 | **[Archive](#archive-badge-endpoint)** | `/archive/count` |
-| **[Auth](#auth-endpoints)** | `/auth/status`, `/auth/validate`, `/auth/regenerate`, `/auth/set-password` |
 | **[Settings](#settings-file)** | `/settings` |
 
 ---
@@ -430,52 +411,6 @@ curl http://<pi-ip>:5005/logs/script/ap-setup/2026-03-28_14-30-00.log
 ```
 
 Returns the raw text content of a specific script log file. The URL path is `logs/script/<category>/<filename>`.
-
-## Auth endpoints
-
-### Check auth status
-
-```bash
-curl http://<pi-ip>:5005/auth/status
-```
-
-Returns whether authentication is enabled. If a token is provided (via header or query param), also validates it:
-
-```json
-{ "enabled": true, "valid": true }
-```
-
-When no token is provided, `valid` is `null`. This endpoint is exempt from authentication.
-
-### Login (validate password)
-
-```bash
-curl -X POST http://<pi-ip>:5005/auth/validate \
-  -H "Content-Type: application/json" \
-  -d '{"password": "your-password"}'
-```
-
-On success returns `{"valid": true, "token": "<api-token>"}`. On failure returns `{"valid": false}`. The returned token is used for all subsequent API requests. This endpoint is exempt from authentication.
-
-### Regenerate token
-
-```bash
-curl -X POST http://<pi-ip>:5005/auth/regenerate \
-  -H "Authorization: Bearer <current-token>"
-```
-
-Generates a new API token and invalidates the old one. Returns `{"token": "<new-token>"}`. All active sessions using the old token will need to log in again. This endpoint requires the current valid token.
-
-### Change password
-
-```bash
-curl -X POST http://<pi-ip>:5005/auth/set-password \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{"current": "old-password", "new": "new-password"}'
-```
-
-Changes the dashboard login password. Requires a valid API token and the current password. New password must be at least 4 characters. Returns `{"message": "Password updated"}` on success, `403` if the current password is wrong, or `400` if the new password is too short.
 
 ## Settings file
 

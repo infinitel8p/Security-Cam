@@ -36,10 +36,5 @@
     },
     "CaptivePortal": {
         "enabled": true
-    },
-    "Auth": {
-        "enabled": false,
-        "token": "",
-        "password_hash": ""
     }
 }

@@ -98,9 +98,6 @@ _start("modules.settings_helpers.unpair_bt_device", return_value=True)
 _start("modules.sse.emit")
 _start("modules.sse.stream", return_value=iter([]))
 
-# Auth - prevent token generation at import time
-_start("modules.auth.ensure_token")
-
 # Event logger - use real logic but patched path (see tmp_data fixture)
 _start("modules.event_logger.log_event")
 
@@ -146,17 +143,11 @@ def app(tmp_path):
         json.dump(s, f, indent=4)
 
     _flask_app.config["TESTING"] = True
-
-    # Reset auth module to use temp settings (auth disabled by default)
-    import modules.auth as auth_mod
-    auth_mod.refresh()
-
     yield _flask_app
 
     # Restore
     sh.SETTINGS_FILE = orig_sf
     sh.DEFAULTS_FILE = orig_df
-    auth_mod.refresh()
 
 
 @pytest.fixture()

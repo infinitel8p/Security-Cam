@@ -21,7 +21,6 @@
  */
 
 import { getBackendUrl } from "./api";
-import { getToken } from "./auth";
 import { apiFetch } from "./fetch";
 
 type Listener = (data: any) => void;
@@ -140,9 +139,7 @@ export function sseClient(): SSEClient {
   function connect() {
     if (destroyed) return;
 
-    let url = `${getBackendUrl()}/events`;
-    const token = getToken();
-    if (token) url += `?token=${encodeURIComponent(token)}`;
+    const url = `${getBackendUrl()}/events`;
     es = new EventSource(url);
     registeredEvents.clear();
 
