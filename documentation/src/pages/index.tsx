@@ -343,7 +343,7 @@ function HomepageHeader() {
         <div className={clsx(styles.buttons, styles.heroCta)}>
           <Link
             className="button button--secondary button--lg"
-            to="/docs/intro">
+            to="/intro">
             Get started with Security-Cam
           </Link>
         </div>

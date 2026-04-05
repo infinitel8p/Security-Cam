@@ -1,7 +1,9 @@
 {
+  "cleanUrls": true,
   "rewrites": [
     { "source": "/archive", "destination": "/archive/index.html" },
     { "source": "/settings", "destination": "/settings/index.html" },
+    { "source": "/docs/**", "destination": "/docs/404.html" },
     { "source": "/**", "destination": "/index.html" }
   ]
 }

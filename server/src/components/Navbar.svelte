@@ -67,7 +67,7 @@
     <div>
       <span class="text-[0.8125rem] font-bold tracking-tight text-text-primary">Security-Cam</span>
       <p class="text-[0.625rem] leading-none font-medium font-mono tracking-widest text-text-muted">
-        v.2026.04.05.3
+        v.2026.04.05.4
       </p>
       {#if gitBranch}
         <p class="mt-0.5 text-[0.5625rem] leading-none font-mono text-text-muted/60 truncate max-w-[7.5rem]" title="{gitBranch}{gitCommit ? ' @ ' + gitCommit : ''}">
@@ -117,9 +117,7 @@
     <div class="flex items-center justify-between px-1">
       <div class="flex items-center gap-1">
         <a
-          href="https://dev.infinitel8p.com/Security-Cam/docs/intro"
-          target="_blank"
-          rel="noopener noreferrer"
+          href="/docs/intro"
           class="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors duration-150 hover:bg-surface-overlay hover:text-text-secondary"
           title={t("nav.docs")}
           aria-label={t("nav.docs")}

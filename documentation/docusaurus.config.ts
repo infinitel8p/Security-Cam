@@ -7,13 +7,13 @@ const config: Config = {
   tagline: 'A DIY security camera for the Raspberry Pi Zero 2 W - records when it matters, stays quiet when you\'re home.',
   favicon: 'img/favicon.png',
 
-  url: 'https://dev.infinitel8p.com',
-  baseUrl: '/Security-Cam/',
+  url: process.env.DOCS_URL || 'https://dev.infinitel8p.com',
+  baseUrl: process.env.DOCS_BASE_URL || '/Security-Cam/',
   trailingSlash: false,
   organizationName: 'infinitel8p',
   projectName: 'Security-Cam',
 
-  onBrokenLinks: 'throw',
+  onBrokenLinks: process.env.DOCS_BASE_URL ? 'warn' : 'throw',
   onBrokenMarkdownLinks: 'warn',
 
   i18n: {
@@ -28,19 +28,13 @@ const config: Config = {
       'classic',
       {
         docs: {
+          routeBasePath: '/',
           sidebarPath: require.resolve('./sidebars.ts'),
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
           editUrl: 'https://github.com/infinitel8p/Security-Cam/edit/main/documentation/',
           showLastUpdateTime: true,
           showLastUpdateAuthor: true,
         },
-        blog: {
-          showReadingTime: true,
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl: 'https://github.com/infinitel8p/Security-Cam/edit/main/documentation/',
-        },
+        blog: false,
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
         },
@@ -78,7 +72,11 @@ const config: Config = {
           position: 'left',
           label: 'Documentation',
         },
-        { to: '/blog', label: 'Blog', position: 'left' },
+        ...(process.env.DOCS_BASE_URL ? [{
+          href: '/',
+          label: 'Dashboard',
+          position: 'left' as const,
+        }] : []),
         {
           href: 'https://github.com/infinitel8p/Security-Cam',
           label: 'GitHub',
@@ -103,7 +101,7 @@ const config: Config = {
           items: [
             {
               label: 'Intro',
-              to: '/docs/intro',
+              to: '/intro',
             },
           ],
         },
@@ -120,12 +118,8 @@ const config: Config = {
           title: 'More',
           items: [
             {
-              label: 'Blog',
-              to: '/blog',
-            },
-            {
               label: 'GitHub',
-              href: 'https://github.com/facebook/docusaurus',
+              href: 'https://github.com/infinitel8p/Security-Cam',
             },
           ],
         },
