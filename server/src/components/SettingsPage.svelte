@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { getBackendUrl } from "../lib/api";
+  import { setToken } from "../lib/auth";
   import { apiFetch } from "../lib/fetch";
   import { sseClient } from "../lib/sse";
   import { checkNow as checkForUpdateNow, subscribe as subscribeUpdate, clearUpdate, type UpdateState } from "../lib/update-badge";
@@ -13,6 +14,7 @@
   import Icon from "./Icon.svelte";
   import ToggleSpring from "./ToggleSpring.svelte";
   import deviceDesktopIcon from "../icons/device-desktop.svg?raw";
+  import shieldIcon from "../icons/shield.svg?raw";
   import sunIcon from "../icons/sun.svg?raw";
   import moonIcon from "../icons/moon.svg?raw";
   import { initLocale, getLocale, setLocale, type Locale } from "../i18n";
@@ -63,7 +65,7 @@
   let deviceStatuses = $state<{ bt: Record<string, boolean>; wifi: Record<string, boolean> }>({ bt: {}, wifi: {} });
   let unsubPresence: (() => void) | null = null;
 
-  const sectionIds = ["appearance", "camera", "storage", "devices", "sensors", "system"];
+  const sectionIds = ["appearance", "camera", "storage", "devices", "sensors", "security", "system"];
 
   // Nav active state color (unified accent)
   const sectionColor = "text-accent";
@@ -117,6 +119,7 @@
     unsubPresence?.();
     unsubUpdate?.();
     if (observer) observer.disconnect();
+    if (regenTimeout) clearTimeout(regenTimeout);
   });
 
   type ThemeMode = "system" | "light" | "dark";
@@ -171,6 +174,9 @@
       scanLinesEnabled = settings.ScanLines !== false;
       const cp = settings.CaptivePortal ?? {};
       captivePortalEnabled = cp.enabled !== false;
+      const au = settings.Auth ?? {};
+      authEnabled = au.enabled ?? false;
+      authToken = au.token ?? "";
       const sl = settings.StorageLimit ?? {};
       storageLimitEnabled = sl.enabled ?? false;
       storageLimitPercent = sl.max_percent ?? 85;
@@ -450,6 +456,119 @@
     ).finally(() => { captivePortalSaving = false; });
   }
 
+  // --- Auth settings ---
+  let authEnabled = $state(false);
+  let authToken = $state("");
+  let authSaving = false;
+  let regenConfirm = $state(false);
+  let regenTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  // Password change
+  let currentPassword = $state("");
+  let newPassword = $state("");
+  let confirmPassword = $state("");
+  let passwordSaving = $state(false);
+
+  function toggleAuth() {
+    if (authSaving) return;
+    authSaving = true;
+    authEnabled = !authEnabled;
+    const enabled = authEnabled;
+
+    toast.promise(
+      (async () => {
+        const res = await apiFetch(`${getBackendUrl()}/settings`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ Auth: { enabled } }),
+        });
+        if (!res.ok) throw new Error();
+        // Store the token so future requests are authenticated
+        if (enabled) {
+          if (!authToken) {
+            // Token not yet loaded - fetch it before auth takes effect
+            const sr = await apiFetch(`${getBackendUrl()}/settings`);
+            if (sr.ok) {
+              const s = await sr.json();
+              authToken = s.Auth?.token ?? "";
+            }
+          }
+          if (authToken) setToken(authToken);
+        }
+        return enabled;
+      })(),
+      {
+        loading: t("status.saving"),
+        success: (on) => on ? t("toast.authEnabled") : t("toast.authDisabled"),
+        error: () => {
+          authEnabled = !enabled;
+          return t("toast.saveFailed");
+        },
+      },
+    ).finally(() => { authSaving = false; });
+  }
+
+  async function copyToken() {
+    try {
+      await navigator.clipboard.writeText(authToken);
+      toast(t("toast.tokenCopied"));
+    } catch {
+      toast.error(t("toast.saveFailed"));
+    }
+  }
+
+  function confirmRegen() {
+    regenConfirm = true;
+    if (regenTimeout) clearTimeout(regenTimeout);
+    regenTimeout = setTimeout(() => { regenConfirm = false; }, 5000);
+  }
+
+  async function doRegen() {
+    regenConfirm = false;
+    try {
+      const res = await apiFetch(`${getBackendUrl()}/auth/regenerate`, { method: "POST" });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      authToken = data.token;
+      setToken(data.token);
+      toast(t("toast.tokenRegenerated"));
+    } catch {
+      toast.error(t("toast.saveFailed"));
+    }
+  }
+
+  async function changePassword() {
+    if (passwordSaving) return;
+    if (newPassword !== confirmPassword) {
+      toast.error(t("toast.passwordMismatch"));
+      return;
+    }
+    if (newPassword.length < 4) {
+      toast.error(t("toast.passwordTooShort"));
+      return;
+    }
+    passwordSaving = true;
+    try {
+      const res = await apiFetch(`${getBackendUrl()}/auth/set-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ current: currentPassword, new: newPassword }),
+      });
+      if (res.ok) {
+        toast.success(t("toast.passwordChanged"));
+        currentPassword = "";
+        newPassword = "";
+        confirmPassword = "";
+      } else {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.error || t("toast.saveFailed"));
+      }
+    } catch {
+      toast.error(t("toast.saveFailed"));
+    }
+    passwordSaving = false;
+  }
+
   let scanLinesSaving = false;
   function toggleScanLines() {
     if (scanLinesSaving) return;
@@ -545,6 +664,7 @@
       {@render mobileNavItem("storage", t("section.storage"))}
       {@render mobileNavItem("devices", t("section.devices"))}
       {@render mobileNavItem("sensors", t("section.triggerSensors"))}
+      {@render mobileNavItem("security", t("section.security"))}
       {@render mobileNavItem("system", t("section.system"))}
     </div>
   </nav>
@@ -558,6 +678,7 @@
         {@render navItem("storage", t("section.storage"))}
         {@render navItem("devices", t("section.devices"))}
         {@render navItem("sensors", t("section.triggerSensors"))}
+        {@render navItem("security", t("section.security"))}
         {@render navItem("system", t("section.system"))}
       </div>
     </nav>
@@ -886,6 +1007,107 @@
           <h2 class="text-xs font-semibold uppercase tracking-widest text-text-secondary">{t("section.triggerSensors")}</h2>
         </div>
         <SensorSettings />
+      </section>
+
+      <!-- Security -->
+      <section id="settings-security" class="scroll-mt-16 lg:scroll-mt-8 mt-12 space-y-3">
+        <div class="flex items-center gap-2.5">
+          <span class="h-3.5 w-0.5 rounded-full bg-accent"></span>
+          <h2 class="text-xs font-semibold uppercase tracking-widest text-text-secondary">{t("section.security")}</h2>
+        </div>
+        <div class="card overflow-hidden {authEnabled ? 'ring-1 ring-accent/15' : ''} transition-all duration-500">
+          <!-- Auth toggle with shield icon -->
+          <div class="px-4 py-4 sm:px-5 sm:py-5">
+            <div class="flex items-center justify-between gap-4">
+              <div class="flex items-start gap-3">
+                <div class="mt-0.5 flex shrink-0 items-center justify-center transition-all duration-300 {authEnabled ? 'h-10 w-10 rounded-[14px] bg-accent/15 border border-accent/25 text-accent shadow-[0_0_16px_-4px_rgba(77,148,255,0.2)]' : 'h-9 w-9 rounded-xl bg-surface-elevated border border-border-default text-text-muted'}">
+                  <Icon icon={shieldIcon} class="{authEnabled ? 'h-[20px] w-[20px]' : 'h-[18px] w-[18px]'} transition-all duration-300" />
+                </div>
+                <div>
+                  <p class="text-sm font-medium text-text-primary">{t("label.authEnabled")}</p>
+                  <p class="mt-0.5 text-xs text-text-muted">{t("help.authEnabled")}</p>
+                </div>
+              </div>
+              <ToggleSpring checked={authEnabled} onToggle={toggleAuth} label={t("label.authEnabled")} />
+            </div>
+          </div>
+          <!-- Password change (visible when auth enabled) -->
+          {#if authEnabled}
+            <div class="border-t border-border-subtle px-4 py-4 sm:px-5 sm:py-5 space-y-3">
+              <div>
+                <p class="text-sm font-medium text-text-primary">{t("label.changePassword")}</p>
+                <p class="mt-0.5 text-xs text-text-muted">{t("help.changePassword")}</p>
+              </div>
+              <div class="space-y-2">
+                <input
+                  type="password"
+                  bind:value={currentPassword}
+                  placeholder={t("label.currentPassword")}
+                  maxlength={128}
+                  autocomplete="current-password"
+                  aria-label={t("label.currentPassword")}
+                  class="w-full rounded-lg bg-surface-elevated border border-border-subtle px-3.5 py-2.5 text-sm text-text-primary placeholder:text-text-muted/70 outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent-muted"
+                />
+                <input
+                  type="password"
+                  bind:value={newPassword}
+                  placeholder={t("label.newPassword")}
+                  maxlength={128}
+                  autocomplete="new-password"
+                  aria-label={t("label.newPassword")}
+                  class="w-full rounded-lg bg-surface-elevated border border-border-subtle px-3.5 py-2.5 text-sm text-text-primary placeholder:text-text-muted/70 outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent-muted"
+                />
+                <input
+                  type="password"
+                  bind:value={confirmPassword}
+                  placeholder={t("label.confirmPassword")}
+                  maxlength={128}
+                  autocomplete="new-password"
+                  aria-label={t("label.confirmPassword")}
+                  class="w-full rounded-lg bg-surface-elevated border border-border-subtle px-3.5 py-2.5 text-sm text-text-primary placeholder:text-text-muted/70 outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent-muted"
+                />
+              </div>
+              <button
+                onclick={changePassword}
+                disabled={passwordSaving || !currentPassword || !newPassword || !confirmPassword}
+                class="btn-press rounded-lg border border-border-default px-3.5 py-2 text-xs font-semibold text-text-secondary transition-colors hover:border-border-strong hover:text-text-primary disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {t("btn.changePassword")}
+              </button>
+            </div>
+          {/if}
+          <!-- API token display (visible when auth enabled and token exists) -->
+          {#if authEnabled && authToken}
+            <div class="border-t border-border-subtle px-4 py-4 sm:px-5 sm:py-5 space-y-3">
+              <div>
+                <p class="text-sm font-medium text-text-primary">{t("label.apiToken")}</p>
+                <p class="mt-0.5 text-xs text-text-muted">{t("help.apiToken")}</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="flex-1 min-w-0 relative group">
+                  <code class="block w-full truncate rounded-lg bg-surface-elevated border border-border-subtle px-3.5 py-2.5 text-xs font-mono text-text-secondary select-all tracking-wide">{authToken}</code>
+                </div>
+                <button
+                  onclick={copyToken}
+                  class="btn-press shrink-0 rounded-lg border border-border-default px-3.5 py-2.5 text-xs font-semibold text-text-secondary transition-colors hover:border-border-strong hover:text-text-primary"
+                >
+                  {t("btn.copyToken")}
+                </button>
+              </div>
+              <div class="flex items-center justify-between pt-1">
+                <p class="text-xs text-text-muted">{t("help.regenerateToken")}</p>
+                {#if regenConfirm}
+                  <div class="flex gap-2 animate-slide-down">
+                    <button onclick={() => { regenConfirm = false; }} class="btn-press rounded-lg border border-border-default px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text-secondary transition-colors">{t("btn.cancel")}</button>
+                    <button onclick={doRegen} class="btn-press rounded-lg bg-status-warning px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-status-warning/90">{t("btn.regenerateToken")}</button>
+                  </div>
+                {:else}
+                  <button onclick={confirmRegen} class="btn-press shrink-0 rounded-lg border border-border-default px-3 py-1.5 text-xs font-semibold text-text-secondary transition-colors hover:border-border-strong hover:text-text-primary">{t("btn.regenerateToken")}</button>
+                {/if}
+              </div>
+            </div>
+          {/if}
+        </div>
       </section>
 
       <!-- System -->
