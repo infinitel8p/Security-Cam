@@ -42,6 +42,8 @@ def _scan_videos():
     videos = []
 
     for root, dirs, files in os.walk(video_dir):
+        # Skip timelapse subdirectory (shown in its own UI section)
+        dirs[:] = [d for d in dirs if d != "timelapse"]
         for file in files:
             if file.endswith(".mp4") and not file.endswith(".tmp.mp4"):
                 filepath = os.path.join(root, file)
@@ -89,6 +91,7 @@ def count_videos_since(since_iso: str) -> int:
     since_ts = since.timestamp()
 
     for root, dirs, files in os.walk(video_dir):
+        dirs[:] = [d for d in dirs if d != "timelapse"]
         for file in files:
             if file.endswith(".mp4") and not file.endswith(".tmp.mp4"):
                 filepath = os.path.join(root, file)

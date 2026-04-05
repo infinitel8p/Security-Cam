@@ -106,6 +106,55 @@ def _capture_frame(output_path: str, resolution: str | None = None) -> bool:
     return False
 
 
+def _probe_duration(video_path: str) -> float | None:
+    """Get video duration in seconds via ffprobe."""
+    try:
+        result = subprocess.run(
+            [
+                "ffprobe", "-v", "quiet",
+                "-show_entries", "format=duration",
+                "-of", "default=noprint_wrappers=1:nokey=1",
+                video_path,
+            ],
+            capture_output=True, text=True, timeout=10,
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            return round(float(result.stdout.strip()), 1)
+    except Exception as e:
+        log.debug("ffprobe failed for %s: %s", video_path, e)
+    return None
+
+
+def _write_timelapse_meta(video_path: str, frame_count: int, duration: float | None) -> None:
+    """Write a .meta.json sidecar for a stitched timelapse."""
+    import json, tempfile
+    meta: dict = {"reason": "timelapse", "frame_count": frame_count}
+    if duration is not None:
+        meta["duration_seconds"] = duration
+    meta_path = os.path.splitext(video_path)[0] + ".meta.json"
+    try:
+        dirpath = os.path.dirname(meta_path) or "."
+        fd, tmp = tempfile.mkstemp(dir=dirpath, suffix=".tmp")
+        with os.fdopen(fd, "w") as f:
+            json.dump(meta, f, indent=2)
+        os.replace(tmp, meta_path)
+    except Exception as e:
+        log.debug("Failed to write timelapse meta %s: %s", meta_path, e)
+
+
+def _read_timelapse_meta(video_path: str) -> dict | None:
+    """Read a .meta.json sidecar for a timelapse."""
+    import json
+    meta_path = os.path.splitext(video_path)[0] + ".meta.json"
+    if not os.path.exists(meta_path):
+        return None
+    try:
+        with open(meta_path, "r") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, IOError):
+        return None
+
+
 def _generate_thumbnail(video_path: str) -> None:
     """Extract a frame from a few seconds into the video as a poster thumbnail."""
     thumb_path = os.path.splitext(video_path)[0] + ".thumb.jpg"
@@ -173,6 +222,8 @@ def _stitch_day(day_dir: str, date_str: str, output_dir: str, fps: int) -> bool:
         if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
             log.info("Timelapse stitched: %s (%d frames)", output_path, len(frames))
             shutil.rmtree(day_dir, ignore_errors=True)
+            duration = _probe_duration(output_path)
+            _write_timelapse_meta(output_path, len(frames), duration)
             _generate_thumbnail(output_path)
             sse.emit("archive_updated", {"path": output_path, "type": "timelapse"})
             return True
@@ -326,6 +377,12 @@ def get_timelapse_videos() -> list[dict]:
                 size = 0
                 mtime = ""
             entry: dict = {"path": filepath, "date": date_str, "size": size, "mtime": mtime}
+            # Read metadata sidecar (duration, frame count)
+            meta = _read_timelapse_meta(filepath)
+            if meta and "duration_seconds" in meta:
+                entry["duration_seconds"] = meta["duration_seconds"]
+            if meta and "frame_count" in meta:
+                entry["frame_count"] = meta["frame_count"]
             # Check for thumbnail sidecar
             thumb_path = os.path.splitext(filepath)[0] + ".thumb.jpg"
             if os.path.exists(thumb_path):
@@ -356,10 +413,11 @@ def delete_timelapse(path: str) -> tuple[dict, int]:
 
     try:
         os.remove(target)
-        # Clean up thumbnail sidecar
-        thumb = os.path.splitext(target)[0] + ".thumb.jpg"
-        if os.path.exists(thumb):
-            os.remove(thumb)
+        # Clean up sidecar files
+        for ext in (".thumb.jpg", ".meta.json"):
+            sidecar = os.path.splitext(target)[0] + ext
+            if os.path.exists(sidecar):
+                os.remove(sidecar)
         log.info("Timelapse deleted: %s", target)
         return {"message": "Timelapse deleted"}, 200
     except Exception as e:
