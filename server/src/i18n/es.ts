@@ -501,6 +501,7 @@ export default {
     rec: "GRAB",
     live: "VIVO",
     new: "NUEVO",
+    ir: "IR",
   },
 
   setup: {

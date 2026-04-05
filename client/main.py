@@ -21,6 +21,7 @@ from modules import sse
 from modules import log_reader
 from modules import timelapse_manager
 from modules import captive_portal_helpers
+from modules import night_vision
 from modules import auth
 from modules.sensors import available_types as sensor_available_types
 
@@ -130,6 +131,7 @@ presence_monitor.start()
 sensor_manager.start()
 storage_manager.start()
 timelapse_manager.start()
+night_vision.start()
 
 # Ensure mediamtx.yml exists (copy from defaults) and merge new default keys,
 # then apply user settings (rotation, resolution, ISP) on top.
@@ -172,6 +174,7 @@ def system_info():
         "uptime_seconds": uptime,
         "throttle": throttle,
         "sd_health": sd_health,
+        "night_mode": night_vision.is_night_mode(),
     }
 
     # Include extended stats when requested (used by /stats page)

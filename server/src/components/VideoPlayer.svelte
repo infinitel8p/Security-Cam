@@ -11,6 +11,7 @@
   import alertCircleIcon from "../icons/alert-circle.svg?raw";
   import maximizeIcon from "../icons/maximize.svg?raw";
   import minimizeIcon from "../icons/minimize.svg?raw";
+  import moonIcon from "../icons/moon.svg?raw";
 
   let containerEl: HTMLDivElement;
   let videoEl: HTMLVideoElement;
@@ -25,7 +26,9 @@
   let recSeconds = $state(0);
   let recTimer: ReturnType<typeof setInterval> | undefined;
   let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
+  let nightMode = $state(false);
   let unsubRecording: (() => void) | undefined;
+  let unsubNightMode: (() => void) | undefined;
   let destroyed = false;
   let webrtcFailCount = $state(0);
   let hlsFailCount = $state(0);
@@ -280,6 +283,13 @@
       recordingStartedAt = ev.started_at ?? null;
     });
 
+    unsubNightMode = sse.on("night_mode", (ev) => {
+      nightMode = ev.active ?? false;
+    });
+    sse.on("system_info", (ev) => {
+      if (typeof ev.night_mode === "boolean") nightMode = ev.night_mode;
+    });
+
     videoEl.addEventListener("webkitbeginfullscreen", onIOSFullscreenStart);
     videoEl.addEventListener("webkitendfullscreen", onIOSFullscreenEnd);
   });
@@ -313,6 +323,7 @@
     clearTimeout(reconnectTimer);
     clearInterval(recTimer);
     unsubRecording?.();
+    unsubNightMode?.();
     cleanup();
     videoEl?.removeEventListener("webkitbeginfullscreen", onIOSFullscreenStart);
     videoEl?.removeEventListener("webkitendfullscreen", onIOSFullscreenEnd);
@@ -372,8 +383,15 @@
 
     <!-- Overlays -->
     <div class="absolute left-0 right-0 top-0 flex items-start justify-between p-3">
-      <!-- Left: timestamp area (empty for now) -->
-      <div></div>
+      <!-- Left: night vision badge -->
+      <div>
+        {#if nightMode && connected}
+          <div class="animate-fade-in flex items-center gap-1.5 rounded-lg bg-black/60 px-2.5 py-1.5 backdrop-blur-md">
+            <Icon icon={moonIcon} class="h-3.5 w-3.5 text-purple-400" stroke={2} />
+            <span class="text-[0.6875rem] font-medium tracking-wide text-purple-300/90">{t("badge.ir")}</span>
+          </div>
+        {/if}
+      </div>
 
       <!-- Right: status badges -->
       <div>

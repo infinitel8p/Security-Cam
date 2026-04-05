@@ -501,6 +501,7 @@ export default {
     rec: "AUFN",
     live: "LIVE",
     new: "NEU",
+    ir: "IR",
   },
 
   setup: {

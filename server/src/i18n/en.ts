@@ -524,6 +524,7 @@ export default {
     rec: "REC",
     live: "LIVE",
     new: "NEW",
+    ir: "IR",
   },
 
   // Setup checklist

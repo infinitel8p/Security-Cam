@@ -501,6 +501,7 @@ export default {
     rec: "REC",
     live: "LIVE",
     new: "NUOVO",
+    ir: "IR",
   },
 
   setup: {

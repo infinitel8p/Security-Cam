@@ -501,6 +501,7 @@ export default {
     rec: "ENR",
     live: "DIRECT",
     new: "NOUV",
+    ir: "IR",
   },
 
   setup: {
