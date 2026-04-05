@@ -1106,7 +1106,7 @@
                 {#if regenConfirm}
                   <div class="flex gap-2 animate-slide-down">
                     <button onclick={() => { regenConfirm = false; }} class="btn-press rounded-lg border border-border-default px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text-secondary transition-colors">{t("btn.cancel")}</button>
-                    <button onclick={doRegen} class="btn-press rounded-lg bg-status-warning px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-status-warning/90">{t("btn.regenerateToken")}</button>
+                    <button onclick={doRegen} class="btn-press rounded-lg bg-status-warning px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-status-warning/90">{t("btn.confirmRegen")}</button>
                   </div>
                 {:else}
                   <button onclick={confirmRegen} class="btn-press shrink-0 rounded-lg border border-border-default px-3 py-1.5 text-xs font-semibold text-text-secondary transition-colors hover:border-border-strong hover:text-text-primary">{t("btn.regenerateToken")}</button>
@@ -1149,7 +1149,7 @@
                     {#if updateConfirm}
                       <div class="flex gap-2 animate-slide-down">
                         <button onclick={() => { updateConfirm = false; }} class="btn-press rounded-lg border border-border-default px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text-secondary transition-colors">{t("btn.cancel")}</button>
-                        <button onclick={doUpdate} class="btn-press rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-accent-hover">{t("btn.updateNow")}</button>
+                        <button onclick={doUpdate} class="btn-press rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-accent-hover">{t("btn.confirmUpdate")}</button>
                       </div>
                     {:else}
                       <button onclick={confirmUpdate} class="btn-press shrink-0 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-accent-hover">{t("btn.updateNow")}</button>
@@ -1177,7 +1177,7 @@
               {#if restartConfirm}
                 <div class="flex gap-2 animate-slide-down">
                   <button onclick={() => { restartConfirm = false; }} class="btn-press rounded-lg border border-border-default px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text-secondary transition-colors">{t("btn.cancel")}</button>
-                  <button onclick={doRestart} class="btn-press rounded-lg bg-status-warning px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-status-warning/90">{t("btn.restart")}</button>
+                  <button onclick={doRestart} class="btn-press rounded-lg bg-status-warning px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-status-warning/90">{t("btn.confirmRestart")}</button>
                 </div>
               {:else}
                 <button onclick={confirmRestart} class="btn-press shrink-0 rounded-lg border border-border-default px-4 py-2 text-xs font-semibold text-text-secondary transition-colors hover:border-border-strong hover:text-text-primary">{t("btn.restart")}</button>
@@ -1193,7 +1193,7 @@
               {#if rebootConfirm}
                 <div class="flex gap-2 animate-slide-down">
                   <button onclick={() => { rebootConfirm = false; }} class="btn-press rounded-lg border border-border-default px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text-secondary transition-colors">{t("btn.cancel")}</button>
-                  <button onclick={doReboot} class="btn-press rounded-lg bg-status-critical px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-status-critical/90">{t("btn.reboot")}</button>
+                  <button onclick={doReboot} class="btn-press rounded-lg bg-status-critical px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-status-critical/90">{t("btn.confirmReboot")}</button>
                 </div>
               {:else}
                 <button onclick={confirmReboot} class="btn-press shrink-0 rounded-lg border border-border-default px-4 py-2 text-xs font-semibold text-text-secondary transition-colors hover:border-border-strong hover:text-text-primary">{t("btn.reboot")}</button>
