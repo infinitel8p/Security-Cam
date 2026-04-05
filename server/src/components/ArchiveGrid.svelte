@@ -90,6 +90,8 @@
     size: number;
     mtime?: string;
     thumbnail?: string;
+    duration_seconds?: number;
+    frame_count?: number;
   }
   let allTimelapses: Timelapse[] = $state([]);
   let timelapsesOpen = $state(false);
@@ -110,9 +112,11 @@
   let showFilterMenu = $state(false);
   let lastSeenTs = $state(0);
   let playerVideo: Video | null = $state(null);
+  let playerList: Video[] = $state([]);
 
-  function openPlayer(video: Video) {
+  function openPlayer(video: Video, list?: Video[]) {
     playerVideo = video;
+    playerList = list ?? filteredVideos;
   }
 
   function parseEntry(entry: { path: string; meta?: VideoMeta; thumbnail?: string; sprite?: string }): Video {
@@ -140,6 +144,7 @@
     if (!meta?.reason) return null;
     if (meta.reason === "sensor") return meta.sensor_type ?? "Sensor";
     if (meta.reason === "manual") return "Manual";
+    if (meta.reason === "timelapse") return "Timelapse";
     return meta.reason;
   }
 
@@ -316,6 +321,18 @@
     a.href = timelapseVideoUrl(tl.path);
     a.download = `timelapse_${tl.date}.mp4`;
     a.click();
+  }
+
+  function timelapseToVideo(tl: Timelapse): Video {
+    return {
+      path: tl.path,
+      filename: `timelapse_${tl.date}.mp4`,
+      date: tl.date,
+      time: "",
+      timestamp: tl.mtime ? new Date(tl.mtime).getTime() : 0,
+      meta: { reason: "timelapse", duration_seconds: tl.duration_seconds },
+      thumbnail: tl.thumbnail ? tl.path : undefined,
+    };
   }
 
   function isNewRecording(video: Video): boolean {
@@ -682,33 +699,65 @@
       {@const TL_LIMIT = 3}
       {@const visibleTimelapses = timelapsesExpanded ? allTimelapses : allTimelapses.slice(0, TL_LIMIT)}
       {@const hasMoreTl = allTimelapses.length > TL_LIMIT}
+      {@const timelapseVideos = allTimelapses.map(timelapseToVideo)}
       <div class="animate-slide-down border-t border-border-subtle px-4 py-3">
-        <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {#each visibleTimelapses as tl}
-            <div class="group overflow-hidden rounded-lg border border-border-subtle bg-surface-overlay">
-              <video
-                src={timelapseVideoUrl(tl.path)}
-                poster={tl.thumbnail ? timelapseThumbnailUrl(tl.path) : undefined}
-                class="aspect-video w-full object-contain bg-black/60"
-                controls
-                preload="none"
-              ></video>
-              <div class="flex items-center justify-between px-3 py-2">
-                <div>
-                  <p class="text-[0.8125rem] font-medium text-text-primary">{tl.date}</p>
-                  <p class="text-[0.625rem] text-text-muted">{formatBytes(tl.size)}</p>
+            {@const tlVideo = timelapseToVideo(tl)}
+            <div class="card-interactive group overflow-hidden">
+              <!-- svelte-ignore a11y_no_static_element_interactions -->
+              <div
+                class="relative cursor-pointer bg-black/60"
+                onclick={() => openPlayer(tlVideo, timelapseVideos)}
+                onkeydown={(e) => { if (e.key === "Enter") openPlayer(tlVideo, timelapseVideos); }}
+                role="button"
+                tabindex="0"
+              >
+                {#if tl.thumbnail}
+                  <img
+                    src={timelapseThumbnailUrl(tl.path)}
+                    alt={`Timelapse ${tl.date}`}
+                    class="aspect-video w-full object-contain"
+                    loading="lazy"
+                  />
+                {:else}
+                  <div class="flex aspect-video w-full items-center justify-center">
+                    <Icon icon={videoIcon} class="h-8 w-8 text-text-muted/30" stroke={1.5} />
+                  </div>
+                {/if}
+                <div class="absolute inset-0 flex items-center justify-center opacity-40 transition-opacity duration-200 group-hover:opacity-100">
+                  <div class="flex h-12 w-12 items-center justify-center rounded-full bg-black/50 text-white/90 backdrop-blur-sm">
+                    <Icon icon={playerPlayIcon} class="h-6 w-6 ml-0.5" />
+                  </div>
                 </div>
-                <div class="flex items-center gap-1">
+              </div>
+              <div class="flex items-center justify-between border-t border-border-subtle px-3.5 py-2.5">
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2">
+                    <p class="text-[0.8125rem] font-medium text-text-primary">{formatDate(tl.date)}</p>
+                    <span class="rounded-full bg-accent/10 px-1.5 py-0.5 text-[0.5625rem] font-semibold uppercase tracking-wide text-accent">
+                      Timelapse
+                    </span>
+                  </div>
+                  <div class="flex items-center gap-1.5 text-[0.6875rem] tabular-nums text-text-muted">
+                    {#if tl.duration_seconds}
+                      <span>{formatDuration(tl.duration_seconds)}</span>
+                      <span class="text-border-strong">·</span>
+                    {/if}
+                    <span>{formatBytes(tl.size)}</span>
+                  </div>
+                </div>
+                <div class="flex shrink-0 gap-0.5 sm:opacity-0 sm:transition-opacity sm:duration-150 sm:group-hover:opacity-100">
                   <button
                     onclick={() => downloadTimelapse(tl)}
-                    class="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-surface-raised hover:text-text-secondary"
+                    class="flex h-10 w-10 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-accent-muted hover:text-accent sm:h-auto sm:w-auto sm:p-2"
                     title={t("btn.download")}
                   >
-                    <Icon icon={downloadIcon} class="h-4 w-4" />
+                    <Icon icon={downloadIcon} class="h-[1.125rem] w-[1.125rem] sm:h-4 sm:w-4" />
                   </button>
                   <button
                     onclick={(e) => openDeleteDialog("timelapse", tl)}
-                    class="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-status-critical/8 hover:text-status-critical disabled:opacity-40"
+                    class="flex h-10 w-10 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-status-critical/8 hover:text-status-critical sm:h-auto sm:w-auto sm:p-2"
                     title={t("btn.delete")}
                   >
                     <Icon icon={trashIcon} class="h-4 w-4" />
@@ -1267,7 +1316,7 @@
 {#if playerVideo}
   <VideoPlayerModal
     video={playerVideo}
-    videos={filteredVideos}
+    videos={playerList}
     onclose={() => { playerVideo = null; }}
     onnavigate={(v) => { playerVideo = v; }}
   />

@@ -284,7 +284,7 @@
     </div>
 
     <Note>
-      {t("help.imageQuality")} <a href="https://dev.infinitel8p.com/Security-Cam/docs/basics/image-quality" target="_blank" rel="noopener noreferrer" class="font-semibold underline underline-offset-2 hover:text-accent">{t("help.ispDocsLink")}</a>
+      {t("help.imageQuality")} <a href="/docs/basics/image-quality" target="_blank" class="font-semibold underline underline-offset-2 hover:text-accent">{t("help.ispDocsLink")}</a>
     </Note>
 
     {#if denoiseVal === "cdn_hq"}

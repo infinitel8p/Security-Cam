@@ -1,0 +1,341 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="404 - Security Cam">
+	<div class="nf-container">
+		<!-- Viewfinder frame -->
+		<div class="nf-viewfinder" aria-hidden="true">
+			<!-- CRT power-on line -->
+			<div class="nf-powerline"></div>
+
+			<!-- Corner brackets -->
+			<div class="nf-corner nf-tl"></div>
+			<div class="nf-corner nf-tr"></div>
+			<div class="nf-corner nf-bl"></div>
+			<div class="nf-corner nf-br"></div>
+
+			<!-- Static noise -->
+			<canvas class="nf-static" width="200" height="120"></canvas>
+
+			<!-- Single scan line sweep -->
+			<div class="nf-scanline"></div>
+
+			<!-- REC badge -->
+			<div class="nf-rec">
+				<span class="nf-rec-dot"></span>
+				NO SIGNAL
+			</div>
+
+			<!-- 404 with glitch -->
+			<div class="nf-code" data-text="404">404</div>
+
+			<!-- Timestamp -->
+			<div class="nf-timestamp">
+				CAM_01 &mdash; <span class="nf-ts-val"></span> &mdash; ERR: FEED NOT FOUND
+			</div>
+		</div>
+
+		<!-- Message -->
+		<p class="animate-in stagger-2 mt-8 text-[0.9375rem] font-medium text-text-secondary">This feed doesn't exist.</p>
+		<p class="animate-in stagger-2 mt-1.5 text-[0.8125rem] text-text-muted">Check the URL or head back to the dashboard.</p>
+
+		<a
+			href="/"
+			class="animate-in stagger-3 btn-press mt-6 rounded-lg bg-accent/10 px-6 py-3 text-[0.8125rem] font-semibold text-accent transition-colors hover:bg-accent/18"
+		>
+			Back to Dashboard
+		</a>
+	</div>
+</Layout>
+
+<script>
+	const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+	// Static noise - delayed to match power-on sequence
+	const canvas = document.querySelector<HTMLCanvasElement>('.nf-static');
+	if (canvas) {
+		const ctx = canvas.getContext('2d');
+		if (ctx) {
+			const w = canvas.width, h = canvas.height;
+			const img = ctx.createImageData(w, h);
+
+			function drawStatic(alpha: number) {
+				const d = img.data;
+				for (let i = 0; i < d.length; i += 4) {
+					const v = (Math.random() * 40) | 0;
+					d[i] = d[i+1] = d[i+2] = v;
+					d[i+3] = alpha;
+				}
+				ctx!.putImageData(img, 0, 0);
+			}
+
+			if (reducedMotion) {
+				drawStatic(25);
+			} else {
+				// Start after power-on (400ms delay)
+				let started = false;
+				let last = 0;
+
+				function loop(t: number) {
+					if (!started) {
+						if (t > 400) started = true;
+						else { requestAnimationFrame(loop); return; }
+					}
+					if (t - last > 83) { // ~12fps
+						drawStatic(35);
+						last = t;
+					}
+					requestAnimationFrame(loop);
+				}
+				requestAnimationFrame(loop);
+			}
+		}
+	}
+
+	// Live timestamp
+	const tsEl = document.querySelector('.nf-ts-val');
+	if (tsEl) {
+		function tick() {
+			const now = new Date();
+			const pad = (n: number) => String(n).padStart(2, '0');
+			tsEl!.textContent = `${now.getFullYear()}/${pad(now.getMonth()+1)}/${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+		}
+		tick();
+		setInterval(tick, 1000);
+	}
+</script>
+
+<style>
+	.nf-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		min-height: calc(100vh - 4rem);
+		text-align: center;
+	}
+
+	/* ── Viewfinder ───────────────────────────────────────────────────── */
+	.nf-viewfinder {
+		position: relative;
+		width: min(82vw, 440px);
+		aspect-ratio: 16 / 10;
+		background: var(--color-surface-raised);
+		border-radius: 4px;
+		overflow: hidden;
+	}
+
+	/* ── CRT power-on line ────────────────────────────────────────────── */
+	.nf-powerline {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 0;
+		height: 1px;
+		background: var(--color-text-primary);
+		opacity: 0.5;
+		z-index: 5;
+		transform: translate(-50%, -50%);
+		animation: power-on 0.3s cubic-bezier(0.16, 1, 0.3, 1) both,
+		           power-fade 0.2s 0.35s both;
+	}
+
+	/* ── Corner brackets ──────────────────────────────────────────────── */
+	.nf-corner {
+		position: absolute;
+		width: 20px;
+		height: 20px;
+		z-index: 2;
+		opacity: 0;
+		animation: corner-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+	}
+
+	.nf-tl {
+		top: 8px; left: 8px;
+		border-top: 2px solid var(--color-accent);
+		border-left: 2px solid var(--color-accent);
+		animation-delay: 0.5s;
+	}
+	.nf-tr {
+		top: 8px; right: 8px;
+		border-top: 2px solid var(--color-accent);
+		border-right: 2px solid var(--color-accent);
+		animation-delay: 0.55s;
+	}
+	.nf-bl {
+		bottom: 8px; left: 8px;
+		border-bottom: 2px solid var(--color-accent);
+		border-left: 2px solid var(--color-accent);
+		animation-delay: 0.6s;
+	}
+	.nf-br {
+		bottom: 8px; right: 8px;
+		border-bottom: 2px solid var(--color-accent);
+		border-right: 2px solid var(--color-accent);
+		animation-delay: 0.65s;
+	}
+
+	/* ── Static noise ─────────────────────────────────────────────────── */
+	.nf-static {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		image-rendering: pixelated;
+		pointer-events: none;
+	}
+
+	/* ── Scan line (single sweep) ─────────────────────────────────────── */
+	.nf-scanline {
+		position: absolute;
+		left: 0;
+		right: 0;
+		height: 2px;
+		background: linear-gradient(
+			90deg,
+			transparent 0%,
+			var(--color-accent) 20%,
+			var(--color-accent) 80%,
+			transparent 100%
+		);
+		opacity: 0;
+		z-index: 3;
+		pointer-events: none;
+		animation: scanline-sweep 0.8s cubic-bezier(0.25, 1, 0.5, 1) 0.6s both;
+	}
+
+	/* ── REC badge ────────────────────────────────────────────────────── */
+	.nf-rec {
+		position: absolute;
+		top: 14px;
+		left: 16px;
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		font-family: var(--font-mono);
+		font-size: 0.625rem;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		color: var(--color-status-critical);
+		z-index: 2;
+		opacity: 0;
+		animation: vf-fade 0.3s 1s both;
+	}
+
+	.nf-rec-dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: var(--color-status-critical);
+		animation: rec-blink 1.4s ease-in-out 1.3s infinite;
+		opacity: 0;
+		animation-fill-mode: forwards, none;
+	}
+
+	/* ── 404 with glitch entrance ─────────────────────────────────────── */
+	.nf-code {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: clamp(4.5rem, 14vw, 8rem);
+		font-weight: 800;
+		line-height: 1;
+		letter-spacing: -0.03em;
+		color: var(--color-text-primary);
+		opacity: 0;
+		z-index: 1;
+		animation: glitch-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.7s both;
+	}
+
+	.nf-code::before {
+		content: attr(data-text);
+		position: absolute;
+		color: transparent;
+		-webkit-text-stroke: 1.5px var(--color-accent);
+		opacity: 0;
+		animation: stroke-in 0.4s 0.9s both;
+	}
+
+	/* ── Timestamp bar ────────────────────────────────────────────────── */
+	.nf-timestamp {
+		position: absolute;
+		bottom: 12px;
+		left: 16px;
+		right: 16px;
+		font-family: var(--font-mono);
+		font-size: 0.5625rem;
+		letter-spacing: 0.05em;
+		color: var(--color-text-muted);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		z-index: 2;
+		opacity: 0;
+		animation: vf-fade 0.3s 1.1s both;
+	}
+
+	/* ── Keyframes ────────────────────────────────────────────────────── */
+
+	/* CRT power-on: thin line expands horizontally from center */
+	@keyframes power-on {
+		from { width: 0; opacity: 0.8; }
+		to   { width: 100%; opacity: 0.5; }
+	}
+	@keyframes power-fade {
+		to { opacity: 0; height: 0; }
+	}
+
+	/* Corners pop in from their respective corners */
+	@keyframes corner-in {
+		from { opacity: 0; transform: scale(0.5); }
+		to   { opacity: 0.5; transform: scale(1); }
+	}
+
+	/* Single scan line sweeps top to bottom */
+	@keyframes scanline-sweep {
+		0%   { top: 0; opacity: 0; }
+		5%   { opacity: 0.6; }
+		90%  { opacity: 0.3; }
+		100% { top: 100%; opacity: 0; }
+	}
+
+	/* 404 glitches in with horizontal offset steps */
+	@keyframes glitch-in {
+		0%   { opacity: 0; transform: translateX(8px); }
+		20%  { opacity: 0.04; transform: translateX(-4px); }
+		40%  { opacity: 0.02; transform: translateX(3px); }
+		60%  { opacity: 0.05; transform: translateX(-1px); }
+		100% { opacity: 0.06; transform: translateX(0); }
+	}
+
+	@keyframes stroke-in {
+		0%   { opacity: 0; transform: translateX(-3px); }
+		50%  { opacity: 0.3; transform: translateX(1px); }
+		100% { opacity: 0.4; transform: translateX(0); }
+	}
+
+	@keyframes vf-fade {
+		from { opacity: 0; }
+		to   { opacity: 1; }
+	}
+
+	@keyframes rec-blink {
+		0%, 100% { opacity: 1; }
+		50% { opacity: 0.15; }
+	}
+
+	/* ── Reduced motion ───────────────────────────────────────────────── */
+	@media (prefers-reduced-motion: reduce) {
+		.nf-powerline { animation: none; opacity: 0; }
+		.nf-corner { animation: none; opacity: 0.5; }
+		.nf-scanline { animation: none; opacity: 0; }
+		.nf-code { animation: none; opacity: 0.06; }
+		.nf-code::before { animation: none; opacity: 0.4; }
+		.nf-rec { animation: none; opacity: 1; }
+		.nf-rec-dot { animation: none; opacity: 0.8; }
+		.nf-timestamp { animation: none; opacity: 1; }
+	}
+</style>
