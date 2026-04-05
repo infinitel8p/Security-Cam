@@ -392,12 +392,7 @@
   async function doUpdate() {
     updateConfirm = false;
     clearUpdate();
-    toast(t("toast.updating"));
-    try {
-      await apiFetch(`${getBackendUrl()}/system/restart`, { method: "POST" });
-    } catch {
-      // Expected - service restarts and runs update.sh via ExecStartPre
-    }
+    doRestart();
   }
 
   let restartConfirm = $state(false);
@@ -419,6 +414,7 @@
 
   async function doRestart() {
     restartConfirm = false;
+    clearUpdate();
     toast(t("toast.restarting"), { icon: "🔄" });
     try {
       await apiFetch(`${getBackendUrl()}/system/restart`, { method: "POST" });
@@ -429,6 +425,7 @@
 
   async function doReboot() {
     rebootConfirm = false;
+    clearUpdate();
     toast(t("toast.rebooting"), { icon: "🔄" });
     try {
       await apiFetch(`${getBackendUrl()}/system/reboot`, { method: "POST" });
