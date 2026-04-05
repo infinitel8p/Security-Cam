@@ -314,6 +314,9 @@ def settings_import():
     # Refresh auth state in case token/password changed
     auth.refresh()
 
+    # Restart sensor so imported sensor config takes effect
+    sensor_manager.restart()
+
     log.info("Settings imported successfully")
     return jsonify({"message": "Settings imported successfully"})
 
