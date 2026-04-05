@@ -490,8 +490,20 @@
   function diffSettings(current: Record<string, any>, incoming: Record<string, any>): { key: string; from: any; to: any }[] {
     const changes: { key: string; from: any; to: any }[] = [];
     for (const key of Object.keys(incoming)) {
-      if (JSON.stringify(current[key]) !== JSON.stringify(incoming[key])) {
-        changes.push({ key, from: current[key], to: incoming[key] });
+      const curVal = current[key];
+      const incVal = incoming[key];
+      if (JSON.stringify(curVal) === JSON.stringify(incVal)) continue;
+
+      // Flatten one level for plain objects (not arrays)
+      if (incVal && typeof incVal === "object" && !Array.isArray(incVal) && curVal && typeof curVal === "object" && !Array.isArray(curVal)) {
+        const allSubKeys = new Set([...Object.keys(curVal), ...Object.keys(incVal)]);
+        for (const sub of allSubKeys) {
+          if (JSON.stringify(curVal[sub]) !== JSON.stringify(incVal[sub])) {
+            changes.push({ key: `${key}.${sub}`, from: curVal[sub], to: incVal[sub] });
+          }
+        }
+      } else {
+        changes.push({ key, from: curVal, to: incVal });
       }
     }
     return changes;
@@ -525,6 +537,12 @@
         const curRes = await apiFetch(`${getBackendUrl()}/settings`);
         if (!curRes.ok) throw new Error(t("toast.settingsImportFailed"));
         const current = await curRes.json();
+        // GET /settings strips password_hash for security, so exclude it
+        // from the diff to avoid false positives when importing a full backup
+        if (parsed.Auth) {
+          const { password_hash: _, ...rest } = parsed.Auth;
+          parsed = { ...parsed, Auth: rest };
+        }
         const changes = diffSettings(current, parsed);
         importPreview = { incoming: parsed, body: text, changes };
       } catch (err: any) {
@@ -562,20 +580,14 @@
     importing = false;
   }
 
-  function formatValue(val: any): string {
+  function formatValue(val: any, key?: string): string {
     if (val === undefined) return "-";
-    if (typeof val === "object") return redactSensitive(val);
+    const leafKey = key?.split(".").pop() ?? "";
+    if (SENSITIVE_KEYS.has(leafKey)) return "***";
+    if (typeof val === "object") return JSON.stringify(val);
     return String(val);
   }
 
-  function redactSensitive(obj: any): string {
-    if (obj === null || typeof obj !== "object") return JSON.stringify(obj);
-    const redacted: Record<string, any> = {};
-    for (const [k, v] of Object.entries(obj)) {
-      redacted[k] = SENSITIVE_KEYS.has(k) ? "***" : v;
-    }
-    return JSON.stringify(redacted);
-  }
 
   // --- Auth settings ---
   let authEnabled = $state(false);
@@ -1383,12 +1395,12 @@
               >
                 <p class="text-xs font-semibold tracking-wide text-text-primary">{change.key}</p>
                 <div class="mt-1.5 flex items-center gap-2 text-[0.6875rem]">
-                  <span class="min-w-0 flex-1 truncate rounded bg-surface-elevated px-2 py-1 font-mono text-text-muted" title={formatValue(change.from)}>
-                    {formatValue(change.from)}
+                  <span class="min-w-0 flex-1 truncate rounded bg-surface-elevated px-2 py-1 font-mono text-text-muted" title={formatValue(change.from, change.key)}>
+                    {formatValue(change.from, change.key)}
                   </span>
                   <Icon icon={chevronRightIcon} class="h-3 w-3 shrink-0 text-text-muted" />
-                  <span class="min-w-0 flex-1 truncate rounded bg-accent-muted px-2 py-1 font-mono text-accent" title={formatValue(change.to)}>
-                    {formatValue(change.to)}
+                  <span class="min-w-0 flex-1 truncate rounded bg-accent-muted px-2 py-1 font-mono text-accent" title={formatValue(change.to, change.key)}>
+                    {formatValue(change.to, change.key)}
                   </span>
                 </div>
               </div>
