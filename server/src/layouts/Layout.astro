@@ -49,9 +49,6 @@ const { title = "Security Cam" } = Astro.props;
 		</AuthGate>
 	</body>
 	<script is:inline>
-		if ("serviceWorker" in navigator) {
-			navigator.serviceWorker.register("/sw.js");
-		}
 		console.log(
 			"%c📷 Security-Cam %chttps://github.com/infinitel8p/Security-Cam",
 			"font-size:14px;font-weight:bold;color:#4d94ff;",
