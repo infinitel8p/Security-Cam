@@ -46,6 +46,9 @@
   let ispMetering = $state("centre");
   let scanLinesEnabled = $state(true);
   let captivePortalEnabled = $state(true);
+  let nightVisionEnabled = $state(true);
+  let nightVisionThreshold = $state(25);
+  let nightVisionSaving = $state(false);
   let storageLimitEnabled = $state(false);
   let storageLimitPercent = $state(85);
   let storageDiskPercent = $state(0);
@@ -176,6 +179,9 @@
       scanLinesEnabled = settings.ScanLines !== false;
       const cp = settings.CaptivePortal ?? {};
       captivePortalEnabled = cp.enabled !== false;
+      const nv = settings.NightVision ?? {};
+      nightVisionEnabled = nv.enabled !== false;
+      nightVisionThreshold = nv.threshold_percent ?? 25;
       const au = settings.Auth ?? {};
       authEnabled = au.enabled ?? false;
       authToken = au.token ?? "";
@@ -457,6 +463,39 @@
         },
       },
     ).finally(() => { captivePortalSaving = false; });
+  }
+
+  function toggleNightVision() {
+    nightVisionEnabled = !nightVisionEnabled;
+    saveNightVision();
+  }
+
+  function saveNightVision() {
+    nightVisionSaving = true;
+    const enabled = nightVisionEnabled;
+    const threshold = nightVisionThreshold;
+
+    toast.promise(
+      (async () => {
+        const res = await apiFetch(`${getBackendUrl()}/settings`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            NightVision: { enabled, threshold_percent: threshold },
+          }),
+        });
+        if (!res.ok) throw new Error();
+        return enabled;
+      })(),
+      {
+        loading: t("status.saving"),
+        success: (on) => on ? t("toast.nightVisionEnabled") : t("toast.nightVisionDisabled"),
+        error: () => {
+          nightVisionEnabled = !enabled;
+          return t("toast.saveFailed");
+        },
+      },
+    ).finally(() => { nightVisionSaving = false; });
   }
 
   // --- Settings backup ---
@@ -925,6 +964,53 @@
           denoise={ispDenoise}
           metering={ispMetering}
         />
+
+        <!-- Night Vision -->
+        <div class="card overflow-hidden">
+          <div class="px-4 py-4 sm:px-5 sm:py-5">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-text-primary">{t("label.nightVision")}</p>
+                <p class="mt-0.5 text-xs text-text-muted">{t("help.nightVision")}</p>
+              </div>
+              <ToggleSpring checked={nightVisionEnabled} onToggle={toggleNightVision} label={t("label.nightVision")} />
+            </div>
+
+            {#if nightVisionEnabled}
+              <div class="mt-4 space-y-3 animate-slide-down">
+                <div>
+                  <div class="flex items-center justify-between mb-1.5">
+                    <label class="text-xs font-medium text-text-secondary" for="nv-threshold">{t("label.nightVisionThreshold")}</label>
+                    <span class="rounded-md bg-surface-elevated px-2 py-0.5 text-[0.6875rem] font-semibold tabular-nums text-text-primary">{nightVisionThreshold}%</span>
+                  </div>
+                  <div class="flex items-center gap-2.5">
+                    <span class="text-[0.625rem] text-text-muted w-8 shrink-0 text-right">5%</span>
+                    <input
+                      id="nv-threshold"
+                      type="range"
+                      min="5"
+                      max="80"
+                      step="5"
+                      bind:value={nightVisionThreshold}
+                      aria-label={t("label.nightVisionThreshold")}
+                      class="range-slider flex-1"
+                    />
+                    <span class="text-[0.625rem] text-text-muted w-8 shrink-0">80%</span>
+                  </div>
+                  <p class="mt-1 text-[0.6875rem] text-text-muted">{t("help.nightVisionThreshold")}</p>
+                </div>
+
+                <button
+                  class="btn-press rounded-lg bg-accent/10 px-4 py-2 text-xs font-semibold text-accent transition-colors hover:bg-accent/18 disabled:opacity-50"
+                  onclick={saveNightVision}
+                  disabled={nightVisionSaving}
+                >
+                  {nightVisionSaving ? t("btn.saving") : t("btn.save")}
+                </button>
+              </div>
+            {/if}
+          </div>
+        </div>
       </section>
 
       <!-- Storage -->

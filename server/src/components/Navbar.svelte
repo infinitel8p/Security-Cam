@@ -67,7 +67,7 @@
     <div>
       <span class="text-[0.8125rem] font-bold tracking-tight text-text-primary">Security-Cam</span>
       <p class="text-[0.625rem] leading-none font-medium font-mono tracking-widest text-text-muted">
-        v.2026.04.05.12
+        v.2026.04.05.13
       </p>
       {#if gitBranch}
         <p class="mt-0.5 text-[0.5625rem] leading-none font-mono text-text-muted/60 truncate max-w-[7.5rem]" title="{gitBranch}{gitCommit ? ' @ ' + gitCommit : ''}">
