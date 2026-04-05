@@ -145,6 +145,10 @@ export default {
     copyToken: "Copiar",
     regenerateToken: "Regenerar",
     changePassword: "Cambiar contraseña",
+    export: "Exportar",
+    import: "Importar",
+    importing: "Importando...",
+    confirmImport: "Aplicar cambios",
   },
 
   label: {
@@ -229,6 +233,8 @@ export default {
     exposureMode: "Modo de exposición",
     denoise: "Reducción de ruido",
     metering: "Medición",
+    settingsBackup: "Copia de seguridad",
+    importPreview: "Vista previa del import",
   },
 
   input: {
@@ -336,6 +342,11 @@ export default {
     ispApplied: "Calidad de imagen actualizada. La transmisión se reconectará.",
     ispFailed: "No se pudo actualizar la calidad de imagen.",
     ispReset: "Calidad de imagen restablecida.",
+    settingsExported: "Copia de seguridad descargada",
+    settingsImported: "Configuración restaurada. Recargando...",
+    settingsImportFailed: "No se pudo importar. Comprueba el archivo e inténtalo de nuevo.",
+    settingsFileTooLarge: "El archivo es demasiado grande. Las copias deben ser menores de 256 KB.",
+    settingsInvalidJson: "El archivo no es JSON válido. Selecciona un archivo de copia de seguridad.",
   },
 
   archive: {
@@ -441,6 +452,9 @@ export default {
     imageQuality: "La transmisión en vivo se interrumpirá brevemente mientras la cámara se reinicia.",
     ispPerformance: "La reducción de ruido 'Alta calidad' usa más CPU. En el Pi Zero 2 W, prefiera 'Rápido' o 'Desactivado'.",
     ispDocsLink: "¿Qué hace cada ajuste?",
+    settingsBackup: "Exporta tus ajustes a un archivo o restaura desde una copia de seguridad",
+    importNoChanges: "El archivo de copia coincide con los ajustes actuales. Nada que cambiar.",
+    importChanges: "{count} ajuste(s) se modificarán:",
   },
 
   isp: {

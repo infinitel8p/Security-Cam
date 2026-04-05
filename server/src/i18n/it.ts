@@ -145,6 +145,10 @@ export default {
     copyToken: "Copia",
     regenerateToken: "Rigenera",
     changePassword: "Cambia password",
+    export: "Esporta",
+    import: "Importa",
+    importing: "Importazione...",
+    confirmImport: "Applica modifiche",
   },
 
   label: {
@@ -229,6 +233,8 @@ export default {
     exposureMode: "Modalità esposizione",
     denoise: "Riduzione rumore",
     metering: "Misurazione",
+    settingsBackup: "Backup impostazioni",
+    importPreview: "Anteprima importazione",
   },
 
   input: {
@@ -336,6 +342,11 @@ export default {
     ispApplied: "Qualità immagine aggiornata. Il feed si riconnetterà.",
     ispFailed: "Impossibile aggiornare la qualità immagine.",
     ispReset: "Qualità immagine ripristinata.",
+    settingsExported: "Backup impostazioni scaricato",
+    settingsImported: "Impostazioni ripristinate. Ricaricamento...",
+    settingsImportFailed: "Impossibile importare. Controlla il file e riprova.",
+    settingsFileTooLarge: "File troppo grande. I backup devono essere inferiori a 256 KB.",
+    settingsInvalidJson: "Il file non è un JSON valido. Seleziona un file di backup.",
   },
 
   archive: {
@@ -441,6 +452,9 @@ export default {
     imageQuality: "Il feed in diretta si interromperà brevemente durante il riavvio della telecamera.",
     ispPerformance: "La riduzione rumore 'Alta qualità' usa più CPU. Sul Pi Zero 2 W, preferire 'Veloce' o 'Disattivato'.",
     ispDocsLink: "Cosa fa ogni impostazione?",
+    settingsBackup: "Esporta le impostazioni in un file o ripristina da un backup precedente",
+    importNoChanges: "Il file di backup corrisponde alle impostazioni attuali. Nessuna modifica necessaria.",
+    importChanges: "{count} impostazione/i verranno modificate:",
   },
 
   isp: {

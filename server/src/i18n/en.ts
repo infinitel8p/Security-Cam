@@ -151,6 +151,10 @@ export default {
     copyToken: "Copy",
     regenerateToken: "Regenerate",
     changePassword: "Change password",
+    export: "Export",
+    import: "Import",
+    importing: "Importing...",
+    confirmImport: "Apply changes",
   },
 
   // Labels
@@ -236,6 +240,8 @@ export default {
     exposureMode: "Exposure Mode",
     denoise: "Denoise",
     metering: "Metering",
+    settingsBackup: "Settings backup",
+    importPreview: "Import preview",
   },
 
   // Input placeholders
@@ -348,6 +354,11 @@ export default {
     ispApplied: "Image quality updated. Feed will reconnect shortly.",
     ispFailed: "Couldn't update image quality. Try again.",
     ispReset: "Image quality reset to defaults.",
+    settingsExported: "Settings backup downloaded",
+    settingsImported: "Settings restored. Reloading...",
+    settingsImportFailed: "Couldn't import settings. Check the file and try again.",
+    settingsFileTooLarge: "File is too large. Settings backups should be under 256 KB.",
+    settingsInvalidJson: "File is not valid JSON. Select a settings backup file.",
   },
 
   // Archive
@@ -459,6 +470,9 @@ export default {
     imageQuality: "The live feed will briefly disconnect while the camera restarts with new settings.",
     ispPerformance: "Denoise 'High Quality' uses more CPU. On Pi Zero 2 W, prefer 'Fast' or 'Off'.",
     ispDocsLink: "What does each setting do?",
+    settingsBackup: "Export your settings to a file, or restore from a previous backup",
+    importNoChanges: "The backup file matches your current settings. Nothing to change.",
+    importChanges: "{count} setting(s) will be changed:",
   },
 
   // ISP image quality option labels

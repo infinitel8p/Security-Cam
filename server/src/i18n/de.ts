@@ -145,6 +145,10 @@ export default {
     copyToken: "Kopieren",
     regenerateToken: "Neu generieren",
     changePassword: "Passwort ändern",
+    export: "Exportieren",
+    import: "Importieren",
+    importing: "Importiert...",
+    confirmImport: "Änderungen übernehmen",
   },
 
   label: {
@@ -229,6 +233,8 @@ export default {
     exposureMode: "Belichtungsmodus",
     denoise: "Rauschunterdrückung",
     metering: "Messmethode",
+    settingsBackup: "Einstellungen sichern",
+    importPreview: "Import-Vorschau",
   },
 
   input: {
@@ -336,6 +342,11 @@ export default {
     ispApplied: "Bildqualität aktualisiert. Feed wird kurz neu verbunden.",
     ispFailed: "Bildqualität konnte nicht aktualisiert werden.",
     ispReset: "Bildqualität auf Standard zurückgesetzt.",
+    settingsExported: "Einstellungen heruntergeladen",
+    settingsImported: "Einstellungen wiederhergestellt. Seite wird neu geladen...",
+    settingsImportFailed: "Import fehlgeschlagen. Datei prüfen und erneut versuchen.",
+    settingsFileTooLarge: "Datei ist zu groß. Sicherungsdateien sollten unter 256 KB sein.",
+    settingsInvalidJson: "Datei ist kein gültiges JSON. Wähle eine Sicherungsdatei aus.",
   },
 
   archive: {
@@ -441,6 +452,9 @@ export default {
     imageQuality: "Das Live-Bild wird kurz unterbrochen, während die Kamera mit neuen Einstellungen neu startet.",
     ispPerformance: "Rauschunterdrückung 'Hohe Qualität' verbraucht mehr CPU. Auf dem Pi Zero 2 W 'Schnell' oder 'Aus' bevorzugen.",
     ispDocsLink: "Was bewirkt jede Einstellung?",
+    settingsBackup: "Einstellungen in eine Datei exportieren oder aus einer Sicherung wiederherstellen",
+    importNoChanges: "Die Sicherungsdatei stimmt mit den aktuellen Einstellungen überein. Keine Änderungen nötig.",
+    importChanges: "{count} Einstellung(en) werden geändert:",
   },
 
   isp: {

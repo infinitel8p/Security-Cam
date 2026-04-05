@@ -1,7 +1,7 @@
 ---
 sidebar_position: 10
 last_update:
-  date: 2026-04-03
+  date: 2026-04-05
   author: Ludo
 ---
 
@@ -367,6 +367,29 @@ Then restart the service.
 ---
 
 ## System {#system}
+
+### Settings backup
+
+Export and restore your complete settings configuration. Useful when re-flashing the SD card, migrating to a new Pi, or keeping a backup before experimenting with settings.
+
+- **Export** downloads `settings-backup.json` containing all settings (devices, sensor config, camera rotation, ISP tuning, storage limits, auth credentials, etc.)
+- **Import** opens a file picker to select a previously exported backup. A preview dialog shows which settings will change before you confirm. After a successful import, the page reloads to reflect the restored settings.
+
+:::warning Auth credentials included
+The exported file contains auth tokens and password hashes. Store the backup file securely and don't share it publicly.
+:::
+
+:::tip API usage
+You can also use the API directly:
+```bash
+# Export
+curl -H "Authorization: Bearer <token>" http://<pi-ip>:5005/settings/export -o settings-backup.json
+
+# Import
+curl -X POST -H "Authorization: Bearer <token>" -H "Content-Type: application/json" \
+  -d @settings-backup.json http://<pi-ip>:5005/settings/import
+```
+:::
 
 ### Software update
 

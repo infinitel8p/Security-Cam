@@ -145,6 +145,10 @@ export default {
     copyToken: "Copier",
     regenerateToken: "Régénérer",
     changePassword: "Changer le mot de passe",
+    export: "Exporter",
+    import: "Importer",
+    importing: "Import en cours...",
+    confirmImport: "Appliquer les modifications",
   },
 
   label: {
@@ -229,6 +233,8 @@ export default {
     exposureMode: "Mode d’exposition",
     denoise: "Réduction du bruit",
     metering: "Mesure de lumière",
+    settingsBackup: "Sauvegarde des paramètres",
+    importPreview: "Aperçu de l'import",
   },
 
   input: {
@@ -336,6 +342,11 @@ export default {
     ispApplied: "Qualité d'image mise à jour. Le flux se reconnectera.",
     ispFailed: "Impossible de mettre à jour la qualité d'image.",
     ispReset: "Qualité d'image réinitialisée.",
+    settingsExported: "Sauvegarde des paramètres téléchargée",
+    settingsImported: "Paramètres restaurés. Rechargement...",
+    settingsImportFailed: "Impossible d'importer les paramètres. Vérifiez le fichier.",
+    settingsFileTooLarge: "Fichier trop volumineux. Les sauvegardes doivent faire moins de 256 Ko.",
+    settingsInvalidJson: "Le fichier n'est pas un JSON valide. Sélectionnez un fichier de sauvegarde.",
   },
 
   archive: {
@@ -441,6 +452,9 @@ export default {
     imageQuality: "Le flux en direct sera brièvement interrompu pendant le redémarrage de la caméra.",
     ispPerformance: "Le mode 'Haute qualité' de réduction du bruit utilise plus de CPU. Sur le Pi Zero 2 W, préférez 'Rapide' ou 'Désactivé'.",
     ispDocsLink: "Que fait chaque réglage ?",
+    settingsBackup: "Exporter vos paramètres ou restaurer une sauvegarde précédente",
+    importNoChanges: "Le fichier de sauvegarde correspond aux paramètres actuels. Rien à modifier.",
+    importChanges: "{count} paramètre(s) seront modifiés :",
   },
 
   isp: {

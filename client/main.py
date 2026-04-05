@@ -1,3 +1,4 @@
+import json
 import logging
 from logging.handlers import RotatingFileHandler
 import os
@@ -272,6 +273,49 @@ def settings():
                 if new_settings["Auth"].get("enabled"):
                     return jsonify({"message": "Settings updated", "token": auth.get_token()})
             return jsonify({"message": "Settings updated"})
+
+
+@app.route('/settings/export', methods=['GET'])
+def settings_export():
+    """Download settings.json as a file."""
+    s = settings_helpers.get_settings()
+    response = jsonify(s)
+    response.headers["Content-Disposition"] = "attachment; filename=settings-backup.json"
+    return response
+
+
+@app.route('/settings/import', methods=['POST'])
+def settings_import():
+    """Upload a settings JSON file and apply it."""
+    if request.content_length and request.content_length > 256 * 1024:
+        return jsonify({"error": "File too large"}), 413
+
+    if not request.is_json:
+        return jsonify({"error": "Expected JSON body"}), 400
+
+    incoming = request.json
+    if not isinstance(incoming, dict):
+        return jsonify({"error": "Invalid settings format"}), 400
+
+    # Validate against known keys from defaults
+    with open(settings_helpers.DEFAULTS_FILE, 'r') as f:
+        defaults = json.load(f)
+
+    unknown = set(incoming.keys()) - set(defaults.keys())
+    if unknown:
+        return jsonify({"error": f"Unknown settings keys: {', '.join(sorted(unknown))}"}), 400
+
+    # Write settings
+    settings_helpers.update_settings(incoming)
+
+    # Re-sync MediaMTX config with imported values
+    mediamtx_helpers.sync_settings_to_config(settings_helpers.get_settings())
+
+    # Refresh auth state in case token/password changed
+    auth.refresh()
+
+    log.info("Settings imported successfully")
+    return jsonify({"message": "Settings imported successfully"})
 
 
 @app.route('/list_directories', methods=['GET'])

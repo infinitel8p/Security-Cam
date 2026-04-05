@@ -14,9 +14,11 @@
   import Icon from "./Icon.svelte";
   import ToggleSpring from "./ToggleSpring.svelte";
   import deviceDesktopIcon from "../icons/device-desktop.svg?raw";
+  import fileTextIcon from "../icons/file-text.svg?raw";
   import shieldIcon from "../icons/shield.svg?raw";
   import sunIcon from "../icons/sun.svg?raw";
   import moonIcon from "../icons/moon.svg?raw";
+  import chevronRightIcon from "../icons/chevron-right.svg?raw";
   import { initLocale, getLocale, setLocale, type Locale } from "../i18n";
   import { t } from "../i18n";
 
@@ -455,6 +457,124 @@
         },
       },
     ).finally(() => { captivePortalSaving = false; });
+  }
+
+  // --- Settings backup ---
+  const MAX_IMPORT_SIZE = 256 * 1024; // 256 KB - settings files are small
+  const SENSITIVE_KEYS = new Set(["token", "password_hash"]);
+  let exporting = $state(false);
+  let importing = $state(false);
+  let importLoading = $state(false);
+  let importPreview: { incoming: Record<string, any>; body: string; changes: { key: string; from: any; to: any }[] } | null = $state(null);
+
+  async function exportSettings() {
+    if (exporting) return;
+    exporting = true;
+    try {
+      const res = await apiFetch(`${getBackendUrl()}/settings/export`);
+      if (!res.ok) throw new Error();
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "settings-backup.json";
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success(t("toast.settingsExported"));
+    } catch {
+      toast.error(t("toast.saveFailed"));
+    }
+    exporting = false;
+  }
+
+  function diffSettings(current: Record<string, any>, incoming: Record<string, any>): { key: string; from: any; to: any }[] {
+    const changes: { key: string; from: any; to: any }[] = [];
+    for (const key of Object.keys(incoming)) {
+      if (JSON.stringify(current[key]) !== JSON.stringify(incoming[key])) {
+        changes.push({ key, from: current[key], to: incoming[key] });
+      }
+    }
+    return changes;
+  }
+
+  function triggerImport() {
+    if (importLoading) return;
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json,application/json";
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      if (file.size > MAX_IMPORT_SIZE) {
+        toast.error(t("toast.settingsFileTooLarge"));
+        return;
+      }
+      importLoading = true;
+      try {
+        const text = await file.text();
+        let parsed: any;
+        try {
+          parsed = JSON.parse(text);
+        } catch {
+          throw new Error(t("toast.settingsInvalidJson"));
+        }
+        if (typeof parsed !== "object" || Array.isArray(parsed)) {
+          throw new Error(t("toast.settingsInvalidJson"));
+        }
+        // Fetch current settings to compute diff
+        const curRes = await apiFetch(`${getBackendUrl()}/settings`);
+        if (!curRes.ok) throw new Error(t("toast.settingsImportFailed"));
+        const current = await curRes.json();
+        const changes = diffSettings(current, parsed);
+        importPreview = { incoming: parsed, body: text, changes };
+      } catch (err: any) {
+        toast.error(err?.message || t("toast.settingsImportFailed"));
+      }
+      importLoading = false;
+    };
+    input.click();
+  }
+
+  function dismissPreview() {
+    if (importing) return;
+    importPreview = null;
+  }
+
+  async function confirmImport() {
+    if (!importPreview || importing) return;
+    importing = true;
+    try {
+      const res = await apiFetch(`${getBackendUrl()}/settings/import`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: importPreview.body,
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || t("toast.settingsImportFailed"));
+      }
+      importPreview = null;
+      toast.success(t("toast.settingsImported"));
+      setTimeout(() => location.reload(), 600);
+    } catch (err: any) {
+      toast.error(err?.message || t("toast.settingsImportFailed"));
+    }
+    importing = false;
+  }
+
+  function formatValue(val: any): string {
+    if (val === undefined) return "-";
+    if (typeof val === "object") return redactSensitive(val);
+    return String(val);
+  }
+
+  function redactSensitive(obj: any): string {
+    if (obj === null || typeof obj !== "object") return JSON.stringify(obj);
+    const redacted: Record<string, any> = {};
+    for (const [k, v] of Object.entries(obj)) {
+      redacted[k] = SENSITIVE_KEYS.has(k) ? "***" : v;
+    }
+    return JSON.stringify(redacted);
   }
 
   // --- Auth settings ---
@@ -1124,8 +1244,33 @@
           <h2 class="text-xs font-semibold uppercase tracking-widest text-text-secondary">{t("section.system")}</h2>
         </div>
         <div class="card overflow-hidden">
-          <!-- Software Update -->
+          <!-- Settings Backup -->
           <div class="px-4 py-4 sm:px-5 sm:py-5">
+            <div class="flex items-center justify-between gap-4">
+              <div class="min-w-0">
+                <p class="text-sm font-medium text-text-primary">{t("label.settingsBackup")}</p>
+                <p class="mt-0.5 text-xs text-text-muted">{t("help.settingsBackup")}</p>
+              </div>
+              <div class="flex gap-2 shrink-0">
+                <button
+                  onclick={exportSettings}
+                  disabled={exporting}
+                  class="btn-press rounded-lg border border-border-default px-4 py-2 text-xs font-semibold text-text-secondary transition-colors hover:border-border-strong hover:text-text-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {t("btn.export")}
+                </button>
+                <button
+                  onclick={triggerImport}
+                  disabled={importing || importLoading}
+                  class="btn-press rounded-lg border border-border-default px-4 py-2 text-xs font-semibold text-text-secondary transition-colors hover:border-border-strong hover:text-text-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {importLoading ? t("btn.importing") : t("btn.import")}
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- Software Update -->
+          <div class="border-t border-border-subtle px-4 py-4 sm:px-5 sm:py-5">
             <div class="flex items-center justify-between gap-4">
               <div class="min-w-0">
                 <p class="text-sm font-medium text-text-primary">{t("label.softwareUpdate")}</p>
@@ -1204,4 +1349,73 @@
       </section>
     </div>
   </div>
+
+  <!-- Import Preview Modal -->
+  {#if importPreview}
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <div
+      class="animate-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      tabindex="-1"
+      onkeydown={(e) => { if (e.key === "Escape") dismissPreview(); }}
+    >
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <div class="absolute inset-0" onclick={dismissPreview}></div>
+      <div class="animate-dialog relative w-full max-w-md rounded-2xl border border-border-subtle bg-surface-raised p-5 shadow-[var(--shadow-lg)]">
+        <!-- Header -->
+        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-accent-muted">
+          <Icon icon={fileTextIcon} class="h-4.5 w-4.5 text-accent" />
+        </div>
+        <h3 class="mt-3 text-sm font-semibold text-text-primary">{t("label.importPreview")}</h3>
+
+        {#if importPreview.changes.length === 0}
+          <p class="mt-1 text-[0.8125rem] leading-relaxed text-text-secondary">{t("help.importNoChanges")}</p>
+        {:else}
+          <p class="mt-1 text-[0.8125rem] leading-relaxed text-text-secondary">{t("help.importChanges", { count: String(importPreview.changes.length) })}</p>
+
+          <!-- Change list -->
+          <div class="mt-4 max-h-72 space-y-1.5 overflow-y-auto pr-1">
+            {#each importPreview.changes as change, i}
+              <div
+                class="animate-in rounded-lg border border-border-subtle bg-surface-overlay px-3.5 py-2.5"
+                style="animation-delay: {Math.min(60 + i * 40, 400)}ms"
+              >
+                <p class="text-xs font-semibold tracking-wide text-text-primary">{change.key}</p>
+                <div class="mt-1.5 flex items-center gap-2 text-[0.6875rem]">
+                  <span class="min-w-0 flex-1 truncate rounded bg-surface-elevated px-2 py-1 font-mono text-text-muted" title={formatValue(change.from)}>
+                    {formatValue(change.from)}
+                  </span>
+                  <Icon icon={chevronRightIcon} class="h-3 w-3 shrink-0 text-text-muted" />
+                  <span class="min-w-0 flex-1 truncate rounded bg-accent-muted px-2 py-1 font-mono text-accent" title={formatValue(change.to)}>
+                    {formatValue(change.to)}
+                  </span>
+                </div>
+              </div>
+            {/each}
+          </div>
+        {/if}
+
+        <!-- Actions -->
+        <div class="mt-5 flex justify-end gap-2.5">
+          <button
+            onclick={dismissPreview}
+            disabled={importing}
+            class="btn-press rounded-lg px-4 py-2.5 text-[0.8125rem] font-medium text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary disabled:opacity-40"
+          >
+            {t("btn.cancel")}
+          </button>
+          {#if importPreview.changes.length > 0}
+            <button
+              onclick={confirmImport}
+              disabled={importing}
+              class="btn-press rounded-lg bg-accent/10 px-4 py-2.5 text-[0.8125rem] font-semibold text-accent transition-colors hover:bg-accent/18 disabled:opacity-40"
+            >
+              {importing ? t("btn.importing") : t("btn.confirmImport")}
+            </button>
+          {/if}
+        </div>
+      </div>
+    </div>
+  {/if}
 {/if}
