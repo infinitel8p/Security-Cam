@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 
 import psutil
 
+from . import night_vision
 from . import system_helpers
 from . import sse
 
@@ -241,6 +242,7 @@ def _stats_emit_loop():
                 "uptime_seconds": system_helpers.get_uptime(),
                 "throttle": system_helpers.get_throttle_status(),
                 "sd_health": system_helpers.get_sd_health(),
+                "night_mode": night_vision.is_night_mode(),
             }
             sse.emit("system_info", data)
         except Exception as e:

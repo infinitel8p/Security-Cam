@@ -65,6 +65,11 @@ _start("modules.timelapse_manager.get_status", return_value={
 })
 _start("modules.timelapse_manager.get_timelapse_videos", return_value=[])
 
+# Night vision - no RTSP / OpenCV
+_start("modules.night_vision.start")
+_start("modules.night_vision.is_night_mode", return_value=False)
+_start("modules.night_vision.get_state", return_value={"active": False, "magenta_pct": 0.0})
+
 # Stream helpers - no camera / ffmpeg
 _start("modules.stream_helpers.set_on_crash")
 _start("modules.stream_helpers.start_recording")

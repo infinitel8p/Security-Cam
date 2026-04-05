@@ -36,6 +36,7 @@ def test_stats_emitter_sends_system_info(client):
             "uptime_seconds": 3600,
             "throttle": None,
             "sd_health": None,
+            "night_mode": False,
         })
 
 

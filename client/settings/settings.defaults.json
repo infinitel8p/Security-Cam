@@ -35,6 +35,14 @@
         "denoise": "off",
         "metering": "centre"
     },
+    "NightVision": {
+        "enabled": true,
+        "hue_low": 140,
+        "hue_high": 170,
+        "saturation_min": 40,
+        "threshold_percent": 25,
+        "check_interval_seconds": 30
+    },
     "CaptivePortal": {
         "enabled": true
     },
