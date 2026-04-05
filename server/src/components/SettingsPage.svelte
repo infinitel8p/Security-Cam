@@ -580,10 +580,15 @@
     importing = false;
   }
 
+  function isDeviceList(val: any): val is { address: string; name?: string }[] {
+    return Array.isArray(val) && val.length > 0 && typeof val[0]?.address === "string";
+  }
+
   function formatValue(val: any, key?: string): string {
     if (val === undefined) return "-";
     const leafKey = key?.split(".").pop() ?? "";
     if (SENSITIVE_KEYS.has(leafKey)) return "***";
+    if (Array.isArray(val) && val.length === 0) return "-";
     if (typeof val === "object") return JSON.stringify(val);
     return String(val);
   }
@@ -1394,15 +1399,45 @@
                 style="animation-delay: {Math.min(60 + i * 40, 400)}ms"
               >
                 <p class="text-xs font-semibold tracking-wide text-text-primary">{change.key}</p>
-                <div class="mt-1.5 flex items-center gap-2 text-[0.6875rem]">
-                  <span class="min-w-0 flex-1 truncate rounded bg-surface-elevated px-2 py-1 font-mono text-text-muted" title={formatValue(change.from, change.key)}>
-                    {formatValue(change.from, change.key)}
-                  </span>
-                  <Icon icon={chevronRightIcon} class="h-3 w-3 shrink-0 text-text-muted" />
-                  <span class="min-w-0 flex-1 truncate rounded bg-accent-muted px-2 py-1 font-mono text-accent" title={formatValue(change.to, change.key)}>
-                    {formatValue(change.to, change.key)}
-                  </span>
-                </div>
+                {#if isDeviceList(change.from) || isDeviceList(change.to)}
+                  <div class="mt-1.5 grid grid-cols-[1fr_auto_1fr] items-start gap-2 text-[0.6875rem]">
+                    <div class="space-y-1">
+                      {#if isDeviceList(change.from)}
+                        {#each change.from as device}
+                          <div class="rounded bg-surface-elevated px-2 py-1 font-mono text-text-muted">
+                            <span class="block truncate">{device.name || device.address}</span>
+                            {#if device.name}<span class="block truncate text-[0.625rem] text-text-muted/60">{device.address}</span>{/if}
+                          </div>
+                        {/each}
+                      {:else}
+                        <span class="block rounded bg-surface-elevated px-2 py-1 font-mono text-text-muted">{formatValue(change.from, change.key)}</span>
+                      {/if}
+                    </div>
+                    <Icon icon={chevronRightIcon} class="mt-1.5 h-3 w-3 shrink-0 text-text-muted" />
+                    <div class="space-y-1">
+                      {#if isDeviceList(change.to)}
+                        {#each change.to as device}
+                          <div class="rounded bg-accent-muted px-2 py-1 font-mono text-accent">
+                            <span class="block truncate">{device.name || device.address}</span>
+                            {#if device.name}<span class="block truncate text-[0.625rem] text-accent/60">{device.address}</span>{/if}
+                          </div>
+                        {/each}
+                      {:else}
+                        <span class="block rounded bg-accent-muted px-2 py-1 font-mono text-accent">{formatValue(change.to, change.key)}</span>
+                      {/if}
+                    </div>
+                  </div>
+                {:else}
+                  <div class="mt-1.5 flex items-center gap-2 text-[0.6875rem]">
+                    <span class="min-w-0 flex-1 truncate rounded bg-surface-elevated px-2 py-1 font-mono text-text-muted" title={formatValue(change.from, change.key)}>
+                      {formatValue(change.from, change.key)}
+                    </span>
+                    <Icon icon={chevronRightIcon} class="h-3 w-3 shrink-0 text-text-muted" />
+                    <span class="min-w-0 flex-1 truncate rounded bg-accent-muted px-2 py-1 font-mono text-accent" title={formatValue(change.to, change.key)}>
+                      {formatValue(change.to, change.key)}
+                    </span>
+                  </div>
+                {/if}
               </div>
             {/each}
           </div>
