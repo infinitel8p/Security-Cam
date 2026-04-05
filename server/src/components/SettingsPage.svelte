@@ -352,6 +352,7 @@
   // --- Update check (shared state from update-badge.ts) ---
   let updateChecking = $state(false);
   let updateResult = $state<UpdateState | null>(null);
+  let updateAvailable = $derived(updateResult?.available ?? false);
   let updateConfirm = $state(false);
   let updateTimeout: ReturnType<typeof setTimeout> | null = null;
   let unsubUpdate: (() => void) | null = null;
@@ -607,7 +608,7 @@
   }
 </script>
 
-{#snippet navItem(id: string, label: string)}
+{#snippet navItem(id: string, label: string, badge?: boolean)}
   <button
     onclick={() => scrollToSection(id)}
     class="group relative w-full text-left px-3.5 py-2 text-[0.8125rem] transition-all duration-200
@@ -620,10 +621,13 @@
         {activeSection === id ? 'h-4 opacity-100' : 'h-0 opacity-0'}"
     ></span>
     {label}
+    {#if badge}
+      <span class="ml-1.5 inline-block h-2 w-2 rounded-full bg-accent"></span>
+    {/if}
   </button>
 {/snippet}
 
-{#snippet mobileNavItem(id: string, label: string)}
+{#snippet mobileNavItem(id: string, label: string, badge?: boolean)}
   <button
     onclick={() => scrollToSection(id)}
     class="relative shrink-0 px-3 pt-2 pb-2.5 text-xs font-medium whitespace-nowrap transition-all duration-200
@@ -632,6 +636,9 @@
         : 'text-text-muted hover:text-text-secondary'}"
   >
     {label}
+    {#if badge}
+      <span class="ml-1 inline-block h-1.5 w-1.5 rounded-full bg-accent"></span>
+    {/if}
     <span
       class="absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 rounded-full bg-accent transition-all duration-300
         {activeSection === id
@@ -665,7 +672,7 @@
       {@render mobileNavItem("devices", t("section.devices"))}
       {@render mobileNavItem("sensors", t("section.triggerSensors"))}
       {@render mobileNavItem("security", t("section.security"))}
-      {@render mobileNavItem("system", t("section.system"))}
+      {@render mobileNavItem("system", t("section.system"), updateAvailable)}
     </div>
   </nav>
 
@@ -679,7 +686,7 @@
         {@render navItem("devices", t("section.devices"))}
         {@render navItem("sensors", t("section.triggerSensors"))}
         {@render navItem("security", t("section.security"))}
-        {@render navItem("system", t("section.system"))}
+        {@render navItem("system", t("section.system"), updateAvailable)}
       </div>
     </nav>
 

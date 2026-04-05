@@ -67,7 +67,7 @@
     <div>
       <span class="text-[0.8125rem] font-bold tracking-tight text-text-primary">Security-Cam</span>
       <p class="text-[0.625rem] leading-none font-medium font-mono tracking-widest text-text-muted">
-        v.2026.04.04.19
+        v.2026.04.05.1
       </p>
       {#if gitBranch}
         <p class="mt-0.5 text-[0.5625rem] leading-none font-mono text-text-muted/60 truncate max-w-[7.5rem]" title="{gitBranch}{gitCommit ? ' @ ' + gitCommit : ''}">
@@ -82,7 +82,7 @@
     {#each links as { href, labelKey, icon }}
       {@const active = isActive(href)}
       <a
-        {href}
+        href={href === "/settings" && updateAvailable ? "/settings#system" : href}
         class="group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[0.8125rem] font-medium transition-all duration-200
           {active
             ? 'bg-accent-muted text-accent'
@@ -101,11 +101,13 @@
           {#if href === "/" && alertLevel !== "ok" && !active}
             <span class="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full {alertLevel === 'critical' ? 'bg-status-critical animate-pulse' : 'bg-status-warning'}"></span>
           {/if}
-          {#if href === "/settings" && updateAvailable && !active}
-            <span class="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-accent"></span>
-          {/if}
         </span>
         {t(labelKey)}
+        {#if href === "/settings" && updateAvailable && !active}
+          <span class="ml-auto rounded-full bg-accent/15 px-2 py-0.5 text-[0.625rem] font-semibold leading-none text-accent">
+            {t("nav.update")}
+          </span>
+        {/if}
       </a>
     {/each}
   </div>

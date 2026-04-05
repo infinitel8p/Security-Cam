@@ -7,6 +7,7 @@ export default {
     logs: "Logs",
     stats: "Stats",
     docs: "Docs",
+    update: "Update",
   },
 
   // Time-of-day greetings (dashboard)

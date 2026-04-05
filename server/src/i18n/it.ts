@@ -6,6 +6,7 @@ export default {
     logs: "Registri",
     stats: "Stats",
     docs: "Docs",
+    update: "Aggiorna",
   },
 
   greeting: {

@@ -81,7 +81,7 @@
   </a>
 
   <a
-    href="/settings"
+    href={updateAvailable ? "/settings#system" : "/settings"}
     class="group relative flex min-h-[3rem] flex-1 flex-col items-center justify-center gap-1 py-2.5 transition-colors duration-200
       {isActive('/settings') ? 'text-accent' : 'text-text-muted'}"
   >
@@ -89,7 +89,7 @@
     <span class="relative">
       <Icon icon={settingsIcon} class="h-5 w-5 shrink-0" />
       {#if updateAvailable && !isActive('/settings')}
-        <span class="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-accent"></span>
+        <span class="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-accent animate-pulse"></span>
       {/if}
     </span>
     <span class="text-[0.6875rem] leading-none font-medium">{t("nav.settings")}</span>

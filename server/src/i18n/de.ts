@@ -6,6 +6,7 @@ export default {
     logs: "Protokolle",
     stats: "Statistik",
     docs: "Doku",
+    update: "Update",
   },
 
   greeting: {
